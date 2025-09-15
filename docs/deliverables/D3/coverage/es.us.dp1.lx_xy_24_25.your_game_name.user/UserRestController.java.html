@@ -58,7 +58,7 @@ class UserRestController {
 		List&lt;User&gt; res;
 <span class="fc bfc" id="L59" title="All 2 branches covered.">		if (auth != null) {</span>
 <span class="fc" id="L60">			res = (List&lt;User&gt;) userService.findAllByAuthority(auth);</span>
-		} else
+<span class="fc" id="L61">		} else</span>
 <span class="fc" id="L62">			res = (List&lt;User&gt;) userService.findAll();</span>
 <span class="fc" id="L63">		return new ResponseEntity&lt;&gt;(res, HttpStatus.OK);</span>
 	}
