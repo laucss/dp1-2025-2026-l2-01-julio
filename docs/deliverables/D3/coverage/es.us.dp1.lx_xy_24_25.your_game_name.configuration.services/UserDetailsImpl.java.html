@@ -25,8 +25,8 @@ public class UserDetailsImpl implements UserDetails {
 
 	private Collection&lt;? extends GrantedAuthority&gt; authorities;
 
-	public UserDetailsImpl(Integer id, String username, String password,
-<span class="fc" id="L29">			Collection&lt;? extends GrantedAuthority&gt; authorities) {</span>
+<span class="fc" id="L28">	public UserDetailsImpl(Integer id, String username, String password,</span>
+			Collection&lt;? extends GrantedAuthority&gt; authorities) {
 <span class="fc" id="L30">		this.id = id;</span>
 <span class="fc" id="L31">		this.username = username;</span>
 <span class="fc" id="L32">		this.password = password;</span>
@@ -38,7 +38,7 @@ public class UserDetailsImpl implements UserDetails {
 
 <span class="nc" id="L39">		return new UserDetailsImpl(user.getId(), user.getUsername(),</span>
 <span class="nc" id="L40">				user.getPassword(),</span>
-				authorities);
+<span class="nc" id="L41">				authorities);</span>
 	}
 
 	@Override
