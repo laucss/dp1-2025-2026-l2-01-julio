@@ -42,6 +42,11 @@
 			<email>marvislop@alum.us.es</email>
 			<url>https://github.com/MarcoVL603</url>
 		</developer>
+				<developer>
+			<name>Alberto</name>
+			<email>albparmin@alum.us.es</email>
+			<url>https://github.com/Dralits</url>
+		</developer>
 	</developers>
 
 	<dependencies>
