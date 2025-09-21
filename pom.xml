@@ -42,6 +42,11 @@
 			<email>japarejo@us.es</email>
 			<url>https://github.com/japarejo</url>
 		</developer>
+		<developer>
+			<name>Nerea</name>
+			<email>nercamper@alum.us.es</email>
+			<url>https://github.com/nereeea13</url>
+		</developer>
 	</developers>
 
 	<dependencies>
