@@ -68,7 +68,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 <span class="nc" id="L68">			logger.error(&quot;JWT token is unsupported: {}&quot;, e.getMessage());</span>
 <span class="nc" id="L69">		} catch (IllegalArgumentException e) {</span>
 <span class="nc" id="L70">			logger.error(&quot;JWT claims string is empty: {}&quot;, e.getMessage());</span>
-<span class="nc" id="L71">		}</span>
+		}
 
 <span class="nc" id="L73">		return false;</span>
 	}
