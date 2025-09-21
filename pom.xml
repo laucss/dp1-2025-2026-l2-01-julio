@@ -47,6 +47,11 @@
 			<email>albparmin@alum.us.es</email>
 			<url>https://github.com/Dralits</url>
 		</developer>
+		<developer>
+			<name>Nerea</name>
+			<email>nercamper@alum.us.es</email>
+			<url>https://github.com/nereeea13</url>
+		</developer>
 	</developers>
 
 	<dependencies>
