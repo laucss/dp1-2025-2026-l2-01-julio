@@ -62,6 +62,11 @@
 			<email>lucbalmun@alum.us.es</email>
 			<url>https://github.com/luciabaltasar2</url>
 		</developer>
+		<developer>
+			<name>laura</name>
+			<email>laucubsan@alum.us.es</email>
+			<url>https://github.com/laucss</url>
+		</developer>
 	</developers>
 
 	<dependencies>
