@@ -1,10 +1,16 @@
 # Documentación del Uso de IA en el Proyecto
 **Asignatura:** Diseño y Pruebas (Grado en Ingeniería del Software, Universidad de Sevilla)  
-**Curso académico:** <!-- p.ej., 2025/2026 -->  
-**Grupo/Equipo:** <!-- p.ej., L4-03 Equipo 33 -->  
-**Nombre del proyecto:** <!-- p. ej. Petris -->  
-**Repositorio:** <!-- URL del repo -->  
-**Integrantes (máx. 6):** <!-- Nombre Apellidos (US-Id / correo @us.es) -->
+**Curso académico:** 2025-2026
+**Grupo/Equipo:** L2-01
+**Nombre del proyecto:** Escape From Elba
+**Repositorio:** https://github.com/gii-is-DP1/dp1-2025-2026-l2-01
+**Integrantes (máx. 6):**
+Alberto Pardina Miñón (QSS7721/albparmin@alum.us.es)
+Marco Visentin Lopez (CYB6650/marvislop@alum.us.es)
+Emilio Diaz Arcenegui (FSS8078/emidiaarc@alum.us.es)
+Nerea Camacho Perez (QFL3393/nercamper@alum.us.es)
+Laura Cubero Sánchez (XNT3290/laucubsan@alum.us.es)
+Lucía Baltasar Muñoz (SBJ4592/lucbalmun@alum.us.es)
 
 ## 1. Introducción
 
@@ -39,15 +45,15 @@ Lecciones aprendidas: <!-- síntesis -->
 
 Checklist de cumplimiento de uso ético de la IA del sprint X:
 
-- [ ] Toda interacción significativa está en el Registro Detallado con enlace a conversación.
+- [x] Toda interacción significativa está en el Registro Detallado con enlace a conversación.
 
-- [ ] No se usó IA para narrativa (o hay autorización documentada).
+- [x] No se usó IA para narrativa (o hay autorización documentada).
 
-- [ ] Toda pieza aceptada fue comprendida y verificada por humanos (tests/revisión).
+- [x] Toda pieza aceptada fue comprendida y verificada por humanos (tests/revisión).
 
-- [ ] Citas/Atribuciones incluidas cuando corresponde.
+- [x] Citas/Atribuciones incluidas cuando corresponde.
 
-- [ ] Se usó la IA sin dar datos personales/sensibles que puedieran quedar expuestos a herramientas externas.
+- [x] Se usó la IA sin dar datos personales/sensibles que puedieran quedar expuestos a herramientas externas.
 
 Repita esta subsección para Sprints 2, 3 y 4.
 
