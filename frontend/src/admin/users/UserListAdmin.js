@@ -18,7 +18,7 @@ export default function UserListAdmin() {
     `/api/v1/users`,
     jwt,
     setMessage,
-    setVisible,
+    setVisible
     
   );
   const [alerts, setAlerts] = useState([]);
