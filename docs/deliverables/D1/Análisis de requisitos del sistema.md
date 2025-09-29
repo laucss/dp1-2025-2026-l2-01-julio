@@ -1,16 +1,27 @@
 # Documento de análisis de requisitos del sistema
 **Asignatura:** Diseño y Pruebas (Grado en Ingeniería del Software, Universidad de Sevilla)  
 **Curso académico:** 2025/2026 
+
 **Grupo/Equipo:** L2-01  
+
 **Nombre del proyecto:** Escape from Elba 
+
 **Repositorio:** https://github.com/gii-is-DP1/dp1-2025-2026-l2-01  
+
 **Integrantes (máx. 6):** 
+
 Alberto Pardina Miñón (QSS7721/albparmin@alum.us.es)
+
 Marco Visentin Lopez (CYB6650/marvislop@alum.us.es)
+
 Emilio Diaz Arcenegui (FSS8078/emidiaarc@alum.us.es)
+
 Nerea Camacho Perez (QFL3393/nercamper@alum.us.es)
+
 Laura Cubero Sánchez (XNT3290/laucubsan@alum.us.es)
+
 Lucía Baltasar Muñoz (SBJ4592/lucbalmun@alum.us.es)
+
 
 ## Introducción
 
