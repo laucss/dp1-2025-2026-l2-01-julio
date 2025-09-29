@@ -1,30 +1,30 @@
 # Documento de análisis de requisitos del sistema
 **Asignatura:** Diseño y Pruebas (Grado en Ingeniería del Software, Universidad de Sevilla)  
-**Curso académico:** <!-- p.ej., 2025/2026 -->  
-**Grupo/Equipo:** <!-- p.ej., L4-03 Equipo 33 -->  
-**Nombre del proyecto:** <!-- p. ej. Petris -->  
-**Repositorio:** <!-- URL del repo -->  
-**Integrantes (máx. 6):** <!-- Nombre Apellidos (US-Id / correo @us.es) -->
-
-_Esta es una plantilla que sirve como guía para realizar este entregable. Por favor, mantén las mismas secciones y los contenidos que se indican para poder hacer su revisión más ágil._ 
+**Curso académico:** 2025/2026 
+**Grupo/Equipo:** L2-01  
+**Nombre del proyecto:** Escape from Elba 
+**Repositorio:** https://github.com/gii-is-DP1/dp1-2025-2026-l2-01  
+**Integrantes (máx. 6):** 
+Alberto Pardina Miñón (QSS7721/albparmin@alum.us.es)
+Marco Visentin Lopez (CYB6650/marvislop@alum.us.es)
+Emilio Diaz Arcenegui (FSS8078/emidiaarc@alum.us.es)
+Nerea Camacho Perez (QFL3393/nercamper@alum.us.es)
+Laura Cubero Sánchez (XNT3290/laucubsan@alum.us.es)
+Lucía Baltasar Muñoz (SBJ4592/lucbalmun@alum.us.es)
 
 ## Introducción
 
+Este proyecto se dedica a la implementación del juego de mesa llamado "Escape From Elba" de 1999. Nuestro objetivo es implementar todos los modulos de este proyecto con un fin de aportar diversion.
+
 _En esta sección debes describir de manera general cual es la funcionalidad del proyecto a rasgos generales. ¿Qué valor puede aportar? ¿Qué objetivos pretendemos alcanzar con su implementación? ¿Cuántos jugadores pueden intervenir en una partida como máximo y como mínimo? ¿Cómo se desarrolla normalmente una partida?¿Cuánto suelen durar?¿Cuando termina la partida?¿Cuantos puntos gana cada jugador o cual es el criterio para elegir al vencedor?_
 
-[Enlace al vídeo de explicación de las reglas del juego / partida jugada por el grupo](http://youtube.com)
+[https://youtu.be/JjQOi04i2-0?si=LMb-skomsHNsHqmz]
 
 ## Tipos de Usuarios / Roles
 
-< Nombre Rol >: < Breve descripción del rol >
+Jugador: Usuario que puede tanto ver su información registrada en el juego como crear y/o unirse a partidas.
 
-_Ej1: Propietario: Dueño de una o varias mascota que viene a la clínica para mantenerla sana y cuidar de su salud._
-
-_Ej2: Veterinario: Profesional de la salud animal con titulación universitaria homologada, está registrado en la clínica y se encarga de realizar diagnósticos y recetar tratamientos. Además mantiene actualizado el vademécum._
-
-_Ej3: Administrador: Dueño de la clínica que se encarga de dar de alta veterinarios y gestionar la información registrada en la aplicación de la clínica._
-
-
+Administrador: Grupo de usuarios que pueden ver una lista de datos generales del juego como partidas y jugadores, gestionar sus usuarios y modificar los logros del juego.
 
 ## Historias de Usuario
 
