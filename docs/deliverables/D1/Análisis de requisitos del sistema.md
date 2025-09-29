@@ -71,8 +71,8 @@ _Puede usar la herramienta de modelado que desee para generar sus diagramas de c
 _Si deseais usar esta herramienta para generar vuestro(s) diagramas con esta herramienta os proporcionamos un [enlace a la documentación oficial de la sintaxis de diagramas de clases de _ermaid](https://mermaid.js.org/syntax/classDiagram.html)_
 
 ## Reglas de Negocio
-### R-< X > < Nombre Regla de negocio >
-_< Descripción de la restricción a imponer >_
+### R1 - Número de jugadores
+En cada partida debe asegurarse un mínimo de 3 jugadores y un máximo de 6 jugadores. 
 
 _Ej:_ 
 ### R1 – Diagnósticos imposibles
