@@ -1,5 +1,6 @@
 # Documento de análisis de requisitos del sistema
-**Asignatura:** Diseño y Pruebas (Grado en Ingeniería del Software, Universidad de Sevilla)  
+**Asignatura:** Diseño y Pruebas (Grado en Ingeniería del Software, Universidad de Sevilla)
+
 **Curso académico:** 2025/2026 
 
 **Grupo/Equipo:** L2-01  
@@ -8,26 +9,33 @@
 
 **Repositorio:** https://github.com/gii-is-DP1/dp1-2025-2026-l2-01  
 
-**Integrantes (máx. 6):** 
+**Integrantes:** 
 
-Alberto Pardina Miñón (QSS7721/albparmin@alum.us.es)
-
-Marco Visentin Lopez (CYB6650/marvislop@alum.us.es)
-
-Emilio Diaz Arcenegui (FSS8078/emidiaarc@alum.us.es)
-
-Nerea Camacho Perez (QFL3393/nercamper@alum.us.es)
-
-Laura Cubero Sánchez (XNT3290/laucubsan@alum.us.es)
-
-Lucía Baltasar Muñoz (SBJ4592/lucbalmun@alum.us.es)
+Alberto Pardina Miñón (QSS7721 / albparmin@alum.us.es)<br>
+Marco Visentin Lopez (CYB6650 / marvislop@alum.us.es)<br>
+Emilio Diaz Arcenegui (FSS8078 / emidiaarc@alum.us.es)<br>
+Nerea Camacho Perez (QFL3393 / nercamper@alum.us.es)<br>
+Laura Cubero Sánchez (XNT3290 / laucubsan@alum.us.es)<br>
+Lucía Baltasar Muñoz (SBJ4592 / lucbalmun@alum.us.es)<br>
 
 
 ## Introducción
 
-Este proyecto se dedica a la implementación del juego de mesa llamado "Escape From Elba" de 1999. Nuestro objetivo es implementar todos los modulos de este proyecto con un fin de aportar diversion.
+Este proyecto se dedica a la implementación del juego de mesa llamado "Escape From Elba" de 1999. Nuestro objetivo es implementar todos los modulos de este proyecto con un fin de disfrutar del juego, el cual por cada partida puede ser disfrutado desde 3 a 6 jugadores, con una duración media de 60 minutos.
+La partida comienza colocando a los visitantes, para esto cada uno lanza dos dados, uno negro y otro blanco, colocando a su personaje en la habitación que estos indiquen. Posteriormente se reparten 3 cartas a cada jugador (si deseas jugar con más de 6 jugadores, se recomienda repartir solo 2 cartas iniciales) y se elige a un jugador de manera aleatoria para que este comience, siendo el siguiente el de su izquierda.
+El ojetivo trata de obtener un conjunto de cartas, ya sea robando del mazo o de otros jugadores, las cuales te permitan escapar, cada carta represnenta una letra (cada una muestra todas las palabras del juego en las que se encuentra), también puedes tener cartas boca arriba sobre la mesa las cuales se considerarán como tu "bolsa", estas cartas son las que te permitirán formar palabras que te ayuden a escapar, luchar y moverte por los alrededores. Para escapar es necesario ganar fuerza (todos los jugadores empiezan con 1 de fuerza), la cual se consigue haciendo batallas contra otros jugadores.
+<br>**Batallas**<br>
+El jugador que entra a una habitación ya ocupada siempre será considerado como el atacante (en caso de empate, contará como victorioso), ambos jugadores lanzan un dado y se le suma sus puntos de fuerza (también es posible utilizar armas si puedes formarlas con la palabra de tu "bolsa"). Si pierdes la batalla contra otro jugador ganas fuerza (se descarta una carta a su elección de la mano o de la "bolsa" si es contra Niall Campbell). Sin embargo, si ganas contra otro jugador puedes elegir entre robar una carta de su "bolsa" o una aleatoria de su mano (la carta superior del mazo de descarte si es contra Niall Cambell o una del mazo de robo si es contra cualquier otro visitante NPC).
+<br>**Turnos**<br>
+El primer paso es robar cartas, puedes robar cuantas cartas quieras hasta alcanzar 7 cartas en tu mano (dependiendo de cuantas cartas tengas afectará a los puntos de acción de tu turno).<br>
+Si tienes 7 o más cartas, no recibes ningún punto de acción, si tienes menos, recibes 7 menos el número de cartas en tu mano, por ejemplo si tienes 5 cartas, obtienes 2 puntos.<br>
+Puedes gastar tus puntos en diferentes acciones:<br>
+-Moverte a una habitación adyacente a la tuya.<br>
+-Mover a un jugador visitante NPC a una habitación adyacente a la suya.<br>
+-Saltar a una habitación si eres capaz de formar algun nombre de alguna habitación con la palabra de tu "bolsa", por ejemplo si tienes "APPEARS", puedes dirigirte a "**SPA**" o a "SAFE **AREA**" (si es una palabra compuesta solo debes formar una de las palabras que la componen). Siempre y cuando no sea una torre de escape.<br>
+-Hacer un intento de escape, siempre que estes en una de las torres de escape (a no ser que sea "EMPEROR" o "CAMPBELL", cuyas palabras pueden usarse en cualquier ubicación), puedas formar su nombre con la palabra en tu "bolsa". Para que el intento sea exitoso, debes lanzar un dado y sacar un número inferior a tu fuerza. Si el intento es fallido, se lanzna los dados para moverte a una habitación aleatoria.<br>
+-Por ultimo, puedes descartarte de tantas cartas como quieras y debes vaciar tu mochila, quedandote con 2 letras o 3 si eres capaz de formar una palabra con estas.
 
-_En esta sección debes describir de manera general cual es la funcionalidad del proyecto a rasgos generales. ¿Qué valor puede aportar? ¿Qué objetivos pretendemos alcanzar con su implementación? ¿Cuántos jugadores pueden intervenir en una partida como máximo y como mínimo? ¿Cómo se desarrolla normalmente una partida?¿Cuánto suelen durar?¿Cuando termina la partida?¿Cuantos puntos gana cada jugador o cual es el criterio para elegir al vencedor?_
 
 [https://youtu.be/JjQOi04i2-0?si=LMb-skomsHNsHqmz]
 
