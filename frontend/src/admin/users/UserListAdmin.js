@@ -6,6 +6,7 @@ import "../../static/css/admin/adminPage.css";
 import deleteFromList from "../../util/deleteFromList";
 import getErrorModal from "../../util/getErrorModal";
 import useFetchState from "../../util/useFetchState";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -18,10 +19,17 @@ export default function UserListAdmin() {
     jwt,
     setMessage,
     setVisible
+    
   );
   const [alerts, setAlerts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5;
+  const totalPages = Math.ceil(users.length / usersPerPage);
+  const LastUser = currentPage * usersPerPage;
+  const FirstUser = LastUser - usersPerPage;
+  const currentUsers = users.slice(FirstUser, LastUser);
 
-  const userList = users.map((user) => {
+  const userList = currentUsers.map((user) => {
     return (
       <tr key={user.id}>
         <td>{user.username}</td>
@@ -80,6 +88,23 @@ export default function UserListAdmin() {
           </thead>
           <tbody>{userList}</tbody>
         </Table>
+      </div>
+    <div className="pagination-buttons">
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((prev) => prev - 1)}
+        >
+          <FaArrowLeft />
+        </Button>
+        <span>
+          {currentPage} of {totalPages}
+        </span>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+        >
+          <FaArrowRight />
+        </Button>
       </div>
     </div>
   );
