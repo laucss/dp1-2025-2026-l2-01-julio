@@ -130,6 +130,28 @@ _Si deseais usar esta herramienta para generar vuestro(s) diagramas con esta her
 ### R9 - Armas
    Cada palabra de arma formada otorga +1 de Fuerza.
 
+### R4 - Ganar puntos de acción
+En cada turno, un jugador puede ganar puntos de acción en función del número de cartas que tenga en su mano tras robar. Si tiene 7 o más cartas, no gana ningún punto de acción. Si tiene menos de 7 cartas, gana puntos de acción igual a 7 menos el número de cartas en su mano.
+Puntos = 7 - Número de cartas en mano.
+
+### R5 - Usos de los Puntos de acción
+Los puntos de acción ganados en un turno pueden ser usados para realizar las siguientes acciones:
+
+### R5.1 - Moverse a una habitación adyacente
+Un jugador puede gastar 1 punto de acción para moverse a una habitación adyacente a la suya.
+
+### R5.2 - Mover a un jugador visitante NPC
+Un jugador puede gastar 1 punto de acción para mover a un jugador visitante NPC a una habitación, esto puede provocar una batalla si la habitación ya está ocupada.
+
+### R5.3 - Saltar a una habitación
+Un jugador puede gastar 1 punto de acción para saltar a una habitación si puede formar el nombre de la habitación con las cartas en su bolsa.
+
+### R5.4 - Intento de escape
+Un jugador puede gastar 1 punto de acción para hacer un intento de escape si está en una de las torres de escape y puede formar su nombre o una de las palabras especiales con las cartas en su bolsa.
+
+### R8 - Posicion inicial de Campbell
+Niall Campbell siempre comienza la partida en la Zona Segura.
+
 _Ej:_ 
 ### R1 – Diagnósticos imposibles
 El diagnóstico debe estar asociado a una enfermedad que es compatible con el tipo de mascota de su visita relacionada. Por ejemplo, no podemos establecer como enfermedad diagnosticada una otitis cuando la visita está asociada a una mascota que es un pez, porque éstos no tienen orejas ni oídos (y por tanto no será uno de los tipos de mascota asociados a la enfermedad otitis en el vademecum).
