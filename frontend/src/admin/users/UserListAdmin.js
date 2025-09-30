@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, ButtonGroup, Table } from "reactstrap";
+import { Button, ButtonGroup, Card, Table } from "reactstrap";
 import tokenService from "../../services/token.service";
 import "../../static/css/admin/adminPage.css";
 import deleteFromList from "../../util/deleteFromList";
@@ -33,7 +33,7 @@ export default function UserListAdmin() {
     return (
       <tr key={user.id}>
         <td>{user.username}</td>
-        <td>{user.authority.authority}</td>
+        <td style={{ textAlign: "center" }}>{user.authority.authority}</td>
         <td>
           <ButtonGroup>
             <Button
@@ -70,26 +70,28 @@ export default function UserListAdmin() {
   const modal = getErrorModal(setVisible, visible, message);
 
   return (
-    <div className="admin-page-container">
-      <h1 className="text-center">Users</h1>
+    <div className="admin-page-container" style={{marginTop: '50px'}}>
+      <Card style={{ width: "600px", height: "400px" }}>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px'}}>
+          <h1 >Users</h1>
+          <Button color="success" tag={Link} to="/users/new" >
+            Add User
+          </Button>
+        </div> 
       {alerts.map((a) => a.alert)}
       {modal}
-      <Button color="success" tag={Link} to="/users/new">
-        Add User
-      </Button>
-      <div>
-        <Table aria-label="users" className="mt-4">
+        <Table style={{marginBottom: 0, width: '100%', tableLayout: 'fixed'}} bordered>
           <thead>
             <tr>
               <th>Username</th>
-              <th>Authority</th>
-              <th>Actions</th>
+              <th style={{ textAlign: "center" }}>Authority</th>
+              <th style={{ textAlign: "center" }}>Actions</th>
             </tr>
           </thead>
           <tbody>{userList}</tbody>
         </Table>
-      </div>
-    <div className="pagination-buttons">
+      </Card>
+    <div className="pagination-buttons" >
         <Button
           disabled={currentPage === 1}
           onClick={() => setCurrentPage((prev) => prev - 1)}
@@ -107,5 +109,7 @@ export default function UserListAdmin() {
         </Button>
       </div>
     </div>
+    
   );
 }
+//TODO: arreglar margenes, tamaño de la tabla y retocar estilos
