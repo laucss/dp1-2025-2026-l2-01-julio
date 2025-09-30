@@ -98,8 +98,8 @@ _Si deseais usar esta herramienta para generar vuestro(s) diagramas con esta her
    ### R2.1 - Posesión de palabra de escape
    El jugador deberá tener en su Bolsa una palabra válida de escape (ESCAPE, FROM, ELBA, PEACE, EMPEROR o CAMPBELL).
    ### R2.2 - Ubicación correspondiente
-   El jugador deberá estar en una de las 4 torres o estar en la ubicación correspondiente a esa palabra formada anteriormente (Excepto EMPEROR y CAMPBELL, que permiten escapar desde cualquier sitio).
-   ### R2.3 - Tirada superior a Fuerza
+   Las palabras de escape ESCAPE, FROM, ELBA y PEACE solo podrán utilizarse en la torre correspondiente, excepto EMPEROR y CAMPBELL, que permiten escapar desde cualquier sitio.
+   ### R2.3 - Tirada inferior a Fuerza
    El jugador deberá tirar su dado y obtener una tirada inferior a su fuerza actual.
 
 ### R3 - Gestión de cartas
@@ -110,6 +110,25 @@ _Si deseais usar esta herramienta para generar vuestro(s) diagramas con esta her
    La Bolsa solo puede contener una palabra en inglés de 3 o más letras, o un máximo de 2 letras sueltas.
    ### R3.3 - Cartas descartadas
    Las cartas descartadas van al montón de descarte.
+
+### R6 - Combates
+   Existen una serie de requisitos en cuanto a los combates
+   ### R6.1 - Obligatoriedad de combate
+   Cada vez que un jugador entra en una sala ocupada, se formará un combate (Excepto en la Zona Segura o entre 2 NPCs)
+   ### R6.2 - Catapulta
+   Si un jugador es catapultado a una sala ocupada, se deberá iniciar inmediatamente un nuevo combate, incluso si esto ocurre varias veces consecutivas. (La sala a la que se es catapultado se elegirá aleatoriamente mediante tirada de dados)
+   ### R6.3 - Incremento de Fuerza
+   Cada derrota aumenta la Fuerza del perdedor en +1
+   ### R6.3.1 - Fuerza máxima
+   Un jugador nunca puede superar un nivel de Fuerza superior a 6.
+   ### R6.4 - Empates
+   En caso de empate, el atacante ganará automáticamente.
+
+### R7 - Fallo en Escape
+   Un intento de escape fallido implicará: ser lanzado a una sala aleatoria, perder todos los puntos de acción restantes, ganar 1 de fuerza (Máximo 6) y descartar una carta de elección propia.
+
+### R9 - Armas
+   Cada palabra de arma formada otorga +1 de Fuerza.
 
 _Ej:_ 
 ### R1 – Diagnósticos imposibles
