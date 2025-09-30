@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, ButtonGroup, Table } from "reactstrap";
+import { Button, ButtonGroup, Card, Table } from "reactstrap";
 import tokenService from "../../services/token.service";
 import "../../static/css/admin/adminPage.css";
 import deleteFromList from "../../util/deleteFromList";
@@ -70,16 +70,18 @@ export default function UserListAdmin() {
   const modal = getErrorModal(setVisible, visible, message);
 
   return (
-    <div className="admin-page-container">
-      <h1 className="text-center">Users</h1>
+    <div className="admin-page-container" style={{marginTop: '50px'}}>
+      <Card style={{ width: "600px", height: "355px", border: "1px solid #000"}}> 
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px'}}>
+          <h1 >Users</h1>
+          <Button color="success" tag={Link} to="/users/new" >
+            Add User
+          </Button>
+        </div> 
       {alerts.map((a) => a.alert)}
       {modal}
-      <Button color="success" tag={Link} to="/users/new">
-        Add User
-      </Button>
-      <div>
-        <Table aria-label="users" className="mt-4">
-          <thead>
+        <Table style={{marginBottom: 0, width: '100%', tableLayout: 'fixed'}} borderless>
+          <thead style={{borderBottom: '1px solid #000'}}> 
             <tr>
               <th>Username</th>
               <th>Authority</th>
@@ -88,8 +90,8 @@ export default function UserListAdmin() {
           </thead>
           <tbody>{userList}</tbody>
         </Table>
-      </div>
-    <div className="pagination-buttons">
+      </Card>
+    <div className="pagination-buttons" style={{marginTop: '25px'}}>
         <Button
           disabled={currentPage === 1}
           onClick={() => setCurrentPage((prev) => prev - 1)}
@@ -107,5 +109,6 @@ export default function UserListAdmin() {
         </Button>
       </div>
     </div>
+    
   );
 }
