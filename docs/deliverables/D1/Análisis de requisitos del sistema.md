@@ -91,45 +91,32 @@ _Si deseais usar esta herramienta para generar vuestro(s) diagramas con esta her
 
 ## Reglas de Negocio
 ### R1 - Número de jugadores
-   En cada partida debe asegurarse un mínimo de 3 jugadores y un máximo de 6 jugadores. 
+En cada partida debe asegurarse un mínimo de 3 jugadores y un máximo de 6 jugadores. 
 
 ### R2 - Condiciones para ganar
-   Para que un jugador pueda considerarse ganador, deberá cumplir los siguientes 3 requisitos.
-   ### R2.1 - Posesión de palabra de escape
-   El jugador deberá tener en su Bolsa una palabra válida de escape (ESCAPE, FROM, ELBA, PEACE, EMPEROR o CAMPBELL).
-   ### R2.2 - Ubicación correspondiente
-   Las palabras de escape ESCAPE, FROM, ELBA y PEACE solo podrán utilizarse en la torre correspondiente, excepto EMPEROR y CAMPBELL, que permiten escapar desde cualquier sitio.
-   ### R2.3 - Tirada inferior a Fuerza
-   El jugador deberá tirar su dado y obtener una tirada inferior a su fuerza actual.
+Para que un jugador pueda considerarse ganador, deberá cumplir los siguientes 3 requisitos.
+
+### R2.1 - Posesión de palabra de escape
+El jugador deberá tener en su Bolsa una palabra válida de escape (ESCAPE, FROM, ELBA, PEACE, EMPEROR o CAMPBELL).
+
+### R2.2 - Ubicación correspondiente
+Las palabras de escape ESCAPE, FROM, ELBA y PEACE solo podrán utilizarse en la torre correspondiente, excepto EMPEROR y CAMPBELL, que permiten escapar desde cualquier sitio.
+
+### R2.3 - Tirada inferior a Fuerza
+El jugador deberá tirar su dado y obtener una tirada inferior a su fuerza actual.
 
 ### R3 - Gestión de cartas
-   El jugador deberá cumplir una serie de requisitos en cuanto a la gestión de las cartas en cada turno.
-   ### R3.1 - Robo
-   El jugador a la hora de robar en su turno no podrá tener más de 7 cartas en su mano.
-   ### R3.2 - Limitaciones Bola
-   La Bolsa solo puede contener una palabra en inglés de 3 o más letras, o un máximo de 2 letras sueltas.
-   ### R3.3 - Cartas descartadas
-   Las cartas descartadas van al montón de descarte.
+El jugador deberá cumplir una serie de requisitos en cuanto a la gestión de las cartas en cada turno.
 
-### R6 - Combates
-   Existen una serie de requisitos en cuanto a los combates
-   ### R6.1 - Obligatoriedad de combate
-   Cada vez que un jugador entra en una sala ocupada, se formará un combate (Excepto en la Zona Segura o entre 2 NPCs)
-   ### R6.2 - Catapulta
-   Si un jugador es catapultado a una sala ocupada, se deberá iniciar inmediatamente un nuevo combate, incluso si esto ocurre varias veces consecutivas. (La sala a la que se es catapultado se elegirá aleatoriamente mediante tirada de dados)
-   ### R6.3 - Incremento de Fuerza
-   Cada derrota aumenta la Fuerza del perdedor en +1
-   ### R6.3.1 - Fuerza máxima
-   Un jugador nunca puede superar un nivel de Fuerza superior a 6.
-   ### R6.4 - Empates
-   En caso de empate, el atacante ganará automáticamente.
+### R3.1 - Robo
+El jugador a la hora de robar en su turno no podrá tener más de 7 cartas en su mano.
 
-### R7 - Fallo en Escape
-   Un intento de escape fallido implicará: ser lanzado a una sala aleatoria, perder todos los puntos de acción restantes, ganar 1 de fuerza (Máximo 6) y descartar una carta de elección propia.
+### R3.2 - Limitaciones Bola
+La Bolsa solo puede contener una palabra en inglés de 3 o más letras, o un máximo de 2 letras sueltas.
 
-### R9 - Armas
-   Cada palabra de arma formada otorga +1 de Fuerza.
-
+### R3.3 - Cartas descartadas
+Las cartas descartadas van al montón de descarte.
+   
 ### R4 - Ganar puntos de acción
 En cada turno, un jugador puede ganar puntos de acción en función del número de cartas que tenga en su mano tras robar. Si tiene 7 o más cartas, no gana ningún punto de acción. Si tiene menos de 7 cartas, gana puntos de acción igual a 7 menos el número de cartas en su mano.
 Puntos = 7 - Número de cartas en mano.
@@ -149,15 +136,29 @@ Un jugador puede gastar 1 punto de acción para saltar a una habitación si pued
 ### R5.4 - Intento de escape
 Un jugador puede gastar 1 punto de acción para hacer un intento de escape si está en una de las torres de escape y puede formar su nombre o una de las palabras especiales con las cartas en su bolsa.
 
+### R6 - Combates
+Existen una serie de requisitos en cuanto a los combates
+
+### R6.1 - Obligatoriedad de combate
+Cada vez que un jugador entra en una sala ocupada, se formará un combate (Excepto en la Zona Segura o entre 2 NPCs)
+
+### R6.2 - Catapulta
+Si un jugador es catapultado a una sala ocupada, se deberá iniciar inmediatamente un nuevo combate, incluso si esto ocurre varias veces consecutivas. (La sala a la que se es catapultado se elegirá aleatoriamente mediante tirada de dados)
+
+### R6.3 - Incremento de Fuerza
+Cada derrota aumenta la Fuerza del perdedor en +1
+
+### R6.3.1 - Fuerza máxima
+Un jugador nunca puede superar un nivel de Fuerza superior a 6.
+
+### R6.4 - Empates
+En caso de empate, el atacante ganará automáticamente.
+
+### R7 - Fallo en Escape
+Un intento de escape fallido implicará: ser lanzado a una sala aleatoria, perder todos los puntos de acción restantes, ganar 1 de fuerza (Máximo 6) y descartar una carta de elección propia.
+
 ### R8 - Posicion inicial de Campbell
 Niall Campbell siempre comienza la partida en la Zona Segura.
 
-_Ej:_ 
-### R1 – Diagnósticos imposibles
-El diagnóstico debe estar asociado a una enfermedad que es compatible con el tipo de mascota de su visita relacionada. Por ejemplo, no podemos establecer como enfermedad diagnosticada una otitis cuando la visita está asociada a una mascota que es un pez, porque éstos no tienen orejas ni oídos (y por tanto no será uno de los tipos de mascota asociados a la enfermedad otitis en el vademecum).
-
-…
-
-_Muchas de las reglas del juego se transformarán en nuestro caso en reglas de negocio, por ejemplo, “la carta X solo podrá jugarse en la ronda Y si en la ronda anterior se jugó la carta Z”, o “en caso de que un jugador quede eliminado el turno cambia de sentido”_
-
-
+### R9 - Armas
+Cada palabra de arma formada otorga +1 de Fuerza.
