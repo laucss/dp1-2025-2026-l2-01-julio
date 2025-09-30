@@ -91,7 +91,25 @@ _Si deseais usar esta herramienta para generar vuestro(s) diagramas con esta her
 
 ## Reglas de Negocio
 ### R1 - Número de jugadores
-En cada partida debe asegurarse un mínimo de 3 jugadores y un máximo de 6 jugadores. 
+   En cada partida debe asegurarse un mínimo de 3 jugadores y un máximo de 6 jugadores. 
+
+### R2 - Condiciones para ganar
+   Para que un jugador pueda considerarse ganador, deberá cumplir los siguientes 3 requisitos.
+   ### R2.1 - Posesión de palabra de escape
+   El jugador deberá tener en su Bolsa una palabra válida de escape (ESCAPE, FROM, ELBA, PEACE, EMPEROR o CAMPBELL).
+   ### R2.2 - Ubicación correspondiente
+   El jugador deberá estar en una de las 4 torres o estar en la ubicación correspondiente a esa palabra formada anteriormente (Excepto EMPEROR y CAMPBELL, que permiten escapar desde cualquier sitio).
+   ### R2.3 - Tirada superior a Fuerza
+   El jugador deberá tirar su dado y obtener una tirada inferior a su fuerza actual.
+
+### R3 - Gestión de cartas
+   El jugador deberá cumplir una serie de requisitos en cuanto a la gestión de las cartas en cada turno.
+   ### R3.1 - Robo
+   El jugador a la hora de robar en su turno no podrá tener más de 7 cartas en su mano.
+   ### R3.2 - Limitaciones Bola
+   La Bolsa solo puede contener una palabra en inglés de 3 o más letras, o un máximo de 2 letras sueltas.
+   ### R3.3 - Cartas descartadas
+   Las cartas descartadas van al montón de descarte.
 
 _Ej:_ 
 ### R1 – Diagnósticos imposibles
