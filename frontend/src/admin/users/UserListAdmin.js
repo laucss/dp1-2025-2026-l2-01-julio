@@ -33,7 +33,7 @@ export default function UserListAdmin() {
     return (
       <tr key={user.id}>
         <td>{user.username}</td>
-        <td style={{ textAlign: "center" }}>{user.authority.authority}</td>
+        <td>{user.authority.authority}</td>
         <td>
           <ButtonGroup>
             <Button
@@ -71,7 +71,7 @@ export default function UserListAdmin() {
 
   return (
     <div className="admin-page-container" style={{marginTop: '50px'}}>
-      <Card style={{ width: "600px", height: "400px" }}>
+      <Card style={{ width: "600px", height: "355px", border: "1px solid #000"}}> 
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px'}}>
           <h1 >Users</h1>
           <Button color="success" tag={Link} to="/users/new" >
@@ -80,18 +80,18 @@ export default function UserListAdmin() {
         </div> 
       {alerts.map((a) => a.alert)}
       {modal}
-        <Table style={{marginBottom: 0, width: '100%', tableLayout: 'fixed'}} bordered>
-          <thead>
+        <Table style={{marginBottom: 0, width: '100%', tableLayout: 'fixed'}} borderless>
+          <thead style={{borderBottom: '1px solid #000'}}> 
             <tr>
               <th>Username</th>
-              <th style={{ textAlign: "center" }}>Authority</th>
-              <th style={{ textAlign: "center" }}>Actions</th>
+              <th>Authority</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>{userList}</tbody>
         </Table>
       </Card>
-    <div className="pagination-buttons" >
+    <div className="pagination-buttons" style={{marginTop: '25px'}}>
         <Button
           disabled={currentPage === 1}
           onClick={() => setCurrentPage((prev) => prev - 1)}
@@ -112,4 +112,3 @@ export default function UserListAdmin() {
     
   );
 }
-//TODO: arreglar margenes, tamaño de la tabla y retocar estilos
