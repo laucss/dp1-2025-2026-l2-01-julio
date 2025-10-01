@@ -91,7 +91,10 @@ _Si deseais usar esta herramienta para generar vuestro(s) diagramas con esta her
 
 ## Reglas de Negocio
 ### R1 - Número de jugadores
-En cada partida debe asegurarse un mínimo de 3 jugadores y un máximo de 6 jugadores. 
+En cada partida debe asegurarse un mínimo de 3 jugadores y un máximo de 6 jugadores, y a cada jugador se le reparten 3 cartas.
+
+### R1.1 - Más de 6 jugadores
+Si se desea jugar con más de 6 jugadores, se reparten solo 2 cartas iniciales.
 
 ### R2 - Condiciones para ganar
 Para que un jugador pueda considerarse ganador, deberá cumplir los siguientes 3 requisitos.
@@ -109,10 +112,10 @@ El jugador deberá tirar su dado y obtener una tirada inferior a su fuerza actua
 El jugador deberá cumplir una serie de requisitos en cuanto a la gestión de las cartas en cada turno.
 
 ### R3.1 - Robo
-El jugador a la hora de robar en su turno no podrá tener más de 7 cartas en su mano.
+La mano de 7 es un límite de robo, no de posesión; está permitido terminar el turno con más de 7 si efectos de combate lo provocan, pero nunca se puede robar por encima de 7 en el paso de robo.
 
-### R3.2 - Limitaciones Bola
-La Bolsa solo puede contener una palabra en inglés de 3 o más letras, o un máximo de 2 letras sueltas.
+### R3.2 - Limitaciones Bolsa
+La Bolsa solo puede contener una palabra en inglés de 3 o más letras, o un máximo de 2 letras sueltas si no es capaz de formar una palabra. En caso de ser nombres propios solo se admitiran "CAMPBELL" y "ELBA".
 
 ### R3.3 - Cartas descartadas
 Las cartas descartadas van al montón de descarte.
@@ -143,16 +146,34 @@ Existen una serie de requisitos en cuanto a los combates
 Cada vez que un jugador entra en una sala ocupada, se formará un combate (Excepto en la Zona Segura o entre 2 NPCs)
 
 ### R6.2 - Catapulta
-Si un jugador es catapultado a una sala ocupada, se deberá iniciar inmediatamente un nuevo combate, incluso si esto ocurre varias veces consecutivas. (La sala a la que se es catapultado se elegirá aleatoriamente mediante tirada de dados)
+Si un jugador es catapultado a una sala ocupada, se deberá iniciar inmediatamente un nuevo combate, incluso si esto ocurre varias veces consecutivas. Si se cae en la misma sala se pelea de nuevo. (La sala a la que se es catapultado se elegirá aleatoriamente mediante tirada de dados)
 
-### R6.3 - Incremento de Fuerza
-Cada derrota aumenta la Fuerza del perdedor en +1
-
-### R6.3.1 - Fuerza máxima
-Un jugador nunca puede superar un nivel de Fuerza superior a 6.
+### R6.3 - Incremento de Fuerza del personaje
+Cada derrota aumenta la Fuerza del perdedor en +1, un jugador nunca puede superar un nivel de Fuerza superior a 6.
 
 ### R6.4 - Empates
 En caso de empate, el atacante ganará automáticamente.
+
+### R6.5 - Victoria
+El personaje con mayor fuerza es quien gana la batalla, esta fuerza se calcula con la fuerza que tengamos más la tirada del dado, de forma opcional se pueden usar armas si se tienen en la bolsa que suman 1 punto de fuerza cada una.
+
+### R6.5.1 - Victoria contra otro jugador
+Si el jugador gana la batalla contra otro jugador, podrá elegir entre robar una carta aleatoria de su mano o una carta de su bolsa.
+
+### R6.5.2 - Victoria contra Niall Campbell
+Si el jugador gana la batalla contra Niall Campbell, podrá robar la carta superior del mazo de descarte.
+
+### R6.5.3 - Victoria contra un NPC
+Si el jugador gana la batalla contra un NPC, podrá robar una carta del mazo de robo.
+
+### R6.6 - Derrota
+El jugador que pierde la batalla sera catapultado, ganara 1 de fuerza (maximo 6) y dependiendo de contra quien pierda, se aplicaran las siguientes reglas:
+
+### R6.6.1 - Derrota contra otro jugador
+Si el jugador pierde la batalla contra otro jugador, pierde la carta que el ganador elija, ya sea de su mano o de su bolsa y perdera todos los puntos de acción restantes.
+
+### R6.6.2 - Derrota contra NPC
+Si el jugador pierde la batalla contra un NPC, pierde una carta a eleccion de su mano o bolsa.
 
 ### R7 - Fallo en Escape
 Un intento de escape fallido implicará: ser lanzado a una sala aleatoria, perder todos los puntos de acción restantes, ganar 1 de fuerza (Máximo 6) y descartar una carta de elección propia.
@@ -160,5 +181,26 @@ Un intento de escape fallido implicará: ser lanzado a una sala aleatoria, perde
 ### R8 - Posicion inicial de Campbell
 Niall Campbell siempre comienza la partida en la Zona Segura.
 
-### R9 - Armas
-Cada palabra de arma formada otorga +1 de Fuerza.
+### R9 - Partida unica
+Cada jugador solo puede estar en una partida a la vez.
+
+### R10 - Dados
+Cada jugador juega con un dado de 6 caras, mientras que Niall Campbell juega con un dado especial llamado "Master die" tambien de 6 caras pero diferenciable por su color.
+
+### R11 - Habitaciones de inicio
+Cada jugador comienza la partida en una habitación determinada por la tirada de dos dados (uno negro y otro blanco). Si un jugador queda ubicado en una habitacion ocupada, este tirara de nuevo.
+
+### R12 - Distribucion predefinida
+Se juega con un total de 64 cartas.
+
+### R13 - Barajar y remezclar
+Cuando el mazo de robo se agota, se baraja inmediatamente el descarte para formar un nuevo mazo y se continúa robando sin pausa en el mismo paso de juego.
+
+### R14 - Jugador inicial
+Se escoge mediante azar el jugaor con tirada de dados mas alta y se siguen los turnos de manera descendente, en caso de empate repiten la tirada solo los empatados.
+
+### R15 - Flujo de cartas estricto
+Las cartas pasan de la mano a la Bolsa y de esta al mazo de descartes, nunca en sentido inverso salvo por efectos de botín de combate o robos del mazo de robo/descarte definidos; está prohibido pasar del descarte a la bolsa o mano sin un evento de juego que lo permita.
+
+### R16 - Orden del turno
+Durante el turno se sigue el orden de 1º robar, 2º tomar accion y por ultimo descartar, y es imposible volver a la fase anterior en caso de avanzar.
