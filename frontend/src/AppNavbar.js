@@ -7,6 +7,7 @@ import jwt_decode from "jwt-decode";
 function AppNavbar() {
     const [roles, setRoles] = useState([]);
     const [username, setUsername] = useState("");
+    const [user, setUser] = useState({});
     const jwt = tokenService.getLocalAccessToken();
     const [collapsed, setCollapsed] = useState(true);
 
@@ -16,14 +17,17 @@ function AppNavbar() {
         if (jwt) {
             setRoles(jwt_decode(jwt).authorities);
             setUsername(jwt_decode(jwt).sub);
+            setUser(tokenService.getUser());
         }
     }, [jwt])
 
     let adminLinks = <></>;
+    let playerLinks = <></>;
     let ownerLinks = <></>;
     let userLinks = <></>;
     let userLogout = <></>;
     let publicLinks = <></>;
+    let profileLinks = <></>;
 
     roles.forEach((role) => {
         if (role === "ADMIN") {
@@ -32,6 +36,27 @@ function AppNavbar() {
                     <NavItem>
                         <NavLink style={{ color: "white" }} tag={Link} to="/users">Users</NavLink>
                     </NavItem>
+                </>
+            )
+            profileLinks = (
+                <>
+                    <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
+                </>
+            )
+        }        
+    })
+
+        roles.forEach((role) => {
+        if (role === "PLAYER") {
+            ownerLinks = (
+                <>              
+                </>
+            )
+            profileLinks = (
+                <>
+                    <NavItem>
+                        <NavLink style={{ color: "white" }} tag={Link} to={`/${user.id}`}>{username}</NavLink>
+                    </NavItem> 
                 </>
             )
         }        
@@ -64,13 +89,6 @@ function AppNavbar() {
         )
         userLogout = (
             <>
-                <NavItem>
-                    <NavLink style={{ color: "white" }} id="docs" tag={Link} to="/docs">Docs</NavLink>
-                </NavItem>
-                <NavItem>
-                    <NavLink style={{ color: "white" }} id="plans" tag={Link} to="/plans">Pricing Plans</NavLink>
-                </NavItem>
-                <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
                 <NavItem className="d-flex">
                     <NavLink style={{ color: "white" }} id="logout" tag={Link} to="/logout">Logout</NavLink>
                 </NavItem>
@@ -84,7 +102,7 @@ function AppNavbar() {
             <Navbar expand="md" dark color="dark">
                 <NavbarBrand href="/">
                     <img alt="logo" src="/logo1-recortado.png" style={{ height: 40, width: 40 }} />
-                    Your Game
+                    Escape From Elba
                 </NavbarBrand>
                 <NavbarToggler onClick={toggleNavbar} className="ms-2" />
                 <Collapse isOpen={!collapsed} navbar>
@@ -95,6 +113,7 @@ function AppNavbar() {
                     </Nav>
                     <Nav className="ms-auto mb-2 mb-lg-0" navbar>
                         {publicLinks}
+                        {profileLinks}
                         {userLogout}
                     </Nav>
                 </Collapse>
