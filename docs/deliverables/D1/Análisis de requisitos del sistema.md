@@ -56,7 +56,7 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
 |Decripción de las interacciones concretas a realizar con la interfaz de usuario del sistema para lleva a cabo la historia. |
 
-    ## Gestión de usuarios
+## Gestión de usuarios
 
 |Como jugador quiero poder registrarme, iniciar y cerrar sesión para poder jugar con mis datos.| 
 |-----|
