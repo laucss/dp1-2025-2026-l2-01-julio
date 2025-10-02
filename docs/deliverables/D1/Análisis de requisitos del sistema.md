@@ -69,12 +69,12 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 |Como jugador quiero robar el número de cartas de mi elección para poder gestionar mi Mano como quiera.| 
 |-----|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|El jugador tiene la opción de las cartas que quiera o no robar ninguna , sin embargo el total de cartas que tenga en su Mano después de robar no puede ser superior a 7. Esto se realiza al principio de cada turno del jugador. |
+|El jugador tiene la opción de robar las cartas que quiera o no robar ninguna , sin embargo el total de cartas que tenga en su Mano después de robar no puede ser superior a 7. Esto se realiza al principio de cada turno del jugador. |
 
 |Como jugador quiero elegir qué acción realizar si tengo puntos de acción para poder gastar esos puntos en acciones estratégicas.| 
 |-----|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|El jugador al terminar de robar cartas calculará su número de puntos de acción ( 7 - número de cartas de tu mano)  y si cuenta con puntos de acción va a tener diversas opciones sobre qué acción realizar. Puede desplazarse a una habitación adyacente, trasladar a un invitado a otra habitación, saltar a otra habitación si posee la palabra de esa habitación y puede hacer un intento de escape. |
+|El jugador al terminar de robar cartas calculará su número de puntos de acción ( 7 - número de cartas de tu mano)  y si cuenta con puntos de acción va a contar con diversas opciones sobre qué acción realizar. Puede desplazarse a una habitación adyacente, trasladar a un invitado a otra habitación, saltar a otra habitación si posee la palabra de esa habitación y puede hacer un intento de escape. |
 
 |Como jugador quiero desplazarme a una habitación adyacente a la que me encuentro para iniciar un combate o para moverme a esa habitación. | 
 |-----|
@@ -84,17 +84,17 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 |Como jugador quiero desplazar a otro invitado a otra habitación para iniciar un combate o alejarlo de escaparse. | 
 |-----|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|El jugador tras hacer el recuento de sus puntos de acción podrá elegir desplazar a Niall Campbell o a un no jugador, es decir, a aquellos jugadores considerados como NPCs, esto también podría ocasionar combates. |
+|El jugador tras hacer el recuento de sus puntos de acción podrá elegir desplazar a Niall Campbell o a un no jugador, es decir, a aquellos jugadores considerados como NPCs, gastando un punto de acción. Esto también podría ocasionar combates. |
 
 |Como jugador quiero desplazarme a una habitación en específico al formar la palabra de esa habitación para avanzar en la partida. | 
 |-----|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|El jugador tras hacer el recuento de sus puntos de acción si posee en su Bolsa una palabra de alguna habitación podrá usar esa palabra para desplazarse a la misma, pudiendo ocurrir así un combate. |
+|El jugador tras hacer el recuento de sus puntos de acción si posee en su Bolsa una palabra de alguna habitación podrá usar esa palabra para desplazarse a la misma gastando un punto de acción, pudiendo ocurrir así un combate. |
 
 |Como jugador quiero intentar escapar, ya sea estando en una torre o teniendo alguna de las dos palabras de escape fuerte para ganar la partida. | 
 |-----|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|El jugador tras hacer el recuento de sus puntos de acción podrá realizar un intento de escape si en su Bolsa posee una palabra de escape fuerte (EMPEROR o CAMPBELL), o si posee la palabra de alguna torre y se encuentra en esa misma torre. |
+|El jugador tras hacer el recuento de sus puntos de acción podrá realizar un intento de escape si en su Bolsa posee una palabra de escape fuerte (EMPEROR o CAMPBELL), o si posee la palabra de alguna torre y se encuentra en esa misma torre. Si el jugador cumple alguna de esas condiciones deberá de lanzar un dado. Si el resultado es inferior a la fuerza del jugador su intento de escape sera existoso y habrá ganado, si por el contrario no es inferior el jugador será catapultado a una habitación aleatoria, perderá todos sus puntos de acción y a su fuerza se le sumará 1. |
 
 |Como jugador voy a formar parte de un combate para poder subir mi fuerza. | 
 |-----|
@@ -104,12 +104,12 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 |Como jugador quiero descartar las cartas que quiera de mi mano para poder llevarlas a mi Bolsa o al montón de descartes. | 
 |-----|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|El jugador tras haber realizado todas las acciones que haya querido, si tiene 7 cartas o menos en su Mano podrá elegir  descartar el número de cartas de su Mano que él quiera mandandolas a su Bolsa, si el jugador tiene en su Mano más de 7 cartas es obligatorio que descarte cartas hasta quedarse con máximo 7 en su Mano. |
+|El jugador tras haber realizado todas las acciones que haya querido si tiene 7 cartas o menos en su Mano podrá elegir  descartar el número de cartas de su Mano que él quiera mandandolas a su Bolsa, si el jugador tiene en su Mano más de 7 cartas es obligatorio que descarte cartas hasta quedarse con máximo 7 en su Mano. |
 
 |Como jugador quiero formar una palabra para poder moverme a otra habitación o intentar escapar. | 
 |-----|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|El jugador después de realizar el descarte de cartas podrá intentar formar palabras con esas cartas y guardarlas en su bolsa para poder usarlas más adelante, si el jugador no es capaz de formar ninguna palabra con sus letras tendrá que mantener solo en su bolsa 2 cartas y las sobrantes irán al montón de descarte, con esto termina el turno del jugador. |
+|El jugador después de realizar el descarte de cartas podrá intentar formar palabras con esas cartas y guardarlas en su bolsa para poder usarlas más adelante, si el jugador no es capaz de formar ninguna palabra con sus letras tendrá que mantener solo en su bolsa 2 cartas y las sobrantes irán al montón de descarte. Con esto termina el turno del jugador. |
 
 |Como jugador quiero formar una palabra que represente un arma para aumentar mi fuerza en un combate. | 
 |-----|
@@ -119,7 +119,7 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 |Como jugador quiero poder formar una palabra que represente un arma y no se encuentre en la lista de armas. | 
 |-----|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|El jugador a la hora de formar un arma en un combate podrá formar una palabra que no se encuentre en la lista de armas dada, con las cartas de la Bolsa en su turno (pero no podrá con las cartas de su Mano). |
+|El jugador a la hora de formar un arma en un combate podrá formar una palabra que no se encuentre en la lista de armas dada con las cartas de la Bolsa en su turno (pero no podrá con las cartas de su Mano). |
 
 |Como jugador quiero aceptar/rechazar la propuesta de arma de otro jugador. | 
 |-----|
