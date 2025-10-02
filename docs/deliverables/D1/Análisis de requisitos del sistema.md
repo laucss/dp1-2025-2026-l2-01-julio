@@ -143,14 +143,16 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 |Como jugador quiero poder registrarme, iniciar y cerrar sesión para poder jugar con mis datos.| 
 |-----|
 |![alt text](image.png)|
+|![alt text](image-1.png)|
+|![alt text](image-2.png)|
 
 |Como jugador quiero editar mi perfil personal para que mis datos estén actualizados.| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](image-3.png)|
 
 |Como administrador quiero ver un listado de usuarios registrados con paginación para saber quiénes son los jugadores de la partida.| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](image-4.png)|
 
 |Como administrador quiero realizar operaciones CRUD sobre los usuarios para mantener actualizado el sistema, poder comprobar la seguridad, poder borrar en cascada partidas, estadísticas, etc.| 
 |-----|
@@ -188,11 +190,12 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 
 |Como jugador quiero enviar, gestionar y recibir invitaciones de amistad para poder jugar juntos.| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](image-5.png)|
+|![alt text](image-6.png)|
 
 |Como jugador quiero enviar y recibir invitaciones a partidas (bien en modo jugador o en modo espectador) para poder ver el juego o jugar.| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](image-7.png)|
 
 |Como jugador quiero acceder con modo espectador de mis amigos para ver como juegan sin necesidad de participar.| 
 |-----|
@@ -200,7 +203,7 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 
 |Como jugador quiero escribir y leer comentarios en un chat durante las partidas para poder comunicarme con los demás jugadores.| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](image-8.png)|
 
 
 
