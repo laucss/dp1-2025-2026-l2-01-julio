@@ -142,7 +142,7 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 
 |Como jugador quiero poder registrarme, iniciar y cerrar sesión para poder jugar con mis datos.| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](image.png)|
 
 |Como jugador quiero editar mi perfil personal para que mis datos estén actualizados.| 
 |-----|
