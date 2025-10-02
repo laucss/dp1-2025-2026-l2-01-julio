@@ -74,8 +74,31 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 |-----|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
 
+## Estadísticas 
 
+|Como jugador quiero poder ver el número de partidas jugadas para observar estadísticas | 
+|-----|
+|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
 
+|Como jugador quiero poder ver la duración de las partidas jugadas para saber si dispongo del tiempo necesario| 
+|-----|
+|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+
+|Como jugador quiero poder ver el número de jugadores por partida jugada para observar estadísticas| 
+|-----|
+|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+
+|Como jugador quiero poder ver un ranking de jugadores para fomentar mi competitividad| 
+|-----|
+|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+
+|Como jugador quiero poder ver mis logros en mi perfil para ver cómo avanzo en el juego | 
+|-----|
+|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+
+|Como administrador quiero poder editar los logros para adaptarlos a nuevos criterios | 
+|-----|
+|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
 
 
 
