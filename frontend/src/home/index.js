@@ -1,16 +1,14 @@
 import React from 'react';
 import '../App.css';
 import '../static/css/home/home.css'; 
-import logo from '../static/images/napoleon.jpeg'
+import logo from '../static/images/napoleon.png'
 
 export default function Home(){
     return(
         <div className="home-page-container">
             <div className="hero-div">
-                <h1>Your game</h1>
-                <h3>---</h3>
-                <img src={logo}/>
-                <h3>Do you want to play?</h3>                
+                <h1>ESCAPE FROM ELBA</h1>
+                <img src={logo} className="napoleon-div" />                       
             </div>
         </div>
     );
