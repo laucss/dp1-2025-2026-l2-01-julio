@@ -78,13 +78,18 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 
 ## Juego
 
-|Como jugador quiero crear una partida, eligiendo si quiero el número de jugadores para poder iniciar una partida y empezar a jugar.| 
+|Como jugador quiero crear una partida pudiendo configurarla como yo desee para poder jugar.| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](1000085523.jpg)|
+|![alt text](1000085521.jpg)|
+|![alt text](1000085527.jpg)|
+|El jugador podrá crear una partida con las opciones que el quiera, pudiendo elegir el número maximo de jugadores, el nombre de la partida y si quiere que sea privada o pública. Cuando el jugador configure la partida el sistema le llevará a una sala de espera en la que irán apareciendo los jugadores que se vayan uniendo, en el caso de ser una partida privada también aparecerá el codigo que permite a otros jugadores unirse. El jugador podrá empezar la partida cuando el quiera usando el botón de empezar partida. |
 
-|Como jugador quiero unirme a una partida, ya sea en modo jugador o en modo espectador, para poder jugar o ver una partida.| 
+|Como jugador quiero unirme a una partida para poder jugar.| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](1000085522.jpg)|
+|![alt text](1000085528.jpg)|
+|El jugador podra elegir unirse a una partida pública en la que aún haya espacio o unirse a una partida privada usando el código correspondiente de esa partida, después de unirse a alguna partida el sistema le llevará a una sala de espera con los jugadores que se vayan uniendo. El jugador podrá abandonar la partida usando el botón de abandonar. |
 
 |Como jugador quiero robar el número de cartas de mi elección para poder gestionar mi Mano como quiera.| 
 |-----|
@@ -148,15 +153,20 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 
 |Como jugador quiero ver el listado de partidas jugadas y creadas por mí para ver mi historial de juego. | 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](1000085524.jpg)|
+|El sistema va a permitir al jugador ver un listado con todas sus partidas, incluyendo datos de la partida como el nombre, los jugadores, si ganó esa partida y la fecha en la que se inició y finalizó la partida. El jugador también tiene la opción de ver solo el listado de partidas que fueron creadas por él usando el botón de filtrado.|
 
 |Como administrador quiero ver el listado de partidas en curso para tener información mas precisa. | 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](1000085529.jpg)|
+|![alt text](1000085525.jpg)|
+|El administrador va a tener acceso a un listado de partidas que siguen en curso que el sistema le proporcionará al pulsar el botón. Este listado va a proporcionar el nombre de la partida, los jugadores y la fecha de inicio.|
 
 |Como administrador quiero ver el listado de partidas jugadas y sus participantes para tener un registro de las partidas. | 
 |-----|
+|![alt text](1000085526.jpg)|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|El administrador va a tener acceso a un listado de partidas completadas que el sistema le proporcionará al pulsar el botón. Este listado va a proporcionar el nombre de la partida, los jugadores y la fecha de inicio y final de la partida.|
 
 ## Gestión de usuarios
 
