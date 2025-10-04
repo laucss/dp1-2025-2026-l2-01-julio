@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Profiler } from "react";
 import { Route, Routes } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
@@ -12,6 +12,8 @@ import PlanList from "./public/plan";
 import tokenService from "./services/token.service";
 import UserListAdmin from "./admin/users/UserListAdmin";
 import UserEditAdmin from "./admin/users/UserEditAdmin";
+import EditProfile from "./player/UserEdit";
+import Profile from "./player/Profile";
 import SwaggerDocs from "./public/swagger";
 
 function ErrorFallback({ error, resetErrorBoundary }) {
@@ -52,7 +54,8 @@ function App() {
     if (role === "PLAYER") {
       ownerRoutes = (
         <>
-          
+          <Route path="/:username" exact={true} element={<Profile />} />
+          <Route path="/:username/EditProfile" exact={true} element={<EditProfile />} />
         </>)
     }    
   })
