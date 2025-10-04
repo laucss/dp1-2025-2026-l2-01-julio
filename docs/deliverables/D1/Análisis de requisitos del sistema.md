@@ -238,59 +238,71 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 ## Estadísticas 
 
 ### HU-026
-|Como jugador quiero poder ver el número de partidas jugadas para observar estadísticas | 
+|Como jugador quiero poder ver el número de partidas jugadas para observar estadísticas                                                                    | 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](image-12.png)|
+|![alt text](image-13.png)|
+|En la pantalla de “Estadísticas”, si el usuario está registrado, aparecerán dos botones: uno para ver las métricas del usuario y otro para las métricas globales de todo el juego. Si desea ver más detalles aparte del número exacto de partidas jugadas, puede desplazarse a la pantalla de “Historial”, en la que aparecen listadas todas las partidas. El usuario puede filtrar este historial por si desea solo ver los detalles de las partidas en las que él haya sido partícipe.|
 
 ### HU-027
 |Como jugador quiero poder ver la duración de las partidas jugadas para saber si dispongo del tiempo necesario| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|Ver mockup de la HU-026|
 
 ### HU-028
-|Como jugador quiero poder ver el número de jugadores por partida jugada para observar estadísticas| 
+|Como jugador quiero poder ver el número de jugadores por partida jugada para observar estadísticas                                                     | 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|Ver mockup de la HU-026|
+|El usuario en la pantalla de “Historial” puede ver cada partida jugada junto detalles como los jugadores implicados. Además puede filtrar ese listado y mostrar solo sus partidas. |
 
 ### HU-029
-|Como jugador quiero poder ver un ranking de jugadores para fomentar mi competitividad| 
+|Como jugador quiero poder ver estadísticas y métricas del juego para hacer un seguimiento de mi rendimiento |
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|Ver mockup de la HU-026|
 
 ### HU-030
-|Como jugador quiero poder ver mis logros en mi perfil para ver cómo avanzo en el juego | 
+|Como jugador quiero poder ver un ranking de jugadores para fomentar mi competitividad| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](image-11.png)|
+|En la barra de navegación hay un atajo llamado “Ranking”. Cuando se clica se muestra una pantalla en la que salen los 3 jugadores con más victorias. Justo debajo se encuentra el listado de jugadores en orden de victorias descendente. La posición del usuario en el ranking sale resaltada. |
 
 ### HU-031
+|Como jugador quiero poder ver mis logros en mi perfil para ver cómo avanzo en el juego | 
+|-----|
+|![alt text](image-14.png)|
+|En la pantalla de “Mis logros” se mostrarán todos los logros desbloqueados por el jugador. Aquellos no conseguidos se mostrarán menos resaltados. |
+
+### HU-032
 |Como administrador quiero poder editar los logros para adaptarlos a nuevos criterios | 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|![alt text](image-15.png)|
+|![alt text](image-16.png)|
+|Cuando el usuario como administrador al acceder a la pantalla de “Logros”, le aparecen cada logro junto con dos botones: uno para editarlo y otro para eliminarlo. Si se desea crear un nuevo logro, se deberá pulsar en el botón de “Crear logro” que llevará a otra pantalla en la que se rellenarán los datos necesarios para su creación. Para guardarlo se pulsará en el botón de “Guardar” y para cancelar en el de “Cancelar”. |
 
 
 
 ## Juego social
 
-### HU-032
+### HU-033
 |Como jugador quiero enviar, gestionar y recibir invitaciones de amistad para poder jugar juntos.| 
 |-----|
 |![alt text](image-9.png)|
 |![alt text](image-6.png)|
 |Cuando el jugador pulse el botón “Amigos” dentro del menú desplegable, irá a una pantalla donde podrá buscar a un amigo por su nombre de usuario y podrá eliminarlo o invitarlo a jugar. También en el botón “enviar una invitación” podrá añadir nuevos amigos buscando su nombre de usuario. Por último, podrá ver las invitaciones de amistad en el botón “Invitaciones” que tendrá un contador de estas.|
 
-### HU-033
+### HU-034
 |Como jugador quiero enviar y recibir invitaciones a partidas (bien en modo jugador o en modo espectador) para poder ver el juego o jugar.| 
 |-----|
 |![alt text](image-7.png)|
 |Cuando el jugador acceda al menú desplegable, podrá hacer click en “Notificaciones” donde podrá ver las invitaciones que ha recibido. Para enviar invitaciones a partidas consultar el mockup de la HU-032.|
 
-### HU-034
+### HU-035
 |Como jugador quiero acceder con modo espectador a partidas de mis amigos para ver como juegan sin necesidad de participar.| 
 |-----|
 |Ver mockup de la HU-032.|
 |En la pantalla de "Amigos", a la que podemos acceder a través del menú de navegación, aparecerá un botón "Ver" cuando un amigo esté en partida. Si hacemos click podremos ver la partida en modo espectador. Este botón desaparecerá si el amigo no está en partida.|
 
-### HU-035
+### HU-036
 |Como jugador quiero escribir y leer comentarios en un chat durante las partidas para poder comunicarme con los demás jugadores.| 
 |-----|
 |![alt text](image-8.png)|
