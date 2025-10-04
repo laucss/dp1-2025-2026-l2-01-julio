@@ -208,30 +208,31 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 ### HU-021
 |Como jugador quiero poder acceder al menú desplegable para poder visitar las diferentes partes del sistema.|
 |-----|
-|Mockup|
+|Ver mockup de la HU-020|
 |El menú desplegable estará ubicado en la esquina superior derecha de la pantalla. Cuando el usuario haga click en él, podrá navegar a la pantalla que quiera.|
 
 ### HU-022
 |Como jugador quiero poder consultar las reglas del juego para conocer sus normas y mecánicas.|
 |-----|
-|Mockup|
+|![alt text](image-10.png)|
 |Cuando el usuario acceda al menú desplegable, podrá hacer click en “Reglas” donde podrá consultar todo lo necesario para conocer el funcionamiento y las normas del juego.|
 
 ### HU-023
 |Como jugador quiero editar mi perfil personal para que mis datos estén actualizados.| 
 |-----|
 |![alt text](image-3.png)|
-|Cuando el usuario acceda al menú desplegable, podrá hacer click en un botón que le permitirá editar sus datos personales (foto  de perfil, nombre de usuario, una breve descripción sobre él y su país).|
+|Cuando el usuario acceda al menú desplegable, podrá hacer click en un botón que le permitirá editar sus datos personales (foto de perfil, nombre de usuario, una breve descripción sobre él y su país).|
 
 ### HU-024
-|Como administrador quiero ver un listado de usuarios registrados con paginación para saber quiénes son los jugadores de la partida.| 
+|Como administrador quiero ver un listado de usuarios registrados con paginación para saber quiénes son los jugadores.| 
 |-----|
 |![alt text](image-4.png)|
+|En la barra de navegación habrá un botón llamado "Listado de perfiles" que nos permitirá ver los jugadores registrados.|
 
 ### HU-025
 |Como administrador quiero realizar operaciones CRUD sobre los usuarios para mantener actualizado el sistema, poder comprobar la seguridad, poder borrar en cascada partidas, estadísticas, etc.| 
 |-----|
-|Ver mockup de la imagen de la HU-024|
+|Ver mockup de la HU-024|
 |Al pulsar en los botones “Editar” o “Eliminar” el sistema completará la acción correspondiente.|
 
 ## Estadísticas 
@@ -268,12 +269,12 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 
 
 
-    ## Juego social
+## Juego social
 
 ### HU-032
 |Como jugador quiero enviar, gestionar y recibir invitaciones de amistad para poder jugar juntos.| 
 |-----|
-|![alt text](image-5.png)|
+|![alt text](image-9.png)|
 |![alt text](image-6.png)|
 |Cuando el jugador pulse el botón “Amigos” dentro del menú desplegable, irá a una pantalla donde podrá buscar a un amigo por su nombre de usuario y podrá eliminarlo o invitarlo a jugar. También en el botón “enviar una invitación” podrá añadir nuevos amigos buscando su nombre de usuario. Por último, podrá ver las invitaciones de amistad en el botón “Invitaciones” que tendrá un contador de estas.|
 
@@ -284,9 +285,10 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 |Cuando el jugador acceda al menú desplegable, podrá hacer click en “Notificaciones” donde podrá ver las invitaciones que ha recibido. Para enviar invitaciones a partidas consultar el mockup de la HU-032.|
 
 ### HU-034
-|Como jugador quiero acceder con modo espectador de mis amigos para ver como juegan sin necesidad de participar.| 
+|Como jugador quiero acceder con modo espectador a partidas de mis amigos para ver como juegan sin necesidad de participar.| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|Ver mockup de la HU-032.|
+|En la pantalla de "Amigos", a la que podemos acceder a través del menú de navegación, aparecerá un botón "Ver" cuando un amigo esté en partida. Si hacemos click podremos ver la partida en modo espectador. Este botón desaparecerá si el amigo no está en partida.|
 
 ### HU-035
 |Como jugador quiero escribir y leer comentarios en un chat durante las partidas para poder comunicarme con los demás jugadores.| 
