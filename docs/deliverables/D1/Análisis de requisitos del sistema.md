@@ -180,7 +180,6 @@ A continuación se definen  todas las historias de usuario a implementar:
 |Como administrador quiero ver el listado de partidas jugadas y sus participantes para tener un registro de las partidas. | 
 |-----|
 |![alt text](1000085526.jpg)|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
 |El administrador va a tener acceso a un listado de partidas completadas que el sistema le proporcionará al pulsar el botón. Este listado va a proporcionar el nombre de la partida, los jugadores y la fecha de inicio y final de la partida.|
 
 ## Gestión de usuarios
