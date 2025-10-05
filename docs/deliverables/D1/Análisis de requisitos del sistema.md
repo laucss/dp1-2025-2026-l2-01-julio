@@ -62,9 +62,13 @@ Puedes gastar tus puntos en diferentes acciones:<br>
 
 ## Tipos de Usuarios / Roles
 
-Jugador: Usuario que puede tanto ver su información registrada en el juego como crear y/o unirse a partidas.
+Jugador (en partida): puede participar en las partidas y jugar acorde a las reglas de juego, como tirar dados, desplazarse a diferentes habitaciones, etc.
 
-Administrador: Grupo de usuarios que pueden ver una lista de datos generales del juego como partidas y jugadores, gestionar sus usuarios y modificar los logros del juego.
+Jugador registrado: puede acceder a las diferentes funcionalidades del sistema como crear partidas, usar el chat, etc.
+
+Espectador: puede observar partidas en tiempo real sin participar. De esta forma, pueden ver jugar a sus amigos y aprender sobre el juego.
+
+Administrador: grupo de usuarios con acceso total al sistema. Pueden ver una lista de datos generales del juego como partidas y jugadores, gestionar sus usuarios y modificar los logros del juego.
 
 ## Historias de Usuario
 
