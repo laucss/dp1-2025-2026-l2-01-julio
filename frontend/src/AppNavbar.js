@@ -43,22 +43,15 @@ function AppNavbar() {
                     <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
                 </>
             )
-        }
-        if (role === "PLAYER") {
-            playerLinks = (
-                <>
-                    <NavItem>
-                        <NavLink style={{ color: "white" }} tag={Link} to="/achievements">Achievements</NavLink>
-                    </NavItem>
-                </>
-            )
-            }
+        }   
     })
-
         roles.forEach((role) => {
         if (role === "PLAYER") {
             ownerLinks = (
-                <>              
+                <> 
+                <NavItem>
+                    <NavLink style={{ color: "white" }} tag={Link} to="/achievements">Achievements</NavLink>
+                </NavItem>             
                 </>
             )
             profileLinks = (
