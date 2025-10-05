@@ -69,12 +69,6 @@ Administrador: Grupo de usuarios que pueden ver una lista de datos generales del
 ## Historias de Usuario
 
 A continuación se definen  todas las historias de usuario a implementar:
-_Os recomentamos usar la siguiente plantilla de contenidos que usa un formato tabular:_
- ### HU-(ISSUE#ID): Nombre ([Enlace a la Issue asociada a la historia de usuario]()
-|Descripción de la historia siguiendo el esquema:  "Como <rol> quiero que el sistema <funcionalidad>  para poder <objetivo/beneficio>."| 
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|Decripción de las interacciones concretas a realizar con la interfaz de usuario del sistema para lleva a cabo la historia. |
 
 ## Juego
 
@@ -312,34 +306,8 @@ _Os recomentamos usar la siguiente plantilla de contenidos que usa un formato ta
 
 
 ## Diagrama conceptual del sistema
-_En esta sección debe proporcionar un diagrama UML de clases que describa el modelo de datos a implementar en la aplicación. Este diagrama estará anotado con las restricciones simples (de formato/patrón, unicidad, obligatoriedad, o valores máximos y mínimos) de los datos a gestionar por la aplicación. _
 
-_Recuerde que este es un diagrama conceptual, y por tanto no se incluyen los tipos de los atributos, ni clases específicas de librerías o frameworks, solamente los conceptos del dominio/juego que pretendemos implementar_
-Ej:
-
-```mermaid
-classDiagram
-    Animal <|-- Duck
-    Animal <|-- Fish
-    Animal <|-- Zebra
-    Animal : age
-    Animal : gender
-    class Duck{
-        beakColor        
-    }
-    class Fish{
-       sizeInFeet
-    }
-    class Zebra{
-        is_wild
-        
-    }
-```
-_Si vuestro diagrama se vuelve demasiado complejo, siempre podéis crear varios diagramas para ilustrar todos los conceptos del dominio. Por ejemplo podríais crear un diagrama para cada uno de los módulos que quereis abordar. La única limitación es que hay que ser coherente entre unos diagramas y otros si nos referimos a las mismas clases_
-
-_Puede usar la herramienta de modelado que desee para generar sus diagramas de clases. Para crear el diagrama anterior nosotros hemos usado un lenguaje textual y librería para la generación de diagramas llamada Mermaid_
-
-_Si deseais usar esta herramienta para generar vuestro(s) diagramas con esta herramienta os proporcionamos un [enlace a la documentación oficial de la sintaxis de diagramas de clases de _ermaid](https://mermaid.js.org/syntax/classDiagram.html)_
+![alt text](image-17.png)
 
 ## Reglas de Negocio
 ### R1 - Número de jugadores
