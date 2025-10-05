@@ -94,20 +94,20 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-003
 |Como jugador quiero robar el número de cartas de mi elección para poder gestionar mi Mano como quiera.| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|El jugador tiene la opción de robar las cartas que quiera o no robar ninguna , sin embargo el total de cartas que tenga en su Mano después de robar no puede ser superior a 7. Esto se realiza al principio de cada turno del jugador. |
+|![alt text](390E2634-EF5D-4BDB-AE46-51CA1F415BA5.jpeg)|
+|El jugador tiene la opción de robar las cartas que quiera o no robar ninguna usando el botón de robar cartas del mazo, sin embargo el total de cartas que tenga en su Mano después de robar no puede ser superior a 7. Esto se realiza al principio de cada turno del jugador. |
 
 ### HU-004
 |Como jugador quiero elegir qué acción realizar si tengo puntos de acción para poder gastar esos puntos en acciones estratégicas.| 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|El jugador al terminar de robar cartas calculará su número de puntos de acción ( 7 - número de cartas de tu mano)  y si cuenta con puntos de acción va a contar con diversas opciones sobre qué acción realizar. Puede desplazarse a una habitación adyacente, trasladar a un invitado a otra habitación, saltar a otra habitación si posee la palabra de esa habitación y puede hacer un intento de escape. |
+|![alt text](E23DD348-5F32-43E1-93A7-B3051E82A44F.jpeg)|
+|El jugador al terminar de robar cartas calculará su número de puntos de acción ( 7 - número de cartas de tu mano)  y si cuenta con puntos de acción el sistema le va a permitir ver las diversas opciones de acciones que puede realizar usando el botón de acciones. Puede desplazarse a una habitación adyacente, trasladar a un invitado a otra habitación, saltar a otra habitación si posee la palabra de esa habitación y puede hacer un intento de escape. |
 
 ### HU-005
 |Como jugador quiero desplazarme a una habitación adyacente a la que me encuentro para iniciar un combate o para moverme a esa habitación. | 
 |-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|El jugador tras hacer el recuento de sus puntos de acción podrá elegir trasladarse a una habitación adyacente de su elección gastando un punto de acción, como consecuencia de esto podríamos terminar en un combate. |
+|![alt text](EDDE0B85-B6D6-46FF-BA5A-308C072DC2E8.jpeg)|
+|El jugador tras hacer el recuento de sus puntos de acción podrá elegir trasladarse a una habitación adyacente de su elección gastando un punto de acción, las habitaciones adyacentes al jugador aparecerán destacadas en el tablero y al pulsar alguna el sistema le hará confirmar su elección. Como consecuencia de esto podríamos terminar en un combate. |
 
 ### HU-006
 |Como jugador quiero desplazar a otro invitado a otra habitación para iniciar un combate o alejarlo de escaparse. | 
