@@ -23,6 +23,15 @@ const Profile = ({ }) => {
             >
               Edit
             </Button>
+        <Button
+              size="sm"
+              color="secondary"
+              aria-label={"achievements-" + user.id}
+              tag={Link}
+              to={"Achievements"}
+            >
+              Achievements
+            </Button>
     </div>
   );
 };

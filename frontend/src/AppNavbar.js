@@ -36,6 +36,9 @@ function AppNavbar() {
                     <NavItem>
                         <NavLink style={{ color: "white" }} tag={Link} to="/users">Users</NavLink>
                     </NavItem>
+                    <NavItem>
+                        <NavLink style={{ color: "white" }} tag={Link} to="/achievements">Achievements</NavLink>
+                    </NavItem>      
                 </>
             )
             profileLinks = (
@@ -49,9 +52,7 @@ function AppNavbar() {
         if (role === "PLAYER") {
             ownerLinks = (
                 <> 
-                <NavItem>
-                    <NavLink style={{ color: "white" }} tag={Link} to="/achievements">Achievements</NavLink>
-                </NavItem>             
+       
                 </>
             )
             profileLinks = (
