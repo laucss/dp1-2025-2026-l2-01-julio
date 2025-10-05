@@ -311,10 +311,9 @@ A continuación se definen  todas las historias de usuario a implementar:
 
 ## Diagrama conceptual del sistema
 <div align="center">
-<img width="871" height="551" alt="User_UML drawio" src="https://github.com/user-attachments/assets/bddf29a8-fb11-4891-91c2-fe0800a4a8ec" />
-
-
 <img width="1254" height="634" alt="Player_UML drawio" src="https://github.com/user-attachments/assets/34eb3274-9beb-4908-99b6-11339aaaea4a" />
+ 
+<img width="871" height="551" alt="User_UML drawio (1)" src="https://github.com/user-attachments/assets/cb7dcfcd-a33b-4770-a3ed-8f3f277f5df5" />
 </div>
 
 ## Reglas de Negocio
