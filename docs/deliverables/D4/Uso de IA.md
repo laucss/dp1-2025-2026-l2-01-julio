@@ -1,20 +1,26 @@
 # Documentación del Uso de IA en el Proyecto
-**Asignatura:** Diseño y Pruebas (Grado en Ingeniería del Software, Universidad de Sevilla)  
+**Asignatura:** Diseño y Pruebas (Grado en Ingeniería del Software, Universidad de Sevilla) 
+
 **Curso académico:** 2025-2026
+
 **Grupo/Equipo:** L2-01
+
 **Nombre del proyecto:** Escape From Elba
+
 **Repositorio:** https://github.com/gii-is-DP1/dp1-2025-2026-l2-01
+
 **Integrantes (máx. 6):**
-Alberto Pardina Miñón (QSS7721/albparmin@alum.us.es)
-Marco Visentin Lopez (CYB6650/marvislop@alum.us.es)
-Emilio Diaz Arcenegui (FSS8078/emidiaarc@alum.us.es)
-Nerea Camacho Perez (QFL3393/nercamper@alum.us.es)
-Laura Cubero Sánchez (XNT3290/laucubsan@alum.us.es)
-Lucía Baltasar Muñoz (SBJ4592/lucbalmun@alum.us.es)
+
+Alberto Pardina Miñón (QSS7721 / albparmin@alum.us.es)<br>
+Marco Visentin Lopez (CYB6650 / marvislop@alum.us.es)<br>
+Emilio Diaz Arcenegui (FSS8078 / emidiaarc@alum.us.es)<br>
+Nerea Camacho Perez (QFL3393 / nercamper@alum.us.es)<br>
+Laura Cubero Sánchez (XNT3290 / laucubsan@alum.us.es)<br>
+Lucía Baltasar Muñoz (SBJ4592 / lucbalmun@alum.us.es)<br>
 
 ## 1. Introducción
 
-Este documento describe el uso que se ha echo de la IA en el proyecto. El objetivo es ser transparentes sobre el uso de IA realizado. Como recordatorio, al alumnado incluimos un resumen de lo indicado en el Syllabus de la asignatura:
+Este documento describe el uso que se ha hecho de la IA en el proyecto. El objetivo es ser transparentes sobre el uso de IA realizado. Como recordatorio, al alumnado incluimos un resumen de lo indicado en el Syllabus de la asignatura:
 
 ### Declaración de Política y Compromiso
 
