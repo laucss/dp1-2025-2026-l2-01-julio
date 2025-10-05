@@ -79,7 +79,7 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-001
 |Como jugador quiero crear una partida pudiendo configurarla como yo desee para poder jugar.| 
 |-----|
-|![alt text](1000085523.jpg)|
+|![alt text](images/1000085523.jpg)|
 |![alt text](1000085521.jpg)|
 |![alt text](1000085527.jpg)|
 |El jugador podrá crear una partida con las opciones que el quiera, pudiendo elegir el número maximo de jugadores, el nombre de la partida y si quiere que sea privada o pública. Cuando el jugador configure la partida el sistema le llevará a una sala de espera en la que irán apareciendo los jugadores que se vayan uniendo, en el caso de ser una partida privada también aparecerá el codigo que permite a otros jugadores unirse. El jugador podrá empezar la partida cuando el quiera usando el botón de empezar partida. |
