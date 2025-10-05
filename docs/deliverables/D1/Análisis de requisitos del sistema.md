@@ -79,34 +79,34 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-001
 |Como jugador quiero crear una partida pudiendo configurarla como yo desee para poder jugar.| 
 |-----|
-|![alt text](1000085523.jpg)|
-|![alt text](1000085521.jpg)|
-|![alt text](1000085527.jpg)|
+|![alt text](images/1000085523.jpg)|
+|![alt text](images/1000085521.jpg)|
+|![alt text](images/1000085527.jpg)|
 |El jugador podrá crear una partida con las opciones que el quiera, pudiendo elegir el número maximo de jugadores, el nombre de la partida y si quiere que sea privada o pública. Cuando el jugador configure la partida el sistema le llevará a una sala de espera en la que irán apareciendo los jugadores que se vayan uniendo, en el caso de ser una partida privada también aparecerá el codigo que permite a otros jugadores unirse. El jugador podrá empezar la partida cuando el quiera usando el botón de empezar partida. |
 
 ### HU-002
 |Como jugador quiero unirme a una partida para poder jugar.| 
 |-----|
-|![alt text](1000085522.jpg)|
-|![alt text](1000085528.jpg)|
+|![alt text](images/1000085522.jpg)|
+|![alt text](images/1000085528.jpg)|
 |El jugador podra elegir unirse a una partida pública en la que aún haya espacio o unirse a una partida privada usando el código correspondiente de esa partida, después de unirse a alguna partida el sistema le llevará a una sala de espera con los jugadores que se vayan uniendo. El jugador podrá abandonar la partida usando el botón de abandonar. |
 
 ### HU-003
 |Como jugador quiero robar el número de cartas de mi elección para poder gestionar mi Mano como quiera.| 
 |-----|
-|![alt text](390E2634-EF5D-4BDB-AE46-51CA1F415BA5.jpeg)|
+|![alt text](images/390E2634-EF5D-4BDB-AE46-51CA1F415BA5.jpeg)|
 |El jugador tiene la opción de robar las cartas que quiera o no robar ninguna usando el botón de robar cartas del mazo, sin embargo el total de cartas que tenga en su Mano después de robar no puede ser superior a 7. Esto se realiza al principio de cada turno del jugador. |
 
 ### HU-004
 |Como jugador quiero elegir qué acción realizar si tengo puntos de acción para poder gastar esos puntos en acciones estratégicas.| 
 |-----|
-|![alt text](E23DD348-5F32-43E1-93A7-B3051E82A44F.jpeg)|
+|![alt text](images/E23DD348-5F32-43E1-93A7-B3051E82A44F.jpeg)|
 |El jugador al terminar de robar cartas calculará su número de puntos de acción ( 7 - número de cartas de tu mano)  y si cuenta con puntos de acción el sistema le va a permitir ver las diversas opciones de acciones que puede realizar usando el botón de acciones. Puede desplazarse a una habitación adyacente, trasladar a un invitado a otra habitación, saltar a otra habitación si posee la palabra de esa habitación y puede hacer un intento de escape. |
 
 ### HU-005
 |Como jugador quiero desplazarme a una habitación adyacente a la que me encuentro para iniciar un combate o para moverme a esa habitación. | 
 |-----|
-|![alt text](EDDE0B85-B6D6-46FF-BA5A-308C072DC2E8.jpeg)|
+|![alt text](images/EDDE0B85-B6D6-46FF-BA5A-308C072DC2E8.jpeg)|
 |El jugador tras hacer el recuento de sus puntos de acción podrá elegir trasladarse a una habitación adyacente de su elección gastando un punto de acción, las habitaciones adyacentes al jugador aparecerán destacadas en el tablero y al pulsar alguna el sistema le hará confirmar su elección. Como consecuencia de esto podríamos terminar en un combate. |
 
 ### HU-006
@@ -166,20 +166,21 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-015
 |Como jugador quiero ver el listado de partidas jugadas y creadas por mí para ver mi historial de juego. | 
 |-----|
-|![alt text](1000085524.jpg)|
+|![alt text](images/1000085524.jpg)|
 |El sistema va a permitir al jugador ver un listado con todas sus partidas, incluyendo datos de la partida como el nombre, los jugadores, si ganó esa partida y la fecha en la que se inició y finalizó la partida. El jugador también tiene la opción de ver solo el listado de partidas que fueron creadas por él usando el botón de filtrado.|
 
 ### HU-016
 |Como administrador quiero ver el listado de partidas en curso para tener información mas precisa. | 
 |-----|
-|![alt text](1000085529.jpg)|
-|![alt text](1000085525.jpg)|
+|![alt text](images/1000085529.jpg)|
+|![alt text](images/1000085525.jpg)|
 |El administrador va a tener acceso a un listado de partidas que siguen en curso que el sistema le proporcionará al pulsar el botón. Este listado va a proporcionar el nombre de la partida, los jugadores y la fecha de inicio.|
 
 ### HU-017
 |Como administrador quiero ver el listado de partidas jugadas y sus participantes para tener un registro de las partidas. | 
 |-----|
-|![alt text](1000085526.jpg)|
+|![alt text](images/1000085526.jpg)|
+|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
 |El administrador va a tener acceso a un listado de partidas completadas que el sistema le proporcionará al pulsar el botón. Este listado va a proporcionar el nombre de la partida, los jugadores y la fecha de inicio y final de la partida.|
 
 ## Gestión de usuarios
@@ -187,19 +188,19 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-018
 |Como jugador quiero poder registrarme para poder acceder a las funcionalidades del juego.| 
 |-----|
-|![alt text](image-1.png)|
+|![alt text](images/image-1.png)|
 |Cuando intentemos registrarnos introduciendo los datos obligatorios (nombre de usuario, contraseña y correo electrónico) el sistema creará un nuevo perfil para el jugador.|
 
 ### HU-019
 |Como jugador quiero poder iniciar sesión para poder jugar a partidas.|
 |-----|
-|![alt text](image.png)|
+|![alt text](images/image.png)|
 |Cuando se inicie sesión con los campos obligatorios necesarios (nombre de usuario y contraseña), el sistema verificará las credenciales.|
 
 ### HU-020
 |Como jugador quiero poder cerrar sesión para desconectar mi cuenta de forma segura.|
 |-----|
-|![alt text](image-2.png)|
+|![alt text](images/image-2.png)|
 |Cuando un jugador identificado pulse el menú desplegable podrá ver dentro un botón de cerrar sesión. Si hace click en él, aparecerá una ventana para que confirme que quiere desconectar su cuenta.|
 
 ### HU-021
@@ -211,19 +212,19 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-022
 |Como jugador quiero poder consultar las reglas del juego para conocer sus normas y mecánicas.|
 |-----|
-|![alt text](image-10.png)|
+|![alt text](images/image-10.png)|
 |Cuando el usuario acceda al menú desplegable, podrá hacer click en “Reglas” donde podrá consultar todo lo necesario para conocer el funcionamiento y las normas del juego.|
 
 ### HU-023
 |Como jugador quiero editar mi perfil personal para que mis datos estén actualizados.| 
 |-----|
-|![alt text](image-3.png)|
+|![alt text](images/image-3.png)|
 |Cuando el usuario acceda al menú desplegable, podrá hacer click en un botón que le permitirá editar sus datos personales (foto de perfil, nombre de usuario, una breve descripción sobre él y su país).|
 
 ### HU-024
 |Como administrador quiero ver un listado de usuarios registrados con paginación para saber quiénes son los jugadores.| 
 |-----|
-|![alt text](image-4.png)|
+|![alt text](images/image-4.png)|
 |En la barra de navegación habrá un botón llamado "Listado de perfiles" que nos permitirá ver los jugadores registrados.|
 
 ### HU-025
@@ -237,8 +238,8 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-026
 |Como jugador quiero poder ver el número de partidas jugadas para observar estadísticas                                                                    | 
 |-----|
-|![alt text](image-12.png)|
-|![alt text](image-13.png)|
+|![alt text](images/image-12.png)|
+|![alt text](images/image-13.png)|
 |En la pantalla de “Estadísticas”, si el usuario está registrado, aparecerán dos botones: uno para ver las métricas del usuario y otro para las métricas globales de todo el juego. Si desea ver más detalles aparte del número exacto de partidas jugadas, puede desplazarse a la pantalla de “Historial”, en la que aparecen listadas todas las partidas. El usuario puede filtrar este historial por si desea solo ver los detalles de las partidas en las que él haya sido partícipe.|
 
 ### HU-027
@@ -260,20 +261,20 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-030
 |Como jugador quiero poder ver un ranking de jugadores para fomentar mi competitividad| 
 |-----|
-|![alt text](image-11.png)|
+|![alt text](images/image-11.png)|
 |En la barra de navegación hay un atajo llamado “Ranking”. Cuando se clica se muestra una pantalla en la que salen los 3 jugadores con más victorias. Justo debajo se encuentra el listado de jugadores en orden de victorias descendente. La posición del usuario en el ranking sale resaltada. |
 
 ### HU-031
 |Como jugador quiero poder ver mis logros en mi perfil para ver cómo avanzo en el juego | 
 |-----|
-|![alt text](image-14.png)|
+|![alt text](images/image-14.png)|
 |En la pantalla de “Mis logros” se mostrarán todos los logros desbloqueados por el jugador. Aquellos no conseguidos se mostrarán menos resaltados. |
 
 ### HU-032
 |Como administrador quiero poder editar los logros para adaptarlos a nuevos criterios | 
 |-----|
-|![alt text](image-15.png)|
-|![alt text](image-16.png)|
+|![alt text](images/image-15.png)|
+|![alt text](images/image-16.png)|
 |Cuando el usuario como administrador al acceder a la pantalla de “Logros”, le aparecen cada logro junto con dos botones: uno para editarlo y otro para eliminarlo. Si se desea crear un nuevo logro, se deberá pulsar en el botón de “Crear logro” que llevará a otra pantalla en la que se rellenarán los datos necesarios para su creación. Para guardarlo se pulsará en el botón de “Guardar” y para cancelar en el de “Cancelar”. |
 
 
@@ -283,14 +284,14 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-033
 |Como jugador quiero enviar, gestionar y recibir invitaciones de amistad para poder jugar juntos.| 
 |-----|
-|![alt text](image-9.png)|
-|![alt text](image-6.png)|
+|![alt text](images/image-9.png)|
+|![alt text](images/image-6.png)|
 |Cuando el jugador pulse el botón “Amigos” dentro del menú desplegable, irá a una pantalla donde podrá buscar a un amigo por su nombre de usuario y podrá eliminarlo o invitarlo a jugar. También en el botón “enviar una invitación” podrá añadir nuevos amigos buscando su nombre de usuario. Por último, podrá ver las invitaciones de amistad en el botón “Invitaciones” que tendrá un contador de estas.|
 
 ### HU-034
 |Como jugador quiero enviar y recibir invitaciones a partidas (bien en modo jugador o en modo espectador) para poder ver el juego o jugar.| 
 |-----|
-|![alt text](image-7.png)|
+|![alt text](images/image-7.png)|
 |Cuando el jugador acceda al menú desplegable, podrá hacer click en “Notificaciones” donde podrá ver las invitaciones que ha recibido. Para enviar invitaciones a partidas consultar el mockup de la HU-032.|
 
 ### HU-035
@@ -302,15 +303,15 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-036
 |Como jugador quiero escribir y leer comentarios en un chat durante las partidas para poder comunicarme con los demás jugadores.| 
 |-----|
-|![alt text](image-8.png)|
+|![alt text](images/image-8.png)|
 |Cuando el jugador esté en partida podrá hacer click en el botón de chat (un bocadillo de conversación con tres puntos) para escribir y leer los comentarios de los demás jugadores.| 
 
 
 
 
 ## Diagrama conceptual del sistema
-
-![alt text](image-17.png)
+![alt text](<images/Captura de pantalla 2025-10-05 181554.png>)
+![alt text](<images/Captura de pantalla 2025-10-05 181603.png>)
 
 ## Reglas de Negocio
 ### R1 - Número de jugadores

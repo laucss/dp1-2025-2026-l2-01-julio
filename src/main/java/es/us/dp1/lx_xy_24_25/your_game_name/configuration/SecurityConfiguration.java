@@ -86,11 +86,12 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET,"/api/v1/achievements/**").authenticated()
 
                 // API restringida para jugadores
-			    .requestMatchers(HttpMethod.POST,"/api/v1/achievements/**").hasAuthority(PLAYER)
-                .requestMatchers(HttpMethod.PUT,"/api/v1/achievements/**").hasAuthority(PLAYER)
-                .requestMatchers(HttpMethod.DELETE,"/api/v1/achievements/**").hasAuthority(PLAYER)
+
                 
                 // API restringida para administradores
+                .requestMatchers(HttpMethod.POST,"/api/v1/achievements/**").hasAuthority(ADMIN)
+                .requestMatchers(HttpMethod.PUT,"/api/v1/achievements/**").hasAuthority(ADMIN)
+                .requestMatchers(HttpMethod.DELETE,"/api/v1/achievements/**").hasAuthority(ADMIN)
                 .requestMatchers("/api/v1/users/**").hasAuthority(ADMIN)
 
                 // El resto denegado
