@@ -428,3 +428,9 @@ Las cartas pasan de la mano a la Bolsa y de esta al mazo de descartes, nunca en 
 
 ### R16 - Orden del turno
 Durante el turno se sigue el orden de 1º robar, 2º tomar accion y por ultimo descartar, y es imposible volver a la fase anterior en caso de avanzar.
+
+### R17 - Bolsa de otros jugadores
+Durante la partida podremos ver las cartas que los otros jugadores tengan en sus bolsas en todo momento.
+
+### R18 - Mano de otros jugadores
+El jugador no podrá ver las cartas de la mano de otros jugadores.
