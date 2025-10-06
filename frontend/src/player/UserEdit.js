@@ -5,6 +5,8 @@ import tokenService from "../services/token.service";
 import "../static/css/admin/adminPage.css";
 import getErrorModal from "../util/getErrorModal";
 import useFetchState from "../util/useFetchState";
+import useFetchData from "../util/useFetchData";
+import getIdFromUrl from "../util/getIdFromUrl";
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -16,19 +18,27 @@ export default function UserEditPlayer() {
     authority: null,
   };
 
+  
   const [message, setMessage] = useState(null);
   const [visible, setVisible] = useState(false);
-  
-  const [user, setUser] = useFetchState(tokenService.getUser());
+  const [user, setUser] = useFetchState(
+    
+   );
 
   function handleChange(event) {
-    const { name, value } = event.target;
-    if (name === "authority") return; 
-    setUser({ ...user, [name]: value });
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+    if (name === "authority") {
+      const auth = "PLAYER"
+      setUser({ ...user, authority: auth }); 
+    } else setUser({ ...user, [name]: value });
   }
 
   function handleSubmit(event) {
     event.preventDefault();
+
+ console.log("Enviando este objeto al servidor:", user);
 
     fetch(`/api/v1/users/${user.id}`, {
       method: "PUT",
@@ -51,6 +61,7 @@ export default function UserEditPlayer() {
 
   const modal = getErrorModal(setVisible, visible, message);
 
+  
   return (
     <div className="auth-page-container">
       <h2>Edita tu perfil</h2>

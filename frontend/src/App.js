@@ -58,8 +58,7 @@ function App() {
     if (role === "PLAYER") {
       ownerRoutes = (
         <>
-          <Route path="/:username" exact={true} element={<Profile />} />
-          <Route path="/:username/EditProfile" exact={true} element={<EditProfile />} />
+          <Route path="/users/:username" exact={true} element={<Profile />} />
         </>)
     }    
   })
