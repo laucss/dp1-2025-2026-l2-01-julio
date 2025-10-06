@@ -1,20 +1,26 @@
 # Documentación del Uso de IA en el Proyecto
-**Asignatura:** Diseño y Pruebas (Grado en Ingeniería del Software, Universidad de Sevilla)  
+**Asignatura:** Diseño y Pruebas (Grado en Ingeniería del Software, Universidad de Sevilla) 
+
 **Curso académico:** 2025-2026
+
 **Grupo/Equipo:** L2-01
+
 **Nombre del proyecto:** Escape From Elba
+
 **Repositorio:** https://github.com/gii-is-DP1/dp1-2025-2026-l2-01
+
 **Integrantes (máx. 6):**
-Alberto Pardina Miñón (QSS7721/albparmin@alum.us.es)
-Marco Visentin Lopez (CYB6650/marvislop@alum.us.es)
-Emilio Diaz Arcenegui (FSS8078/emidiaarc@alum.us.es)
-Nerea Camacho Perez (QFL3393/nercamper@alum.us.es)
-Laura Cubero Sánchez (XNT3290/laucubsan@alum.us.es)
-Lucía Baltasar Muñoz (SBJ4592/lucbalmun@alum.us.es)
+
+Alberto Pardina Miñón (QSS7721 / albparmin@alum.us.es)<br>
+Marco Visentin Lopez (CYB6650 / marvislop@alum.us.es)<br>
+Emilio Diaz Arcenegui (FSS8078 / emidiaarc@alum.us.es)<br>
+Nerea Camacho Perez (QFL3393 / nercamper@alum.us.es)<br>
+Laura Cubero Sánchez (XNT3290 / laucubsan@alum.us.es)<br>
+Lucía Baltasar Muñoz (SBJ4592 / lucbalmun@alum.us.es)<br>
 
 ## 1. Introducción
 
-Este documento describe el uso que se ha echo de la IA en el proyecto. El objetivo es ser transparentes sobre el uso de IA realizado. Como recordatorio, al alumnado incluimos un resumen de lo indicado en el Syllabus de la asignatura:
+Este documento describe el uso que se ha hecho de la IA en el proyecto. El objetivo es ser transparentes sobre el uso de IA realizado. Como recordatorio, al alumnado incluimos un resumen de lo indicado en el Syllabus de la asignatura:
 
 ### Declaración de Política y Compromiso
 
@@ -31,19 +37,19 @@ Este documento describe el uso que se ha echo de la IA en el proyecto. El objeti
 **Rellenar este documento es Obligatorio:** La **documentación del uso de IA** es un **entregable** del proyecto.
 
 ## Resumen por Sprint (1–4)
-### Sprint X — Resumen de uso de IA
+### Sprint 1 — Resumen de uso de IA
 
-Usos registrados: <!-- nº -->
+Usos registrados: 3
 
-Ámbitos principales: <!-- p.ej., generación de pruebas, esqueletos de código, análisis y resolución de errores -->
+Ámbitos principales: Esqueleto de código y correción de errores respecto a la edición del perfil de usuario, extracción de información para elaborar el esqueleto del diagrama UML y resolución de dudas.
 
-Valor aportado: <!-- síntesis -->
+Valor aportado: Resolución de errores y dudas junto con el aprendizaje aportado.
 
-Riesgos relevantes y mitigaciones: <!-- síntesis -->
+Riesgos relevantes y mitigaciones: Información incorrecta o poco precisa que suponga errores o exposición de datos.
 
-Lecciones aprendidas: <!-- síntesis -->
+Lecciones aprendidas: Utilización de la IA como herramienta complementaria para orientarnos en la resolución de problemas y extracción de datos útiles para el desarrollo de nuestro proyecto de manera que se asegure el aprendizaje.
 
-Checklist de cumplimiento de uso ético de la IA del sprint X:
+Checklist de cumplimiento de uso ético de la IA del sprint 1:
 
 - [x] Toda interacción significativa está en el Registro Detallado con enlace a conversación.
 
@@ -55,17 +61,15 @@ Checklist de cumplimiento de uso ético de la IA del sprint X:
 
 - [x] Se usó la IA sin dar datos personales/sensibles que puedieran quedar expuestos a herramientas externas.
 
-Repita esta subsección para Sprints 2, 3 y 4.
-
 ## Registro detallado de uso de AI por Sprint
-
-**Use una fila por “uso realmente significativo”** (idea sugerida por la IA, trozo de código importante modificado, depuración de error que no eras capaz de resolver por tu cuenta, generación de pruebas para el código de producción, etc.). No incluya filas para detalles nímios como el autocompletado de variables o signaturas de métodos, o la generación de código simple (recorridos y procesamiento de estructuras de datos, formateo  y/o creación de estilos CSS, etc.).
 
 ### Sprint 1 registro detallado de uso de IA por sprint
 
 | # | Fecha y hora | Sprint | Integrante(s) | **Herramienta & versión** | **Acceso** | **Enlace a conversación / Prompt** | **Finalidad** | **Artefactos afectados** | **Verificación humana** | **Riesgos & mitigaciones** | **Resultado** |
 |---:|--------------|:-----:|---------------|----------------------------|------------|------------------------------------|---------------|---------------------------|--------------------------|-----------------------------|---------------|
-| 1.1 | <!-- 04/09/2025 18:40 --> | 1 | <!-- Nombre --> | <!-- p.ej., ChatGPT (GPT-5, OpenAI, 2025) --> | <!-- web/plugin/integración --> | <!-- URL al chat o prompt resumido --> | <!-- idea / código / depuración / pruebas / documentación técnica* --> | <!-- ficheros, issue, PR, commit --> | <!-- pruebas, revisión por pares, reasoning propio --> | <!-- plagio, licencias, datos personales; mitigación --> | <!-- aceptado / rechazado / aceptado con cambios parciales --> |
+| 1.1 | 01/10/2025 18:19 | 1 | Alberto Pardina Miñón | PerplexityPro | Web | https://www.perplexity.ai/search/basandose-en-el-documento-adju-7CH7jqJ5R8aPAoXZ_BmEjA#0 | Ideas para Diagrama UML | D1 (Diagrama UML) | Comprobación concordancia | Sin riesgos ni mitigaciones | Aceptado |
+| 1.2 | 04/10/2025 11:13 | 1 | Lucía Baltasar Muñoz | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/68e10413-d83c-8002-8981-30d4597900d4 | Resolución duda Diagrama UML | D1 (Diagrama UML) | Corroboración de información dada | Sin riesgos ni mitigaciones | Aceptado |
+| 1.1 | 05/10/2025 10:36 | 1 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/68e26609-0264-800a-b1b1-8ca7e320c074 | Obtención de código | Ninguno | Razonamiento propio y pruebas | Exposición de datos provocando vulnerabilidad a usuarios | Rechazado (Sin cambios en código) |
 
 
 ### Sprint 2

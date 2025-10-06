@@ -310,18 +310,15 @@ A continuación se definen  todas las historias de usuario a implementar:
 
 
 ## Diagrama conceptual del sistema
-<div align="center">
-<img width="1254" height="634" alt="Player_UML drawio" src="https://github.com/user-attachments/assets/34eb3274-9beb-4908-99b6-11339aaaea4a" />
- 
-<img width="871" height="551" alt="User_UML drawio (1)" src="https://github.com/user-attachments/assets/cb7dcfcd-a33b-4770-a3ed-8f3f277f5df5" />
-</div>
+![alt text](<images/Captura de pantalla 2025-10-05 181554.png>)
+![alt text](<images/Captura de pantalla 2025-10-05 181603.png>)
 
 ## Reglas de Negocio
 ### R1 - Número de jugadores
 En cada partida debe asegurarse un mínimo de 3 jugadores y un máximo de 6 jugadores, y a cada jugador se le reparten 3 cartas.
 
 ### R1.1 - Más de 6 jugadores
-Si se desea jugar con más de 6 jugadores, se reparten solo 2 cartas iniciales.
+Si se desea jugar con más de 6 jugadores, se juega con dos barajas de cartas.
 
 ### R2 - Condiciones para ganar
 Para que un jugador pueda considerarse ganador, deberá cumplir los siguientes 3 requisitos.
@@ -431,3 +428,9 @@ Las cartas pasan de la mano a la Bolsa y de esta al mazo de descartes, nunca en 
 
 ### R16 - Orden del turno
 Durante el turno se sigue el orden de 1º robar, 2º tomar accion y por ultimo descartar, y es imposible volver a la fase anterior en caso de avanzar.
+
+### R17 - Bolsa de otros jugadores
+Durante la partida podremos ver las cartas que los otros jugadores tengan en sus bolsas en todo momento.
+
+### R18 - Mano de otros jugadores
+El jugador no podrá ver las cartas de la mano de otros jugadores.
