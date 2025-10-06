@@ -318,7 +318,7 @@ A continuación se definen  todas las historias de usuario a implementar:
 En cada partida debe asegurarse un mínimo de 3 jugadores y un máximo de 6 jugadores, y a cada jugador se le reparten 3 cartas.
 
 ### R1.1 - Más de 6 jugadores
-Si se desea jugar con más de 6 jugadores, se reparten solo 2 cartas iniciales.
+Si se desea jugar con más de 6 jugadores, se juega con dos barajas de cartas.
 
 ### R2 - Condiciones para ganar
 Para que un jugador pueda considerarse ganador, deberá cumplir los siguientes 3 requisitos.
