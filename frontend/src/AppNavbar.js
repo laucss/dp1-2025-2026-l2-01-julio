@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar, NavbarBrand, NavLink, NavItem, Nav, NavbarText, NavbarToggler, Collapse } from 'reactstrap';
+import { Navbar, NavbarBrand, NavLink, NavItem, Nav, NavbarText, NavbarToggler, Collapse, Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import tokenService from './services/token.service';
 import jwt_decode from "jwt-decode";
@@ -10,8 +10,11 @@ function AppNavbar() {
     const [user, setUser] = useState({});
     const jwt = tokenService.getLocalAccessToken();
     const [collapsed, setCollapsed] = useState(true);
-
+    const [modal, setModal] = useState(false);
+    
     const toggleNavbar = () => setCollapsed(!collapsed);
+    const toggleModal = () => setModal(!modal);
+
 
     useEffect(() => {
         if (jwt) {
@@ -58,7 +61,7 @@ function AppNavbar() {
             profileLinks = (
                 <>
                     <NavItem>
-                        <NavLink style={{ color: "white" }} tag={Link} to={`/${user.id}`}>{username}</NavLink>
+                        <NavLink style={{ color: "white", cursor: "pointer" }} onClick={toggleModal}>{username}</NavLink>
                     </NavItem> 
                 </>
             )
@@ -90,13 +93,6 @@ function AppNavbar() {
                 </NavItem>
             </>
         )
-        userLogout = (
-            <>
-                <NavItem className="d-flex">
-                    <NavLink style={{ color: "white" }} id="logout" tag={Link} to="/logout">Logout</NavLink>
-                </NavItem>
-            </>
-        )
 
     }
 
@@ -121,6 +117,27 @@ function AppNavbar() {
                     </Nav>
                 </Collapse>
             </Navbar>
+
+            <Modal isOpen={modal} toggle={toggleModal} className="side-modal">
+                <ModalHeader toggle={toggleModal}>Opciones de Usuario</ModalHeader>
+                <ModalBody>
+                    <NavItem>
+                        <NavLink tag={Link} to={`/users/${user.id}`} onClick={toggleModal}>Editar perfil</NavLink>
+                    </NavItem>
+                    <NavItem>
+                        <NavLink tag={Link} to="" onClick={toggleModal}>Logros</NavLink>
+                    </NavItem>
+                    <NavItem>
+                        <NavLink tag={Link} to="/logout" onClick={toggleModal}>Logout</NavLink>
+                    </NavItem>
+                </ModalBody>
+                <ModalFooter>
+                    <Button color="secondary" onClick={toggleModal}>
+                        Cerrar
+                    </Button>
+                </ModalFooter>
+            </Modal>
+
         </div>
     );
 }

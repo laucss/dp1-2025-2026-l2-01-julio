@@ -84,9 +84,10 @@ public class SecurityConfiguration {
                 // API restringida para usuarios autenticados
                 .requestMatchers(HttpMethod.GET,"/api/v1/achievements").authenticated()
                 .requestMatchers(HttpMethod.GET,"/api/v1/achievements/**").authenticated()
-
+                .requestMatchers(HttpMethod.PUT,"/api/v1/users/**").authenticated()
+                
                 // API restringida para jugadores
-
+                
                 
                 // API restringida para administradores
                 .requestMatchers(HttpMethod.POST,"/api/v1/achievements/**").hasAuthority(ADMIN)
