@@ -3,6 +3,8 @@ import { Navbar, NavbarBrand, NavLink, NavItem, Nav, NavbarText, NavbarToggler, 
 import { Link } from 'react-router-dom';
 import tokenService from './services/token.service';
 import jwt_decode from "jwt-decode";
+import Sidebar from './Sidebar';
+import { FaBars } from 'react-icons/fa'
 
 function AppNavbar() {
     const [roles, setRoles] = useState([]);
@@ -10,10 +12,10 @@ function AppNavbar() {
     const [user, setUser] = useState({});
     const jwt = tokenService.getLocalAccessToken();
     const [collapsed, setCollapsed] = useState(true);
-    const [modal, setModal] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     
     const toggleNavbar = () => setCollapsed(!collapsed);
-    const toggleModal = () => setModal(!modal);
+    const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
 
     useEffect(() => {
@@ -61,7 +63,7 @@ function AppNavbar() {
             profileLinks = (
                 <>
                     <NavItem>
-                        <NavLink style={{ color: "white", cursor: "pointer" }} onClick={toggleModal}>{username}</NavLink>
+                        <NavLink style={{ color: "white", cursor: "pointer" }} onClick={toggleSidebar}><FaBars/></NavLink>
                     </NavItem> 
                 </>
             )
@@ -118,25 +120,8 @@ function AppNavbar() {
                 </Collapse>
             </Navbar>
 
-            <Modal isOpen={modal} toggle={toggleModal} className="side-modal">
-                <ModalHeader toggle={toggleModal}>Opciones de Usuario</ModalHeader>
-                <ModalBody>
-                    <NavItem>
-                        <NavLink tag={Link} to={`/users/${user.id}`} onClick={toggleModal}>Editar perfil</NavLink>
-                    </NavItem>
-                    <NavItem>
-                        <NavLink tag={Link} to="" onClick={toggleModal}>Logros</NavLink>
-                    </NavItem>
-                    <NavItem>
-                        <NavLink tag={Link} to="/logout" onClick={toggleModal}>Logout</NavLink>
-                    </NavItem>
-                </ModalBody>
-                <ModalFooter>
-                    <Button color="secondary" onClick={toggleModal}>
-                        Cerrar
-                    </Button>
-                </ModalFooter>
-            </Modal>
+            <Sidebar isOpen={sidebarOpen} toggle={toggleSidebar} user={user} />
+            {sidebarOpen && <div className="sidebar-overlay" onClick={toggleSidebar}></div>}
 
         </div>
     );

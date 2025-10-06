@@ -1,0 +1,37 @@
+import React from 'react';
+import { Nav, NavItem, NavLink } from 'reactstrap';
+import { Link } from 'react-router-dom';
+import './static/css/appnavbar/sidebar.css'; 
+import avatar from "./static/images/Avatares/Avatar1.jpg"
+
+
+function Sidebar({ isOpen, toggle, user }) {
+  return (
+    <div className={`sidebar ${isOpen ? 'is-open' : ''}`}>
+      <div className="sidebar-header">
+        <span className="sidebar-close" onClick={toggle}>&times;</span>
+        <h3>{user.username}</h3>
+        <img src={avatar} alt="Avatar" className="sidebar-avatar" />
+      </div>
+      <Nav vertical>
+        <NavItem>
+          <NavLink tag={Link} to={`/users/${user.id}`} onClick={toggle}>
+            Edit Profile
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink tag={Link} to="" onClick={toggle}>
+            Achievements
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink tag={Link} to="/logout" onClick={toggle}>
+            Logout
+          </NavLink>
+        </NavItem>
+      </Nav>
+    </div>
+  );
+}
+
+export default Sidebar;
