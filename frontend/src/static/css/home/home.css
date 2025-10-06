@@ -42,18 +42,3 @@
 .hero-div h3{
     text-align: center;
 }
-
-.side-modal .modal-dialog {
-  position: fixed;
-  right: 0;
-  top: 0;
-  margin: 0;
-  height: 100vh;
-  max-width: 380px; 
-  transform: none !important;
-}
-
-.side-modal .modal-content {
-  height: 100vh;
-  border-radius: 0;
-}
