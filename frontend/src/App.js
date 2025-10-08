@@ -17,6 +17,7 @@ import Profile from "./player/Profile";
 import SwaggerDocs from "./public/swagger";
 import AchievementList from "./achievements/achievementList";
 import AchievementEdit from "./achievements/achievementEdit";
+import Friends from './friends/Friends';
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -75,6 +76,7 @@ function App() {
         {/* <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} /> */}        
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/friends" element={<PrivateRoute><Friends /></PrivateRoute>} />
       </>
     )
   }

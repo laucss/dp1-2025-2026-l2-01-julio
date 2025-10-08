@@ -1,0 +1,122 @@
+.friends-page {
+  color: white;
+  padding: 2rem;
+  background-color: #1e1e2f;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Botones principales */
+.friends-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.main-button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  background-color: #3a3a5c;
+  color: white;
+  font-size: 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.main-button:hover {
+  background-color: #565681;
+}
+
+/* Buscador */
+.friends-search {
+  display: flex;
+  align-items: center;
+  background-color: #2b2b3d;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.search-icon {
+  margin-right: 0.5rem;
+  color: #aaa;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+}
+
+/* Lista de amigos */
+.friends-list {
+  background-color: #2b2b3d;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.friends-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.friends-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.friend-card {
+  display: flex;
+  align-items: center;
+  background-color: #3a3a5c;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.friend-avatar {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.friend-name {
+  flex: 1;
+}
+
+.friend-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.play-btn,
+.remove-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.play-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.play-btn:hover {
+  background-color: #66bb6a;
+}
+
+.remove-btn {
+  background-color: #e53935;
+  color: white;
+}
+
+.remove-btn:hover {
+  background-color: #ef5350;
+}

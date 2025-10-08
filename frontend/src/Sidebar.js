@@ -20,6 +20,11 @@ function Sidebar({ isOpen, toggle, user }) {
           </NavLink>
         </NavItem>
         <NavItem>
+          <NavLink tag={Link} to="/friends" onClick={toggle}>
+            Friends
+          </NavLink>
+        </NavItem>
+        <NavItem>
           <NavLink tag={Link} to="" onClick={toggle}>
             Achievements
           </NavLink>
