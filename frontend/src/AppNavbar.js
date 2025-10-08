@@ -49,6 +49,10 @@ function AppNavbar() {
             profileLinks = (
                 <>
                     <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
+                    {/* TODO: provisional hasta poner logout en AppNavbar cuando  eres admin */}
+                    <NavItem>
+                        <NavLink style={{ color: "white", cursor: "pointer" }} onClick={toggleSidebar}><FaBars/></NavLink>
+                    </NavItem> 
                 </>
             )
         }   
