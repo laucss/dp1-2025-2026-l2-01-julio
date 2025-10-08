@@ -62,9 +62,7 @@ Puedes gastar tus puntos en diferentes acciones:<br>
 
 ## Tipos de Usuarios / Roles
 
-Jugador (en partida): puede participar en las partidas y jugar acorde a las reglas de juego, como tirar dados, desplazarse a diferentes habitaciones, etc.
-
-Jugador registrado: puede acceder a las diferentes funcionalidades del sistema como crear partidas, usar el chat, etc.
+Usuario: puede acceder a las diferentes funcionalidades del sistema como crear partidas, usar el chat, etc. También puede participar en las partidas y jugar acorde a las reglas de juego, como tirar dados, desplazarse a diferentes habitaciones, etc.
 
 Espectador: puede observar partidas en tiempo real sin participar. De esta forma, pueden ver jugar a sus amigos y aprender sobre el juego.
 
@@ -188,13 +186,13 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-018
 |Como jugador quiero poder registrarme para poder acceder a las funcionalidades del juego.| 
 |-----|
-|![alt text](images/image-1.png)|
+|![alt text](images/image.png)|
 |Cuando intentemos registrarnos introduciendo los datos obligatorios (nombre de usuario, contraseña y correo electrónico) el sistema creará un nuevo perfil para el jugador.|
 
 ### HU-019
 |Como jugador quiero poder iniciar sesión para poder jugar a partidas.|
 |-----|
-|![alt text](images/image.png)|
+|![alt text](images/image-1.png)|
 |Cuando se inicie sesión con los campos obligatorios necesarios (nombre de usuario y contraseña), el sistema verificará las credenciales.|
 
 ### HU-020
@@ -212,19 +210,19 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-022
 |Como jugador quiero poder consultar las reglas del juego para conocer sus normas y mecánicas.|
 |-----|
-|![alt text](images/image-10.png)|
+|![alt text](images/image-3.png)|
 |Cuando el usuario acceda al menú desplegable, podrá hacer click en “Reglas” donde podrá consultar todo lo necesario para conocer el funcionamiento y las normas del juego.|
 
 ### HU-023
 |Como jugador quiero editar mi perfil personal para que mis datos estén actualizados.| 
 |-----|
-|![alt text](images/image-3.png)|
+|![alt text](images/image-4.png)|
 |Cuando el usuario acceda al menú desplegable, podrá hacer click en un botón que le permitirá editar sus datos personales (foto de perfil, nombre de usuario, una breve descripción sobre él y su país).|
 
 ### HU-024
 |Como administrador quiero ver un listado de usuarios registrados con paginación para saber quiénes son los jugadores.| 
 |-----|
-|![alt text](images/image-4.png)|
+|![alt text](images/image-5.png)|
 |En la barra de navegación habrá un botón llamado "Listado de perfiles" que nos permitirá ver los jugadores registrados.|
 
 ### HU-025
@@ -284,26 +282,26 @@ A continuación se definen  todas las historias de usuario a implementar:
 ### HU-033
 |Como jugador quiero enviar, gestionar y recibir invitaciones de amistad para poder jugar juntos.| 
 |-----|
-|![alt text](images/image-9.png)|
 |![alt text](images/image-6.png)|
+|![alt text](images/image-7.png)|
 |Cuando el jugador pulse el botón “Amigos” dentro del menú desplegable, irá a una pantalla donde podrá buscar a un amigo por su nombre de usuario y podrá eliminarlo o invitarlo a jugar. También en el botón “enviar una invitación” podrá añadir nuevos amigos buscando su nombre de usuario. Por último, podrá ver las invitaciones de amistad en el botón “Invitaciones” que tendrá un contador de estas.|
 
 ### HU-034
 |Como jugador quiero enviar y recibir invitaciones a partidas (bien en modo jugador o en modo espectador) para poder ver el juego o jugar.| 
 |-----|
-|![alt text](images/image-7.png)|
+|![alt text](images/image-8.png)|
 |Cuando el jugador acceda al menú desplegable, podrá hacer click en “Notificaciones” donde podrá ver las invitaciones que ha recibido. Para enviar invitaciones a partidas consultar el mockup de la HU-032.|
 
 ### HU-035
 |Como jugador quiero acceder con modo espectador a partidas de mis amigos para ver como juegan sin necesidad de participar.| 
 |-----|
-|Ver mockup de la HU-032.|
+|Ver mockup de la HU-033.|
 |En la pantalla de "Amigos", a la que podemos acceder a través del menú de navegación, aparecerá un botón "Ver" cuando un amigo esté en partida. Si hacemos click podremos ver la partida en modo espectador. Este botón desaparecerá si el amigo no está en partida.|
 
 ### HU-036
 |Como jugador quiero escribir y leer comentarios en un chat durante las partidas para poder comunicarme con los demás jugadores.| 
 |-----|
-|![alt text](images/image-8.png)|
+|![alt text](images/image-9.png)|
 |Cuando el jugador esté en partida podrá hacer click en el botón de chat (un bocadillo de conversación con tres puntos) para escribir y leer los comentarios de los demás jugadores.| 
 
 
