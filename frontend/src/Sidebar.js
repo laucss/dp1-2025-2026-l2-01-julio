@@ -35,6 +35,11 @@ function Sidebar({ isOpen, toggle, user }) {
           </NavLink>
         </NavItem>
         <NavItem>
+          <NavLink tag={Link} to="/rules" onClick={toggle}>
+            Rules
+          </NavLink>
+        </NavItem>
+        <NavItem>
           <NavLink tag={Link} to="/logout" onClick={toggle}>
             Logout
           </NavLink>
