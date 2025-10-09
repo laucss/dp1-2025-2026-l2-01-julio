@@ -20,6 +20,7 @@ import AchievementEdit from "./screens/achievements/achievementEdit";
 import Friends from './screens/friends/Friends';
 import Statistics from "./screens/statistics/Statistics";
 import AchievementUserList from "./screens/achievements/achievementUserList";
+import Rules from "./screens/rules/Rules";
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -81,6 +82,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/friends" element={<PrivateRoute><Friends /></PrivateRoute>} />
         <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
+        <Route path="/rules" element={<PrivateRoute><Rules /></PrivateRoute>} />
       </>
     )
   }
