@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Form, Input, Label } from "reactstrap";
-import tokenService from "../services/token.service";
-import "../static/css/admin/adminPage.css";
-import getErrorModal from "../util/getErrorModal";
-import useFetchState from "../util/useFetchState";
-import useFetchData from "../util/useFetchData";
-import getIdFromUrl from "../util/getIdFromUrl";
+import tokenService from "../../services/token.service";
+import "../../static/css/admin/adminPage.css";
+import getErrorModal from "../../util/getErrorModal";
+import useFetchState from "../../util/useFetchState";
+import useFetchData from "../../util/useFetchData";
+import getIdFromUrl from "../../util/getIdFromUrl";
 
 const jwt = tokenService.getLocalAccessToken();
 
-export default function UserEditPlayer() {
+export default function EditProfile() {
   const emptyItem = {
     id: null,
     username: "",

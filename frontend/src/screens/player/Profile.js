@@ -1,13 +1,13 @@
 import { Button, Form, FormGroup, Label, Input } from "reactstrap";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import tokenService from "../services/token.service";
-import "../static/css/admin/adminPage.css";
-import avatar from "../static/images/Avatares/Avatar1.jpg"
-import "../static/css/Profile/PlayerProfile.css"
+import tokenService from "../../services/token.service";
+import "../../static/css/admin/adminPage.css";
+import avatar from "../../static/images/Avatares/Avatar1.jpg"
+import "../../static/css/Profile/PlayerProfile.css"
 import React, {useState} from "react";
-import getIdFromUrl from "../util/getIdFromUrl";
-import useFetchState from "../util/useFetchState";
-import useFetchData from "../util/useFetchData";
+import getIdFromUrl from "../../util/getIdFromUrl";
+import useFetchState from "../../util/useFetchState";
+import useFetchData from "../../util/useFetchData";
 
 const jwt = tokenService.getLocalAccessToken();
 

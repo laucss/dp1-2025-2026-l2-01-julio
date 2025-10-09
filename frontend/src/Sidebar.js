@@ -25,8 +25,13 @@ function Sidebar({ isOpen, toggle, user }) {
           </NavLink>
         </NavItem>
         <NavItem>
-          <NavLink tag={Link} to="" onClick={toggle}>
-            Achievements
+          <NavLink tag={Link} to="/achievements" onClick={toggle}>
+            Achievement
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink tag={Link} to="/statistics" onClick={toggle}>
+            Statistics
           </NavLink>
         </NavItem>
         <NavItem>

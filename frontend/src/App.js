@@ -3,21 +3,23 @@ import { Route, Routes } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
 import AppNavbar from "./AppNavbar";
-import Home from "./home";
+import Home from "./screens/home";
 import PrivateRoute from "./privateRoute";
 import Register from "./auth/register";
 import Login from "./auth/login";
 import Logout from "./auth/logout";
 import PlanList from "./public/plan";
 import tokenService from "./services/token.service";
-import UserListAdmin from "./admin/users/UserListAdmin";
-import UserEditAdmin from "./admin/users/UserEditAdmin";
-import EditProfile from "./player/UserEdit";
-import Profile from "./player/Profile";
+import UserListAdmin from "./screens/admin/UserListAdmin";
+import UserEditAdmin from "./screens/admin/UserEditAdmin";
+import EditProfile from "./screens/player/EditProfile";
+import Profile from "./screens/player/Profile";
 import SwaggerDocs from "./public/swagger";
-import AchievementList from "./achievements/achievementList";
-import AchievementEdit from "./achievements/achievementEdit";
-import Friends from './friends/Friends';
+import AchievementList from "./screens/achievements/achievementList";
+import AchievementEdit from "./screens/achievements/achievementEdit";
+import Friends from './screens/friends/Friends';
+import Statistics from "./screens/statistics/Statistics";
+import AchievementUserList from "./screens/achievements/achievementUserList";
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -60,6 +62,7 @@ function App() {
       ownerRoutes = (
         <>
           <Route path="/users/:username" exact={true} element={<Profile />} />
+          <Route path="/achievements" element={<PrivateRoute><AchievementUserList /></PrivateRoute>} />
         </>)
     }    
   })
@@ -77,6 +80,7 @@ function App() {
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/friends" element={<PrivateRoute><Friends /></PrivateRoute>} />
+        <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
       </>
     )
   }
