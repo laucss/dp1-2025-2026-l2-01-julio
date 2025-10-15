@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import es.us.dp1.lx_xy_24_25.your_game_name.auth.payload.response.UpdateResponse;
 import es.us.dp1.lx_xy_24_25.your_game_name.configuration.jwt.JwtUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import es.us.dp1.lx_xy_24_25.your_game_name.auth.payload.response.MessageResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -50,6 +51,8 @@ class UserRestController {
 	private final AuthoritiesService authService;
 	private final JwtUtils jwtUtils;
 
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	@Autowired
 	public UserRestController(UserService userService, AuthoritiesService authService, JwtUtils jwtUtils) {
 		this.userService = userService;
@@ -89,6 +92,11 @@ class UserRestController {
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<UpdateResponse> update(@PathVariable("userId") Integer id, @RequestBody @Valid User user) {
 		RestPreconditions.checkNotNull(userService.findUser(id), "User", "ID", id);
+		if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }else{
+			user.setPassword(userService.findUser(id).getPassword());
+		}
 		User updatedUser = this.userService.updateUser(user, id);
 		String newToken = jwtUtils.generateTokenFromUsername(updatedUser.getUsername(), updatedUser.getAuthority());
 		List<String> roles = List.of(updatedUser.getAuthority().getAuthority());

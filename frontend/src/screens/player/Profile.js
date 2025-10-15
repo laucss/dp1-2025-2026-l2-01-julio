@@ -1,13 +1,13 @@
-import { Button, Form, FormGroup, Label, Input } from "reactstrap";
+import { Button, Form, FormGroup, Label, Input, Col } from "reactstrap";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import tokenService from "../../services/token.service";
-import "../../static/css/admin/adminPage.css";
-import avatar from "../../static/images/Avatares/Avatar1.jpg"
+import Avatar_default from "../../static/images/Avatares/Avatar_default.png"
 import "../../static/css/Profile/PlayerProfile.css"
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import getIdFromUrl from "../../util/getIdFromUrl";
 import useFetchState from "../../util/useFetchState";
 import useFetchData from "../../util/useFetchData";
+import StandardImageList from "./ImageList";
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -18,11 +18,19 @@ const Profile = ({ }) => {
       username: "",
       password: "",
       authority: null,
+      avatar: Avatar_default,
     };
     const id = getIdFromUrl(2);
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
-     const navigate = useNavigate();
+    const navigate = useNavigate();
+    const [modalOpen, setModalOpen] = useState(false);
+    const [password, setPassword] = useState("");
+
+    const toggleModal = () => {
+    setModalOpen(!modalOpen);
+    };
+
     const [user, setUser] = useFetchState(
       emptyItem,
       `/api/v1/users/${id}`,
@@ -32,6 +40,17 @@ const Profile = ({ }) => {
       id
     );
 
+    
+
+    const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(Avatar_default);
+
+        useEffect(() => {
+        if (user && user.avatar) {
+            setSelectedAvatarUrl(user.avatar);
+        }
+    }, [user]);
+
+   
 
   const handleChange = (event) => {
     const target = event.target;
@@ -40,10 +59,17 @@ const Profile = ({ }) => {
     setUser({ ...user, [name]: value })
   };
 
+   const handleImageSelect = (imageUrl) => {
+        setSelectedAvatarUrl(imageUrl);
+        setUser({ ...user, avatar: { ...user.avatar, url: imageUrl } });
+        toggleModal(); 
+    };
+
     const handleSubmit = (e) => {
     e.preventDefault();
-    const body = { ...user, authority: { id: 2, authority: "PLAYER" } };
+    const body = { ...user, password: password, authority: { id: 2, authority: "PLAYER" } };
     
+    console.log(body);
       fetch(`/api/v1/users/${user.id}`, {
       method: "PUT",
       headers: {
@@ -71,17 +97,25 @@ const Profile = ({ }) => {
 
   return (
     <div className="profile-container">
-      <h2>Editar Perfil</h2>
-
+      <h2>Edit Profile</h2>
+    <div className="profile-card">
       <div className="profile-info">
-        <img src={avatar} alt="User Avatar" className="profile-avatar" />
+        <img src={selectedAvatarUrl} alt="User Avatar" className="profile-avatar" onClick={toggleModal} style={{cursor: 'pointer',width: '100px',height: '100px',borderRadius: '50%'}} />
       </div>
-      
+      {modalOpen && (
+          <div className="modal-backdrop" onClick={toggleModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <h2 className="modal-text">Edit avatar</h2>
+              <StandardImageList onImageSelect={handleImageSelect} />
+            </div>
+          </div>
+        )}
       <Form onSubmit={handleSubmit}>
           <div className="custom-form-input">
-            <Label for="username" className="custom-form-input-label">
-              Username
-            </Label>
+            <FormGroup row className="mb-3">
+          <Label for="username" sm={3} className="custom-form-label">
+            Username:
+          </Label>
             <Input
               type="text"
               required
@@ -89,39 +123,39 @@ const Profile = ({ }) => {
               id="username"
               value={user.username || ""}
               onChange={handleChange}
-              className="custom-input"
+              className="custom-input-text"
             />
+        </FormGroup>
           </div>
           <div className="custom-form-input">
-            <Label for="lastName" className="custom-form-input-label">
-              Password
+            <FormGroup row className="mb-3">
+            <Label for="password" sm={3} className="custom-form-label">
+              Password:
             </Label>
             <Input
               type="password"
-              required
               name="password"
               id="password"
-              value={user.password || ""}
-              onChange={handleChange}
-              className="custom-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="custom-input-text"
             />
+            </FormGroup>
           </div>
         
 
         <div className="profile-actions">
-          <Button color="primary" type="submit">
-            Guardar Cambios
+          <Button className="play-btn">
+            Save Changes
           </Button>
-          <Button tag={Link} to="/" color="secondary">
-            Cancelar
+          <Button className="remove-btn" tag={Link} to="/">
+            Cancel
           </Button>
         </div>
       </Form>
     </div>
+    </div>
   );
 };
-
-
-
 
 export default Profile;
