@@ -1,0 +1,13 @@
+.selectAvatar{
+    cursor: pointer;
+    border: 3px solid transparent;
+    border-radius: 8px;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    transition: border-color 0.2s;
+}
+
+.selectAvatar.selected {
+    border: 3px solid #007bff;
+}

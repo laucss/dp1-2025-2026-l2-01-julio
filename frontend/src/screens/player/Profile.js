@@ -61,7 +61,7 @@ const Profile = ({ }) => {
 
    const handleImageSelect = (imageUrl) => {
         setSelectedAvatarUrl(imageUrl);
-        setUser({ ...user, avatar: { ...user.avatar, url: imageUrl } });
+        setUser({ ...user, avatar: imageUrl });
         toggleModal(); 
     };
 

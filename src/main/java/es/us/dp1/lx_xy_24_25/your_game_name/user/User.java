@@ -23,6 +23,8 @@ public class User extends BaseEntity {
 
 	String password;
 
+	String avatar;
+
 	@NotNull
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "authority")
