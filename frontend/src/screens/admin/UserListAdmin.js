@@ -32,6 +32,9 @@ export default function UserListAdmin() {
   const userList = currentUsers.map((user) => {
     return (
       <tr key={user.id}>
+        <td>
+          <img src={user.avatar ? user.avatar : '/Avatar_default.png'} alt="Avatar" className="user-avatar" />
+        </td>
         <td>{user.username}</td>
         <td>{user.authority.authority}</td>
         <td>
@@ -71,7 +74,7 @@ export default function UserListAdmin() {
 
   return (
     <div className="admin-page-container" style={{marginTop: '50px'}}>
-      <Card style={{ width: "600px", height: "355px", border: "1px solid #000"}}> 
+      <Card style={{ width: "600px", height: "375px", border: "1px solid #000"}}> 
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px'}}>
           <h1 >Users</h1>
           <Button color="success" tag={Link} to="/users/new" >

@@ -14,7 +14,7 @@ function Sidebar({ isOpen, toggle, user}) {
       <div className="sidebar-header">
         <span className="sidebar-close" onClick={toggle}>&times;</span>
         <h3>{user.username}</h3>
-        <img src={user.avatar} alt="Avatar" className="sidebar-avatar" />
+        <img src={user.avatar ? user.avatar : '/Avatar_default.png'} alt="Avatar" className="sidebar-avatar" />
       </div>
       <Nav vertical>
         <NavItem>
