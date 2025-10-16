@@ -14,23 +14,9 @@ public class SignupRequest {
 	private String username;
 	
 	@NotBlank
-	private String authority;
-
-	@NotBlank
 	private String password;
-	
-	//Both
-	@NotBlank
-	private String firstName;
-	
-	@NotBlank
-	private String lastName;
-		
-	
-	//Owner
-	private String city;
-	private String address;
-	private String telephone;
 
+	@NotBlank
+	private String authority;
 
 }

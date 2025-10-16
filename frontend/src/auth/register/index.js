@@ -2,15 +2,13 @@ import "../../static/css/auth/authButton.css";
 import "../../static/css/auth/authPage.css";
 import tokenService from "../../services/token.service";
 import FormGenerator from "../../components/formGenerator/formGenerator";
-import { registerFormOwnerInputs } from "./form/registerFormOwnerInputs";
-import { registerFormVetInputs } from "./form/registerFormVetInputs";
-import { registerFormClinicOwnerInputs } from "./form/registerFormClinicOwnerInputs";
+import { registerFormPlayer } from "./form/registerFormPlayer";
+import { registerFormAdmin } from "./form/registerFormAdmin";
 import { useEffect, useRef, useState } from "react";
 
 export default function Register() {
   let [type, setType] = useState(null);
   let [authority, setAuthority] = useState(null);
-  let [clinics, setClinics] = useState([]);
 
   const registerFormRef = useRef();
 
@@ -22,8 +20,9 @@ export default function Register() {
     setType(value);
   }
 
-  function handleSubmit({ values }) {
 
+  function handleSubmit({ values }) {
+    console.log(values);
     if(!registerFormRef.current.validate()) return;
 
     const request = values;
@@ -61,7 +60,7 @@ export default function Register() {
               else {
                 tokenService.setUser(data);
                 tokenService.updateLocalAccessToken(data.token);
-                window.location.href = "/dashboard";
+                window.location.href = "/";
               }
             })
             .catch((message) => {
@@ -82,8 +81,8 @@ export default function Register() {
           <FormGenerator
             ref={registerFormRef}
             inputs={
-              type === "Player" ? registerFormOwnerInputs               
-              : registerFormClinicOwnerInputs
+              type === "PLAYER" ? registerFormPlayer               
+              : registerFormAdmin
             }
             onSubmit={handleSubmit}
             numberOfColumns={1}
@@ -105,14 +104,14 @@ export default function Register() {
           <div className="options-row">
             <button
               className="auth-button"
-              value="Owner"
+              value="PLAYER"
               onClick={handleButtonClick}
             >
               Player
             </button>
             <button
               className="auth-button"
-              value="Vet"
+              value="ADMIN"
               onClick={handleButtonClick}
             >
               Admin
