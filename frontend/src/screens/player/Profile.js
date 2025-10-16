@@ -68,8 +68,6 @@ const Profile = ({ }) => {
     const handleSubmit = (e) => {
     e.preventDefault();
     const body = { ...user, password: password, authority: { id: 2, authority: "PLAYER" } };
-    
-    console.log(body);
       fetch(`/api/v1/users/${user.id}`, {
       method: "PUT",
       headers: {
@@ -86,7 +84,6 @@ const Profile = ({ }) => {
         setVisible(true);
 
       } else {
-        console.log(json)
         tokenService.setUser(json);
         tokenService.updateLocalAccessToken(json.token);
         window.location.href = "/";
