@@ -61,7 +61,7 @@ const Profile = ({ }) => {
 
    const handleImageSelect = (imageUrl) => {
         setSelectedAvatarUrl(imageUrl);
-        setUser({ ...user, avatar: { ...user.avatar, url: imageUrl } });
+        setUser({ ...user, avatar: imageUrl });
         toggleModal(); 
     };
 
@@ -100,7 +100,7 @@ const Profile = ({ }) => {
       <h2>Edit Profile</h2>
     <div className="profile-card">
       <div className="profile-info">
-        <img src={selectedAvatarUrl} alt="User Avatar" className="profile-avatar" onClick={toggleModal} style={{cursor: 'pointer',width: '100px',height: '100px',borderRadius: '50%'}} />
+        <img src={selectedAvatarUrl} alt="User Avatar" className="user-avatar" onClick={toggleModal} />
       </div>
       {modalOpen && (
           <div className="modal-backdrop" onClick={toggleModal}>

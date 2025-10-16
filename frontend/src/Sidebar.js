@@ -2,16 +2,19 @@ import React from 'react';
 import { Nav, NavItem, NavLink } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import './static/css/appnavbar/sidebar.css'; 
-import avatar from "./static/images/Avatares/Avatar1.jpg"
+import tokenService from './services/token.service';
 
 
-function Sidebar({ isOpen, toggle, user }) {
+
+function Sidebar({ isOpen, toggle, user}) {
+  console.log("Sidebar user prop:", user);
   return (
+    
     <div className={`sidebar ${isOpen ? 'is-open' : ''}`}>
       <div className="sidebar-header">
         <span className="sidebar-close" onClick={toggle}>&times;</span>
         <h3>{user.username}</h3>
-        <img src={avatar} alt="Avatar" className="sidebar-avatar" />
+        <img src={user.avatar ? user.avatar : '/Avatar_default.png'} alt="Avatar" className="sidebar-avatar" />
       </div>
       <Nav vertical>
         <NavItem>

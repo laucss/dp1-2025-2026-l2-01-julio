@@ -23,13 +23,16 @@ public class UserDetailsImpl implements UserDetails {
 	@JsonIgnore
 	private String password;
 
+	private String avatar;
+
 	private Collection<? extends GrantedAuthority> authorities;
 
-	public UserDetailsImpl(Integer id, String username, String password,
+	public UserDetailsImpl(Integer id, String username, String password, String avatar,
 			Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
+		this.avatar = avatar;
 		this.authorities = authorities;
 	}
 
@@ -37,7 +40,7 @@ public class UserDetailsImpl implements UserDetails {
 		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getAuthority().getAuthority()));
 
 		return new UserDetailsImpl(user.getId(), user.getUsername(),
-				user.getPassword(),
+				user.getPassword(), user.getAvatar(),
 				authorities);
 	}
 
@@ -59,6 +62,10 @@ public class UserDetailsImpl implements UserDetails {
 	@Override
 	public String getUsername() {
 		return username;
+	}
+
+	public String getAvatar() {
+		return avatar;
 	}
 
 	@Override

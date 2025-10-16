@@ -12,7 +12,6 @@ import PlanList from "./public/plan";
 import tokenService from "./services/token.service";
 import UserListAdmin from "./screens/admin/UserListAdmin";
 import UserEditAdmin from "./screens/admin/UserEditAdmin";
-import EditProfile from "./screens/player/EditProfile";
 import Profile from "./screens/player/Profile";
 import SwaggerDocs from "./public/swagger";
 import AchievementList from "./screens/achievements/achievementList";

@@ -64,7 +64,7 @@ public class AuthController {
 			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 
-			return ResponseEntity.ok().body(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles));
+			return ResponseEntity.ok().body(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getAvatar(), roles));
 		}catch(BadCredentialsException exception){
 			return ResponseEntity.badRequest().body("Bad Credentials!");
 		}
