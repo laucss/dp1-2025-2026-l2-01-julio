@@ -22,7 +22,6 @@ export default function Register() {
 
 
   function handleSubmit({ values }) {
-    console.log(values);
     if(!registerFormRef.current.validate()) return;
 
     const request = values;

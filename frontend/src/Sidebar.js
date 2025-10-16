@@ -7,7 +7,6 @@ import tokenService from './services/token.service';
 
 
 function Sidebar({ isOpen, toggle, user}) {
-  console.log("Sidebar user prop:", user);
   return (
     
     <div className={`sidebar ${isOpen ? 'is-open' : ''}`}>

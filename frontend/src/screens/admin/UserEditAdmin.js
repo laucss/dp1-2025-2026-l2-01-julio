@@ -20,6 +20,7 @@ export default function UserEditAdmin() {
   const id = getIdFromUrl(2);
   const [message, setMessage] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [password, setPassword] = useState("");
   const [user, setUser] = useFetchState(
     emptyItem,
     `/api/v1/users/${id}`,
@@ -42,7 +43,7 @@ export default function UserEditAdmin() {
 
   function handleSubmit(event) {
     event.preventDefault();
-
+    const body = { ...user, password: password};
     fetch("/api/v1/users" + (user.id ? "/" + user.id : ""), {
       method: user.id ? "PUT" : "POST",
       headers: {
@@ -50,7 +51,7 @@ export default function UserEditAdmin() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(user),
+      body: JSON.stringify(body),
     })
       .then((response) => response.json())
       .then((json) => {
@@ -90,16 +91,15 @@ export default function UserEditAdmin() {
             />
           </div>
           <div className="custom-form-input">
-            <Label for="lastName" className="custom-form-input-label">
+            <Label for="password" className="custom-form-input-label">
               Password
             </Label>
             <Input
               type="password"
-              required
               name="password"
               id="password"
-              value={user.password || ""}
-              onChange={handleChange}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="custom-input"
             />
           </div>
