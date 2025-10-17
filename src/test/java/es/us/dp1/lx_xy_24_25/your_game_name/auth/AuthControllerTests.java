@@ -89,14 +89,9 @@ class AuthControllerTests {
 		signupRequest = new SignupRequest();
 		signupRequest.setUsername("username");
 		signupRequest.setPassword("password");
-		signupRequest.setAddress("Address");
-		signupRequest.setCity("City");
-		signupRequest.setFirstName("Test");
-		signupRequest.setLastName("Test");
-		signupRequest.setTelephone("999999999");
 		signupRequest.setAuthority("OWNER");
 
-		userDetails = new UserDetailsImpl(1, loginRequest.getUsername(), loginRequest.getPassword(),
+		userDetails = new UserDetailsImpl(1, loginRequest.getUsername(), loginRequest.getPassword(), loginRequest.getAvatar(),
 				List.of(new SimpleGrantedAuthority("OWNER")));
 
 		token = "JWT TOKEN";
