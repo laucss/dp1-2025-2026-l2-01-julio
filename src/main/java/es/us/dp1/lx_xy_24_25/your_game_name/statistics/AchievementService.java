@@ -47,4 +47,8 @@ public class AchievementService {
         return repo.findByName(name);
     }
     
+    @Transactional(readOnly = true)
+    public List<Achievement> getAchievementsByPlayerId(int playerId){
+        return repo.findByPlayerId(playerId);
+    }
 }
