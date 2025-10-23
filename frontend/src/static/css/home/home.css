@@ -1,44 +1,66 @@
 .home-page-container{
     position: relative;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: -1;
-    background-color: white;
+    width: 100%;
+    height: 100vh; 
+    background-image: url('../../images/background.jpeg');
+    background-size: cover;
+    background-position: center; 
+    background-repeat: no-repeat; 
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .hero-div{
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(240, 2, 2, 0.3);
     padding: 2rem;
     border-radius: 25px;
     backdrop-filter: blur(10px);
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
 }
 
-.napoleon-div{
-    width: 600px;      
-    height: auto;      
-    margin-top: 1rem;
-    margin-left: auto;
-}
-
-
 .hero-div h1{
-    font-family: 'antialiased';
-    font-size: 90px;
+    font-size: 3rem;
     font-weight: 700;
-    color: #b32603;
+    color: #2f324f;
     text-align: center;
     text-transform: uppercase;
 }
 
 .hero-div h3{
     text-align: center;
+}
+
+.home-buttons {
+  display: flex;     
+  gap: 40px;              
+  justify-content: center;
+  margin-top: 1.5rem;     
+}
+
+.create-button,
+.join-button {
+    background-color: #ff941a;         
+    color: #fff;                       
+    border: 4px solid #b46000;         
+    border-radius: 10px;               
+    padding: 1rem 3rem;                
+    font-size: 3rem;                 
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    -webkit-text-stroke: 2px #b46000; 
+    cursor: pointer;
+    transition: all 0.3s ease;         
+}
+
+/* Efecto al pasar el ratón */
+.create-button:hover,
+.join-button:hover {
+    background-color: #4a90e2;         
+    border-color: #2c70d3;
+    -webkit-text-stroke: 2px #2c70d3;
+    transform: scale(1.05);           
 }
