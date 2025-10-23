@@ -22,6 +22,7 @@ import AchievementUserList from "./screens/achievements/achievementUserList";
 import Rules from "./screens/rules/Rules";
 import CreateMatch from "./screens/match/createMatch";
 import JoinMatch from "./screens/match/joinMatch";
+import MatchList from "./screens/prueba";
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -86,6 +87,7 @@ function App() {
         <Route path="/rules" element={<PrivateRoute><Rules /></PrivateRoute>} />
         <Route path="/matchs/new" element={<PrivateRoute><CreateMatch/></PrivateRoute>}></Route>
         <Route path="/lobbies" element={<PrivateRoute><JoinMatch/></PrivateRoute>}></Route>
+        <Route path="/matches" element={<PrivateRoute><MatchList /></PrivateRoute>} />
       </>
     )
   }

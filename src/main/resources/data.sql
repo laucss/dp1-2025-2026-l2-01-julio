@@ -25,3 +25,8 @@ INSERT INTO appusers(id,username,password,authority) VALUES (15,'QFL3393','$2a$1
 INSERT INTO appusers(id,username,password,authority) VALUES (16, 'SBJ4592', '$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2);
 INSERT INTO appusers(id,username,password,authority) VALUES (3, 'FSS8078', '$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2);
 INSERT INTO appusers(id,username,password,authority) VALUES (17, 'XNT3290', '$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2);
+
+
+INSERT INTO match(id,name,code,start,finish) VALUES (1,'Fiesta para todos!!!! UNETE!',null,null,null);
+INSERT INTO match(id,name,code,start,finish) VALUES (2,'Partida privada ya comenzada','super-secret','2023-04-11 15:20',null);
+INSERT INTO match(id,name,code,start,finish) VALUES  (3,'Partida abierta ya terminada',null,'2023-04-11 18:20','2023-04-11 19:20');
