@@ -19,8 +19,8 @@ import jakarta.persistence.OneToMany;
 @EqualsAndHashCode(of = "id")
 public class Match extends NamedEntity {
     private String code;
-    private LocalDateTime start;
-    private LocalDateTime finish;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 
     @OneToMany
     private List<PlayerInGame> players; 
