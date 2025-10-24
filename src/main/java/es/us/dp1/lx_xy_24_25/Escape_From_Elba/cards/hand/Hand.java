@@ -1,4 +1,4 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Bag extends BaseEntity{
+public class Hand extends BaseEntity {
 
     @OneToOne // un jugador tiene una sola bolsa
     private PlayerInGame playerOwner;
@@ -22,21 +22,8 @@ public class Bag extends BaseEntity{
     // @OneToMany 
     // private Match match; 
 
-    @OneToMany  // una bolsa tiene varias cartas 
+    @OneToMany // una "Mano" tiene varias cartas 
     private List<Card> cards; 
- 
-
-    /*
-     * Vamos a leer carta por carta, obteniendo su letra para sacar la palabra
-     * que compone la bolsa
-     */
-
-     /*
-      
-    public String getWordOfBag (){
-        // podemos hacer un ford o un stream si se quiere que sea más limpio 
-    }
-      */
     
-    
+
 }
