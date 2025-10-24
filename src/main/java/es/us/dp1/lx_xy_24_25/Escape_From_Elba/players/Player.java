@@ -16,5 +16,7 @@ public class Player extends BaseEntity{
     @NotNull
     @OneToOne
     private User user; 
+
+    // tendrá estadísticas y amigos y tal  
     
 }
