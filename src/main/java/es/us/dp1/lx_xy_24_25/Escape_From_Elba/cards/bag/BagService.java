@@ -24,6 +24,8 @@ public class BagService {
     /*
     @Transactional 
     public Boolean isValidWordForBag (String word) {
+
+        // hay que mirar a ver cómo hacer para que tampoco acepte nombres propios 
      
         if (word.length >= 3){
 
