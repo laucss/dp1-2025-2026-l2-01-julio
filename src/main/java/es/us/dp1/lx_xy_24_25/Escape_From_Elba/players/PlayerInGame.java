@@ -3,8 +3,10 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 // import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,6 +33,7 @@ public class PlayerInGame extends BaseEntity {
 
     private Integer actionPoints; 
         
+
 
 }
 

@@ -1,8 +1,11 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 
+import com.fasterxml.jackson.databind.deser.DataFormatReaders.Match;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -18,5 +21,7 @@ public class Player extends BaseEntity{
     private User user; 
 
     // tendrá estadísticas y amigos y tal  
+    
+    
     
 }
