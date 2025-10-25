@@ -4,7 +4,7 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import scala.concurrent.duration.Duration;
+//import scala.concurrent.duration.Duration;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -21,6 +21,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -28,7 +29,7 @@ import jakarta.validation.constraints.NotNull;
 @Getter
 @Setter
 @Entity
-//@Table(name = "Game")??
+@Table(name = "Game")
 @EqualsAndHashCode(of = "id")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Match extends NamedEntity {
@@ -37,7 +38,7 @@ public class Match extends NamedEntity {
     //Tiempos
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    /** estaría bien??
+    /** estaría bien?? hay proyectos que lo tienen
     public Duration getDuration() {
         if(startTime == null || endTime == null) return null;
         return Duration.between(startTime, endTime);
@@ -50,9 +51,22 @@ public class Match extends NamedEntity {
     @NotNull
     private Integer maxPlayers = 6;
 
+    @NotNull
+    @Min(3)
+    @Max(6)
+    private Integer minPlayers = 3;
+
+    //Validación para asegurar que minplayers es menor o igual que maxplayers???
+    @AssertTrue(message = "minPlayers debe ser menor o igual que maxPlayers")
+    private boolean isPlayerLimitsValid() {
+        if (minPlayers == null || maxPlayers == null) 
+            return true;
+        return minPlayers <= maxPlayers;
+    }
+
     //Usuarios
     @NotNull
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "match", orphanRemoval = true)
     private List<PlayerInGame> players; 
 
     /** 
@@ -77,17 +91,60 @@ public class Match extends NamedEntity {
     @NotNull
     private Boolean isPrivate;
 
+    public Boolean isInProgress() {
+		return this.getStartTime() != null && this.getEndTime() == null;
+	}
     
     public Boolean isFinished() {
         return this.getEndTime() != null;
     }
 
     //añade jugador 
+    /** Version cortita de la que está abajo, hablarlo.
     public void addPlayer(PlayerInGame player) {
         this.players.add(player);
         player.setMatch(this); 
     }
+    */
 
+    public void addPlayer(PlayerInGame player) {
+        if (player == null) throw new IllegalArgumentException("El jugador no puede ser nulo");
+        if (isFull()) {
+            throw new IllegalStateException("No se puede añadir otro jugador: la partida está llena (Máximo=" + this.maxPlayers + ")");
+        }
+        if (this.players == null) {
+            this.players = new java.util.ArrayList<>();
+        }
+        this.players.add(player);
+        player.setMatch(this); 
+    }
+
+    // Devuelve true si se ha alcanzado el numero máximo de jugadores
+    public boolean isFull() {
+        if (this.players == null) return false;
+        if (this.maxPlayers == null) return false;
+        return this.players.size() >= this.maxPlayers;
+    }
+
+    // Devuelve true si se ha alcanzado el número mínimo de jugadores para empezar
+    public boolean isMinReached() {
+        if (this.players == null) return false;
+        if (this.minPlayers == null) return false;
+        return this.players.size() >= this.minPlayers;
+    }
+    // Devuelve true si NO se ha alcanzado el número mínimo de jugadores
+    public boolean isMinNotReached() {
+        return !isMinReached();
+    }
+
+    // Lanza IllegalStateException si no se ha alcanzado el mínimo de jugadores
+    public void ensureMinReached() {
+        if (isMinNotReached()) {
+            int current = (this.players == null) ? 0 : this.players.size();
+            throw new IllegalStateException("No hay suficientes jugadores para comenzar (Mínimo=" 
+                + this.minPlayers + ", actuales=" + current + ")");
+        }
+    }
 
     //En principio devuelve un jugador aleatorio de la partida para empezar (o null si no hay jugadores)
     public PlayerInGame pickRandomStartingPlayer() {
