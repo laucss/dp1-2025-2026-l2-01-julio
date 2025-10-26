@@ -26,8 +26,16 @@ INSERT INTO appusers(id,username,password,authority) VALUES (16, 'SBJ4592', '$2a
 INSERT INTO appusers(id,username,password,authority) VALUES (3, 'FSS8078', '$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2);
 INSERT INTO appusers(id,username,password,authority) VALUES (17, 'XNT3290', '$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2);
 
-/*
-INSERT INTO match(id,name,code,start_time,end_time) VALUES (1,'Fiesta para todos!!!! UNETE!',null,null,null);
-INSERT INTO match(id,name,code,start_time,end_time) VALUES (2,'Partida privada ya comenzada','super-secret','2023-04-11 15:20',null);
-INSERT INTO match(id,name,code,start_time,end_time) VALUES  (3,'Partida abierta ya terminada',null,'2023-04-11 18:20','2023-04-11 19:20');
-*/
+-- Match
+
+-- Partida no iniciada, no empezada aún
+INSERT INTO match(id,name,code,start_time,end_time,max_players,min_players,is_private)
+VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,NULL,NULL,6,3,false);
+
+-- Partida en progreso 
+INSERT INTO match(id,name,code,start_time,end_time,max_players,min_players,is_private)
+VALUES (2,'Partida en curso','ABC123','2025-10-26 20:00:00',NULL,5,3,false);
+
+-- Partida finalizada
+INSERT INTO match(id,name,code,start_time,end_time,max_players,min_players,is_private)
+VALUES (3,'Partida terminada','XYZ789','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,true);
