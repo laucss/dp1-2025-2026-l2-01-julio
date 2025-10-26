@@ -18,7 +18,7 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
     //Devuelve todos los lobbies para unirse publicos
     @Query( "SELECT m FROM Match m WHERE m.isPrivate=false and m.status= 'WAITING'")
-    Page<Match> findPublicLobbies(Pageable pageable); // El page es para poder poner paginas 
+    List<Match> findPublicLobbies(); // El page es para poder poner paginas 
 
     //Devuelve un lobby privado por su codigo de acceso
     @Query("SELECT m FROM Match m WHERE m.isPrivate=true and LOWER(m.code)= LOWER(:codeLobby) and m.status='WAITING'" )
