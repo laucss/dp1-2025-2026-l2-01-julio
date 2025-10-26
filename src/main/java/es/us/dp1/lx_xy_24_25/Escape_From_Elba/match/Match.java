@@ -29,10 +29,11 @@ import jakarta.validation.constraints.NotNull;
 @Getter
 @Setter
 @Entity
-@Table(name = "Game")
+@Table(name = "Match")
 @EqualsAndHashCode(of = "id")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Match extends NamedEntity {
+    
     private String code;
     
     //Tiempos

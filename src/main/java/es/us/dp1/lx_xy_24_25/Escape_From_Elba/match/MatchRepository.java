@@ -13,7 +13,7 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
     List<Match> findByName(String name);
 
-    Optional<Match> findByGameCode(String gameCode);
+    Optional<Match> findByCode(String gameCode);
 
     // Devuelve todas las partidas en progreso (he hecho una propiedad del estilo en match)
     @Query("SELECT m FROM Match m WHERE m.startTime IS NOT NULL AND m.endTime IS NULL")
