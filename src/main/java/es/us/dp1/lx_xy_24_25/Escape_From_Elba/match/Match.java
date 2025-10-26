@@ -18,6 +18,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGame;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -35,6 +37,9 @@ import jakarta.validation.constraints.NotNull;
 public class Match extends NamedEntity {
     
     private String code;
+    
+    @Enumerated(EnumType.STRING)
+    private MatchStatus status;
     
     //Tiempos
     private LocalDateTime startTime;

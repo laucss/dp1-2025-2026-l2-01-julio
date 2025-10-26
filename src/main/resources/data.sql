@@ -29,13 +29,13 @@ INSERT INTO appusers(id,username,password,authority) VALUES (17, 'XNT3290', '$2a
 -- Match
 
 -- Partida no iniciada, no empezada aún
-INSERT INTO match(id,name,code,start_time,end_time,max_players,min_players,is_private)
-VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,NULL,NULL,6,3,false);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
+VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL, 'WAITING',NULL,NULL,6,3,false);
 
 -- Partida en progreso 
-INSERT INTO match(id,name,code,start_time,end_time,max_players,min_players,is_private)
-VALUES (2,'Partida en curso','ABC123','2025-10-26 20:00:00',NULL,5,3,false);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
+VALUES (2,'Partida en curso','ABC123','PLAYING','2025-10-26 20:00:00',NULL,5,3,false);
 
 -- Partida finalizada
-INSERT INTO match(id,name,code,start_time,end_time,max_players,min_players,is_private)
-VALUES (3,'Partida terminada','XYZ789','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,true);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
+VALUES (3,'Partida terminada','XYZ789','FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,true);

@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface MatchRepository extends CrudRepository<Match, Integer> {
     Match save(Match game);
@@ -13,7 +15,16 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
     List<Match> findByName(String name);
 
-    Optional<Match> findByCode(String gameCode);
+
+    //Devuelve todos los lobbies para unirse publicos
+    @Query( "SELECT m FROM Match m WHERE m.isPrivate=false and m.status= 'WAITING'")
+    Page<Match> findPublicLobbies(Pageable pageable); // El page es para poder poner paginas 
+
+    //Devuelve un lobby privado por su codigo de acceso
+    @Query("SELECT m FROM Match m WHERE m.isPrivate=true and LOWER(m.code)= LOWER(:codeLobby) and m.status='WAITING'" )
+    //Busca el juego cuyo estado sea Waiting ( eso significa que es un lobby), sea privado y cuyo codigo sea el mismo
+    Optional<Match> findPrivateLobbieById(String codeLobby);
+
 
     // Devuelve todas las partidas en progreso (he hecho una propiedad del estilo en match)
     @Query("SELECT m FROM Match m WHERE m.startTime IS NOT NULL AND m.endTime IS NULL")
