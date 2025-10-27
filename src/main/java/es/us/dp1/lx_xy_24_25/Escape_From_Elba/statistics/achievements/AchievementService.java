@@ -1,4 +1,4 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics.achievements;
 
 
 import java.util.List;

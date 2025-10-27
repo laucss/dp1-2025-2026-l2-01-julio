@@ -1,4 +1,4 @@
-package es.us.dp1.lx_xy_24_25.your_game_name.statistics.achievements;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics.achievements;
 
 import java.util.List;
 
@@ -12,4 +12,5 @@ public interface AchievementRepository extends CrudRepository<Achievement, Integ
     
     public Achievement findByName(String name);
 
+    List<Achievement> findByPlayerId(int playerId);
 }
