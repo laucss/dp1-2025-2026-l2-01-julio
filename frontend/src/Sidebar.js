@@ -27,12 +27,12 @@ function Sidebar({ isOpen, toggle, user}) {
           </NavLink>
         </NavItem>
         <NavItem>
-          <NavLink tag={Link} to="/achievements" onClick={toggle}>
+          <NavLink tag={Link} to={`/users/${user.id}/achievements`} onClick={toggle}>
             Achievement
           </NavLink>
         </NavItem>
         <NavItem>
-          <NavLink tag={Link} to="/statistics" onClick={toggle}>
+          <NavLink tag={Link} to={`/users/${user.id}/statistics`} onClick={toggle}>
             Statistics
           </NavLink>
         </NavItem>
