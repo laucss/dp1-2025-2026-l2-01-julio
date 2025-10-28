@@ -5,6 +5,9 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -24,6 +27,10 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
     @Query("SELECT m FROM Match m WHERE m.isPrivate=true and LOWER(m.code)= LOWER(:codeLobby) and m.status='WAITING'" )
     //Busca el juego cuyo estado sea Waiting ( eso significa que es un lobby), sea privado y cuyo codigo sea el mismo
     Optional<Match> findPrivateLobbieById(String codeLobby);
+
+    //Devuelve si el usuario esta en algun lobby
+    @Query("SELECT m FROM Match m WHERE m.status='WAITING' AND :player MEMBER OF m.players")
+    Optional<Match> findLobbyWherePlayerIsIn(Player player);
 
 
     // Devuelve todas las partidas en progreso (he hecho una propiedad del estilo en match)
