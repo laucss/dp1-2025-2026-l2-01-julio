@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -73,7 +73,7 @@ public class Match extends NamedEntity {
     //Usuarios
     @NotNull
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "match", orphanRemoval = true)
-    private List<PlayerInGame> players; 
+    private List<Player> players; 
 
     /** 
     @NotNull
@@ -113,7 +113,7 @@ public class Match extends NamedEntity {
     }
     */
 
-    public void addPlayer(PlayerInGame player) {
+    public void addPlayer(Player player) {
         if (player == null) throw new IllegalArgumentException("El jugador no puede ser nulo");
         if (isFull()) {
             throw new IllegalStateException("No se puede añadir otro jugador: la partida está llena (Máximo=" + this.maxPlayers + ")");
@@ -153,7 +153,7 @@ public class Match extends NamedEntity {
     }
 
     //En principio devuelve un jugador aleatorio de la partida para empezar (o null si no hay jugadores)
-    public PlayerInGame pickRandomStartingPlayer() {
+    public Player pickRandomStartingPlayer() {
         if (players == null || players.isEmpty()) return null;
         SecureRandom rnd = new SecureRandom();
         int idx = rnd.nextInt(players.size());

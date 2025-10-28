@@ -33,13 +33,13 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
     // Partidas no iniciadas que ya han alcanzadoo el número mínimo de jugadores y se pueden empezar
     @Query("SELECT m FROM Match m WHERE m.startTime IS NULL AND m.endTime IS NULL AND " +
-           "(SELECT COUNT(p) FROM PlayerInGame p WHERE p.match = m) >= m.minPlayers")
+           "(SELECT COUNT(p) FROM Player p WHERE p.match = m) >= m.minPlayers")
     List<Match> findReadyToStart();
 
     // Partidas jugables en progreso o listas para empezar
     @Query("SELECT m FROM Match m WHERE " +
            "(m.startTime IS NOT NULL AND m.endTime IS NULL) OR " +
-           "(m.startTime IS NULL AND m.endTime IS NULL AND (SELECT COUNT(p) FROM PlayerInGame p WHERE p.match = m) >= m.minPlayers)")
+           "(m.startTime IS NULL AND m.endTime IS NULL AND (SELECT COUNT(p) FROM Player p WHERE p.match = m) >= m.minPlayers)")
     List<Match> findPlayable();
 
 }
