@@ -65,7 +65,7 @@ Puedes gastar tus puntos en diferentes acciones:<br>
 
 ### Diagrama de Dominio/Diseño
 
-![alt text](<images/WhatsApp Image 2025-10-29 at 09.32.01>)
+![alt text](<images/WhatsApp Image 2025-10-29 at 09.32.01.jpeg>)
 
 ### Diagrama de Capas (incluyendo Controladores, Servicios y Repositorios)
 _En esta sección debe proporcionar un diagrama UML de clases que describa el conjunto de controladores, servicios, y repositorios implementados, incluya la división en capas del sistema como paquetes horizontales tal y como se muestra en el siguiente ejemplo:_
