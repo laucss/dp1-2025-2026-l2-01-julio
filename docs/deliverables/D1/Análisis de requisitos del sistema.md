@@ -308,7 +308,7 @@ A continuación se definen  todas las historias de usuario a implementar:
 
 
 ## Diagrama conceptual del sistema
-![alt text](<images/Captura de pantalla 2025-10-05 181554.png>)
+![alt text](<images/WhatsApp Image 2025-10-29 at 09.32.01>)
 ![alt text](<images/Captura de pantalla 2025-10-05 181603.png>)
 
 ## Reglas de Negocio
