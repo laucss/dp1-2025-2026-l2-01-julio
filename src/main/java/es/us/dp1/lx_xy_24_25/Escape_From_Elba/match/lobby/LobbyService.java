@@ -6,11 +6,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import java.util.List;
 import java.util.Optional;
 
-import org.hibernate.validator.internal.util.stereotypes.Lazy;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;

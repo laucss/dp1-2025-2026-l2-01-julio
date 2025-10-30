@@ -5,7 +5,6 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.Authorities;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 // import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -59,7 +58,7 @@ public class Player extends BaseEntity {
 
     private Integer strength; 
 
-    private Integer actionPoints; 
+    private Integer actionPoints; // realmente tendría que ser una función de getActionPoints no? 
         
 
 
