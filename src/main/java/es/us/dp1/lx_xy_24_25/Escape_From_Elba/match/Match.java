@@ -15,13 +15,11 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;

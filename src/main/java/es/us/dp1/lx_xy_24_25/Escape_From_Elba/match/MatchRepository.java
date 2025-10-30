@@ -8,8 +8,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 public interface MatchRepository extends CrudRepository<Match, Integer> {
     Match save(Match game);

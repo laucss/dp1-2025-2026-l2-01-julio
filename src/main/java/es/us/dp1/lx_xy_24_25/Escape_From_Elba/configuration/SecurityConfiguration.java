@@ -24,7 +24,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.jwt.AuthEntryPointJwt;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.jwt.AuthTokenFilter;

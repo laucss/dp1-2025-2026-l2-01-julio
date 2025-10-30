@@ -1,6 +1,5 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
@@ -8,12 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class BagService {
 
-    BagRepository bagRepository; 
-
-    @Autowired
-    public BagService(BagRepository bagRepository) {
-        this.bagRepository = bagRepository;
-    }
 
     /*
      * Valida si la palabra que forma el usuario es valida para guardarse en la bolsa
@@ -40,11 +33,14 @@ public class BagService {
             BagRepository.save(bag); 
         
             }
-    
 
     }
-     
-     
+     */
+
+
+
+    /*
+     * Método que checkea si palabra formada forma parte de la lista de armas ofrecida por el juego 
      */
     
     
