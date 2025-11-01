@@ -5,8 +5,9 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+
 
 public interface MatchRepository extends CrudRepository<Match, Integer> {
     Match save(Match game);
@@ -25,6 +26,10 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
     //Busca el juego cuyo estado sea Waiting ( eso significa que es un lobby), sea privado y cuyo codigo sea el mismo
     Optional<Match> findPrivateLobbieById(String codeLobby);
 
+    //Devuelve si el usuario esta en algun lobby
+    @Query("SELECT m FROM Match m WHERE m.status='WAITING' AND :player MEMBER OF m.players")
+    Optional<Match> findLobbyWherePlayerIsIn(Player player);
+
 
     // Devuelve todas las partidas en progreso (he hecho una propiedad del estilo en match)
     @Query("SELECT m FROM Match m WHERE m.startTime IS NOT NULL AND m.endTime IS NULL")
@@ -33,13 +38,13 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
     // Partidas no iniciadas que ya han alcanzadoo el número mínimo de jugadores y se pueden empezar
     @Query("SELECT m FROM Match m WHERE m.startTime IS NULL AND m.endTime IS NULL AND " +
-           "(SELECT COUNT(p) FROM PlayerInGame p WHERE p.match = m) >= m.minPlayers")
+           "(SELECT COUNT(p) FROM Player p WHERE p.match = m) >= m.minPlayers")
     List<Match> findReadyToStart();
 
     // Partidas jugables en progreso o listas para empezar
     @Query("SELECT m FROM Match m WHERE " +
            "(m.startTime IS NOT NULL AND m.endTime IS NULL) OR " +
-           "(m.startTime IS NULL AND m.endTime IS NULL AND (SELECT COUNT(p) FROM PlayerInGame p WHERE p.match = m) >= m.minPlayers)")
+           "(m.startTime IS NULL AND m.endTime IS NULL AND (SELECT COUNT(p) FROM Player p WHERE p.match = m) >= m.minPlayers)")
     List<Match> findPlayable();
 
 }

@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.user;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
