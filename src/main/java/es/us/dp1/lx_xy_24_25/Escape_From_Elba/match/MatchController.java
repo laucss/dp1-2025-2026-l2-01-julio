@@ -8,7 +8,6 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,8 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -31,9 +34,11 @@ import jakarta.validation.Valid;
 @SecurityRequirement(name = "bearerAuth")
 public class MatchController {
     MatchService ms;
+    LobbyService ls;
     @Autowired
-    public MatchController(MatchService ms){
+    public MatchController(MatchService ms, LobbyService ls){
         this.ms=ms;
+        this.ls=ls;
     }
 
     @GetMapping
@@ -47,6 +52,16 @@ public class MatchController {
         if(!m.isPresent())
             throw new ResourceNotFoundException("Match", "id", id);
         return m.get();
+    }
+
+    @GetMapping("/lobbies")
+    public List<Match> getPublicGames(){
+        return ls.getAllPublicLobbies();
+    }
+
+    @GetMapping("/lobbies/{id}")
+    public Optional<Match> getPrivateGame(@ParameterObject String code){
+        return ls.getPrivateLobby(code);
     }
 
     @PostMapping()
