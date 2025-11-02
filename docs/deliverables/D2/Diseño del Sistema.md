@@ -82,20 +82,28 @@ _En este caso, como mermaid no soporta la definición de paquetes, hemos usado u
 
 ## Descomposición del mockups del tablero de juego en componentes
 
-En esta sección procesaremos el mockup del tablero de juego (o los mockups si el tablero cambia en las distintas fases del juego). Etiquetaremos las zonas de cada una de las pantallas para identificar componentes a implementar. Para cada mockup se especificará el árbol de jerarquía de componentes, así como, para cada componente el estado que necesita mantener, las llamadas a la API que debe realizar y los parámetros de configuración global que consideramos que necesita usar cada componente concreto. 
-Por ejemplo, para la pantalla de visualización de métricas del usuario en un hipotético módulo de juego social:
+En esta sección procesaremos los mockup del tablero de juego. Etiquetaremos las zonas de cada una de las pantallas para identificar componentes a implementar. Para cada mockup se especificará el árbol de jerarquía de componentes, así como, para cada componente el estado que necesita mantener, las llamadas a la API que debe realizar y los parámetros de configuración global que consideramos que necesita usar cada componente concreto. 
+Componentes de la pantalla de juego principal:
 
-![Descomposición en componentes de la interfaz de estadísticas](https://github.com/gii-is-DP1/react-petclinic/assets/756431/12b36c37-39ed-422e-b8d9-56c94753cbdc)
+![Descomposición en componentes de la interfaz de estadísticas](![componentes](https://github.com/user-attachments/assets/f86606a6-f837-48f6-a669-fa1ff02937e0)
+
 
   - App – Componente principal de la aplicación
-    - $\color{orange}{\textsf{NavBar – Barra de navegación lateral}}$
-      - $\color{darkred}{\textsf{[ NavButton ]. Muestra un botón de navegación con un icono asociado.}}$
-    - $\color{darkblue}{\textsf{UserNotificationArea – Área de notificaciones e identificación del usuario actual}}$
-    - $\color{blue}{\textsf{MetricsBar – En este componente se muestran las métricas principales del juego. Se mostrarán 4 métricas: partidas jugadas, puntos logrados, tiempo total, y cartas jugadas.}}$
-      - $\color{darkgreen}{\textsf{[ MetricWell ] – Proporciona el valor y el incremento semanal de una métrica concreta. }}$
-    - $\color{purple}{\textsf{GamesEvolutionChart – Muestra la tendencia de evolución en ellos últimos 4 meses en cuanto a partida jugadas, ganadas, perdidas y abandonadas.}}$
-    - $\color{yellow}{\textsf{PopularCardsChart – Muestra la proporción de las N (parámetro de configuración) cartas más jugadas en el juego por el jugador.}}$
-    - $\color{red}{\textsf{FrequentCoPlayersTable – Muestra los jugadores  con los que más se  ha jugado (de M en M donde M es un parámetro definido por la configuración del componente). Concretamente, se mostrarán la el nombre, la fecha de la última partida, la localización del jugador el porcentaje de partidas jugadas por ambos en las que el usuario ha ganado y si el jugador es amigo o no del usuario.}}$
+    - $\color{pink}{\textsf{PlayersAvatar – Muestra los avatares de los N jugadores de la actual partida.}}$
+    - $\color{darkblue}{\textsf{Map – Área de juego principal.}}$
+       - $\color{blue}{\textsf{Rooms – Conjunto de habitaciones que hay en el mapa.}}$
+    - $\color{yellow}{\textsf{DiscardPile – Muestra el mazo de cartas de descarte.}}$
+    - $\color{red}{\textsf{Deck – Muestra el mazo de cartas de robo.}}$
+       - $\color{yellow}{\textsf{DeckButton – Permite al jugador robar una carta del mazo de robo.}}$
+    - $\color{purple}{\textsf{PlayerInformation – Muestra toda la información relevante sobre tu partida personal, como las cartas en tu poseson (mano o bolsa), tus puntos de fuerza y de acción, un boton para elegir tu acción y el botón del chat.}}$
+       - $\color{orange}{\textsf{ChatButton – Boton para abrir el chat}}$
+       - $\color{gray}{\textsf{ActionsButton – Boton para abrir el menu de acciones disponibles en tu ronda.}}$
+       - $\color{darkred}{\textsf{HandCards - Muestra un listado de tus cartas en la mano.}}$
+       - $\color{darkgreen}{\textsf{BagCards – Muestra un listado de tus cartas en la bolsa. }}$
+       - $\color{green}{\textsf{ActionPoints – Muestra los puntos de acción disponibles en tu ronda.}}$
+       - $\color{cyan}{\textsf{Strength – Muestra tus puntos de fuerza actuales.}}$
+
+
 
 ## Patrones de diseño y arquitectónicos aplicados
 En esta sección de especificar el conjunto de patrones de diseño y arquitectónicos aplicados durante el proyecto.
