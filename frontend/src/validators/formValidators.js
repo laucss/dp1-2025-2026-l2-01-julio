@@ -17,10 +17,16 @@ export const formValidators = {
         },
         message: "Please, select a type"
     },
-    validPhoneNumberValidator: {
+    validAgeValidator: {
         validate: (value) => {
-            return value.trim().length === 9 && /^\d+$/.test(value);
+            return value > 0 && Number.isInteger(Number(value)) && value < 100;
         },
-        message: "The phone number must be 9 digits long and contain only numbers"
+        message: "The age must be a valid number between 1 and 99"
+    },
+    emailValidator: {
+    validate: (value) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+    },
+    message: "Please enter a valid email address"
     }
 }

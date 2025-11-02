@@ -6,7 +6,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,6 +24,14 @@ public class User extends BaseEntity {
 
 	String password;
 
+	@Column(unique = true)
+	@Email
+	String email;
+
+	@Min(1)
+	@Max(100)
+	Integer age;
+	
 	String avatar;
 
 	@NotNull

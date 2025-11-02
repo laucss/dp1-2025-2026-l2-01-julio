@@ -106,6 +106,16 @@ class UserServiceTests {
 	}
 
 	@Test
+	void shouldExistEmail() {
+		assertEquals(true, this.userService.existsEmail("player1@example.com"));
+	}
+
+	@Test
+	void shouldNotExistEmail() {
+		assertEquals(false, this.userService.existsEmail("player10000@example.com"));
+	}
+
+	@Test
 	@Transactional
 	void shouldUpdateUser() {
 		int idToUpdate = 1;
