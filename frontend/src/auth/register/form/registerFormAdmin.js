@@ -16,5 +16,13 @@ export const registerFormAdmin = [
     defaultValue: "",
     isRequired: true,
     validators: [formValidators.notEmptyValidator],
-  }
+  },
+  {
+    tag: "Email",
+    name: "email",
+    type: "email",
+    defaultValue: "",
+    isRequired: true,
+    validators: [formValidators.notEmptyValidator, formValidators.emailValidator],
+  },
 ];

@@ -70,6 +70,10 @@ public class UserService {
 		return userRepository.existsByUsername(username);
 	}
 
+	public Boolean existsEmail(String email) {
+		return userRepository.existsByEmail(email);
+	}
+
 	@Transactional(readOnly = true)
 	public Iterable<User> findAll() {
 		return userRepository.findAll();
