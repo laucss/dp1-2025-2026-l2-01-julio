@@ -168,31 +168,31 @@ Como grupo nos gustaría poder hacer pruebas con un conjunto de datos reales suf
 
 *Alternativa 1.a*: Incluir los datos en el propio script de inicialización de la BD (data.sql).
 
-*Ventajas:*
-•	Simple, no requiere nada más que escribir el SQL que genere los datos.
-*Inconvenientes:*
-•	Ralentiza todo el trabajo con el sistema para el desarrollo. 
-•	Tenemos que buscar nosotros los datos reales
+*Ventajas:* <br>
+•	Simple, no requiere nada más que escribir el SQL que genere los datos. <br>
+*Inconvenientes:* <br>
+•	Ralentiza todo el trabajo con el sistema para el desarrollo. <br>
+•	Tenemos que buscar nosotros los datos reales <br>
 
-*Alternativa 1.b*: Crear un script con los datos adicionales a incluir (extra-data.sql) y un controlador que se encargue de leerlo y lanzar las consultas a petición cuando queramos tener más datos para mostrar.
-*Ventajas:*
-•	Podemos reutilizar parte de los datos que ya tenemos especificados en (data.sql).
-•	No afecta al trabajo diario de desarrollo y pruebas de la aplicación
-*Inconvenientes:*
-•	Puede suponer saltarnos hasta cierto punto la división en capas si no creamos un servicio de carga de datos. 
-•	Tenemos que buscar nosotros los datos reales adicionales
+*Alternativa 1.b*: Crear un script con los datos adicionales a incluir (extra-data.sql) y un controlador que se encargue de leerlo y lanzar las consultas a petición cuando queramos tener más datos para mostrar. <br>
+*Ventajas:* <br>
+•	Podemos reutilizar parte de los datos que ya tenemos especificados en (data.sql). <br>
+•	No afecta al trabajo diario de desarrollo y pruebas de la aplicación <br>
+*Inconvenientes:* <br>
+•	Puede suponer saltarnos hasta cierto punto la división en capas si no creamos un servicio de carga de datos. <br>
+•	Tenemos que buscar nosotros los datos reales adicionales <br>
 
 *Alternativa 1.c*: Crear un controlador que llame a un servicio de importación de datos, que a su vez invoca a un cliente REST de la API de datos oficiales de XXXX para traerse los datos, procesarlos y poder grabarlos desde el servicio de importación.
 
-*Ventajas:*
-•	No necesitamos inventarnos ni buscar nosotros lo datos.
-•	Cumple 100% con la división en capas de la aplicación.
-•	No afecta al trabajo diario de desarrollo y pruebas de la aplicación
-*Inconvenientes:*
-•	Supone mucho más trabajo. 
-•	Añade cierta complejidad al proyecto
+*Ventajas:* <br>
+•	No necesitamos inventarnos ni buscar nosotros lo datos. <br>
+•	Cumple 100% con la división en capas de la aplicación. <br>
+•	No afecta al trabajo diario de desarrollo y pruebas de la aplicación <br>
+*Inconvenientes:* <br>
+•	Supone mucho más trabajo. <br>
+•	Añade cierta complejidad al proyecto <br>
 
-*Justificación de la solución adoptada*
+*Justificación de la solución adoptada* <br>
 Como consideramos que la división en capas es fundamental y no queremos renunciar a un trabajo ágil durante el desarrollo de la aplicación, seleccionamos la alternativa de diseño 1.c.
 
 ## Refactorizaciones aplicadas
