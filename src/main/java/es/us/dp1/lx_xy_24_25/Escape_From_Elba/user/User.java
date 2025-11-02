@@ -54,4 +54,17 @@ public class User extends BaseEntity {
 		user.setUsername(username);
 		return user;
 	}
+
+	public Player toPlayer(){
+		if (!this.authority.authority.equals("USER")){
+			return null;
+		}
+		Player player = new Player();
+		player.setAuthority(authority);
+		player.setAvatar(avatar);
+		player.setId(id);
+		player.setPassword(password);
+		player.setUsername(username);
+		return player;
+	}
 }
