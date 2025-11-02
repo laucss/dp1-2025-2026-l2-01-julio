@@ -1,0 +1,74 @@
+/* Fondo general */
+.admin-page-container {
+  background-color: #baa9ff;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Cuadro del listado */
+.lobbies-box {
+  background-color: rgba(0, 15, 83, 0.9); /* blanco semitransparente */
+  border-radius: 20px;
+  padding: 2rem 3rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  width: 70%;
+  max-width: 900px;
+  text-align: center;
+}
+
+/* Título */
+.lobbies-box h1 {
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* Tabla */
+.lobbies-box table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color:  #b7a5ff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.lobbies-box th {
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  padding: 0.75rem;
+}
+
+.lobbies-box td {
+  text-align: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid #bcadff;
+}
+
+.lobbies-box tr:last-child td {
+  border-bottom: none;
+}
+
+/* Botón de lobby privado */
+.join-private-btn {
+  margin-top: 1.5rem;
+  background-color: #7493fa;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.5rem;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.join-private-btn:hover {
+  background-color: #3b24a1;
+  transform: scale(1.05);
+}

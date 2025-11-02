@@ -1,0 +1,41 @@
+.waiting-room-background {
+  background-image: url("https://img.freepik.com/vector-premium/isla-pequena_645480-1472.jpg?semt=ais_hybrid&w=740&q=80");
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.waiting-room-overlay {
+  background-color: rgba(0, 0, 0, 0.4); /* oscurece ligeramente la imagen */
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.waiting-room-box {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  padding: 3rem 4rem;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(31, 0, 170, 0.3);
+  backdrop-filter: blur(5px);
+  color: #000000;
+  max-width: 500px;
+}
+
+.waiting-room-box h1 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.waiting-room-box p {
+  font-size: 1.2rem;
+  color: #444;
+}
