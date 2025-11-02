@@ -74,6 +74,8 @@ _En esta sección debe proporcionar un diagrama UML de clases que describa el co
 
 ![alt text](images/image.png)
 
+![alt text](images/diagrama%20capas%20cartas.png)
+
 *Nota importante para el alumno*: A la hora de entregar el proyecto, debes modificar la url para que esté asociada al respositorio concreto de tu proyecto. Date cuenta de que ahora mismo apunta al repositorio _gii-is-DP1/group-project-seed_.
 
 
@@ -156,6 +158,20 @@ La aplicación para evitar exponer datos internos de algunas clases relacionados
 
 La aplicación del patrón Data Transfer Object protege la lógica interna de la aplicación y evita exponer campos sensibles, el frontend al no depender directamente de las entidades del backend gracias a esto favorece el bajo acoplamiento entre capas. Otra ventaja es la optimización de la transferencia de datos ya que se reduce el tamaño de las respuestas al enviar solo los datos necesarios.
 
+### Patrón: Prototype
+*Tipo*: de Diseño 
+
+*Contexto de Aplicación*
+Usamos este patrón sobre todo al iniciar elementos de la partida como en nuestra caso, la baraja. Al iniciar una partida se coge cada carta de la baraja original almacenada y se hace una copia de ella, para formar una baraja completa copiada. 
+
+
+*Clases o paquetes creados*
+-paquete patterns 
+-clase Prototype.java
+ 
+
+*Ventajas alcanzadas al aplicar el patrón*
+Conseguimos crear copias exacta de una entidad de forma sencilla. 
 
 ### Patrón: 
 *Tipo*: Arquitectónico o De Diseño
