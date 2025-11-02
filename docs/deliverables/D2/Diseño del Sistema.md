@@ -226,6 +226,71 @@ Como grupo nos gustaría poder hacer pruebas con un conjunto de datos reales suf
 *Justificación de la solución adoptada*
 Como consideramos que la división en capas es fundamental y no queremos renunciar a un trabajo ágil durante el desarrollo de la aplicación, seleccionamos la alternativa de diseño 1.c.
 
+
+### Decisión 2
+#### Descripción del problema:*
+
+Hemos decidido implementar en nuestra aplicación cuando te unes a una partida una sala de espera hasta que se de por empezado el propio juego. El crear una sala de espera trata los mismos datos que una partida pero maneja una logica diferente por lo que tuvimos que pensar como lo ibamos a organizar.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 2.a* : Añadir la lógica de negocio del lobby en el propio MatchService
+*Ventajas:*
+•	Una clase que gestiona todo, lobbies y partidas, hace que sea más simple.
+•	Hay menos servicios que implementar.
+•	No se necesita coordinación entre distintos servicios.
+*Inconvenientes:*
+• La lógica de lobby y de partida se mezcla, lo que hace que la clase sea más grande y difícil de mantener.
+• Añadir nuevas funcionalidades de lobby afecta directamente a la lógica de la partida.
+• Difícil de testear de forma aislada.
+
+*Alternativa 2.b* : Crear un servicio LobbyService para gestionar la lógica.
+*Ventajas:*
+•	Hace el código más fácil de entender, mantener y testear.
+•	Se separan las responsabilidades.
+•	Permite añadir funcionalidades específicas del lobby sin tocar la lógica de partidas.
+*Inconvenientes:*
+• Más código y más estructura que mantener.
+• Hay que pasar datos de LobbyService a MatchService cuando se inicia la partida.
+
+
+
+#### Justificación de la solución adoptada
+
+Consideramos que es más importante usar la opción que nos permita separar las responsabilidades ya que es un proyecto que vamos a ir actualizando y añadiendo código por lo que es mejor que los cambios que hagamos no afecten a toda una partida, por eso hemos decidido crear el servicio LobbyService.
+
+
+### Decisión 3
+#### Descripción del problema:*
+
+A la hora de construir los services nos hemos visto con una gran cantidad de validaciones que comprobar por lo que hemos tenido que decidir cual sería la mejor manera de implementar estas validaciones.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 3.a* : Añadir directamente cada validación en la función que la necesite.
+*Ventajas:*
+• No hay que crear nuevas clases ni abstraer la lógica, todo está “donde se usa”, por lo que es más simple.
+*Inconvenientes:*
+• La misma restricción puede necesitarse en varias funciones, y si se modifica, hay que actualizar todas.
+• Cambiar una regla implica revisar múltiples funciones, aumentando riesgo de errores.
+• La lógica de juego queda mezclada con servicios o controladores, dificultando extensiones o reutilización.
+
+*Alternativa 3.b* : Crear una clase checkers con todas las restricciones.
+*Ventajas:*
+• Todas las reglas del juego están en un solo lugar, fácil de localizar y modificar.
+•	Otras partes del sistema (MatchService, frontend, tests) pueden reutilizar la misma lógica sin duplicarla.
+•	Si cambia una regla del juego, solo se modifica en la clase Checkers.
+*Inconvenientes:*
+• Los servicios (como MatchService) deben interactuar con la clase Checkers correctamente, lo que añade un nivel de abstracción.
+
+
+
+#### Justificación de la solución adoptada
+
+Consideramos que al tener muchas restricciones que son reutilizables nos va a facilitar mucho el tener una clase Checkers, también nos va a facilitar la lectura del código.
+
+_Ejemplos de uso de la plantilla con otras decisiones de diseño:_
+
 ## Refactorizaciones aplicadas
 
 Si ha hecho refactorizaciones en su código, puede documentarlas usando el siguiente formato:
