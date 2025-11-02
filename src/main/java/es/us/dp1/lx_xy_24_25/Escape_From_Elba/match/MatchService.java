@@ -22,6 +22,11 @@ public class MatchService {
         return mrepo.findAll();
     }
 
+    /*@Transactional(readOnly = true)  El metodo esta en LobbyService por ahora
+    public Page<Match> getAllPublicLobbies(Pageable pageable) {
+        return mrepo.findPublicLobbies(pageable);
+    }*/
+
     @Transactional(readOnly = true)
     public List<Match> getMatchsByName(String name) {
         return mrepo.findByName(name);
