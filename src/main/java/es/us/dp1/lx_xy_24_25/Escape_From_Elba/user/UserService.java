@@ -15,7 +15,6 @@
  */
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.user;
 
-import java.util.Optional;
 
 import jakarta.validation.Valid;
 

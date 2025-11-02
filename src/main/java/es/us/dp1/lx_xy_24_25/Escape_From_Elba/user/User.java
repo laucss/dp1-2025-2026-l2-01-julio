@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.user;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -52,4 +53,29 @@ public class User extends BaseEntity {
 		return cond;
 	}
 
+	public User toUser(){
+		if (!this.authority.authority.equals("USER")){
+			return null;
+		}
+		User user = new User();
+		user.setAuthority(authority);
+		user.setAvatar(avatar);
+		user.setId(id);
+		user.setPassword(password);
+		user.setUsername(username);
+		return user;
+	}
+
+	public Player toPlayer(){
+		if (!this.authority.authority.equals("USER")){
+			return null;
+		}
+		Player player = new Player();
+		player.setAuthority(authority);
+		player.setAvatar(avatar);
+		player.setId(id);
+		player.setPassword(password);
+		player.setUsername(username);
+		return player;
+	}
 }

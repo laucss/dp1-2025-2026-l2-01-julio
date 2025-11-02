@@ -1,6 +1,5 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth;
 
-import java.util.ArrayList;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
