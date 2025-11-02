@@ -54,6 +54,13 @@ public class MatchController {
             throw new ResourceNotFoundException("Match", "id", id);
         return m.get();
     }
+    @PostMapping("/lobbies")
+    @ResponseStatus(HttpStatus.CREATED)
+    public  ResponseEntity<Match> createLobby(@RequestBody LobbyDTO lobbyDTO) {
+        Match game = new Match();
+        Match saved= ls.createLobby(game, lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers());
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
 
     @GetMapping("/lobbies")
     public List<Match> getPublicGames(){
@@ -67,10 +74,12 @@ public class MatchController {
 
     @PostMapping("/lobbies/{matchId}/join")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Match> joinLobby(@Parameter(description = "Id of the lobby to join") @PathVariable Integer gameId) {
-        ls.joinLobby(gameId);
+    public ResponseEntity<Match> joinLobby(@Parameter(description = "Id of the lobby to join") @PathVariable Integer matchId) {
+        Match joinedMatch = ls.joinLobby(matchId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok(joinedMatch);
+
+
     }
 
     @PostMapping()

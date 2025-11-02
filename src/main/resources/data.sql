@@ -32,6 +32,12 @@ INSERT INTO appusers(id,username,email,password,authority) VALUES (17, 'XNT3290'
 INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
 VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL, 'WAITING',NULL,NULL,6,3,false);
 
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
+VALUES (5,'Fiesta ',NULL, 'WAITING',NULL,NULL,5,3,false);
+
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
+VALUES (4,'nerea!','DEF345', 'WAITING',NULL,NULL,5,3,true);
+
 -- Partida en progreso 
 INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
 VALUES (2,'Partida en curso','ABC123','PLAYING','2025-10-26 20:00:00',NULL,5,3,false);
