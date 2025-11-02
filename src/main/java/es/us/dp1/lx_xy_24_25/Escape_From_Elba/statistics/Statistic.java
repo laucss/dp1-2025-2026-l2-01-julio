@@ -15,14 +15,14 @@ import lombok.Setter;
 @Table(name = "statistics")
 public class Statistic extends BaseEntity{
 
-    @Column(name="total_matches", nullable = false, columnDefinition = "int default 0")
-    private Integer totalMatches=0;
+    @Column(name="GAMES_PLAYED", nullable = false, columnDefinition = "int default 0")
+    private Integer GAMES_PLAYED=0;
 
-    @Column(name="won_matches", nullable = false, columnDefinition = "int default 0")
-    private Integer wonMatches=0;
+    @Column(name="VICTORIES", nullable = false, columnDefinition = "int default 0")
+    private Integer VICTORIES=0;
 
-    @Column(name="mins_played", nullable = false, columnDefinition = "int default 0")
-    private Integer minsPlayed=0;
+    @Column(name="TOTAL_PLAY_TIME", nullable = false, columnDefinition = "int default 0")
+    private Integer TOTAL_PLAY_TIME=0;
 
     @Column(name="avg_players", nullable = false, columnDefinition = "double default 0")
     private Double avgPlayers=0.;

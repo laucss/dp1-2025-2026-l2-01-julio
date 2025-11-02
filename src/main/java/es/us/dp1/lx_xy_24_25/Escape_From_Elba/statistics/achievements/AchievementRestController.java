@@ -48,7 +48,7 @@ public class AchievementRestController {
 		return new ResponseEntity<Achievement>(achievementToGet, HttpStatus.OK);
 	}
 
-	@GetMapping("/player/{playerId}")
+	@GetMapping("/player/{id}")
 	public ResponseEntity<List<Achievement>> findAchievementsByPlayer(@PathVariable("playerId") int playerId) {
     	List<Achievement> achievements = achievementService.getAchievementsByPlayerId(playerId);
     	if (achievements.isEmpty()) {
