@@ -35,6 +35,8 @@ import jakarta.validation.constraints.NotNull;
 public class Match extends NamedEntity {
     
     private String code;
+
+     private Integer creatorId;
     
     @Enumerated(EnumType.STRING)
     private MatchStatus status;

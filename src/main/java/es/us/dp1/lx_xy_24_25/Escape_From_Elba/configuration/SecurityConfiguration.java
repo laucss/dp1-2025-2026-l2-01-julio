@@ -87,7 +87,8 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET,"/api/v1/users/**").authenticated()
                 
                 // API restringida para jugadores
-                
+                .requestMatchers(HttpMethod.POST, "/api/v1/matches/lobbies").hasAnyAuthority(PLAYER)
+
 
                 // API restringida para administradores
                 .requestMatchers(HttpMethod.POST,"/api/v1/achievements/**").hasAuthority(ADMIN)
@@ -98,6 +99,7 @@ public class SecurityConfiguration {
 
                 // API restringida para jugadores o administradores
                 .requestMatchers("/api/v1/matches/**").hasAnyAuthority(PLAYER, ADMIN)
+
                 
                 // El resto denegado
                 .anyRequest().denyAll()
