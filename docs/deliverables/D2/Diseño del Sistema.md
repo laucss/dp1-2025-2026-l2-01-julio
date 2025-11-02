@@ -120,6 +120,43 @@ La aplicación tiene diferentes secciones estructuradas siguiendo el patrón MVC
 
 La aplicación del patrón MVC permite una clara separación entre la lógica de negocio (capa service), las entidades y acceso a datos (capas models y repositories) y la comunicación con el frontend (capa controller). Esta división mejora la organización del proyecto, facilita el trabajo en equipo y optimiza el mantenimiento y la evolución del sistema.
 
+
+### Patrón: Dependency Injection
+*Tipo*: de Diseño?
+
+*Contexto de Aplicación*
+
+La aplicación delega la creación de dependencias, objetos que una clase necesita para funcionar, a un contenedor externo en lugar de que la propia clase las cree directamente. En Spring Boot, esto lo hace el contenedor de Spring, que se encarga de instanciar e inyectar los objetos (beans) necesarios en cada clase
+
+*Clases o paquetes creados*
+
+La inyección de dependencias se aplica a través de anotaciones de Spring ya que esta integrado directamente en el framework de Spring Boot por lo que no ha sido necesaria la creación de clases o paquetes para este patrón. 
+
+*Ventajas alcanzadas al aplicar el patrón*
+
+La aplicación del patrón Dependency Injection facilita cambiar las dependencias sin tener que modificar el código principal ya que las clases no dependen de implementaciones concretas, sino de interfaces o abstracciones. Permite también la alta reutilización y mantenebilidad ya que es posible modificar la lógica de una clase sin tocar el servicio que la usa. Por otro lado, también se consigue un código más limpio y organizado.
+
+
+### Patrón: Data Transfer Object (DTO)
+*Tipo*: de Diseño
+
+*Contexto de Aplicación*
+
+La aplicación para evitar exponer datos internos de algunas clases relacionados con la base de datos interna a la hora de transportar la información de una capa a otra utiliza varios objetos DTO para realizar esta transferencia.
+
+*Clases o paquetes creados*
+
+-LobbyDTO
+-ChatDTO
+-MiniUserDTO
+-MiniRequestDTO
+
+
+*Ventajas alcanzadas al aplicar el patrón*
+
+La aplicación del patrón Data Transfer Object protege la lógica interna de la aplicación y evita exponer campos sensibles, el frontend al no depender directamente de las entidades del backend gracias a esto favorece el bajo acoplamiento entre capas. Otra ventaja es la optimización de la transferencia de datos ya que se reduce el tamaño de las respuestas al enviar solo los datos necesarios.
+
+
 ### Patrón: 
 *Tipo*: Arquitectónico o De Diseño
 
