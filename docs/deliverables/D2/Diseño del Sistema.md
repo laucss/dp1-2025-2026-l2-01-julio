@@ -1,12 +1,18 @@
 # Documento de diseño del sistema
 **Asignatura:** Diseño y Pruebas (Grado en Ingeniería del Software, Universidad de Sevilla)  
-**Curso académico:** <!-- p.ej., 2025/2026 -->  
-**Grupo/Equipo:** <!-- p.ej., L4-03 Equipo 33 -->  
-**Nombre del proyecto:** <!-- p. ej. Petris -->  
-**Repositorio:** <!-- URL del repo -->  
-**Integrantes (máx. 6):** <!-- Nombre Apellidos (US-Id / correo @us.es) -->
+**Curso académico:** 2025/2026  
+**Grupo/Equipo:** L2-01  
+**Nombre del proyecto:** Escape from Elba 
+**Repositorio:** [<!-- URL del repo --> ](https://github.com/gii-is-DP1/dp1-2025-2026-l2-01) 
+**Integrantes:** 
 
-_Esta es una plantilla que sirve como guía para realizar este entregable. Por favor, mantén las mismas secciones y los contenidos que se indican para poder hacer su revisión más ágil._ 
+Alberto Pardina Miñón (QSS7721 / albparmin@alum.us.es)<br>
+Marco Visentin Lopez (CYB6650 / marvislop@alum.us.es)<br>
+Emilio Diaz Arcenegui (FSS8078 / emidiaarc@alum.us.es)<br>
+Nerea Camacho Perez (QFL3393 / nercamper@alum.us.es)<br>
+Laura Cubero Sánchez (XNT3290 / laucubsan@alum.us.es)<br>
+Lucía Baltasar Muñoz (SBJ4592 / lucbalmun@alum.us.es)<br>
+
 
 ## Introducción
 
