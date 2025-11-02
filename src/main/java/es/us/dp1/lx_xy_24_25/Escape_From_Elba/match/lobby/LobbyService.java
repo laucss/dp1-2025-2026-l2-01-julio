@@ -37,7 +37,7 @@ public class LobbyService {
     }
 
     
-    public Match save(Match m) {
+    public void save(Match m) {
         mrepo.save(m);
     }
 

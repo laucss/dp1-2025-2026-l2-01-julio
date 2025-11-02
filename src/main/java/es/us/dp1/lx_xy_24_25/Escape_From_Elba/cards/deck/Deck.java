@@ -21,18 +21,18 @@ public class Deck extends BaseEntity{
      */
 
     @OneToMany
-    private List<Card> cardsNotDiscarded; 
+    private List<Card> notDiscardedCards; 
 
     @OneToMany
-    private List<Card> cardsDiscarded; 
+    private List<Card> discardedCards; 
 
     /*
      * Constructor
      */
     public Deck (List<Card> cards) {
-        this.cardsNotDiscarded = new ArrayList<>(cards);
+        this.notDiscardedCards = new ArrayList<>(cards);
 
-        this.cardsDiscarded = new ArrayList<>();
+        this.discardedCards = new ArrayList<>();
 
     }
     
