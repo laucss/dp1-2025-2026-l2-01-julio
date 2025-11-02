@@ -55,6 +55,7 @@ public class User extends BaseEntity {
 		return user;
 	}
 
+	
 	public Player toPlayer(){
 		if (!this.authority.authority.equals("USER")){
 			return null;
