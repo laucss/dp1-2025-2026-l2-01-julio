@@ -98,25 +98,43 @@ Por ejemplo, para la pantalla de visualización de métricas del usuario en un h
     - $\color{red}{\textsf{FrequentCoPlayersTable – Muestra los jugadores  con los que más se  ha jugado (de M en M donde M es un parámetro definido por la configuración del componente). Concretamente, se mostrarán la el nombre, la fecha de la última partida, la localización del jugador el porcentaje de partidas jugadas por ambos en las que el usuario ha ganado y si el jugador es amigo o no del usuario.}}$
 
 ## Patrones de diseño y arquitectónicos aplicados
-En esta sección de especificar el conjunto de patrones de diseño y arquitectónicos aplicados durante el proyecto. Para especificar la aplicación de cada patrón puede usar la siguiente plantilla:
+En esta sección de especificar el conjunto de patrones de diseño y arquitectónicos aplicados durante el proyecto.
 
-### Patrón: < Nombre del patrón >
-*Tipo*: Arquitectónico | de Diseño
+### Patrón: Modelo-Vista-Controlador(MVC)
+*Tipo*: de Diseño
 
 *Contexto de Aplicación*
 
-Describir las partes de la aplicación donde se ha aplicado el patrón. Si se considera oportuno especificar el paquete donde se han incluido los elementos asociados a la aplicación del patrón.
+La aplicación tiene diferentes secciones estructuradas siguiendo el patrón MVC, dividiendo su funcionalidad en varias capas bien diferenciadas: entidades del modelo, repositorios, servicios y controladores. El framework Spring fomenta esta organización.
 
 *Clases o paquetes creados*
 
-Indicar las clases o paquetes creados como resultado de la aplicación del patrón.
+ -Models
+ -Repositories
+ -Services
+ -Controllers
 
 *Ventajas alcanzadas al aplicar el patrón*
 
-Describir porqué era interesante aplicar el patrón.
+La aplicación del patrón MVC permite una clara separación entre la lógica de negocio (capa service), las entidades y acceso a datos (capas models y repositories) y la comunicación con el frontend (capa controller). Esta división mejora la organización del proyecto, facilita el trabajo en equipo y optimiza el mantenimiento y la evolución del sistema.
+
+### Patrón: 
+*Tipo*: Arquitectónico o De Diseño
+
+*Contexto de Aplicación*
+
+
+
+*Clases o paquetes creados*
+
+ 
+
+*Ventajas alcanzadas al aplicar el patrón*
+
+
 
 ## Decisiones de diseño
-_En esta sección describiremos las decisiones de diseño que se han tomado a lo largo del desarrollo de la aplicación que vayan más allá de la mera aplicación de patrones de diseño o arquitectónicos._
+
 
 ### Decisión X
 #### Descripción del problema:*
