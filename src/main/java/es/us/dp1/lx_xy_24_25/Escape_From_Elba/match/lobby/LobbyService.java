@@ -46,9 +46,14 @@ public class LobbyService {
         return mrepo.findPublicLobbies();
     }
 
+        @Transactional(readOnly = true)
+    public List<Match> getAllPrivateLobbies() {
+        return mrepo.findPrivateLobbies();
+    }
+
     @Transactional(readOnly = true)
     public Optional<Match> getPrivateLobby(String codeLobby) {
-        return mrepo.findPrivateLobbieById(codeLobby);
+        return mrepo.findPrivateLobbyByCode(codeLobby);
     }
 
     //Crear metodo para unirse a una partida publica
@@ -62,12 +67,28 @@ public class LobbyService {
         //Comprueba que el lobby no esta lleno
         checkers.checkNumberOfPlayers(m);
         //Comprueba que el jugador no esta ya en otro lobby
-        
         checkers.checkPlayerAlreadyInALobby(player);
         m.getPlayers().add(player);
         mrepo.save(m); 
         return m;
 }
+
+
+    @Transactional
+    public Match joinPrivateLobby(String code){
+        User currentUser = userService.findCurrentUser();
+
+        Player player = playerService.findByUser(currentUser)
+            .orElseThrow(() -> new IllegalStateException("El usuario no tiene un Player asociado"));
+
+        Match m = mrepo.findPrivateLobbyByCode(code).orElseThrow(() -> new LobbyNotFound("Lobby not found"));
+        checkers.checkNumberOfPlayers(m);
+        checkers.checkPlayerAlreadyInALobby(player);
+        m.getPlayers().add(player);
+        mrepo.save(m); 
+        return m;
+
+    }
         
     
     //Funcion para crear un lobby

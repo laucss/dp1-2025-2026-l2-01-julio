@@ -43,7 +43,10 @@ function AppNavbar() {
                     </NavItem>
                     <NavItem>
                         <NavLink style={{ color: "white" }} tag={Link} to="/achievements">Achievements</NavLink>
-                    </NavItem>      
+                    </NavItem>   
+                    <NavItem>
+                        <NavLink style={{ color: "white" }} tag={Link} to="/matches">Matches</NavLink>
+                    </NavItem>
                 </>
             )
             profileLinks = (
@@ -94,9 +97,6 @@ function AppNavbar() {
     } else {
         userLinks = (
             <>
-                <NavItem>
-                    <NavLink style={{ color: "white" }} tag={Link} to="/matches">Matches</NavLink>
-                </NavItem>
             </>
         )
 
