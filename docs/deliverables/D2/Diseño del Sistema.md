@@ -65,12 +65,10 @@ Puedes gastar tus puntos en diferentes acciones:<br>
 
 ### Diagrama de Dominio/Diseño
 
-![alt text](<images/WhatsApp Image 2025-10-29 at 09.32.01.jpeg>)
+![alt text](<images/WhatsApp Image 2025-10-29 at 09.32.01.png>)
 
 ### Diagrama de Capas (incluyendo Controladores, Servicios y Repositorios)
 _En esta sección debe proporcionar un diagrama UML de clases que describa el conjunto de controladores, servicios, y repositorios implementados, incluya la división en capas del sistema como paquetes horizontales tal y como se muestra en el siguiente ejemplo:_
-
-![your-UML-diagram-name](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/gii-is-DP1/group-project-seed/main/docs/diagrams/LayersUMLPackageDiagram.iuml)
 
 ![alt text](images/image.png)
 
