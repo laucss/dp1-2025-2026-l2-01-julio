@@ -23,6 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -47,11 +48,11 @@ public class MatchController {
         return ms.getAllMatchs();
     }
 
-    @GetMapping("/{id}")
-    public Match getMatchById(@PathVariable("id")Integer id){
-        Optional<Match> m=ms.getMatchById(id);
+    @GetMapping("/{matchId}")
+    public Match getMatchById(@PathVariable("matchId")Integer matchId){
+        Optional<Match> m=ms.getMatchById(matchId);
         if(!m.isPresent())
-            throw new ResourceNotFoundException("Match", "id", id);
+            throw new ResourceNotFoundException("Match", "id", matchId);
         return m.get();
     }
     @PostMapping("/lobbies")
@@ -67,6 +68,13 @@ public class MatchController {
         return ls.getAllPublicLobbies();
     }
 
+    @GetMapping("/lobbies/privates")
+    public List<Match> getPrivateLobbies(){
+        return ls.getAllPrivateLobbies();
+    }
+
+
+
     @GetMapping("/lobbies/{matchId}")
     public Optional<Match> getPrivateGame(@ParameterObject String code){
         return ls.getPrivateLobby(code);
@@ -81,6 +89,14 @@ public class MatchController {
 
 
     }
+
+@PostMapping("/lobbies/join/private")
+@ResponseStatus(HttpStatus.OK)
+public ResponseEntity<Match> joinPrivateLobby(@RequestParam String code) {
+    Match joinedMatch = ls.joinPrivateLobby(code);
+    return ResponseEntity.ok(joinedMatch);
+}
+
 
     @PostMapping()
     public ResponseEntity<Match> createGame(@Valid @RequestBody Match m){

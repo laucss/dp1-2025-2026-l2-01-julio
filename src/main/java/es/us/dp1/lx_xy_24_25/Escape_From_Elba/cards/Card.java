@@ -3,6 +3,7 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.patterns.Prototype;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(name = "cards")
 public class Card extends BaseEntity implements Prototype<Card> {
 
     @NotNull

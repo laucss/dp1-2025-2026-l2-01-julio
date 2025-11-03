@@ -21,10 +21,14 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
     @Query( "SELECT m FROM Match m WHERE m.isPrivate=false and m.status= 'WAITING'")
     List<Match> findPublicLobbies(); // El page es para poder poner paginas 
 
+    //Devuelve todos los lobbies privados
+    @Query( "SELECT m FROM Match m WHERE m.isPrivate=true and m.status= 'WAITING'")
+    List<Match> findPrivateLobbies(); 
+
     //Devuelve un lobby privado por su codigo de acceso
     @Query("SELECT m FROM Match m WHERE m.isPrivate=true and LOWER(m.code)= LOWER(:codeLobby) and m.status='WAITING'" )
     //Busca el juego cuyo estado sea Waiting ( eso significa que es un lobby), sea privado y cuyo codigo sea el mismo
-    Optional<Match> findPrivateLobbieById(String codeLobby);
+    Optional<Match> findPrivateLobbyByCode(String codeLobby);
 
     //Devuelve si el usuario esta en algun lobby
     @Query("SELECT m FROM Match m WHERE m.status='WAITING' AND :player MEMBER OF m.players")

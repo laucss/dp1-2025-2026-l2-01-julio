@@ -71,9 +71,11 @@ Puedes gastar tus puntos en diferentes acciones:<br>
 ### Diagrama de Capas (incluyendo Controladores, Servicios y Repositorios)
 _En esta sección debe proporcionar un diagrama UML de clases que describa el conjunto de controladores, servicios, y repositorios implementados, incluya la división en capas del sistema como paquetes horizontales tal y como se muestra en el siguiente ejemplo:_
 
-![your-UML-diagram-name](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/gii-is-DP1/group-project-seed/main/docs/diagrams/LayersUMLPackageDiagram.iuml)
-
 ![alt text](images/image.png)
+
+![alt text](images/diagrama%20capas%20cartas.png)
+
+![Diagrama de Capas Actualizado](images/Diagrama.png)
 
 *Nota importante para el alumno*: A la hora de entregar el proyecto, debes modificar la url para que esté asociada al respositorio concreto de tu proyecto. Date cuenta de que ahora mismo apunta al repositorio _gii-is-DP1/group-project-seed_.
 
@@ -85,20 +87,28 @@ _En este caso, como mermaid no soporta la definición de paquetes, hemos usado u
 
 ## Descomposición del mockups del tablero de juego en componentes
 
-En esta sección procesaremos el mockup del tablero de juego (o los mockups si el tablero cambia en las distintas fases del juego). Etiquetaremos las zonas de cada una de las pantallas para identificar componentes a implementar. Para cada mockup se especificará el árbol de jerarquía de componentes, así como, para cada componente el estado que necesita mantener, las llamadas a la API que debe realizar y los parámetros de configuración global que consideramos que necesita usar cada componente concreto. 
-Por ejemplo, para la pantalla de visualización de métricas del usuario en un hipotético módulo de juego social:
+En esta sección procesaremos los mockup del tablero de juego. Etiquetaremos las zonas de cada una de las pantallas para identificar componentes a implementar. Para cada mockup se especificará el árbol de jerarquía de componentes, así como, para cada componente el estado que necesita mantener, las llamadas a la API que debe realizar y los parámetros de configuración global que consideramos que necesita usar cada componente concreto. 
+Componentes de la pantalla de juego principal:
 
-![Descomposición en componentes de la interfaz de estadísticas](https://github.com/gii-is-DP1/react-petclinic/assets/756431/12b36c37-39ed-422e-b8d9-56c94753cbdc)
+![Descomposición en componentes de la interfaz de estadísticas](![componentes](https://github.com/user-attachments/assets/f86606a6-f837-48f6-a669-fa1ff02937e0)
+
 
   - App – Componente principal de la aplicación
-    - $\color{orange}{\textsf{NavBar – Barra de navegación lateral}}$
-      - $\color{darkred}{\textsf{[ NavButton ]. Muestra un botón de navegación con un icono asociado.}}$
-    - $\color{darkblue}{\textsf{UserNotificationArea – Área de notificaciones e identificación del usuario actual}}$
-    - $\color{blue}{\textsf{MetricsBar – En este componente se muestran las métricas principales del juego. Se mostrarán 4 métricas: partidas jugadas, puntos logrados, tiempo total, y cartas jugadas.}}$
-      - $\color{darkgreen}{\textsf{[ MetricWell ] – Proporciona el valor y el incremento semanal de una métrica concreta. }}$
-    - $\color{purple}{\textsf{GamesEvolutionChart – Muestra la tendencia de evolución en ellos últimos 4 meses en cuanto a partida jugadas, ganadas, perdidas y abandonadas.}}$
-    - $\color{yellow}{\textsf{PopularCardsChart – Muestra la proporción de las N (parámetro de configuración) cartas más jugadas en el juego por el jugador.}}$
-    - $\color{red}{\textsf{FrequentCoPlayersTable – Muestra los jugadores  con los que más se  ha jugado (de M en M donde M es un parámetro definido por la configuración del componente). Concretamente, se mostrarán la el nombre, la fecha de la última partida, la localización del jugador el porcentaje de partidas jugadas por ambos en las que el usuario ha ganado y si el jugador es amigo o no del usuario.}}$
+    - $\color{pink}{\textsf{PlayersAvatar – Muestra los avatares de los N jugadores de la actual partida.}}$
+    - $\color{darkblue}{\textsf{Map – Área de juego principal.}}$
+       - $\color{blue}{\textsf{Rooms – Conjunto de habitaciones que hay en el mapa.}}$
+    - $\color{yellow}{\textsf{DiscardPile – Muestra el mazo de cartas de descarte.}}$
+    - $\color{red}{\textsf{Deck – Muestra el mazo de cartas de robo.}}$
+       - $\color{yellow}{\textsf{DeckButton – Permite al jugador robar una carta del mazo de robo.}}$
+    - $\color{purple}{\textsf{PlayerInformation – Muestra toda la información relevante sobre tu partida personal, como las cartas en tu poseson (mano o bolsa), tus puntos de fuerza y de acción, un boton para elegir tu acción y el botón del chat.}}$
+       - $\color{orange}{\textsf{ChatButton – Boton para abrir el chat}}$
+       - $\color{gray}{\textsf{ActionsButton – Boton para abrir el menu de acciones disponibles en tu ronda.}}$
+       - $\color{darkred}{\textsf{HandCards - Muestra un listado de tus cartas en la mano.}}$
+       - $\color{darkgreen}{\textsf{BagCards – Muestra un listado de tus cartas en la bolsa. }}$
+       - $\color{green}{\textsf{ActionPoints – Muestra los puntos de acción disponibles en tu ronda.}}$
+       - $\color{cyan}{\textsf{Strength – Muestra tus puntos de fuerza actuales.}}$
+
+
 
 ## Patrones de diseño y arquitectónicos aplicados
 En esta sección de especificar el conjunto de patrones de diseño y arquitectónicos aplicados durante el proyecto.
@@ -120,6 +130,57 @@ La aplicación tiene diferentes secciones estructuradas siguiendo el patrón MVC
 *Ventajas alcanzadas al aplicar el patrón*
 
 La aplicación del patrón MVC permite una clara separación entre la lógica de negocio (capa service), las entidades y acceso a datos (capas models y repositories) y la comunicación con el frontend (capa controller). Esta división mejora la organización del proyecto, facilita el trabajo en equipo y optimiza el mantenimiento y la evolución del sistema.
+
+
+### Patrón: Dependency Injection
+*Tipo*: de Diseño?
+
+*Contexto de Aplicación*
+
+La aplicación delega la creación de dependencias, objetos que una clase necesita para funcionar, a un contenedor externo en lugar de que la propia clase las cree directamente. En Spring Boot, esto lo hace el contenedor de Spring, que se encarga de instanciar e inyectar los objetos (beans) necesarios en cada clase
+
+*Clases o paquetes creados*
+
+La inyección de dependencias se aplica a través de anotaciones de Spring ya que esta integrado directamente en el framework de Spring Boot por lo que no ha sido necesaria la creación de clases o paquetes para este patrón. 
+
+*Ventajas alcanzadas al aplicar el patrón*
+
+La aplicación del patrón Dependency Injection facilita cambiar las dependencias sin tener que modificar el código principal ya que las clases no dependen de implementaciones concretas, sino de interfaces o abstracciones. Permite también la alta reutilización y mantenebilidad ya que es posible modificar la lógica de una clase sin tocar el servicio que la usa. Por otro lado, también se consigue un código más limpio y organizado.
+
+
+### Patrón: Data Transfer Object (DTO)
+*Tipo*: de Diseño
+
+*Contexto de Aplicación*
+
+La aplicación para evitar exponer datos internos de algunas clases relacionados con la base de datos interna a la hora de transportar la información de una capa a otra utiliza varios objetos DTO para realizar esta transferencia.
+
+*Clases o paquetes creados*
+
+-LobbyDTO
+-ChatDTO
+-MiniUserDTO
+-MiniRequestDTO
+
+
+*Ventajas alcanzadas al aplicar el patrón*
+
+La aplicación del patrón Data Transfer Object protege la lógica interna de la aplicación y evita exponer campos sensibles, el frontend al no depender directamente de las entidades del backend gracias a esto favorece el bajo acoplamiento entre capas. Otra ventaja es la optimización de la transferencia de datos ya que se reduce el tamaño de las respuestas al enviar solo los datos necesarios.
+
+### Patrón: Prototype
+*Tipo*: de Diseño 
+
+*Contexto de Aplicación*
+Usamos este patrón sobre todo al iniciar elementos de la partida como en nuestra caso, la baraja. Al iniciar una partida se coge cada carta de la baraja original almacenada y se hace una copia de ella, para formar una baraja completa copiada. 
+
+
+*Clases o paquetes creados*
+-paquete patterns 
+-clase Prototype.java
+ 
+
+*Ventajas alcanzadas al aplicar el patrón*
+Conseguimos crear copias exacta de una entidad de forma sencilla. 
 
 ### Patrón: 
 *Tipo*: Arquitectónico o De Diseño
@@ -163,32 +224,97 @@ Como grupo nos gustaría poder hacer pruebas con un conjunto de datos reales suf
 
 *Alternativa 1.a*: Incluir los datos en el propio script de inicialización de la BD (data.sql).
 
-*Ventajas:*
-•	Simple, no requiere nada más que escribir el SQL que genere los datos.
-*Inconvenientes:*
-•	Ralentiza todo el trabajo con el sistema para el desarrollo. 
-•	Tenemos que buscar nosotros los datos reales
+*Ventajas:* <br>
+•	Simple, no requiere nada más que escribir el SQL que genere los datos. <br>
+*Inconvenientes:* <br>
+•	Ralentiza todo el trabajo con el sistema para el desarrollo. <br>
+•	Tenemos que buscar nosotros los datos reales <br>
 
-*Alternativa 1.b*: Crear un script con los datos adicionales a incluir (extra-data.sql) y un controlador que se encargue de leerlo y lanzar las consultas a petición cuando queramos tener más datos para mostrar.
-*Ventajas:*
-•	Podemos reutilizar parte de los datos que ya tenemos especificados en (data.sql).
-•	No afecta al trabajo diario de desarrollo y pruebas de la aplicación
-*Inconvenientes:*
-•	Puede suponer saltarnos hasta cierto punto la división en capas si no creamos un servicio de carga de datos. 
-•	Tenemos que buscar nosotros los datos reales adicionales
+*Alternativa 1.b*: Crear un script con los datos adicionales a incluir (extra-data.sql) y un controlador que se encargue de leerlo y lanzar las consultas a petición cuando queramos tener más datos para mostrar. <br>
+*Ventajas:* <br>
+•	Podemos reutilizar parte de los datos que ya tenemos especificados en (data.sql). <br>
+•	No afecta al trabajo diario de desarrollo y pruebas de la aplicación <br>
+*Inconvenientes:* <br>
+•	Puede suponer saltarnos hasta cierto punto la división en capas si no creamos un servicio de carga de datos. <br>
+•	Tenemos que buscar nosotros los datos reales adicionales <br>
 
 *Alternativa 1.c*: Crear un controlador que llame a un servicio de importación de datos, que a su vez invoca a un cliente REST de la API de datos oficiales de XXXX para traerse los datos, procesarlos y poder grabarlos desde el servicio de importación.
 
-*Ventajas:*
-•	No necesitamos inventarnos ni buscar nosotros lo datos.
-•	Cumple 100% con la división en capas de la aplicación.
-•	No afecta al trabajo diario de desarrollo y pruebas de la aplicación
-*Inconvenientes:*
-•	Supone mucho más trabajo. 
-•	Añade cierta complejidad al proyecto
+*Ventajas:* <br>
+•	No necesitamos inventarnos ni buscar nosotros lo datos. <br>
+•	Cumple 100% con la división en capas de la aplicación. <br>
+•	No afecta al trabajo diario de desarrollo y pruebas de la aplicación <br>
+*Inconvenientes:* <br>
+•	Supone mucho más trabajo. <br>
+•	Añade cierta complejidad al proyecto <br>
 
-*Justificación de la solución adoptada*
+*Justificación de la solución adoptada* <br>
 Como consideramos que la división en capas es fundamental y no queremos renunciar a un trabajo ágil durante el desarrollo de la aplicación, seleccionamos la alternativa de diseño 1.c.
+
+
+### Decisión 2
+#### Descripción del problema:*
+
+Hemos decidido implementar en nuestra aplicación cuando te unes a una partida una sala de espera hasta que se de por empezado el propio juego. El crear una sala de espera trata los mismos datos que una partida pero maneja una logica diferente por lo que tuvimos que pensar como lo ibamos a organizar.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 2.a* : Añadir la lógica de negocio del lobby en el propio MatchService
+*Ventajas:*
+•	Una clase que gestiona todo, lobbies y partidas, hace que sea más simple.
+•	Hay menos servicios que implementar.
+•	No se necesita coordinación entre distintos servicios.
+*Inconvenientes:*
+• La lógica de lobby y de partida se mezcla, lo que hace que la clase sea más grande y difícil de mantener.
+• Añadir nuevas funcionalidades de lobby afecta directamente a la lógica de la partida.
+• Difícil de testear de forma aislada.
+
+*Alternativa 2.b* : Crear un servicio LobbyService para gestionar la lógica.
+*Ventajas:*
+•	Hace el código más fácil de entender, mantener y testear.
+•	Se separan las responsabilidades.
+•	Permite añadir funcionalidades específicas del lobby sin tocar la lógica de partidas.
+*Inconvenientes:*
+• Más código y más estructura que mantener.
+• Hay que pasar datos de LobbyService a MatchService cuando se inicia la partida.
+
+
+
+#### Justificación de la solución adoptada
+
+Consideramos que es más importante usar la opción que nos permita separar las responsabilidades ya que es un proyecto que vamos a ir actualizando y añadiendo código por lo que es mejor que los cambios que hagamos no afecten a toda una partida, por eso hemos decidido crear el servicio LobbyService.
+
+
+### Decisión 3
+#### Descripción del problema:*
+
+A la hora de construir los services nos hemos visto con una gran cantidad de validaciones que comprobar por lo que hemos tenido que decidir cual sería la mejor manera de implementar estas validaciones.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 3.a* : Añadir directamente cada validación en la función que la necesite.
+*Ventajas:*
+• No hay que crear nuevas clases ni abstraer la lógica, todo está “donde se usa”, por lo que es más simple.
+*Inconvenientes:*
+• La misma restricción puede necesitarse en varias funciones, y si se modifica, hay que actualizar todas.
+• Cambiar una regla implica revisar múltiples funciones, aumentando riesgo de errores.
+• La lógica de juego queda mezclada con servicios o controladores, dificultando extensiones o reutilización.
+
+*Alternativa 3.b* : Crear una clase checkers con todas las restricciones.
+*Ventajas:*
+• Todas las reglas del juego están en un solo lugar, fácil de localizar y modificar.
+•	Otras partes del sistema (MatchService, frontend, tests) pueden reutilizar la misma lógica sin duplicarla.
+•	Si cambia una regla del juego, solo se modifica en la clase Checkers.
+*Inconvenientes:*
+• Los servicios (como MatchService) deben interactuar con la clase Checkers correctamente, lo que añade un nivel de abstracción.
+
+
+
+#### Justificación de la solución adoptada
+
+Consideramos que al tener muchas restricciones que son reutilizables nos va a facilitar mucho el tener una clase Checkers, también nos va a facilitar la lectura del código.
+
+_Ejemplos de uso de la plantilla con otras decisiones de diseño:_
 
 ## Refactorizaciones aplicadas
 

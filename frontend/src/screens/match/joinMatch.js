@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import tokenService from "../../services/token.service";
 import useFetchState from "../../util/useFetchState";
-import { Button, ButtonGroup, Table } from "reactstrap";
+import './listingLobbies.css';
+import { Button, ButtonGroup, Table, Modal, ModalHeader, ModalBody, ModalFooter, Input } from "reactstrap";
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -17,9 +18,12 @@ export default function JoinMatch() {
     setVisible
   );
 
+  const [showModal, setShowModal] = useState(false);  
+  const [privateCode, setPrivateCode] = useState(""); 
+
   const navigate = useNavigate();
 
-  // 👉 Función para unirse a un lobby
+
   const handleJoin = async (match) => {
     try {
       const response = await fetch(`/api/v1/matches/lobbies/${match.id}/join`, {
@@ -32,62 +36,109 @@ export default function JoinMatch() {
       });
 
       if (response.ok) {
-        // Redirige a la sala de espera de ese lobby
         navigate(`/lobby/${match.id}`);
       } else {
         const errorText = await response.text();
-        console.error("Error joining lobby:", errorText);
-        alert("No se pudo unir al lobby.");
+        alert(" No se pudo unir al lobby: " + errorText);
       }
     } catch (error) {
-      console.error("Error:", error);
-      alert("Error al conectar con el servidor.");
+      alert(" Error al conectar con el servidor.");
     }
   };
 
-  const lobbiesList = lobbies.map((match) => {
-    return (
-      <tr key={match.id}>
-        <td className="text-center">{match.name}</td>
-        <td className="text-center">
-          {match.players ? match.players.length : 0} / {match.maxPlayers}
-        </td>
-        <td className="text-center">
-          <ButtonGroup>
-            <Button
-              size="sm"
-              color="success"
-              aria-label={"join-" + match.name}
-              onClick={() => handleJoin(match)}
-            >
-              Join
-            </Button>
-          </ButtonGroup>
-        </td>
-      </tr>
-    );
-  });
+ 
+  const handleJoinPrivate = async () => {
+    if (!privateCode) {
+      alert("Introduce un código primero");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/v1/matches/lobbies/join/private?code=${privateCode}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: 'application/json',
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const match = await response.json();
+        setShowModal(false);
+        navigate(`/lobby/${match.id}`);
+      } else {
+        const errorText = await response.text();
+        alert(" Código inválido o lobby no disponible: " + errorText);
+      }
+    } catch (error) {
+      alert(" Error al conectar con el servidor.");
+    }
+  };
+
+
+  const lobbiesList = lobbies.map((match) => (
+    <tr key={match.id}>
+      <td className="text-center">{match.name}</td>
+      <td className="text-center">
+        {match.players ? match.players.length : 0} / {match.maxPlayers}
+      </td>
+      <td className="text-center">
+        <ButtonGroup>
+          <Button
+            size="sm"
+            color="success"
+            aria-label={"join-" + match.name}
+            onClick={() => handleJoin(match)}
+          >
+            Join
+          </Button>
+        </ButtonGroup>
+      </td>
+    </tr>
+  ));
 
   return (
-    <div>
-      <div className="admin-page-container">
-        <h1 className="text-center">Lobbies</h1>
-        <div>
-          <Table aria-label="lobbies" className="mt-4">
-            <thead>
-              <tr>
-                <th width="15%" className="text-center">Name</th>
-                <th width="15%" className="text-center">Players</th>
-                <th width="15%" className="text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>{lobbiesList}</tbody>
-          </Table>
-        </div>
-        <Button color="primary">
-          Join Private Lobby
-        </Button>
-      </div>
+  <div className="admin-page-container">
+    <div className="lobbies-box">
+      <h1>Lobbies</h1>
+
+      <Table aria-label="lobbies" className="mt-4">
+        <thead>
+          <tr>
+            <th width="15%">Name</th>
+            <th width="15%">Players</th>
+            <th width="15%">Action</th>
+          </tr>
+        </thead>
+        <tbody>{lobbiesList}</tbody>
+      </Table>
+
+      <Button
+        className="join-private-btn"
+        onClick={() => setShowModal(true)}
+      >
+        Join Private Lobby
+      </Button>
     </div>
+
+    {/* Modal para lobby privado */}
+    <Modal isOpen={showModal} toggle={() => setShowModal(false)}>
+      <ModalHeader toggle={() => setShowModal(false)}>Join Private Lobby</ModalHeader>
+      <ModalBody>
+        <p>Introduce el código del lobby privado:</p>
+        <Input
+          type="text"
+          value={privateCode}
+          onChange={(e) => setPrivateCode(e.target.value)}
+          placeholder="Ej: AB12CD34"
+        />
+      </ModalBody>
+      <ModalFooter>
+        <Button color="success" onClick={handleJoinPrivate}>Join</Button>
+        <Button color="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+      </ModalFooter>
+    </Modal>
+  </div>
   );
 }

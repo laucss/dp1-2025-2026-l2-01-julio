@@ -1,4 +1,4 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
