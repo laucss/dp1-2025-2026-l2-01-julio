@@ -12,9 +12,9 @@
 **Integrantes (máx. 6):**
 
 Alberto Pardina Miñón (QSS7721 / albparmin@alum.us.es)<br>
-Marco Visentin Lopez (CYB6650 / marvislop@alum.us.es)<br>
+Marco Visentin López (CYB6650 / marvislop@alum.us.es)<br>
 Emilio Diaz Arcenegui (FSS8078 / emidiaarc@alum.us.es)<br>
-Nerea Camacho Perez (QFL3393 / nercamper@alum.us.es)<br>
+Nerea Camacho Pérez (QFL3393 / nercamper@alum.us.es)<br>
 Laura Cubero Sánchez (XNT3290 / laucubsan@alum.us.es)<br>
 Lucía Baltasar Muñoz (SBJ4592 / lucbalmun@alum.us.es)<br>
 
@@ -61,6 +61,30 @@ Checklist de cumplimiento de uso ético de la IA del sprint 1:
 
 - [x] Se usó la IA sin dar datos personales/sensibles que puedieran quedar expuestos a herramientas externas.
 
+### Sprint 2 — Resumen de uso de IA
+
+Usos registrados: 4
+
+Ámbitos principales: Resolución de dudas y errores en código
+
+Valor aportado: Velocidad en el desarrollo del proyecto junto con código altamente optimizado y sin errores (Comprobado antes de integrarlo).
+
+Riesgos relevantes y mitigaciones: Sin demasiados riesgos y mitigaciones. Leves riesgos de errores en clases importantes en el proyecto (Match por ejemplo).
+
+Lecciones aprendidas: Tener criterio propio a la hora de decidir que código aportado por la IA integrar en el proyecto para no desencadenar futuros errores.
+
+Checklist de cumplimiento de uso ético de la IA del sprint 2:
+
+- [x] Toda interacción significativa está en el Registro Detallado con enlace a conversación.
+
+- [x] No se usó IA para narrativa (o hay autorización documentada).
+
+- [x] Toda pieza aceptada fue comprendida y verificada por humanos (tests/revisión).
+
+- [x] Citas/Atribuciones incluidas cuando corresponde.
+
+- [x] Se usó la IA sin dar datos personales/sensibles que puedieran quedar expuestos a herramientas externas.
+
 ## Registro detallado de uso de AI por Sprint
 
 ### Sprint 1 registro detallado de uso de IA por sprint
@@ -76,7 +100,10 @@ Checklist de cumplimiento de uso ético de la IA del sprint 1:
 
 | # | Fecha y hora | Sprint | Integrante(s) | **Herramienta & versión** | **Acceso** | **Enlace a conversación / Prompt** | **Finalidad** | **Artefactos afectados** | **Verificación humana** | **Riesgos & modificaciones** | **Resultado** |
 |---:|--------------|:-----:|---------------|----------------------------|------------|------------------------------------|---------------|---------------------------|--------------------------|-----------------------------|---------------|
-| 2.1 | <!-- 04/09/2025 18:40 --> | 2 | <!-- Nombre --> | <!-- p.ej., ChatGPT (GPT-5, OpenAI, 2025) --> | <!-- web/plugin/integración --> | <!-- URL al chat o prompt resumido --> | <!-- idea / código / depuración / pruebas / documentación técnica* --> | <!-- ficheros, issue, PR, commit --> | <!-- pruebas, revisión por pares, reasoning propio --> | <!-- plagio, licencias, datos personales; mitigación --> | <!-- aceptado / rechazado / aceptado con cambios parciales --> |
+| 2.1 | 24/10/2025 13:22 | 2 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/c/68fb5ff9-df78-8332-83af-b3a039650727 | Aclaración de dudas | <!-- ficheros, issue, PR, commit --> | Criterio humano | Sin riesgos ni mitigaciones | Aceptado parcialmente |
+| 2.2 | 27/10/2025 19:41 | 2 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/g/g-p-68fe107d069481919138c5cb4b6d12e1-dp1/shared/c/68ffbd58-0cd0-832a-acb5-bf4effab99d9?owner_user_id=user-avQXrJCP35cKMG1fC3E1w3D4 | Obtención de código | Card, CardRepository | Razonamiento propio y pruebas | Posibles errores de implementación | Aceptado Parcialmente |
+| 1.1 | 01/11/2025 18:31 | 2 | Nerea Camacho Pérez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/6907ba76-bb80-8006-9829-c04f106dcce6 | Obtención de código | Match, MatchController, MatchRepository, MatchService, MatchStatus | Criterio humano y pruebas | Riesgos generales (Match = Clase más importante) | Aceptado |
+| 1.1 | 26/10/2025 10:36 | 2 | Nerea Camacho Pérez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/6907bc59-3de8-8006-a022-a27071207568 | Obtención de código | Player, PlayerRepository, UserService, LobbyService | Pruebas | Sin riesgos ni mitigaciones | Aceptado |
 
 ### Sprint 3
 
