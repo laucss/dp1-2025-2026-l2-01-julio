@@ -55,36 +55,49 @@ export default function Friends() {
     setShowInviteModal(false);
   };
 
-  const handleClick = async () => {
-    getAndSetAllFriends(tokenService.getUser.id);
-    getAndSetReceivedRequests(tokenService.getUser.id);
-    getAndSetSentRequests(tokenService.getUser.id);
-  };
-
   function handleSubmit(event) {
-    event.preventDefault();
+  event.preventDefault();
 
-    fetch(`api/v1/friendRequests/` + (receiver ? receiver : ""), {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(tokenService.getUser.id),
+  // Limpieza de estados previos
+  setInviteError(null);
+  setInviteSuccess(null);
+  setInviteLoading(true);
+
+  console.log("JWT:", tokenService.getLocalAccessToken());
+
+  fetch(`/api/v1/friendRequests`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ receiverId: inviteUsername }),
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Error ${response.status}: ${errText}`);
+      }
+      return response.json();
     })
-      .then((response) => response.json())
-      .then((json) => {
-        if (json.message) {
-          setErrorMessage(json.message);
-        }
-      })
-      .catch((error) => {
-        setErrorMessage(error.message);
-      });
-    getAndSetSentRequests(tokenService.getUser.id);
-    setReceiver("")
-  }
+    .then((json) => {
+      if (json.message) {
+        setInviteSuccess(json.message);
+      } else {
+        setInviteSuccess("Invitación enviada correctamente.");
+      }
+      getAndSetSentRequests(tokenService.getUser()?.id);
+      setInviteUsername("");
+    })
+    .catch((error) => {
+      console.error(error);
+      setInviteError(error.message);
+    })
+    .finally(() => {
+      setInviteLoading(false);
+    });
+}
 
   async function handleAccept(requestId) {
     try {
@@ -135,10 +148,6 @@ export default function Friends() {
     }
   }
 
-  const handleChange = (event) => {
-    setReceiver(event.target.value);
-  };
-
   const handleDelete = (event) => {
     event.preventDefault();
 
@@ -155,7 +164,7 @@ export default function Friends() {
       .catch((error) => {
         setErrorMessage(error.message);
       });
-    getAndSetAllFriends(tokenService.getUser.id);
+    getAndSetAllFriends(tokenService.getUser()?.id);
   };
 
   useEffect(() => {
@@ -172,7 +181,7 @@ export default function Friends() {
 
 
   const friendList = allFriends?.map((f) => {
-    const friend = f.sender.id == tokenService.getUser.id ? f.receiver : f.sender;
+    const friend = f.sender.id == tokenService.getUser()?.id ? f.receiver : f.sender;
 
     return (
     <Card key={f.id}>
@@ -229,25 +238,31 @@ export default function Friends() {
       {/* Lista de amigos */}
       <div className="friends-list">
         <div className="friends-header">
-          <h2>Lista de Amigos ({allFriends.length})</h2>
+          <h2>Lista de Amigos ({allFriends?.length || 0})</h2>
         </div>
 
         <div className="friends-scroll">
-          {allFriends.map(friend => (
-            <div key={friend.id} className="friend-card">
-              <FaUser className="friend-avatar" />
-              <span className="friend-name">{friend.name}</span>
-              <div className="friend-actions">
-                <button className="play-btn">Jugar</button>
-                <button
-                  className="remove-btn"
-                  onClick={handleDelete}
-                >
-                  Eliminar
-                </button>
-              </div>
+          {(!allFriends || allFriends.length === 0) ? (
+            <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+              No tienes amigos ;(
             </div>
-          ))}
+          ) : (
+            allFriends.map(friend => (
+              <div key={friend.id} className="friend-card">
+                <FaUser className="friend-avatar" />
+                <span className="friend-name">{friend.name}</span>
+                <div className="friend-actions">
+                  <button className="play-btn">Jugar</button>
+                  <button
+                    className="remove-btn"
+                    onClick={handleDelete}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
       
