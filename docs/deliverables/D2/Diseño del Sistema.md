@@ -76,6 +76,8 @@ _En esta sección debe proporcionar un diagrama UML de clases que describa el co
 
 ![alt text](images/diagrama%20capas%20cartas.png)
 
+![Diagrama de Capas Actualizado](images/Diagrama.png)
+
 *Nota importante para el alumno*: A la hora de entregar el proyecto, debes modificar la url para que esté asociada al respositorio concreto de tu proyecto. Date cuenta de que ahora mismo apunta al repositorio _gii-is-DP1/group-project-seed_.
 
 
