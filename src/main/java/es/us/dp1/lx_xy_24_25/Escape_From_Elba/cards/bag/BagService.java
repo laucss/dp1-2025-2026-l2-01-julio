@@ -1,5 +1,8 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
 
@@ -7,6 +10,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class BagService {
 
+    /*
+     * Variable que vamos a usar a modo de "almacenamiento" del estado de la bolsa Es decir, vamos a usar un map
+     * en el que la clave sea el Id de la partida O EL OWNER AUN NO SÉ y el valor, la baraja en sí -> BagInGame (guardada en memoria)
+     */
+    private final Map<Integer, BagInGame> activesBags = new HashMap<>(); 
 
     /*
      * Valida si la palabra que forma el usuario es valida para guardarse en la bolsa

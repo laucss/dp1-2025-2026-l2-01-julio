@@ -67,7 +67,7 @@ export default function CreateLobby() {
       <div>
         <label>Número de jugadores</label>
         <div className="player-count-container">
-          <button type="button" onClick={() => setMaxPlayers((prev) => Math.max(2, prev - 1))}>↓</button>
+          <button type="button" onClick={() => setMaxPlayers((prev) => Math.max(3, prev - 1))}>↓</button>
           <span>{maxPlayers}</span>
           <button type="button" onClick={() => setMaxPlayers((prev) => Math.min(6, prev + 1))}>↑</button>
         </div>

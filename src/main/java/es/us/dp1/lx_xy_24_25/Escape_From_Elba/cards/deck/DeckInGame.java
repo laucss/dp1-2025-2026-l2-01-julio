@@ -11,9 +11,15 @@ import lombok.Setter;
 @Setter
 public class DeckInGame {
 
-    List<Card> notDiscardedCards; 
+    /*
+     * Vamos a usar DeckInGame para guardar las cartas de la baraja de la partida en memoria y no en la base de datos por:  
+     * 1. Es más rápido, vamos a modificar mucho el estado de la baraja del jugador y hacer tantas llamadas a la BD es más lento
+     * 2. No vamos a necesitar guardar tras finalizar la partida ningún dato del mazo, por lo que no necesito usar un repository. 
+     */
 
-    List<Card> discardedCards; 
+    private List<Card> notDiscardedCards; 
+
+    private List<Card> discardedCards; 
 
     public DeckInGame (List<Card> cards) {
         this.notDiscardedCards = new ArrayList<>(cards);
