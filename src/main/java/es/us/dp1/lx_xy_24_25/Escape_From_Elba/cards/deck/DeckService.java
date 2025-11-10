@@ -18,6 +18,10 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 @Service
 public class DeckService {
 
+    /*
+     * Variable que vamos a usar a modo de "almacenamiento" del estado de la baraja, de los mazos. Es decir, vamos a usar un map
+     * en el que la clave sea el Id de la partida y el valor, la baraja en sí -> DeckInGame (guardada en memoria)
+     */
     private final Map<Integer, DeckInGame> activesDecks = new HashMap<>(); 
 
     public CardRepository cardRepository;
@@ -35,7 +39,7 @@ public class DeckService {
      */
 
     @Transactional(readOnly = true)
-    public DeckInGame initializeDeck() {
+    public DeckInGame initializeDeck(Integer macthId) {
         List<Card> originalsCards = cardRepository.findAll();
 
         List<Card> copiedCards = originalsCards.stream().map(carta -> carta.getClone()).toList(); 
@@ -43,7 +47,9 @@ public class DeckService {
         // barajamos las cartas ya copiadas
         Collections.shuffle(copiedCards);
 
-        return new DeckInGame(copiedCards); 
+        DeckInGame newDeck = new DeckInGame(copiedCards); 
+        activesDecks.put(macthId, newDeck); 
+        return newDeck; 
 
     }
 
@@ -52,8 +58,8 @@ public class DeckService {
      *
     */
 
-    public DeckInGame findDeckById(Integer id) {
-        DeckInGame deck = activesDecks.get(id); 
+    public DeckInGame findDeckById(Integer macthId) {
+        DeckInGame deck = activesDecks.get(macthId); 
         if (deck==null)
             throw new ResourceNotFoundException("This deck does not exist or is not found"); 
         return deck;   
@@ -68,11 +74,11 @@ public class DeckService {
 
     
     
-    public DeckInGame shuffleAndDicardedToNotDiscarded(Integer deckId){
+    public DeckInGame shuffleAndDicardedToNotDiscarded(Integer macthId){
         // checkear si quedan menos de x cartas en vez de cero 
 
         // buscamos baraja
-        DeckInGame deck = findDeckById(deckId);
+        DeckInGame deck = findDeckById(macthId);
 
         List<Card> discardedCards = deck.getDiscardedCards();
         Collections.shuffle(discardedCards);
@@ -90,10 +96,10 @@ public class DeckService {
      * Método que añade una carta al mazo de descartes
      */
 
-    public void addCardToDiscardedPile (Integer deckId, Card card){
+    public void addCardToDiscardedPile (Integer macthId, Card card){
     
         // buscamos baraja
-        DeckInGame deck = findDeckById(deckId);
+        DeckInGame deck = findDeckById(macthId);
 
         // cogemos pila de descartes 
         List<Card> discardedCards = deck.getDiscardedCards();
@@ -114,10 +120,10 @@ public class DeckService {
 
      /*
 
-    public void addFewCardsToDiscardedPile (Integer deckId, List<Card> cards){
+    public void addFewCardsToDiscardedPile (Integer macthId, List<Card> cards){
     
         // buscamos baraja
-        DeckInGame deck = findDeckById(deckId);
+        DeckInGame deck = findDeckById(macthId);
 
         // cogemos pila de descartes 
         List<Card> discardedCards = deck.getDiscardedCards();
@@ -137,10 +143,10 @@ public class DeckService {
      
     */
 
-    public Card drawLastDiscardedCard (Integer deckId){
+    public Card drawLastDiscardedCard (Integer macthId){
 
         // buscamos baraja
-        DeckInGame deck = findDeckById(deckId);
+        DeckInGame deck = findDeckById(macthId);
 
         // cogemos pila de descartes 
         List<Card> discardedCards = deck.getDiscardedCards();
@@ -155,8 +161,8 @@ public class DeckService {
      * Método que comprueba si el mazo de cartas no descartadas está vacío 
      */
 
-    public Boolean isEmpty (Integer id) { // (Integer deckId)
-        DeckInGame deck = findDeckById(id);
+    public Boolean isEmpty (Integer macthId) { // (Integer deckId)
+        DeckInGame deck = findDeckById(macthId);
         return deck.getNotDiscardedCards().isEmpty();  
     }
 
