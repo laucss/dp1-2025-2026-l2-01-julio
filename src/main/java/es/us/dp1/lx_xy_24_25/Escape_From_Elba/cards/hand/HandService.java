@@ -1,9 +1,20 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
 @Service
 public class HandService {
+
+    /*
+     * Variable que vamos a usar a modo de "almacenamiento" de las manos. Es decir, vamos a usar un map
+     * en el que la clave sea el Id del jugador que posee esa "Mano" y el valor la mano en sí -> HandInGame
+     * 
+     * Explicación de por qué HandInGame en su clase. 
+     */
+    private final Map<Integer, HandInGame> activesHands = new HashMap<>(); 
 
 
     /*

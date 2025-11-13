@@ -44,15 +44,14 @@ public class MatchService {
     }
 
     @Transactional(readOnly=true)
-    public Optional<Match> getMatchById(Integer id) {
-        return mrepo.findById(id);
+    public Optional<Match> getMatchById(Integer matchId){
+        return mrepo.findById(matchId);
     }
 
     @Transactional
     public void delete(Integer id) {
         mrepo.deleteById(id);
     }
-
 
 
 

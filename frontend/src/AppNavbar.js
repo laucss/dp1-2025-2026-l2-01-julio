@@ -43,7 +43,10 @@ function AppNavbar() {
                     </NavItem>
                     <NavItem>
                         <NavLink style={{ color: "white" }} tag={Link} to="/achievements">Achievements</NavLink>
-                    </NavItem>      
+                    </NavItem>   
+                    <NavItem>
+                        <NavLink style={{ color: "white" }} tag={Link} to="/matches">Matches</NavLink>
+                    </NavItem>
                 </>
             )
             profileLinks = (
@@ -83,20 +86,11 @@ function AppNavbar() {
                 <NavItem>
                     <NavLink style={{ color: "white" }} id="plans" tag={Link} to="/plans">Pricing Plans</NavLink>
                 </NavItem>
-                <NavItem>
-                    <NavLink style={{ color: "white" }} id="register" tag={Link} to="/register">Register</NavLink>
-                </NavItem>
-                <NavItem>
-                    <NavLink style={{ color: "white" }} id="login" tag={Link} to="/login">Login</NavLink>
-                </NavItem>
             </>
         )
     } else {
         userLinks = (
             <>
-                <NavItem>
-                    <NavLink style={{ color: "white" }} tag={Link} to="/matches">Matches</NavLink>
-                </NavItem>
             </>
         )
 

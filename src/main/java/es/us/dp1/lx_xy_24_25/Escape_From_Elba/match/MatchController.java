@@ -23,6 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -47,18 +48,32 @@ public class MatchController {
         return ms.getAllMatchs();
     }
 
-    @GetMapping("/{id}")
-    public Match getMatchById(@PathVariable("id")Integer id){
-        Optional<Match> m=ms.getMatchById(id);
+    @GetMapping("/{matchId}")
+    public Match getMatchById(@PathVariable("matchId")Integer matchId){
+        Optional<Match> m=ms.getMatchById(matchId);
         if(!m.isPresent())
-            throw new ResourceNotFoundException("Match", "id", id);
+            throw new ResourceNotFoundException("Match", "id", matchId);
         return m.get();
+    }
+    @PostMapping("/lobbies")
+    @ResponseStatus(HttpStatus.CREATED)
+    public  ResponseEntity<Match> createLobby(@RequestBody LobbyDTO lobbyDTO) {
+        Match game = new Match();
+        Match saved= ls.createLobby(game, lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers());
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @GetMapping("/lobbies")
     public List<Match> getPublicGames(){
         return ls.getAllPublicLobbies();
     }
+
+    @GetMapping("/lobbies/privates")
+    public List<Match> getPrivateLobbies(){
+        return ls.getAllPrivateLobbies();
+    }
+
+
 
     @GetMapping("/lobbies/{matchId}")
     public Optional<Match> getPrivateGame(@ParameterObject String code){
@@ -67,11 +82,21 @@ public class MatchController {
 
     @PostMapping("/lobbies/{matchId}/join")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Match> joinLobby(@Parameter(description = "Id of the lobby to join") @PathVariable Integer gameId) {
-        ls.joinLobby(gameId);
+    public ResponseEntity<Match> joinLobby(@Parameter(description = "Id of the lobby to join") @PathVariable Integer matchId) {
+        Match joinedMatch = ls.joinLobby(matchId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok(joinedMatch);
+
+
     }
+
+@PostMapping("/lobbies/join/private")
+@ResponseStatus(HttpStatus.OK)
+public ResponseEntity<Match> joinPrivateLobby(@RequestParam String code) {
+    Match joinedMatch = ls.joinPrivateLobby(code);
+    return ResponseEntity.ok(joinedMatch);
+}
+
 
     @PostMapping()
     public ResponseEntity<Match> createGame(@Valid @RequestBody Match m){

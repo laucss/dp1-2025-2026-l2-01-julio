@@ -18,6 +18,8 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.user;
 
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -27,15 +29,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 
 @Service
 public class UserService {
 
 	private UserRepository userRepository;
+	private PlayerRepository playerRepository;
 
 	@Autowired
-	public UserService(UserRepository userRepository) {
+	public UserService(UserRepository userRepository, PlayerRepository playerRepository) {
 		this.userRepository = userRepository;
+		this.playerRepository = playerRepository;
 
 	}
 
@@ -70,6 +76,10 @@ public class UserService {
 		return userRepository.existsByUsername(username);
 	}
 
+	public Boolean existsEmail(String email) {
+		return userRepository.existsByEmail(email);
+	}
+
 	@Transactional(readOnly = true)
 	public Iterable<User> findAll() {
 		return userRepository.findAll();
@@ -93,6 +103,18 @@ public class UserService {
 		User toDelete = findUser(id);
 		this.userRepository.delete(toDelete);
 	}
+
+    public void ensureAllUsersHavePlayer() {
+    List<User> users = userRepository.findAll();
+    for (User user : users) {
+        if (playerRepository.findByUser(user).isEmpty()) {
+            Player player = new Player();
+            player.setUser(user);
+			player.setAuthority(user.getAuthority());
+            playerRepository.save(player);
+        }
+    }
+}
 
 
 }

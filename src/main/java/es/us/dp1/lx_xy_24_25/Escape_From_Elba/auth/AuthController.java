@@ -80,6 +80,9 @@ public class AuthController {
 		if (userService.existsUser(signUpRequest.getUsername()).equals(true)) {
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
 		}
+		if (userService.existsEmail(signUpRequest.getEmail()).equals(true)) {
+			return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+		}
 		authService.createUser(signUpRequest);
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}

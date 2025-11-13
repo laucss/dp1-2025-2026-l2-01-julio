@@ -6,7 +6,6 @@
   font-family: 'Segoe UI', sans-serif;
 }
 
-/* Botones principales */
 .friends-buttons {
   display: flex;
   gap: 1rem;
@@ -29,7 +28,6 @@
   background-color: #565681;
 }
 
-/* Buscador */
 .friends-search {
   display: flex;
   align-items: center;
@@ -52,7 +50,6 @@
   color: white;
 }
 
-/* Lista de amigos */
 .friends-list {
   background-color: #2b2b3d;
   border-radius: 12px;
@@ -119,4 +116,100 @@
 
 .remove-btn:hover {
   background-color: #ef5350;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.modal-card {
+  background: #1f1f30;
+  padding: 2rem;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  min-height: 300px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.modal-input {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 2px solid #3a3a5c;
+  background: #2b2b3d;
+  color: white;
+  outline: none;
+  font-size: 1.1rem;
+  margin: 1.5rem 0;
+  transition: border-color 0.2s;
+}
+
+.modal-input:focus {
+  border-color: #3a7bd5;
+}
+
+.modal-error {
+  color: #ffb4b4;
+}
+
+.modal-success {
+  color: #baffc9;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1.5rem;
+}
+
+.modal-send,
+.modal-cancel {
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.modal-send {
+  background: #3a7bd5;
+  box-shadow: 0 4px 15px rgba(58, 123, 213, 0.3);
+}
+
+.modal-send:disabled {
+  background: #6c6c8a;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.modal-send:not(:disabled):hover {
+  background: #4a8be5;
+  transform: translateY(-2px);
+}
+
+.modal-cancel {
+  background: #3a3a5c;
+}
+
+.modal-cancel:hover {
+  background: #4a4a6c;
+  transform: translateY(-2px);
 }
