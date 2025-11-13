@@ -12,5 +12,4 @@ public interface AchievementRepository extends CrudRepository<Achievement, Integ
     
     public Achievement findByName(String name);
 
-    List<Achievement> findByPlayerId(int playerId);
 }

@@ -48,15 +48,6 @@ public class AchievementRestController {
 		return new ResponseEntity<Achievement>(achievementToGet, HttpStatus.OK);
 	}
 
-	@GetMapping("/player/{id}")
-	public ResponseEntity<List<Achievement>> findAchievementsByPlayer(@PathVariable("playerId") int playerId) {
-    	List<Achievement> achievements = achievementService.getAchievementsByPlayerId(playerId);
-    	if (achievements.isEmpty()) {
-        	throw new ResourceNotFoundException("No achievements found for player with ID " + playerId);
-    	}
-    	return new ResponseEntity<>(achievements, HttpStatus.OK);
-	}
-
 	@PostMapping
 	public ResponseEntity<Achievement> createAchievement(@RequestBody @Valid Achievement newAchievement, BindingResult br){ 
 		Achievement result=null;
