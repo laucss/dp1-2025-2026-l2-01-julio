@@ -3,15 +3,23 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 
+@Service
 public class StatisticService {
     
+    @Autowired
     private StatisticRepository statisticRepository;
+    @Autowired    
     private PlayerRepository playerRepository;
-    private GameRepository gameRepository;
+    @Autowired
+    private MatchRepository matchRepository;
 
     @Transactional(readOnly = true)
     public List<StatisticWithPlayerDTO> findAllStatistics() {
@@ -19,9 +27,18 @@ public class StatisticService {
         List<StatisticWithPlayerDTO> statisticDTOs = new ArrayList<>();
         statistics.forEach(statistic -> {
             Player player = playerRepository.findByStatisticId(statistic.getId());
-            StatisticWithPlayerDTO statisticDTO = new StatisticWithPlayerDTO(statistic, player.getUsername());
-            statisticDTOs.add(statisticDTO);
+            if(player != null) {
+                StatisticWithPlayerDTO statisticDTO = new StatisticWithPlayerDTO(statistic, player.getUsername());
+                statisticDTOs.add(statisticDTO);
+            }
         });
         return statisticDTOs;
+    }
+
+    public StatisticService(StatisticRepository statisticRepository, PlayerRepository playerRepository,
+            MatchRepository matchRepository) {
+        this.statisticRepository = statisticRepository;
+        this.playerRepository = playerRepository;
+        this.matchRepository = matchRepository;
     }
 }
