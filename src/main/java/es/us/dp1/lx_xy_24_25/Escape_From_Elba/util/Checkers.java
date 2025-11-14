@@ -49,6 +49,7 @@ public class Checkers {
         }
     }
 
+    // CARTAS 
     public void checkCardExists(Card card) {
         Optional<Card> givenCard = cardRepository.findById(card.getId()); 
         if (givenCard == null)

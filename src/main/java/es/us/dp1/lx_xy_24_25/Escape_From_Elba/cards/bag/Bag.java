@@ -16,13 +16,13 @@ import lombok.Setter;
 @Setter
 public class Bag extends BaseEntity{
 
-    @OneToOne // un jugador tiene una sola bolsa
+    @OneToOne 
     private Player playerOwner;
 
     // @OneToMany 
     // private Match match; 
 
-    @OneToMany  // una bolsa tiene varias cartas 
+    @OneToMany  
     private List<Card> cards; 
  
 
