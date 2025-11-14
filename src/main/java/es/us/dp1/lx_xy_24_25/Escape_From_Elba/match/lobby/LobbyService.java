@@ -12,14 +12,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
-
+import jakarta.persistence.EntityManager;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.Authorities;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
+
 @Service
 public class LobbyService {
 
@@ -27,6 +32,9 @@ public class LobbyService {
     public UserService userService;
     public Checkers checkers;
     public PlayerService playerService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     public LobbyService(MatchRepository mrepo, Checkers checkers, UserService userService, PlayerService playerService) {
@@ -56,19 +64,15 @@ public class LobbyService {
         return mrepo.findPrivateLobbyByCode(codeLobby);
     }
 
+
     //Crear metodo para unirse a una partida publica
     @Transactional
     public Match joinLobby(Integer lobbyId) {
-        User currentUser = userService.findCurrentUser();
-        //Comprueba que existe un lobby con ese id
-        Player player = playerService.findByUser(currentUser)
-                      .orElseThrow(() -> new IllegalStateException("El usuario no tiene un Player asociado"));
+        Player currentPlayer = userService.findCurrentUser().toPlayer();        
         Match m = mrepo.findById(lobbyId).orElseThrow(() -> new LobbyNotFound("Lobby not found"));
-        //Comprueba que el lobby no esta lleno
         checkers.checkNumberOfPlayers(m);
-        //Comprueba que el jugador no esta ya en otro lobby
-        checkers.checkPlayerAlreadyInALobby(player);
-        m.getPlayers().add(player);
+        checkers.checkPlayerAlreadyInALobby(currentPlayer);
+        m.getPlayers().add(currentPlayer);
         mrepo.save(m); 
         return m;
 }
@@ -76,15 +80,13 @@ public class LobbyService {
 
     @Transactional
     public Match joinPrivateLobby(String code){
-        User currentUser = userService.findCurrentUser();
 
-        Player player = playerService.findByUser(currentUser)
-            .orElseThrow(() -> new IllegalStateException("El usuario no tiene un Player asociado"));
+        Player currentPlayer = userService.findCurrentUser().toPlayer();
 
         Match m = mrepo.findPrivateLobbyByCode(code).orElseThrow(() -> new LobbyNotFound("Lobby not found"));
         checkers.checkNumberOfPlayers(m);
-        checkers.checkPlayerAlreadyInALobby(player);
-        m.getPlayers().add(player);
+        checkers.checkPlayerAlreadyInALobby(currentPlayer);
+        m.getPlayers().add(currentPlayer);
         mrepo.save(m); 
         return m;
 
@@ -94,16 +96,22 @@ public class LobbyService {
     //Funcion para crear un lobby
     @Transactional
     public  Match createLobby(Match game, Boolean isPrivate, String name, Integer maxPlayers) {
-        
         User currentUser = userService.findCurrentUser();
-        Player player = playerService.findByUser(currentUser)
-                      .orElseThrow(() -> new IllegalStateException("El usuario no tiene un Player asociado"));
-        checkers.checkPlayerAlreadyInALobby(player);
+        Player currentPlayer = playerService.findById(currentUser.getId())
+                .orElseGet(() -> {
+                    Player newPlayer = currentUser.toPlayer(); 
+                    if (newPlayer == null) {
+                        throw new IllegalStateException("El usuario no tiene un Player asociado");
+                    }
+                    return playerService.save(newPlayer);
+                });
+        checkers.checkPlayerAlreadyInALobby(currentPlayer);
         game.setStatus(MatchStatus.WAITING);
-        game.setPlayers(new ArrayList<>(List.of(player)));
+        currentPlayer = entityManager.merge(currentPlayer); //Esto me lo dijo chatgpt
+        game.setPlayers(new ArrayList<>(List.of(currentPlayer)));
         game.setName(name);
         game.setMaxPlayers(maxPlayers);
-        game.setCreatorId(currentUser.getId());
+        game.setCreatorId(currentPlayer.getId());
         game.setIsPrivate(isPrivate);
         if(game.getIsPrivate()){
             String code=game.generateCodeLobby();
@@ -112,5 +120,34 @@ public class LobbyService {
         mrepo.save(game);
         return game;
     }
+
+
+
+
+    /*@Transactional
+    public Match leaveLobby(Integer lobbyId) {
+        User currentUser = userService.findCurrentUser();
+        Player player = playerService.findByUser(currentUser)
+                        .orElseThrow(() -> new IllegalStateException("El usuario no tiene un Player asociado"));
+
+        Match m = mrepo.findById(lobbyId)
+                        .orElseThrow(() -> new LobbyNotFound("Lobby no encontrado"));
+
+        // Crear checker
+        if (!m.getPlayers().contains(player)) {
+            throw new IllegalStateException("El jugador no está en este lobby");
+        }
+
+
+        m.getPlayers().remove(player);
+        player.setMatch(null);
+
+
+        return mrepo.save(m);
+
+    } */
+
+
+
     
 }
