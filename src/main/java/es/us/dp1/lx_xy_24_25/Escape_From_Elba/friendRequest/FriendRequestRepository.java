@@ -24,7 +24,7 @@ public interface FriendRequestRepository extends CrudRepository<FriendRequest, I
     List<FriendRequest> findAllRequestsForUserId(@Param("userId") Integer userId);
 
     //Devuelve todas las solicitudes de amistad aceptadas (ACCEPTED) donde el usuario es o el sender o el receiver. (Amigos)
-    @Query(value = "SELECT fr FROM FriendRequest fr WHERE fr.status = 'ACCEPTED' AND fr.sender.id = :userId OR fr.status = 'ACCEPTED' AND fr.receiver.id = :userId")
+    @Query("SELECT fr FROM FriendRequest fr WHERE fr.status = 'ACCEPTED' AND (fr.sender.id = :userId OR fr.receiver.id = :userId)")
     List<FriendRequest> findAllFriendsByUserId(@Param("userId") Integer userId);
 
     //Busca si dos usuarios concretos (user1Id y user2Id) tienen una solicitud pendiente o ya son amigos (ACCEPTED)

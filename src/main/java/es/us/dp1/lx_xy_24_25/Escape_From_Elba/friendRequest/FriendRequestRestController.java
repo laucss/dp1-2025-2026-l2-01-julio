@@ -42,8 +42,10 @@ public class FriendRequestRestController {
     @GetMapping("{userId}")
     @Operation(summary = "Get friends by user id", description = "Get all friends of a user by user id.")
     public ResponseEntity<List<MiniRequestDTO>> getFriendsByUserId(@PathVariable("userId") Integer userId) {
-        List<MiniRequestDTO> friends = friendRequestService.findFriendsByUserId(userId).stream()
-                .map(r -> new MiniRequestDTO(r)).toList();
+        List<MiniRequestDTO> friends = friendRequestService.findFriendRequestsByUserId(userId) // <- cambia este método
+        .stream()
+        .map(fr -> new MiniRequestDTO(fr))
+        .toList();
         return new ResponseEntity<>(friends, HttpStatus.OK);
     }
 

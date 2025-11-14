@@ -99,6 +99,8 @@ public class SecurityConfiguration {
 
                 // API restringida para jugadores o administradores
                 .requestMatchers("/api/v1/matches/**").hasAnyAuthority(PLAYER, ADMIN)
+                
+                .requestMatchers("/api/v1/friendRequests/**").authenticated()
 
                 
                 // El resto denegado

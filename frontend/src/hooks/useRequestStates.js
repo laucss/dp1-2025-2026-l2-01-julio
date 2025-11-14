@@ -5,6 +5,7 @@ const useRequestStates = (jwt, errorMessage, setErrorMessage) => {
   const [allFriends, setAllFriends] = useState([]);
   const [allReceived, setAllReceived] = useState([]);
   const [allSent, setAllSent] = useState([]);
+  const [message, setMessage] = useState(null);
 
   const {
     getAllFriends,
@@ -39,8 +40,8 @@ const useRequestStates = (jwt, errorMessage, setErrorMessage) => {
     return newRequest;
   };
 
-  const acceptRequest = async () => {
-    const acceptedRequest = await acceptFriendRequest();
+  const acceptRequest = async (requestId) => {
+    const acceptedRequest = await acceptFriendRequest(requestId, jwt, message, setMessage);
     return acceptedRequest;
   };
 
