@@ -19,26 +19,25 @@ public class PlayerService {
         this.playerRepository = playerRepository;
     }
 
-    // 🔹 Encuentra un Player por su User asociado
+    /* Encuentra un Player por su User asociado
     @Transactional(readOnly = true)
     public Optional<Player> findByUser(User user) {
         return playerRepository.findByUser(user);
-    }
+    } */
 
-    // 🔹 Encuentra un Player por su ID
+
     @Transactional(readOnly = true)
     public Optional<Player> findById(Integer id) {
         return playerRepository.findById(id);
     }
 
-    // 🔹 Guarda o actualiza un Player
+
     @Transactional
     public Player save(Player player) {
         return playerRepository.save(player);
     }
 
 
-    // 🔹 Borra un Player por ID
     @Transactional
     public void deleteById(Integer id) {
         playerRepository.deleteById(id);
