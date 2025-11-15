@@ -19,12 +19,16 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+
 
 @Getter
 @Setter
@@ -70,9 +74,13 @@ public class Match extends NamedEntity {
         return minPlayers <= maxPlayers;
     }
 
-    //Usuarios
+    //Jugadores 
     @NotNull
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "match", orphanRemoval = true)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}) // Ponerlo en cascada 
+    @JoinTable(
+        name = "match_players",
+        joinColumns = @JoinColumn(name = "match_id"),
+        inverseJoinColumns = @JoinColumn(name = "player_id"))
     private List<Player> players; 
 
     /** 
