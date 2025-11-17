@@ -34,11 +34,5 @@ public class StatisticController {
         return new ResponseEntity<>(statisticService.findAllStatistics(), HttpStatus.OK);
     }
 
-    @GetMapping("/global")
-    @Operation(summary = "Get global statistics", description = "Returns the total, average, minimum and maximum statistics for multiple metrics in a global scale.")
-    public ResponseEntity<FullStatisticDTO> getGlobalStatistics() {
-        FullStatisticDTO globalStatistic = statisticService.getGlobalStatistics();
-        return new ResponseEntity<>(globalStatistic, HttpStatus.OK);
-    }
     
 }

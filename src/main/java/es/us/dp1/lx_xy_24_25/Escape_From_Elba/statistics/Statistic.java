@@ -27,5 +27,5 @@ public class Statistic extends BaseEntity{
     @Column(name="avg_players", nullable = false, columnDefinition = "double default 0")
     private Double avgPlayers=0.;
 
-    /*total batallas ganadas, maximos puntos fuerza, total batallas perdidas, maximo de armas */
+    /*total batallas ganadas, maximos puntos fuerza, total batallas perdidas, maximo de armas, total salas visitadas */
 }
