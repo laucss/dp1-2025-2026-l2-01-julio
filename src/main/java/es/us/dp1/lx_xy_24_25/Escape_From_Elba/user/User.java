@@ -1,13 +1,17 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.user;
 
+import java.util.List;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -31,6 +35,10 @@ public class User extends BaseEntity {
     @Column(unique = true)
     @Email
     String email;
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Player> players;
 
     @Min(1)
     @Max(100)
@@ -68,7 +76,7 @@ public class User extends BaseEntity {
         user.setUsername(username);
         return user;
     }
-
+    /* 
     public Player toPlayer(){
         if (authority == null || ! "PLAYER".equals(authority.getAuthority())){
             return null;
@@ -80,5 +88,5 @@ public class User extends BaseEntity {
         player.setPassword(password);
         player.setUsername(username);
         return player;
-    }
+    } */
 }

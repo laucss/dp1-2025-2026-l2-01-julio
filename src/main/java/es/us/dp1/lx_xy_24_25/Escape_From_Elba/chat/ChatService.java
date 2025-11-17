@@ -1,4 +1,4 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.chat;
+ /*package es.us.dp1.lx_xy_24_25.Escape_From_Elba.chat;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -54,4 +54,4 @@ public class ChatService {
 
         return chatRepository.save(created);
     }
-}
+} */

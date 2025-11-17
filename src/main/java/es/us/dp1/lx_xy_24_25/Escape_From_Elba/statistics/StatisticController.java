@@ -27,12 +27,13 @@ public class StatisticController {
     public StatisticController(StatisticService statisticService) {
         this.statisticService = statisticService;
     }
-
+    
+     /* 
     @GetMapping
     @Operation(summary = "Get all statistics", description = "Returns all the statistics of the players.")
     public ResponseEntity<List<StatisticWithPlayerDTO>> getAllStatistics() {
         return new ResponseEntity<>(statisticService.findAllStatistics(), HttpStatus.OK);
-    }
+    }  */
 
     
 }
