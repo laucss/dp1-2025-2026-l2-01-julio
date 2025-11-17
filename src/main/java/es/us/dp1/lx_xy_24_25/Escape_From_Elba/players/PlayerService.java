@@ -31,6 +31,11 @@ public class PlayerService {
         return playerRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<Player> findByMatchIdAndUserId(Integer matchId, Integer userId) {
+        return playerRepository.findByMatchAndUser(matchId, userId);
+    }
+
 
     @Transactional
     public Player save(Player player) {
