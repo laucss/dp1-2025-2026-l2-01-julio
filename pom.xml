@@ -41,8 +41,8 @@
 			<name>Emilio</name>
 			<email>emidiaarc@alum.us.es</email>
 			<url>https://github.com/Emiliodiar</url>
-    </developer>
-     <developer>
+    	</developer>
+     	<developer>
 			<name>Marco</name>
 			<email>marvislop@alum.us.es</email>
 			<url>https://github.com/MarcoVL603</url>
@@ -142,7 +142,7 @@
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-junit5</artifactId>
             <scope>test</scope>
-          </dependency>
+        </dependency>
 		<!-- Development tools -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
