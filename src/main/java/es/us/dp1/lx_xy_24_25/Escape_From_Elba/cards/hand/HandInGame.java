@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
+@Embeddable
 public class HandInGame {
 
     /*
@@ -18,6 +21,7 @@ public class HandInGame {
      */
 
 
+    @OneToMany
     private List<Card> cards; 
 
 
