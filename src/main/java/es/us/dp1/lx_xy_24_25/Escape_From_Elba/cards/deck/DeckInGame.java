@@ -4,14 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Embeddable
 public class DeckInGame {
 
     /*
@@ -20,16 +17,23 @@ public class DeckInGame {
      * 2. No vamos a necesitar guardar tras finalizar la partida ningún dato del mazo, por lo que no necesito usar un repository. 
      */
 
-    @OneToMany
     private List<Card> notDiscardedCards; 
 
-    @OneToMany
     private List<Card> discardedCards; 
 
     public DeckInGame (List<Card> cards) {
-        this.notDiscardedCards = new ArrayList<>(cards);
+        if (cards ==null){
+            this.notDiscardedCards = new ArrayList<>();
+
+            this.discardedCards = new ArrayList<>();
+
+        } else {
+            this.notDiscardedCards = new ArrayList<>(cards);
 
         this.discardedCards = new ArrayList<>();
+        }
 
     }
+    public DeckInGame(){}
+    
 }

@@ -1,5 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.patterns.Prototype;
 import jakarta.persistence.Entity;
@@ -12,6 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "cards")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Card extends BaseEntity implements Prototype<Card> {
 
     @NotNull
@@ -23,6 +26,7 @@ public class Card extends BaseEntity implements Prototype<Card> {
     @NotNull
     private String letter; 
 
+    public Card(){}
 
 
     

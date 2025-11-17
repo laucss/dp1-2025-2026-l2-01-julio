@@ -1,8 +1,76 @@
-import React from "react"
+import React, { useState } from "react"
 import '../../static/css/match/Match.css';
+import getIdFromUrl from '../../util/getIdFromUrl'
+import { useEffect } from "react";
+import tokenService from "../../services/token.service";
+
+const jwt = tokenService.getLocalAccessToken();
 
 
 export default function Match(){
+    const matchId = getIdFromUrl(2);
+    const [deck, setDeck] = useState(null)
+    const [drawnCards, setDrawnCards] = useState([])
+
+    useEffect(() => {
+    fetch(`/api/v1/deck/${matchId}`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${jwt}`,
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(async res => {
+        if (!res.ok) {
+            // Intentamos leer el cuerpo de error si el servidor lo devuelve
+            let errorBody;
+            try {
+                errorBody = await res.json();
+            } catch {
+                errorBody = await res.text();
+            }
+            throw new Error(`Error al obtener el mazo: ${res.status} ${res.statusText} - ${JSON.stringify(errorBody)}`);
+        }
+        return res.json();
+    })
+    .then(data => {
+        setDeck(data);
+        console.log("Deck cargado:", data);
+    })
+    .catch(err => {
+        console.error("Fetch fallido:", err);
+        alert(`Ocurrió un error: ${err.message}`); // opcional, para verlo en pantalla
+    });
+}, [matchId]);
+
+
+    function drawCard() {
+        fetch(`/api/v1/deck/${matchId}/draw`, {
+            method: "POST",
+            headers: {
+            Authorization: `Bearer ${jwt}`,
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Error al robar carta");
+            }
+            return response.json();
+        })
+        .then(card => {
+            console.log("Carta robada:", card);
+
+            // 👇 AÑADIMOS LA CARTA A LA LISTA DE CARTAS ROBADAS
+            setDrawnCards(prev => [...prev, card]);
+        })
+        .catch(err => {
+            console.error(err);
+        });
+    }
+
 
     return (
         <div>
@@ -45,7 +113,30 @@ export default function Match(){
             </map>
             <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
 
+            <div>
+                 <button onClick={drawCard}>Robar carta</button>
+                 <h2>Cartas robadas</h2>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                        {drawnCards.map((carta, index) => (
+                            <div 
+                                key={index}
+                                style={{
+                                    padding: "10px",
+                                    border: "1px solid black",
+                                    borderRadius: "8px",
+                                    background: "#f0f0f0"
+                                }}
+                            >
+                                <p><strong>ID:</strong> {carta.id}</p>
+                                <p><strong>Nombre:</strong> {carta.letter}</p>
+                            </div>
+                        ))}
+                </div>
+            </div>
             
         </div>
+        
             )
+
+        
     }
