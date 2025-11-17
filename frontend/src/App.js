@@ -24,6 +24,7 @@ import CreateMatch from "./screens/match/createMatch";
 import JoinMatch from "./screens/match/joinMatch";
 import MatchList from "./screens/prueba";
 import WaitingLobby from "./screens/match/waitingLobby";
+import Match from "./screens/match/Match";
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -68,6 +69,7 @@ function App() {
         <>
           <Route path="/users/:username" exact={true} element={<Profile />} />
           <Route path="/achievements" element={<PrivateRoute><AchievementUserList /></PrivateRoute>} />
+          <Route path="/match/:matchId" element={<PrivateRoute><Match /></PrivateRoute>} />
         </>)
     }    
   })
