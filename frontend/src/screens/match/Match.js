@@ -1,14 +1,6 @@
 import React from "react"
 import '../../static/css/match/Match.css';
 
-const [users, setUsers] = useFetchState(
-    [],
-    `/api/v1/users`,
-    jwt,
-    setMessage,
-    setVisible
-    
-  );
 
 export default function Match(){
 
