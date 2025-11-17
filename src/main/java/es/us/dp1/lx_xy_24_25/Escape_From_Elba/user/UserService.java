@@ -104,7 +104,7 @@ public class UserService {
 		this.userRepository.delete(toDelete);
 	}
 
-    public void ensureAllUsersHavePlayer() {
+    /*public void ensureAllUsersHavePlayer() {
     List<User> users = userRepository.findAll();
     for (User user : users) {
         if (playerRepository.findByUser(user).isEmpty()) {
@@ -114,7 +114,7 @@ public class UserService {
             playerRepository.save(player);
         }
     }
-}
+}*/
 
 
 }
