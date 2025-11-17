@@ -76,11 +76,7 @@ public class Match extends NamedEntity {
 
     //Jugadores 
     @NotNull
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}) // Ponerlo en cascada 
-    @JoinTable(
-        name = "match_players",
-        joinColumns = @JoinColumn(name = "match_id"),
-        inverseJoinColumns = @JoinColumn(name = "player_id"))
+    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Player> players; 
 
     /** 

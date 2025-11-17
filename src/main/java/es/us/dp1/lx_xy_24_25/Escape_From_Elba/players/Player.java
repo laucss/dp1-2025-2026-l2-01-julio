@@ -20,13 +20,16 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Player extends User {
+public class Player extends BaseEntity {
 
 
-	
+	@NotNull
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User user;
+
 	@ManyToOne
 	@JoinColumn(name = "match_id")
-	@JsonBackReference
 	private Match match;
 
 
@@ -35,7 +38,7 @@ public class Player extends User {
 
     private Integer actionPoints; // realmente tendría que ser una función de getActionPoints no? 
         
-	private Statistic statistic;
+	//private Statistic statistic;
 
 }
 

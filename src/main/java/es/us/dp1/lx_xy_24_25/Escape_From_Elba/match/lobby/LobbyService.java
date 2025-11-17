@@ -64,15 +64,15 @@ public class LobbyService {
         return mrepo.findPrivateLobbyByCode(codeLobby);
     }
 
-
+    
     //Crear metodo para unirse a una partida publica
     @Transactional
     public Match joinLobby(Integer lobbyId) {
-        Player currentPlayer = userService.findCurrentUser().toPlayer();        
-        Match m = mrepo.findById(lobbyId).orElseThrow(() -> new LobbyNotFound("Lobby not found"));
+        //Player currentPlayer = userService.findCurrentUser().toPlayer();        
+        Match m = mrepo.findById(lobbyId).orElseThrow(() -> new LobbyNotFound("Lobby not found")); 
         checkers.checkNumberOfPlayers(m);
-        checkers.checkPlayerAlreadyInALobby(currentPlayer);
-        m.getPlayers().add(currentPlayer);
+        //checkers.checkPlayerAlreadyInALobby(currentPlayer);
+        //m.getPlayers().add(currentPlayer);
         mrepo.save(m); 
         return m;
 }
@@ -81,12 +81,12 @@ public class LobbyService {
     @Transactional
     public Match joinPrivateLobby(String code){
 
-        Player currentPlayer = userService.findCurrentUser().toPlayer();
+        //Player currentPlayer = userService.findCurrentUser().toPlayer();
 
         Match m = mrepo.findPrivateLobbyByCode(code).orElseThrow(() -> new LobbyNotFound("Lobby not found"));
         checkers.checkNumberOfPlayers(m);
-        checkers.checkPlayerAlreadyInALobby(currentPlayer);
-        m.getPlayers().add(currentPlayer);
+        //checkers.checkPlayerAlreadyInALobby(currentPlayer);
+        //m.getPlayers().add(currentPlayer);
         mrepo.save(m); 
         return m;
 
@@ -97,21 +97,21 @@ public class LobbyService {
     @Transactional
     public  Match createLobby(Match game, Boolean isPrivate, String name, Integer maxPlayers) {
         User currentUser = userService.findCurrentUser();
-        Player currentPlayer = playerService.findById(currentUser.getId())
+        /*Player currentPlayer = playerService.findById(currentUser.getId())
                 .orElseGet(() -> {
                     Player newPlayer = currentUser.toPlayer(); 
                     if (newPlayer == null) {
                         throw new IllegalStateException("El usuario no tiene un Player asociado");
                     }
                     return playerService.save(newPlayer);
-                });
-        checkers.checkPlayerAlreadyInALobby(currentPlayer);
+                }); */
+        //checkers.checkPlayerAlreadyInALobby(currentPlayer);
         game.setStatus(MatchStatus.WAITING);
-        currentPlayer = entityManager.merge(currentPlayer); //Esto me lo dijo chatgpt
-        game.setPlayers(new ArrayList<>(List.of(currentPlayer)));
+        //currentPlayer = entityManager.merge(currentPlayer); //Esto me lo dijo chatgpt
+        //game.setPlayers(new ArrayList<>(List.of(currentPlayer)));
         game.setName(name);
         game.setMaxPlayers(maxPlayers);
-        game.setCreatorId(currentPlayer.getId());
+        //game.setCreatorId(currentPlayer.getId());
         game.setIsPrivate(isPrivate);
         if(game.getIsPrivate()){
             String code=game.generateCodeLobby();
