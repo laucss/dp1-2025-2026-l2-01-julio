@@ -16,6 +16,9 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class DeckService {
 
@@ -43,10 +46,11 @@ public class DeckService {
     public DeckInGame initializeDeck(Integer macthId) {
         // TODO: revisar si debería checkear que el match exista, creo que no pq no da tiempo pero bueno
         List<Card> originalsCards = cardRepository.findAll();
+        //System.out.println("originalsCards: " + originalsCards);
 
         List<Card> copiedCards = originalsCards.stream().map(carta -> carta.getClone()).toList(); 
 
-        Collections.shuffle(copiedCards);
+        // Collections.shuffle(copiedCards); TODO: ESTO DA ERROR
 
         DeckInGame newDeck = new DeckInGame(copiedCards); 
         activesDecks.put(macthId, newDeck); 
@@ -107,8 +111,13 @@ public class DeckService {
     @Transactional
     public Card drawCard(Integer matchId){
         DeckInGame deck = findDeckById(matchId); 
+        if (deck.getNotDiscardedCards().isEmpty()) {
+            throw new RuntimeException("No hay cartas para robar");
+}
 
-        return deck.getNotDiscardedCards().remove(0); 
+        Card card = deck.getNotDiscardedCards().getLast();
+        deck.getNotDiscardedCards().removeLast(); 
+        return card; 
         
     }
 
