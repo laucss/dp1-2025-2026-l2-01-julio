@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import lombok.Getter;
 import lombok.Setter;
 

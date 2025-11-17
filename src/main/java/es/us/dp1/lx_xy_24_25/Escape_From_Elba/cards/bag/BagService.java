@@ -25,7 +25,15 @@ public class BagService {
     }
 
     /*
-     * Método que crea un HandInGame para un jugador
+     * Variable que vamos a usar a modo de "almacenamiento" en memoria del estado de la bolsa
+     * Map de la forma: 
+     * Map<MatchId, Map<PlayerId, BagInGame>> 
+     */
+    private final Map<Integer, Map<Integer, BagInGame>> activesBags = new HashMap<>(); 
+
+
+    /*
+     * Método que crea un BagInGame para un jugador
      */
     public void createPlayerBag(Integer matchId, Integer playerId){
         playerService.findById(playerId); 
@@ -35,12 +43,17 @@ public class BagService {
     }
 
     /*
-     * Variable que vamos a usar a modo de "almacenamiento" en memoria del estado de la bolsa
-     * Map de la forma: 
-     * Map<MatchId, Map<PlayerId, BagInGame>> 
+     * Método que tras acabar una partida, borra la bolsa en memoria del jugador 
      */
-    private final Map<Integer, Map<Integer, BagInGame>> activesBags = new HashMap<>(); 
+    public void deletePlayerBag(Integer matchId, Integer playerId){
+        playerService.findById(playerId); 
+        // TODO: revisar si tengo que checkear que match exista
 
+        Map<Integer, BagInGame> playerMap= activesBags.get(matchId); 
+        playerMap.remove(playerId); 
+    }
+
+    
 
     /*
      * Método que busca y devuelve el BagInGame del jugador

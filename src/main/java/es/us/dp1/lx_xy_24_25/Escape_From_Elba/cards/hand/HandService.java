@@ -1,6 +1,5 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +7,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ch.qos.logback.core.net.HardenedObjectInputStream;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
@@ -48,6 +46,18 @@ public class HandService {
 
     }
     /*
+     * Método que tras acabar una partida, borra la mano en memoria del jugador 
+     */
+
+    public void deletePlayerHand(Integer matchId, Integer playerId){
+        playerService.findById(playerId); 
+        // TODO: revisar si tengo que checkear que match exista
+
+        Map<Integer, HandInGame> playerMap= activesHands.get(matchId); 
+        playerMap.remove(playerId); 
+    }
+
+    /*
      * Método que busca la HandInGame del jugador en la partida dada
      */
 
@@ -83,12 +93,12 @@ public class HandService {
     }
 
     /*
-     * Método que quita una carta de la bolsa del jugador 
+     * Método que quita una carta de la mano del jugador 
      */
 
 
     @Transactional
-    public Card removeCardFromPlayerBag(Card card, Integer matchId, Integer playerId){
+    public Card removeCardFromPlayerHand(Card card, Integer matchId, Integer playerId){
         checkers.checkCardExists(card);
         
         HandInGame playerHand = findPlayerHand(matchId, playerId); 

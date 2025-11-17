@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 
@@ -51,6 +52,15 @@ public class DeckService {
         activesDecks.put(macthId, newDeck); 
         return newDeck; 
 
+    }
+
+    /*
+     * Método que tras acabar una partida, borra la baraja en memoria de la partida 
+     */
+
+    public void deleteDeckInGame(Integer matchId){ 
+        // TODO: revisar si tengo que checkear que match exista
+        activesDecks.remove(matchId); 
     }
 
     /* 
