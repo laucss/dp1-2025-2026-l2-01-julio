@@ -11,16 +11,25 @@ const useRequestStates = (jwt, errorMessage, setErrorMessage) => {
     getAllFriends,
     getAllReceived,
     getAllSent,
-    createNewRequest,
-    acceptFriendRequest,
-    rejectFriendRequest,
-    deleteFriendRequest,
+    createRequest: svcCreateRequest,
+    acceptRequest: svcAcceptRequest,
+    rejectRequest: svcRejectRequest,
+    deleteFriend: svcDeleteFriend,
   } = useRequestService(jwt, errorMessage, setErrorMessage);
 
   const getAndSetAllFriends = async (userId) => {
-    const allFriends = await getAllFriends(userId);
-    setAllFriends(allFriends);
-    return allFriends;
+  const allFriendsResponse = await getAllFriends(userId);
+    // Normalizar distintas formas de respuesta del backend
+    let friendsArray = [];
+    if (Array.isArray(allFriendsResponse)) {
+      friendsArray = allFriendsResponse;
+    } else if (allFriendsResponse && Array.isArray(allFriendsResponse.content)) {
+      friendsArray = allFriendsResponse.content;
+    } else if (allFriendsResponse && Array.isArray(allFriendsResponse.data)) {
+      friendsArray = allFriendsResponse.data;
+    }
+    setAllFriends(friendsArray);
+    return friendsArray;
   };
 
   const getAndSetReceivedRequests = async (userId) => {
@@ -36,23 +45,37 @@ const useRequestStates = (jwt, errorMessage, setErrorMessage) => {
   };
 
   const createRequest = async (username) => {
-    const newRequest = await createNewRequest(username);
+    const newRequest = await svcCreateRequest(username);
     return newRequest;
   };
 
   const acceptRequest = async (requestId) => {
-    const acceptedRequest = await acceptFriendRequest(requestId, jwt, message, setMessage);
+    const acceptedRequest = await svcAcceptRequest(requestId);
     return acceptedRequest;
   };
 
   const rejectRequest = async () => {
-    const acceptedRequest = await rejectFriendRequest();
-    return acceptedRequest;
+    const rejected = await svcRejectRequest();
+    return rejected;
   };
 
   const deleteFriend = async () => {
-    const deletedFriend = await deleteFriendRequest();
+    const deletedFriend = await svcDeleteFriend();
     return deletedFriend;
+  };
+
+  // Añadir un amigo directamente al estado (evita esperar al GET si el backend tarda)
+  const addFriendToState = (friend) => {
+    if (!friend) return;
+    setAllFriends((prev) => {
+      try {
+        const exists = prev.some((f) => f.id === friend.id);
+        if (exists) return prev;
+      } catch (e) {
+        // en caso de que prev no sea array
+      }
+      return Array.isArray(prev) ? [...prev, friend] : [friend];
+    });
   };
 
   return {
@@ -66,6 +89,7 @@ const useRequestStates = (jwt, errorMessage, setErrorMessage) => {
     acceptRequest,
     rejectRequest,
     deleteFriend,
+    addFriendToState,
   };
 };
 

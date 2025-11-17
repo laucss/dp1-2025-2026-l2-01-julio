@@ -8,12 +8,18 @@ import useRequestStates from '../../hooks/useRequestStates';
 const jwt = tokenService.getLocalAccessToken();
 
 export default function Friends() {
-
   const [errorMessage, setErrorMessage] = useState(null);
-
-  const { allFriends, getAndSetAllFriends } = useRequestStates(jwt, errorMessage, setErrorMessage);
-  const { allSent, getAndSetSentRequests } = useRequestStates(jwt, errorMessage, setErrorMessage);
-  const { allReceived, getAndSetReceivedRequests } = useRequestStates(jwt, errorMessage, setErrorMessage);
+  const [visible, setVisible] = useState(false);
+  
+  const {
+    allFriends,
+    allSent,
+    allReceived,
+    getAndSetAllFriends,
+    getAndSetSentRequests,
+    getAndSetReceivedRequests,
+    addFriendToState,
+  } = useRequestStates(jwt, errorMessage, setErrorMessage);
 
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showReceivedModal, setShowReceivedModal] = useState(false);
@@ -99,10 +105,14 @@ export default function Friends() {
         body: JSON.stringify(requestId),
       });
 
-      const json = await response.json();
+  const json = await response.json();
       if (json.message) setErrorMessage(json.message);
 
-      const userId = tokenService.getUser?.()?.id;
+    const userId = tokenService.getUser?.()?.id;
+      // Añadir inmediatamente al estado local para que la UI se actualice
+      if (json && json.id) {
+        addFriendToState(json);
+      }
       if (userId) {
         await getAndSetAllFriends(userId);
         await getAndSetReceivedRequests(userId);
@@ -161,6 +171,18 @@ export default function Friends() {
       return () => clearTimeout(timer);
     }
   }, [errorMessage]);
+
+  // Cargar inicialmente amigos/solicitudes al montar el componente
+  useEffect(() => {
+    const userId = tokenService.getUser?.()?.id;
+  // mount userId logged earlier during development
+    if (userId) {
+      getAndSetAllFriends(userId);
+      getAndSetSentRequests(userId);
+      getAndSetReceivedRequests(userId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="friends-page">
