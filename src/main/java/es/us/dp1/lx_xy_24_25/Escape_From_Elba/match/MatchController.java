@@ -55,14 +55,12 @@ public class MatchController {
             throw new ResourceNotFoundException("Match", "id", matchId);
         return m.get();
     }
-    
-    @PostMapping("/lobbies")
-    @ResponseStatus(HttpStatus.CREATED)
-    public  ResponseEntity<Match> createLobby(@RequestBody LobbyDTO lobbyDTO) {
-        Match game = new Match();
-        Match saved= ls.createLobby(game, lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers());
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+
+    @GetMapping("/lobbies/{matchId}")
+    public Optional<Match> getPrivateGame(@ParameterObject String code){
+        return ls.getPrivateLobby(code);
     }
+
 
     @GetMapping("/lobbies")
     public List<Match> getPublicGames(){
@@ -74,11 +72,13 @@ public class MatchController {
         return ls.getAllPrivateLobbies();
     }
 
-
-
-    @GetMapping("/lobbies/{matchId}")
-    public Optional<Match> getPrivateGame(@ParameterObject String code){
-        return ls.getPrivateLobby(code);
+    
+    @PostMapping("/lobbies")
+    @ResponseStatus(HttpStatus.CREATED)
+    public  ResponseEntity<Match> createLobby(@RequestBody LobbyDTO lobbyDTO) {
+        Match game = new Match();
+        Match saved= ls.createLobby(game, lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers());
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PostMapping("/lobbies/{matchId}/join")
@@ -91,7 +91,6 @@ public class MatchController {
 
     }
     
-
     @PostMapping("/lobbies/join/private")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Match> joinPrivateLobby(@RequestParam String code) {
@@ -99,14 +98,11 @@ public class MatchController {
         return ResponseEntity.ok(joinedMatch);
     }
 
-    /*@DeleteMapping("/lobbies/{matchId}/leave")
-    public ResponseEntity<Match> leaveLobby(
-            @Parameter(description = "Id of the lobby to leave") 
-            @PathVariable Integer matchId) {
-
+    @PostMapping("/lobbies/{matchId}/leave")
+    public ResponseEntity<Match> leaveLobby(@Parameter(description = "Id of the lobby to leave") @PathVariable Integer matchId) {
         Match leftMatch = ls.leaveLobby(matchId);
         return ResponseEntity.ok(leftMatch);
-    }*/
+    }
 
 
 

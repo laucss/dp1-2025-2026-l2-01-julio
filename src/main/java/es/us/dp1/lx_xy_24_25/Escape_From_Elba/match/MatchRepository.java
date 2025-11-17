@@ -31,8 +31,9 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
     Optional<Match> findPrivateLobbyByCode(String codeLobby);
 
     //Devuelve si el usuario esta en algun lobby
-    @Query("SELECT m FROM Match m WHERE m.status='WAITING' AND :player MEMBER OF m.players")
-    Optional<Match> findLobbyWherePlayerIsIn(Player player);
+       @Query("SELECT m FROM Match m JOIN m.players p WHERE m.status = 'WAITING'AND p.user.id = :userId")
+       Optional<Match> findLobbyWhereUserIsIn(Integer userId);
+
 
 
     // Devuelve todas las partidas en progreso (he hecho una propiedad del estilo en match)
