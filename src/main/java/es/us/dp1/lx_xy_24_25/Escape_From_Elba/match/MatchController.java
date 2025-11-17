@@ -55,6 +55,7 @@ public class MatchController {
             throw new ResourceNotFoundException("Match", "id", matchId);
         return m.get();
     }
+    
     @PostMapping("/lobbies")
     @ResponseStatus(HttpStatus.CREATED)
     public  ResponseEntity<Match> createLobby(@RequestBody LobbyDTO lobbyDTO) {
@@ -89,13 +90,24 @@ public class MatchController {
 
 
     }
+    
 
-@PostMapping("/lobbies/join/private")
-@ResponseStatus(HttpStatus.OK)
-public ResponseEntity<Match> joinPrivateLobby(@RequestParam String code) {
-    Match joinedMatch = ls.joinPrivateLobby(code);
-    return ResponseEntity.ok(joinedMatch);
-}
+    @PostMapping("/lobbies/join/private")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Match> joinPrivateLobby(@RequestParam String code) {
+        Match joinedMatch = ls.joinPrivateLobby(code);
+        return ResponseEntity.ok(joinedMatch);
+    }
+
+    /*@DeleteMapping("/lobbies/{matchId}/leave")
+    public ResponseEntity<Match> leaveLobby(
+            @Parameter(description = "Id of the lobby to leave") 
+            @PathVariable Integer matchId) {
+
+        Match leftMatch = ls.leaveLobby(matchId);
+        return ResponseEntity.ok(leftMatch);
+    }*/
+
 
 
     @PostMapping()
@@ -111,11 +123,11 @@ public ResponseEntity<Match> joinPrivateLobby(@RequestParam String code) {
 
     @PutMapping(value="/{id}")
     public ResponseEntity<Void> updateGame(@Valid @RequestBody Match m,@PathVariable("id")Integer id){
-        Match mToUpdate=getMatchById(id); // error???
+        Match mToUpdate=getMatchById(id);
         BeanUtils.copyProperties(m,mToUpdate, "id");
         ms.save(mToUpdate);
-        return ResponseEntity.noContent().build(); // error???
-    } // error???
+        return ResponseEntity.noContent().build(); 
+    } 
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGame(@PathVariable("id")Integer id){
