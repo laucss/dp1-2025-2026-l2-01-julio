@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StatisticRepository extends CrudRepository<Statistic, Integer> {
+	List<Statistic> findAll(); // Method to retrieve all statistics
 }

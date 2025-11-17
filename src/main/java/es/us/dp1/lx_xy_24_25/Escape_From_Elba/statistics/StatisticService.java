@@ -35,6 +35,24 @@ public class StatisticService {
         return statisticDTOs;
     }
 
+    @Transactional(readOnly = true)
+    public FullStatisticDTO getGlobalStatistics() {
+        StatisticDTO globalStatistic = statisticRepository.findGlobalTotalStatistics();
+        StatisticAvgDTO avgStatistic = statisticRepository.findGlobalAvgStatistics();
+        StatisticDTO minStatistic = statisticRepository.findGlobalMinStatistics();
+        StatisticDTO maxStatistic = statisticRepository.findGlobalMaxStatistics();
+        
+        Object[] playersPerGameStats = matchRepository.getPlayersPerGameStats().get(0);
+        avgStatistic.setPlayers((Double) playersPerGameStats[0]);
+        maxStatistic.setPlayers(((Number) playersPerGameStats[1]).longValue());
+        minStatistic.setPlayers(((Number) playersPerGameStats[2]).longValue());
+
+        Long finishedGamesCount = gameRepository.getFinishedGamesCount();
+        globalStatistic.setGamesPlayed(finishedGamesCount);
+
+        return new FullStatisticDTO(globalStatistic, avgStatistic, minStatistic, maxStatistic);
+    }
+
     public StatisticService(StatisticRepository statisticRepository, PlayerRepository playerRepository,
             MatchRepository matchRepository) {
         this.statisticRepository = statisticRepository;
