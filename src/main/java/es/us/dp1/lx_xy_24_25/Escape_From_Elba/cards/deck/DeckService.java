@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +50,10 @@ public class DeckService {
         List<Card> originalsCards = cardRepository.findAll();
         //System.out.println("originalsCards: " + originalsCards);
 
-        List<Card> copiedCards = originalsCards.stream().map(carta -> carta.getClone()).toList(); 
-
-        // Collections.shuffle(copiedCards); TODO: ESTO DA ERROR
+        List<Card> copiedCards = new ArrayList<>(
+                originalsCards.stream().map(Card::getClone).toList());
+        
+        Collections.shuffle(copiedCards); //TODO: ESTO DA ERROR
 
         DeckInGame newDeck = new DeckInGame(copiedCards); 
         activesDecks.put(macthId, newDeck); 

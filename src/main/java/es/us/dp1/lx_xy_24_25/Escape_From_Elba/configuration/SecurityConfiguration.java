@@ -75,6 +75,8 @@ public class SecurityConfiguration {
                     "/swagger-resources/**"
                 ).permitAll()
 
+                 .requestMatchers("/resources/images/**").permitAll()
+
                 // API pública
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/developers").permitAll()
