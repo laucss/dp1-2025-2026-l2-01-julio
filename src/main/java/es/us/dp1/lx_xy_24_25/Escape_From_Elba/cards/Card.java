@@ -1,5 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
@@ -28,7 +29,6 @@ public class Card extends BaseEntity implements Prototype<Card> {
 
     public Card(){}
 
-
     
     /*
      * Constructor para poder hacer una copia de carta y aplicar el patron Prototipe
@@ -40,6 +40,7 @@ public class Card extends BaseEntity implements Prototype<Card> {
         this.letter = carta.letter;
     }
 
+    @JsonIgnore
     public Card getClone() {
         return new Card(this); 
     }

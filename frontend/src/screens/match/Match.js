@@ -127,8 +127,7 @@ export default function Match(){
                                     background: "#f0f0f0"
                                 }}
                             >
-                                <p><strong>ID:</strong> {carta.id}</p>
-                                <p><strong>Nombre:</strong> {carta.letter}</p>
+                                <p><strong>{carta.letter}</strong> </p>
                             </div>
                         ))}
                 </div>
