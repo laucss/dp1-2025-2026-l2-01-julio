@@ -27,6 +27,9 @@ export default function Friends() {
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState(null);
   const [inviteSuccess, setInviteSuccess] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null); // { id, name }
+  const [searchQuery, setSearchQuery] = useState('');
 
   const openInviteModal = () => {
     setInviteUsername('');
@@ -45,6 +48,13 @@ export default function Friends() {
   setInviteError(null);
   setInviteSuccess(null);
   setInviteLoading(true);
+
+  const currentUsername = tokenService.getUser?.()?.username;
+  if (inviteUsername.trim().toLowerCase() === currentUsername?.toLowerCase()) {
+    setInviteError("No puedes enviar una invitación a ti mismo.");
+    setInviteLoading(false);
+    return;
+  }
 
   fetch(`/api/v1/friendRequests/${inviteUsername}`, {
     method: "POST",
@@ -65,6 +75,19 @@ export default function Friends() {
           errObj = null;
         }
 
+        const errorMessage = errObj?.message || errText;
+
+        if (response.status === 404) {
+          if (errorMessage.includes("User not found")) {
+            throw new Error("El usuario no existe.");
+          }
+          throw new Error(errorMessage);
+        }
+
+        if (response.status === 400) {
+          throw new Error(errorMessage || "El usuario especificado no existe o la solicitud es inválida.");
+        }
+
         if (errObj && errObj.message?.includes("Entity Friend request already created.")) {
           let customError = "Ya existe una solicitud con este usuario.";
 
@@ -75,7 +98,7 @@ export default function Friends() {
           }
           throw new Error(customError);
         } else {
-          throw new Error(`Error ${response.status}: ${errText}`);
+          throw new Error(errorMessage);
         }
       }
       return response.json();
@@ -109,7 +132,6 @@ export default function Friends() {
       if (json.message) setErrorMessage(json.message);
 
     const userId = tokenService.getUser?.()?.id;
-      // Añadir inmediatamente al estado local para que la UI se actualice
       if (json && json.id) {
         addFriendToState(json);
       }
@@ -144,22 +166,47 @@ export default function Friends() {
     }
   }
 
-  const handleDelete = (event) => {
-    event.preventDefault();
+  const openDeleteModal = (friend) => {
+    const currentUserId = tokenService.getUser?.()?.id;
+    const name = friend?.sender?.id === currentUserId
+      ? friend?.receiver?.username
+      : friend?.sender?.username;
+    setDeleteTarget({ id: friend.id, name });
+    setShowDeleteModal(true);
+  };
 
-    fetch(`api/v1/friendRequests`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(event.target.value),
-    })
-      .then((response) => response.json())
-      .catch((error) => setErrorMessage(error.message));
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+  };
 
-    getAndSetAllFriends(tokenService.getUser()?.id);
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      const response = await fetch(`api/v1/friendRequests`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(deleteTarget.id),
+      });
+      let json = null;
+      try {
+        json = await response.json();
+      } catch (e) {
+      }
+
+      if (json && json.message) setErrorMessage(json.message);
+
+      const userId = tokenService.getUser?.()?.id;
+      if (userId) await getAndSetAllFriends(userId);
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      closeDeleteModal();
+    }
   };
 
   useEffect(() => {
@@ -172,16 +219,13 @@ export default function Friends() {
     }
   }, [errorMessage]);
 
-  // Cargar inicialmente amigos/solicitudes al montar el componente
   useEffect(() => {
     const userId = tokenService.getUser?.()?.id;
-  // mount userId logged earlier during development
     if (userId) {
       getAndSetAllFriends(userId);
       getAndSetSentRequests(userId);
       getAndSetReceivedRequests(userId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -203,30 +247,51 @@ export default function Friends() {
         </button>
       </div>
 
-      <div className="friends-search">
+        <div className="friends-search">
         <FaSearch className="search-icon" />
-        <input type="text" placeholder="Buscar por nombre de usuario" className="search-input" />
+        <input
+          type="text"
+          placeholder="Buscar por nombre de usuario"
+          className="search-input"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
 
       <div className="friends-list">
         <div className="friends-header">
-          <h2>Lista de Amigos ({allFriends?.length || 0})</h2>
+          <h2>Lista de Amigos</h2>
         </div>
 
         <div className="friends-scroll">
-          {!allFriends || allFriends.length === 0 ? (
+          {(!allFriends || allFriends.length === 0) ? (
             <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
               No tienes amigos ;(
             </div>
-          ) : (
-            allFriends.map(friend => (
+          ) : (() => {
+            const currentUserId = tokenService.getUser?.()?.id;
+            const friendsWithName = (allFriends || []).map(f => ({
+              ...f,
+              displayName: (f.sender?.id === currentUserId) ? f.receiver?.username : f.sender?.username,
+            }));
+
+            const q = searchQuery?.trim().toLowerCase();
+            const filtered = q ? friendsWithName.filter(f => (f.displayName || '').toLowerCase().includes(q)) : friendsWithName;
+
+            if (filtered.length === 0) {
+              return (
+                <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                  No se han encontrado amigos que coincidan
+                </div>
+              );
+            }
+
+            return filtered.map(friend => (
               <div key={friend.id} className="friend-card">
                 <FaUser className="friend-avatar" />
 
                 <span className="friend-name">
-                  {friend.sender.id === tokenService.getUser()?.id
-                    ? friend.receiver.username
-                    : friend.sender.username}
+                  {friend.displayName}
                 </span>
 
                 <div className="friend-actions">
@@ -234,15 +299,14 @@ export default function Friends() {
 
                   <button
                     className="remove-btn"
-                    value={friend.id}
-                    onClick={handleDelete}
+                    onClick={() => openDeleteModal(friend)}
                   >
                     Eliminar
                   </button>
                 </div>
               </div>
-            ))
-          )}
+            ));
+          })()}
         </div>
       </div>
 
@@ -309,6 +373,26 @@ export default function Friends() {
             <div className="modal-buttons">
               <button onClick={() => setShowReceivedModal(false)} className="modal-cancel">
                 Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+
+            <p className="modal-confirm-text">
+              ¿Estás seguro de que quieres eliminar a "{deleteTarget?.name}" como amigo?
+            </p>
+
+            <div className="modal-buttons">
+              <button onClick={confirmDelete} className="modal-delete">
+                Eliminar
+              </button>
+              <button onClick={closeDeleteModal} className="modal-cancel">
+                Cancelar
               </button>
             </div>
           </div>

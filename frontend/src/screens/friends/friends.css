@@ -132,11 +132,12 @@
 
 .modal-card {
   background: #1f1f30;
-  padding: 2rem;
+  /* top/right/left padding kept, bottom padding reduced so buttons sit closer to the edge */
+  padding: 1.25rem 1.25rem 0.9rem;
   border-radius: 15px;
   width: 90%;
   max-width: 500px;
-  min-height: 300px;
+  min-height: auto; /* let content define height to avoid empty space under buttons */
   color: white;
   display: flex;
   flex-direction: column;
@@ -172,8 +173,9 @@
   display: flex;
   justify-content: center;
   gap: 1rem;
-  margin-top: auto;
-  padding-top: 1.5rem;
+  margin-top: 1rem; /* keep buttons closer to the content */
+  padding-top: 0; /* remove extra top padding */
+  margin-bottom: 0; /* remove any bottom gap */
 }
 
 .modal-send,
@@ -293,4 +295,32 @@
 .modal-card .friends-scroll::-webkit-scrollbar-thumb {
   background-color: #555;
   border-radius: 3px;
+}
+
+/* Confirm delete button (red) inside modals */
+.modal-delete {
+  padding: 0.72rem 1.25rem;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-size: 1.02rem; /* slightly larger text */
+  font-weight: 600;
+  min-width: 110px;
+  background: #e53935; /* red */
+  box-shadow: 0 4px 15px rgba(229, 57, 53, 0.18);
+}
+
+.modal-delete:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+}
+
+.modal-confirm-text {
+  text-align: center;
+  font-size: 1.16rem; /* increased font size to reduce perceived empty space */
+  margin: 0.6rem 0; /* smaller margins */
+  color: white;
+  line-height: 1.3;
 }
