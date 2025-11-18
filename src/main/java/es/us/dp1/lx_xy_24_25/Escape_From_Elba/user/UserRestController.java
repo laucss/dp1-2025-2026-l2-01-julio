@@ -106,7 +106,9 @@ class UserRestController {
             updatedUser.getId(),
             updatedUser.getUsername(),
 			updatedUser.getAvatar(),
-            roles
+            roles,
+			updatedUser.getEmail(),
+			updatedUser.getAge()
         );
 		return new ResponseEntity<>(responseBody, HttpStatus.OK);
 	}

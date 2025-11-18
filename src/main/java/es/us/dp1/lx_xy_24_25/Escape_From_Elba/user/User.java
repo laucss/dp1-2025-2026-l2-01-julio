@@ -39,7 +39,7 @@ public class User extends BaseEntity {
     String email;
 
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Player> players;
 
