@@ -114,7 +114,22 @@ export default function Match(){
             <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
 
             <div>
-                 <button onClick={drawCard}>Robar carta</button>
+                <button 
+                    onClick={drawCard}
+                    style={{ 
+                        border: "none", 
+                        background: "transparent", 
+                        padding: 0, 
+                        cursor: "pointer" 
+                    }}
+                >
+                    <img 
+                        src="/backCard.png" 
+                        alt="Robar carta"
+                        style={{ width: "120px", height: "auto" }}
+                    />
+                </button>
+
                  <h2>Cartas robadas</h2>
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                         {drawnCards.map((carta, index) => (
@@ -127,8 +142,11 @@ export default function Match(){
                                     background: "#f0f0f0"
                                 }}
                             >
-                                <p><strong>ID:</strong> {carta.id}</p>
-                                <p><strong>Nombre:</strong> {carta.letter}</p>
+                                <img 
+                                    src={`/resources${carta.frontImage}`}
+                                    alt={`Carta ${carta.letter}`}
+                                    style={{ width: "120px", height: "auto", borderRadius: "8px" }}
+                                />
                             </div>
                         ))}
                 </div>
