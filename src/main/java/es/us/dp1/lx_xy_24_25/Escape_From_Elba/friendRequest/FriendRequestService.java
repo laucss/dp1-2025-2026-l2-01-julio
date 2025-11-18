@@ -71,6 +71,11 @@ public class FriendRequestService {
     }
 
     @Transactional(readOnly = true)
+    public List<FriendRequest> findAcceptedFriendRequestsByUserId(Integer userId) {
+        return friendRequestRepository.findAllFriendsByUserId(userId);
+}
+
+    @Transactional(readOnly = true)
     public User findPlayerById(Integer playerId) throws ResourceNotFoundException {
         return userRepository.findById(playerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Player", "id", playerId));

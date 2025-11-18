@@ -54,9 +54,9 @@ const createNewRequest = async (username, jwt, message, setMessage) => {
   );
 };
 
-const acceptFriendRequest = async (jwt, message, setMessage) => {
+const acceptFriendRequest = async (requestId, jwt, message, setMessage) => {
   return serviceResponseHandler(
-    await serviceErrorHandler(async () => await acceptRequest(jwt)),
+    await serviceErrorHandler(async () => await acceptRequest(requestId, jwt)),
     "friendRequest",
     message,
     setMessage

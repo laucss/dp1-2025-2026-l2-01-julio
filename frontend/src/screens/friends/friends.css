@@ -213,3 +213,84 @@
   background: #4a4a6c;
   transform: translateY(-2px);
 }
+
+.request-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #2b2b3d;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.request-card:hover {
+  background-color: #3a3a5c;
+  transform: translateY(-2px);
+}
+
+.request-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: white;
+}
+
+.request-user .icon {
+  font-size: 1.4rem;
+  color: #9aa0b6;
+}
+
+.request-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.request-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.request-btn:hover {
+  transform: translateY(-2px);
+}
+
+.request-accept {
+  background-color: #23c483;
+  color: #0d3e2b;
+}
+
+.request-accept:hover {
+  background-color: #2fd69a;
+}
+
+.request-reject {
+  background-color: #e53935;
+  color: #4a0000;
+}
+
+.request-reject:hover {
+  background-color: #ef5350;
+}
+
+/* Scroll interno del modal de solicitudes */
+.modal-card .friends-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.modal-card .friends-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-card .friends-scroll::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 3px;
+}

@@ -18,8 +18,13 @@ async function createRequest(username, jwt) {
     return await generalFetcher(`${requestBaseURL}/${username}`, jwt, "POST");
 }
 
-async function acceptRequest(jwt) {
-    return await generalFetcher(`${requestBaseURL}/accept`, jwt, "PUT");
+async function acceptRequest(requestId, jwt) {
+    return await generalFetcher(
+        `${requestBaseURL}/accept`,
+        jwt,
+        "PUT",
+        JSON.stringify(requestId)
+    );
 }
 
 async function rejectRequest(jwt) {
