@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 
+@Entity
 @Getter
 @Setter
-public class DeckInGame {
+public class DeckInGame extends BaseEntity{
 
     /*
      * Vamos a usar DeckInGame para guardar las cartas de la baraja de la partida en memoria y no en la base de datos por:  
@@ -17,8 +21,10 @@ public class DeckInGame {
      * 2. No vamos a necesitar guardar tras finalizar la partida ningún dato del mazo, por lo que no necesito usar un repository. 
      */
 
+    @OneToMany
     private List<Card> notDiscardedCards; 
 
+    @OneToMany
     private List<Card> discardedCards; 
 
     public DeckInGame (List<Card> cards) {

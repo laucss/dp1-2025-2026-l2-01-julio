@@ -13,6 +13,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.Deck;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import jakarta.persistence.CascadeType;
@@ -23,6 +25,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
@@ -79,11 +82,12 @@ public class Match extends NamedEntity {
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Player> players; 
 
-    /** 
-    @NotNull
+    
     @OneToOne(cascade = CascadeType.ALL)
-    private Deck deck;
+    private DeckInGame deck; //No se si es deck o deckInGame
 
+    
+    /*
     @NotNull
     @OneToOne(cascade = CascadeType.ALL)
     private Chat chat;

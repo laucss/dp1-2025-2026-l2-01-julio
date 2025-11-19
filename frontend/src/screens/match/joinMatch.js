@@ -85,14 +85,24 @@ export default function JoinMatch() {
       </td>
       <td className="text-center">
         <ButtonGroup>
-          <Button
-            size="sm"
-            color="success"
-            aria-label={"join-" + match.name}
-            onClick={() => handleJoin(match)}
-          >
-            Join
-          </Button>
+          {match.players && match.players.length >= match.maxPlayers ? (
+            <Button
+              size="sm"
+              color="danger" // rojo
+              disabled       // no se puede hacer click
+            >
+              FULL
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              color="success"
+              aria-label={"join-" + match.name}
+              onClick={() => handleJoin(match)}
+            >
+              Join
+            </Button>
+          )}
         </ButtonGroup>
       </td>
     </tr>

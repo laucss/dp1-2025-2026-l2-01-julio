@@ -6,6 +6,7 @@ import { Button, Table } from "reactstrap";
 import tokenService from "../../services/token.service";
 
 const jwt = tokenService.getLocalAccessToken();
+const currentUser = tokenService.getUser();
 
 export default function WaitingRoom() {
   const { matchId } = useParams();
@@ -14,6 +15,8 @@ export default function WaitingRoom() {
   const [visible, setVisible] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const countdownRef = useRef(null);
+  const userId = tokenService.getUser().id;
+
   const [lobby, setLobby] = useFetchState(
       [],
       `/api/v1/matches/lobbies/${matchId}`,
@@ -50,6 +53,9 @@ export default function WaitingRoom() {
     </tr>
   )) : [];
 
+  const isCreator = currentUser && lobby.creatorId === currentUser.id;
+  const canStart = lobby.players && lobby.players.length >= lobby.minPlayers;
+
   return (
     <div className="waiting-room-background">
       <div className="waiting-room-overlay">
@@ -67,6 +73,19 @@ export default function WaitingRoom() {
             </tbody>
           </Table>
 
+          {isCreator && (
+            <Button
+              color="success"
+              disabled={!canStart} // deshabilitado si no hay suficientes jugadores
+              style={{ marginTop: "1.5rem", padding: "0.7rem 1.5rem", fontWeight: "bold" }}
+              onClick={() => navigate(`/match/${matchId}`)} //CAMBIAR ESTO CUANDO SE HAGA LA FUNCION START GAME
+            >
+              Comenzar Partida
+            </Button>
+          )}
+
+
+
           {countdown !== null && (
             <div style={{ marginTop: '1rem', textAlign: 'center' }}>
               <h4>La partida comienza en: {countdown} s</h4>
@@ -80,6 +99,7 @@ export default function WaitingRoom() {
           >
             Salir del Lobby
           </Button>
+
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,8 +21,10 @@ public class MatchService {
     MatchRepository mrepo;
 
     @Autowired
-    public MatchService(MatchRepository mrepo) {
+    public MatchService(MatchRepository mrepo, DeckService deckService, HandService handService) {
         this.mrepo = mrepo;
+        this.deckService = deckService;
+        this.handService = handService;
     }
 
     @Transactional(readOnly = true)
@@ -58,6 +61,18 @@ public class MatchService {
     @Transactional
     public void delete(Integer id) {
         mrepo.deleteById(id);
+    }
+
+
+
+    //Funcion para innicializar un match 
+    @Transactional
+    public void startMatch(Integer matchId) {
+        Match m = mrepo.findById(matchId).orElseThrow(() -> new IllegalArgumentException("Match not found"));
+        m.setStatus(MatchStatus.PLAYING);
+        m.setStartTime(LocalDateTime.now());
+        m.setDeck(deckService.initializeDeck(matchId));
+        mrepo.save(m);
     }
 
 
