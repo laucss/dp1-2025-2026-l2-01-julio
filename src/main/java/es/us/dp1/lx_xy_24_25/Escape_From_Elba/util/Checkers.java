@@ -28,9 +28,6 @@ public class Checkers {
         this.cardRepository = cardRepository; 
     }
 
-    @Autowired
-    public MatchService matchService;
-
 
     public void checkGameStatus(Match match, String status){
         if(!match.getStatus().equals(status)){
