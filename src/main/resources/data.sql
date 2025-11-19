@@ -46,6 +46,7 @@ VALUES (2,'Partida en curso','ABC123','PLAYING','2025-10-26 20:00:00',NULL,5,3,f
 INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
 VALUES (3,'Partida terminada','XYZ789','FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,true);
 
+-- Cartas 
 INSERT INTO cards(id,front_image, back_image,letter ) 
 VALUES (1,'/images/cards/Carta 1.jpg','/images/cards/backCard.jpg','A'),
         (2,'/images/cards/Carta 2.jpg','/images/cards/backCard.jpg','A'),
@@ -115,3 +116,8 @@ VALUES (1,'/images/cards/Carta 1.jpg','/images/cards/backCard.jpg','A'),
 
         
         
+
+INSERT INTO player (id, action_points, match_id, strength, user_id) 
+        VALUES (7,null,1,null,4), 
+               (8,null,1,null,5), 
+               (9,null,1,null,6); 

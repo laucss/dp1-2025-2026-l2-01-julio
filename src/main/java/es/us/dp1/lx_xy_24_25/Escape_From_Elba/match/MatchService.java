@@ -9,22 +9,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 
 @Service
 public class MatchService {
 
     DeckService deckService; 
     HandService handService; 
+    BagService bagService; 
 
     MatchRepository mrepo;
 
     @Autowired
-    public MatchService(MatchRepository mrepo, DeckService deckService, HandService handService) {
+    public MatchService(MatchRepository mrepo, DeckService deckService, HandService handService, BagService bagService) {
         this.mrepo = mrepo;
         this.deckService = deckService;
         this.handService = handService;
+        this.bagService = bagService; 
     }
 
     @Transactional(readOnly = true)
@@ -69,6 +73,14 @@ public class MatchService {
     @Transactional
     public void startMatch(Integer matchId) {
         Match m = mrepo.findById(matchId).orElseThrow(() -> new IllegalArgumentException("Match not found"));
+        
+        // le creamos una mano y una bolsa asociadas a cada jugador 
+        List<Player> playersInGame = m.getPlayers(); 
+        for (Player player : playersInGame){
+            handService.createPlayerHand(matchId, player.getId());
+            bagService.createPlayerbag(matchId, player.getId());
+        }
+        
         m.setStatus(MatchStatus.PLAYING);
         m.setStartTime(LocalDateTime.now());
         m.setDeck(deckService.initializeDeck(matchId));
@@ -79,6 +91,20 @@ public class MatchService {
     /*
      * METODOS RELACIONADOS CON LAS CARTAS 
      */
+
+    /*
+     * Reparte las cartas iniciales a un jugador 
+     * si se quiere cambiar el número de cartas repartidas inicialmente: cambiar variable en DeckService
+     */
+
+    @Transactional
+    public List<Card> distributeInitialCardsToPlayer(Integer matchId, Integer playerId) {
+        List<Card> cards = deckService.drawInitialCardsFromDeck(matchId); 
+
+        handService.addFewCardsToPlayerHand(matchId, playerId, cards);
+
+        return cards; 
+    }
 
     /*
      * Jugador roba una carta del mazo de robar

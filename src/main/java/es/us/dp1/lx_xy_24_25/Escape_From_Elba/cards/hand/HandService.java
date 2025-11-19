@@ -115,4 +115,22 @@ public class HandService {
         return removedCard; 
 
     }
+    
+    /*
+     * Método que mete varias cartas a la mano del jugador 
+     */
+
+    public void addFewCardsToPlayerHand (Integer matchId, Integer playerId, List<Card> cards ){
+       //TODO: REVISAR ESTA DOS LINEAS, NS SI SON REPETITIVAS
+       Map<Integer, HandInGame> playerMap = activesHands.get(matchId); 
+       HandInGame playerHand= findPlayerHand(matchId, playerId); 
+
+       for (Card card : cards){
+        playerHand.getCards().add(card); 
+       }
+
+       playerMap.replace(playerId, playerHand); 
+       activesHands.replace(matchId, playerMap); 
+    }
+    
 }
