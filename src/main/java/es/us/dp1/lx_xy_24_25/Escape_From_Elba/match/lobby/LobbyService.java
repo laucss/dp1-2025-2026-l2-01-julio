@@ -65,6 +65,11 @@ public class LobbyService {
         return mrepo.findPrivateLobbyByCode(codeLobby);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<Match> getById(Integer id) {
+        return mrepo.findById(id);
+    }
+
     
     //Crear metodo para unirse a una partida publica
     @Transactional
