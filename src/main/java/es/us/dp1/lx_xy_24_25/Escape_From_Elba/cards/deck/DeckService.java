@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +35,7 @@ public class DeckService {
     public Checkers checkers;
 
     @Autowired
-    public DeckService(CardRepository cardRepository, Checkers checkers) {
+    public DeckService(CardRepository cardRepository, @Lazy Checkers checkers) {
         this.cardRepository = cardRepository;
         this.checkers = checkers; 
     }
