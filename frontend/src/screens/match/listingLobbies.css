@@ -1,15 +1,24 @@
 /* Fondo general */
 .admin-page-container {
-  background-color: #baa9ff;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+    position: relative;
+    width: 100%;
+    height: 100vh; 
+    background-image: url('../../static/images/menuBackGround.png');
+    background-size: cover;
+    background-position: center; 
+    background-repeat: no-repeat; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-  min-height: 100vh;
+.lobbies-overlay {
+  background-color: rgba(0, 0, 0, 0.4); /* oscurece ligeramente la imagen */
+  height: 100%;
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 /* Cuadro del listado */

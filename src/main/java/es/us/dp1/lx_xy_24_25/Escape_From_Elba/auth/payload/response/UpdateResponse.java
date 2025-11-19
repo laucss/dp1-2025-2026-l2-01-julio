@@ -14,12 +14,16 @@ public class UpdateResponse {
     private String username;
     private String avatar;
     private List<String> roles;
+    private String email;
+    private Integer age;
 
-    public UpdateResponse(String accessToken, Integer id, String username, String avatar, List<String> roles) {
+    public UpdateResponse(String accessToken, Integer id, String username, String avatar, List<String> roles, String email, Integer age) {
         this.token = accessToken;
         this.id = id;
         this.username = username;
         this.avatar = avatar;
         this.roles = roles;
+        this.email = email;
+        this.age = age;
     }
 }

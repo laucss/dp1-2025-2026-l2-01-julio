@@ -49,8 +49,10 @@ export default function CreateLobby() {
   };
   return (
   <div className="center-box">
+    <div className="lobbies-overlay">
+  <div className="lobbies-box">
   <div className="lobby-creation-content">
-    <h1>Crear Partida</h1>
+    <h1 style={{color:"black"}}>Crear Partida</h1>
 
     <form onSubmit={handleCreate}>
       <div>
@@ -89,6 +91,8 @@ export default function CreateLobby() {
 
     {message && <p>{message}</p>}
   </div>
+  </div>
+</div>
 </div>
 );
 

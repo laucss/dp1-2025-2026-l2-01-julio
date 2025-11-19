@@ -100,6 +100,7 @@ export default function JoinMatch() {
 
   return (
   <div className="admin-page-container">
+    <div className="lobbies-overlay">
     <div className="lobbies-box">
       <h1>Lobbies</h1>
 
@@ -139,6 +140,7 @@ export default function JoinMatch() {
         <Button color="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
       </ModalFooter>
     </Modal>
+    </div>
   </div>
   );
 }
