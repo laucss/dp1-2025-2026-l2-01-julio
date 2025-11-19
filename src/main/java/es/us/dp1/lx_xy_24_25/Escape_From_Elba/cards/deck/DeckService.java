@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardRepository;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 public class DeckService {
@@ -38,7 +33,9 @@ public class DeckService {
         this.cardRepository = cardRepository;
         this.checkers = checkers; 
     }
-    
+
+    // VARIABLES DE LOGICA DE NEGOCIO 
+    private static final Integer numberOfInitialCards = 3; 
 
     /*
      * Método para hacer una copia de la baraja original de la base de datos y barajarla para iniciar el mazo al empezar una partida
@@ -48,12 +45,15 @@ public class DeckService {
     public DeckInGame initializeDeck(Integer macthId) {
         // TODO: revisar si debería checkear que el match exista, creo que no pq no da tiempo pero bueno
         List<Card> originalsCards = cardRepository.findAll();
-        //System.out.println("originalsCards: " + originalsCards);
 
+        /*
+         * lo creo que de esta manera, con el new ArrayList antes para que se cree una lista mutable
+         * y se pueda hacer el shuffle. Si no le pongo eso delante, da error porque lo trata como una lista inmutable
+         */
         List<Card> copiedCards = new ArrayList<>(
                 originalsCards.stream().map(Card::getClone).toList());
         
-        Collections.shuffle(copiedCards); //TODO: ESTO DA ERROR
+        Collections.shuffle(copiedCards); 
 
         DeckInGame newDeck = new DeckInGame(copiedCards); 
         activesDecks.put(macthId, newDeck); 
@@ -65,6 +65,7 @@ public class DeckService {
      * Método que tras acabar una partida, borra la baraja en memoria de la partida 
      */
 
+    @Transactional
     public void deleteDeckInGame(Integer matchId){ 
         // TODO: revisar si tengo que checkear que match exista
         activesDecks.remove(matchId); 
@@ -185,7 +186,7 @@ public class DeckService {
      * Método que comprueba si el mazo de cartas no descartadas está vacío 
      */
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Boolean isEmpty (Integer macthId) { // (Integer deckId)
         DeckInGame deck = findDeckById(macthId);
         return deck.getNotDiscardedCards().isEmpty();  
@@ -195,6 +196,23 @@ public class DeckService {
      * CONTEXTO: cada jugador debe empezar con 3 cartas al inicio de la partida 
      * Método que saca las 3 primeras cartas del mazo 
      */
+
+    @Transactional
+    public List<Card> drawInitialCardsFromDeck (Integer matchId){
+        List<Card> cards = new ArrayList<>(); 
+        DeckInGame deck = findDeckById(matchId); 
+        // TODO: REVISAR SI ES MEJOR HACER UNA COPIA DE DECK 
+
+        for (int i = 0; i<numberOfInitialCards; i++) {
+            cards.add(deck.getNotDiscardedCards().getLast()); 
+            deck.getNotDiscardedCards().removeLast(); 
+        }
+        
+        // actualizamos la baraja en memoria 
+        activesDecks.replace(matchId, deck); 
+
+        return cards;  
+    }
 }
 
 

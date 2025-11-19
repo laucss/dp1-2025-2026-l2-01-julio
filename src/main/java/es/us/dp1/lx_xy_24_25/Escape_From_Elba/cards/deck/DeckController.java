@@ -1,7 +1,5 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,22 +11,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 
 
 @RestController
 @RequestMapping("/api/v1/deck")
 public class DeckController {
 
-    DeckService ds; 
+    DeckService deckService;
+    MatchService matchService;  
 
    @Autowired
-    public DeckController(DeckService ds){
-        this.ds=ds;
+    public DeckController(DeckService deckService, MatchService matchService) {
+        this.deckService=deckService;
+        this.matchService=matchService;
     }
 
     @GetMapping("/{matchId}")
     public ResponseEntity<?> iniciarDeck(@PathVariable Integer matchId) {
-        DeckInGame deck = ds.initializeDeck(matchId); 
+        DeckInGame deck = deckService.initializeDeck(matchId); 
     
 
         if (deck == null) {
@@ -40,12 +42,15 @@ public class DeckController {
 
     }
 
+
+    // @PostMapping("/{matchId}/{playerId}/draw")
+    // public ResponseEntity<CardDTO> drawCardFromDeck( @PathVariable Integer matchId, @PathVariable Integer playerId) {
     @PostMapping("/{matchId}/draw")
-    public ResponseEntity<Card> robarcarta( @PathVariable Integer matchId) {
-        Card card = ds.drawCard(matchId); 
+    public ResponseEntity<CardDTO> drawCardFromDeck( @PathVariable Integer matchId) {
+        Card card = deckService.drawCard(matchId); 
+        // Card card = matchService.playerDrawsCardFromDeck(matchId, playerId);
 
-        return ResponseEntity.ok(card);
-
+        return ResponseEntity.ok(new CardDTO(card));
 
     }
     

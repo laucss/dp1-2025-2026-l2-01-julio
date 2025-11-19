@@ -9,10 +9,19 @@ const jwt = tokenService.getLocalAccessToken();
 
 export default function Match(){
     const matchId = getIdFromUrl(2);
+    // const [match, setMatch] = useState({})
     const [deck, setDeck] = useState(null)
     const [drawnCards, setDrawnCards] = useState([])
+    // const playerId = 
+    // const [playerTurnId, setPlayerTurnId] = useState(null)
+
 
     useEffect(() => {
+        initializeDeck(); 
+        // TODO: cambiar esta funcion pq realmente hay que repartir primero a todos los jugadores
+}, [matchId]);
+
+const initializeDeck = () => {
     fetch(`/api/v1/deck/${matchId}`, {
         method: "GET",
         headers: {
@@ -23,7 +32,7 @@ export default function Match(){
     })
     .then(async res => {
         if (!res.ok) {
-            // Intentamos leer el cuerpo de error si el servidor lo devuelve
+            // TODO: CAMBIAR, ESTÁ SACADO DE CHATI A MODO DE PRUEBA DE FUNCIONALIDAD DE BACKEND, hay que ponerlo bien
             let errorBody;
             try {
                 errorBody = await res.json();
@@ -40,12 +49,11 @@ export default function Match(){
     })
     .catch(err => {
         console.error("Fetch fallido:", err);
-        alert(`Ocurrió un error: ${err.message}`); // opcional, para verlo en pantalla
     });
-}, [matchId]);
 
+}
 
-    function drawCard() {
+const drawCard = () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO DE CHATI PQ QUERIA SOLO PROBARLO
         fetch(`/api/v1/deck/${matchId}/draw`, {
             method: "POST",
             headers: {
@@ -63,13 +71,16 @@ export default function Match(){
         .then(card => {
             console.log("Carta robada:", card);
 
-            // 👇 AÑADIMOS LA CARTA A LA LISTA DE CARTAS ROBADAS
+            
             setDrawnCards(prev => [...prev, card]);
         })
         .catch(err => {
             console.error(err);
         });
-    }
+
+}
+
+    
 
 
     return (
