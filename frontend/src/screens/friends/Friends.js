@@ -1,48 +1,35 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Card, CardText, Col, Input, Label, Row } from "reactstrap";
+import { Card, CardText, Col, Row } from "reactstrap";
 import './friends.css';
 import { FaSearch, FaUser } from 'react-icons/fa';
-import api from '../../services/api';
 import tokenService from '../../services/token.service';
 import useRequestStates from '../../hooks/useRequestStates';
 
-
 const jwt = tokenService.getLocalAccessToken();
 
-
 export default function Friends() {
-
-  const [receiver, setReceiver] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
+  const [visible, setVisible] = useState(false);
+  
+  const {
+    allFriends,
+    allSent,
+    allReceived,
+    getAndSetAllFriends,
+    getAndSetSentRequests,
+    getAndSetReceivedRequests,
+    addFriendToState,
+  } = useRequestStates(jwt, errorMessage, setErrorMessage);
 
-  const friendBoxRef = useRef(null);
-
-  const { allFriends, getAndSetAllFriends } = useRequestStates(
-    jwt,
-    errorMessage,
-    setErrorMessage
-  );
-
-  const { allSent, getAndSetSentRequests } = useRequestStates(
-    jwt,
-    errorMessage,
-    setErrorMessage
-  );
-
-  const { allReceived, getAndSetReceivedRequests } = useRequestStates(
-    jwt,
-    errorMessage,
-    setErrorMessage
-  );
-
-  // Modal states
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showReceivedModal, setShowReceivedModal] = useState(false);
   const [inviteUsername, setInviteUsername] = useState('');
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState(null);
   const [inviteSuccess, setInviteSuccess] = useState(null);
-
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null); // { id, name }
+  const [searchQuery, setSearchQuery] = useState('');
 
   const openInviteModal = () => {
     setInviteUsername('');
@@ -58,40 +45,70 @@ export default function Friends() {
   function handleSubmit(event) {
   event.preventDefault();
 
-  // Limpieza de estados previos
   setInviteError(null);
   setInviteSuccess(null);
   setInviteLoading(true);
 
-  console.log("JWT:", tokenService.getLocalAccessToken());
+  const currentUsername = tokenService.getUser?.()?.username;
+  if (inviteUsername.trim().toLowerCase() === currentUsername?.toLowerCase()) {
+    setInviteError("No puedes enviar una invitación a ti mismo.");
+    setInviteLoading(false);
+    return;
+  }
 
-  fetch(`/api/v1/friendRequests`, {
+  fetch(`/api/v1/friendRequests/${inviteUsername}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${jwt}`,
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ receiverId: inviteUsername }),
+    body: tokenService.getUser()?.id,
   })
     .then(async (response) => {
       if (!response.ok) {
         const errText = await response.text();
-        throw new Error(`Error ${response.status}: ${errText}`);
+        let errObj;
+        try {
+          errObj = JSON.parse(errText);
+        } catch {
+          errObj = null;
+        }
+
+        const errorMessage = errObj?.message || errText;
+
+        if (response.status === 404) {
+          if (errorMessage.includes("User not found")) {
+            throw new Error("El usuario no existe.");
+          }
+          throw new Error(errorMessage);
+        }
+
+        if (response.status === 400) {
+          throw new Error(errorMessage || "El usuario especificado no existe o la solicitud es inválida.");
+        }
+
+        if (errObj && errObj.message?.includes("Entity Friend request already created.")) {
+          let customError = "Ya existe una solicitud con este usuario.";
+
+          if (errObj.status === "ACCEPTED") {
+            customError = "La solicitud ya fue aceptada.";
+          } else if (errObj.status === "PENDING") {
+            customError = "La solicitud ya está pendiente.";
+          }
+          throw new Error(customError);
+        } else {
+          throw new Error(errorMessage);
+        }
       }
       return response.json();
     })
     .then((json) => {
-      if (json.message) {
-        setInviteSuccess(json.message);
-      } else {
-        setInviteSuccess("Invitación enviada correctamente.");
-      }
+      setInviteSuccess(json.message || "Invitación enviada correctamente.");
       getAndSetSentRequests(tokenService.getUser()?.id);
       setInviteUsername("");
     })
     .catch((error) => {
-      console.error(error);
       setInviteError(error.message);
     })
     .finally(() => {
@@ -110,11 +127,14 @@ export default function Friends() {
         },
         body: JSON.stringify(requestId),
       });
-      const json = await response.json();
-      if (json.message) {
-        setErrorMessage(json.message);
+
+  const json = await response.json();
+      if (json.message) setErrorMessage(json.message);
+
+    const userId = tokenService.getUser?.()?.id;
+      if (json && json.id) {
+        addFriendToState(json);
       }
-      const userId = tokenService.getUser?.()?.id;
       if (userId) {
         await getAndSetAllFriends(userId);
         await getAndSetReceivedRequests(userId);
@@ -135,36 +155,58 @@ export default function Friends() {
         },
         body: JSON.stringify(requestId),
       });
+
       const json = await response.json();
-      if (json.message) {
-        setErrorMessage(json.message);
-      }
+      if (json.message) setErrorMessage(json.message);
+
       const userId = tokenService.getUser?.()?.id;
-      if (userId) {
-        await getAndSetReceivedRequests(userId);
-      }
+      if (userId) await getAndSetReceivedRequests(userId);
     } catch (error) {
       setErrorMessage(error.message);
     }
   }
 
-  const handleDelete = (event) => {
-    event.preventDefault();
+  const openDeleteModal = (friend) => {
+    const currentUserId = tokenService.getUser?.()?.id;
+    const name = friend?.sender?.id === currentUserId
+      ? friend?.receiver?.username
+      : friend?.sender?.username;
+    setDeleteTarget({ id: friend.id, name });
+    setShowDeleteModal(true);
+  };
 
-    fetch(`api/v1/friendRequests`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(event.target.value),
-    })
-      .then((response) => response.json())
-      .catch((error) => {
-        setErrorMessage(error.message);
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      const response = await fetch(`api/v1/friendRequests`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(deleteTarget.id),
       });
-    getAndSetAllFriends(tokenService.getUser()?.id);
+      let json = null;
+      try {
+        json = await response.json();
+      } catch (e) {
+      }
+
+      if (json && json.message) setErrorMessage(json.message);
+
+      const userId = tokenService.getUser?.()?.id;
+      if (userId) await getAndSetAllFriends(userId);
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      closeDeleteModal();
+    }
   };
 
   useEffect(() => {
@@ -172,73 +214,53 @@ export default function Friends() {
       if (errorMessage === "Unexpected end of JSON input") {
         setErrorMessage("You cannot send an invitation to yourself.");
       }
-      const timer = setTimeout(() => {
-        setErrorMessage(null);
-      }, 2500);
+      const timer = setTimeout(() => setErrorMessage(null), 2500);
       return () => clearTimeout(timer);
     }
   }, [errorMessage]);
 
-
-  const friendList = allFriends?.map((f) => {
-    const friend = f.sender.id == tokenService.getUser()?.id ? f.receiver : f.sender;
-
-    return (
-    <Card key={f.id}>
-      <Row>
-        <Col className="Column-friend">
-          <Row>
-            <Col>
-              <CardText style={{ marginLeft: "-65%", paddingTop: "4%" }}>
-                {friend.username}
-              </CardText>
-            </Col>
-          </Row>
-        </Col>
-        <Row>
-        <Col style={{ marginLeft: "70%" }}>
-          <button
-            className="request-button"
-            style={{
-              backgroundColor: "hsl(0, 70%, 55%)",
-              color: "hsl(0, 80%, 25%)",
-            }}
-            value={f.id}
-            onClick={handleDelete}
-          >
-            Delete
-          </button>
-        </Col>
-        </Row>
-      </Row>
-    </Card>
-    );
-  });
+  useEffect(() => {
+    const userId = tokenService.getUser?.()?.id;
+    if (userId) {
+      getAndSetAllFriends(userId);
+      getAndSetSentRequests(userId);
+      getAndSetReceivedRequests(userId);
+    }
+  }, []);
 
   return (
     <div className="friends-page">
       <h1>Amigos</h1>
 
-      {/* Botones principales */}
       <div className="friends-buttons">
-        <button className="main-button" onClick={openInviteModal}>Enviar invitación</button>
-        <button className="main-button" onClick={() => { setShowReceivedModal(true); getAndSetReceivedRequests(tokenService.getUser?.()?.id); }}>Invitaciones</button>
+        <button className="main-button" onClick={openInviteModal}>
+          Enviar invitación
+        </button>
+        <button
+          className="main-button"
+          onClick={() => {
+            setShowReceivedModal(true);
+            getAndSetReceivedRequests(tokenService.getUser?.()?.id);
+          }}
+        >
+          Invitaciones
+        </button>
       </div>
 
-      {/* Buscador */}
-      <div className="friends-search">
+        <div className="friends-search">
         <FaSearch className="search-icon" />
         <input
           type="text"
           placeholder="Buscar por nombre de usuario"
           className="search-input"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
-      {/* Lista de amigos */}
       <div className="friends-list">
         <div className="friends-header">
-          <h2>Lista de Amigos ({allFriends?.length || 0})</h2>
+          <h2>Lista de Amigos</h2>
         </div>
 
         <div className="friends-scroll">
@@ -246,95 +268,101 @@ export default function Friends() {
             <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
               No tienes amigos ;(
             </div>
-          ) : (
-            allFriends.map(friend => (
+          ) : (() => {
+            const currentUserId = tokenService.getUser?.()?.id;
+            const friendsWithName = (allFriends || []).map(f => ({
+              ...f,
+              displayName: (f.sender?.id === currentUserId) ? f.receiver?.username : f.sender?.username,
+            }));
+
+            const q = searchQuery?.trim().toLowerCase();
+            const filtered = q ? friendsWithName.filter(f => (f.displayName || '').toLowerCase().includes(q)) : friendsWithName;
+
+            if (filtered.length === 0) {
+              return (
+                <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                  No se han encontrado amigos que coincidan
+                </div>
+              );
+            }
+
+            return filtered.map(friend => (
               <div key={friend.id} className="friend-card">
                 <FaUser className="friend-avatar" />
-                <span className="friend-name">{friend.name}</span>
+
+                <span className="friend-name">
+                  {friend.displayName}
+                </span>
+
                 <div className="friend-actions">
                   <button className="play-btn">Jugar</button>
+
                   <button
                     className="remove-btn"
-                    onClick={handleDelete}
+                    onClick={() => openDeleteModal(friend)}
                   >
                     Eliminar
                   </button>
                 </div>
               </div>
-            ))
-          )}
+            ));
+          })()}
         </div>
       </div>
-      
-      {/* Modal Invitación */}
+
       {showInviteModal && (
         <div className="modal-overlay">
-        <div className="modal-card">
-          <h3>Enviar invitación</h3>
+          <div className="modal-card">
+            <h3>Enviar invitación</h3>
 
-          <input
-            type="text"
-            placeholder="Nombre de usuario"
-            value={inviteUsername}
-            onChange={(e) => setInviteUsername(e.target.value)}
-            className="modal-input"
-          />
+            <input
+              type="text"
+              placeholder="Nombre de usuario"
+              value={inviteUsername}
+              onChange={(e) => setInviteUsername(e.target.value)}
+              className="modal-input"
+            />
 
-          {inviteError && <div className="modal-error">{inviteError}</div>}
-          {inviteSuccess && <div className="modal-success">{inviteSuccess}</div>}
+            {inviteError && <div className="modal-error">{inviteError}</div>}
+            {inviteSuccess && <div className="modal-success">{inviteSuccess}</div>}
 
-          <div className="modal-buttons">
-            <button
-              onClick={handleSubmit}
-              disabled={inviteLoading}
-              className="modal-send"
-            >
-              {inviteLoading ? 'Enviando...' : 'Enviar'}
-            </button>
-            <button 
-              onClick={closeInviteModal} 
-              className="modal-cancel"
-            >
-              Cancelar
-            </button>
+            <div className="modal-buttons">
+              <button onClick={handleSubmit} disabled={inviteLoading} className="modal-send">
+                {inviteLoading ? 'Enviando...' : 'Enviar'}
+              </button>
+              <button onClick={closeInviteModal} className="modal-cancel">
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       )}
 
-      {/* Modal Solicitudes Recibidas */}
       {showReceivedModal && (
         <div className="modal-overlay">
           <div className="modal-card">
             <h3>Solicitudes Pendientes</h3>
-            
+
             <div className="friends-scroll" style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '16px' }}>
               {(allReceived || []).map(request => (
-                <Card key={request.id} className="friend-card" style={{ margin: '8px 0', padding: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <FaUser className="friend-avatar" style={{ marginRight: '8px' }}/>
-                      <span className="friend-name">{request.sender?.username}</span>
-                    </div>
-                    <div className="friend-actions" style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        className="request-button"
-                        style={{ backgroundColor: "#23c483", color: "hsl(156, 80%, 25%)" }}
-                        onClick={() => handleAccept(request.id)}
-                      >
-                        Aceptar
-                      </button>
-                      <button
-                        className="request-button"
-                        style={{ backgroundColor: "hsl(0, 70%, 55%)", color: "hsl(0, 80%, 25%)" }}
-                        onClick={() => handleReject(request.id)}
-                      >
-                        Rechazar
-                      </button>
-                    </div>
+                <div key={request.id} className="request-card">
+                  <div className="request-user">
+                    <FaUser className="icon" />
+                    <span>{request.sender?.username}</span>
                   </div>
-                </Card>
+
+                  <div className="request-actions">
+                    <button className="request-btn request-accept" onClick={() => handleAccept(request.id)}>
+                      Aceptar
+                    </button>
+
+                    <button className="request-btn request-reject" onClick={() => handleReject(request.id)}>
+                      Rechazar
+                    </button>
+                  </div>
+                </div>
               ))}
+
               {(!allReceived || allReceived.length === 0) && (
                 <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
                   No tienes solicitudes pendientes
@@ -343,11 +371,28 @@ export default function Friends() {
             </div>
 
             <div className="modal-buttons">
-              <button 
-                onClick={() => setShowReceivedModal(false)} 
-                className="modal-cancel"
-              >
+              <button onClick={() => setShowReceivedModal(false)} className="modal-cancel">
                 Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+
+            <p className="modal-confirm-text">
+              ¿Estás seguro de que quieres eliminar a "{deleteTarget?.name}" como amigo?
+            </p>
+
+            <div className="modal-buttons">
+              <button onClick={confirmDelete} className="modal-delete">
+                Eliminar
+              </button>
+              <button onClick={closeDeleteModal} className="modal-cancel">
+                Cancelar
               </button>
             </div>
           </div>

@@ -56,11 +56,15 @@ public class MatchController {
         return m.get();
     }
 
-    @GetMapping("/lobbies/{matchId}")
+    @GetMapping("/lobbies/private/{matchId}")
     public Optional<Match> getPrivateGame(@ParameterObject String code){
         return ls.getPrivateLobby(code);
     }
 
+    @GetMapping("/lobbies/{matchId}")
+    public Optional<Match> getLobbyById(@PathVariable("matchId") Integer matchId) {
+        return ls.getById(matchId);
+    }
 
     @GetMapping("/lobbies")
     public List<Match> getPublicGames(){

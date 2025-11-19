@@ -132,11 +132,12 @@
 
 .modal-card {
   background: #1f1f30;
-  padding: 2rem;
+  /* top/right/left padding kept, bottom padding reduced so buttons sit closer to the edge */
+  padding: 1.25rem 1.25rem 0.9rem;
   border-radius: 15px;
   width: 90%;
   max-width: 500px;
-  min-height: 300px;
+  min-height: auto; /* let content define height to avoid empty space under buttons */
   color: white;
   display: flex;
   flex-direction: column;
@@ -172,8 +173,9 @@
   display: flex;
   justify-content: center;
   gap: 1rem;
-  margin-top: auto;
-  padding-top: 1.5rem;
+  margin-top: 1rem; /* keep buttons closer to the content */
+  padding-top: 0; /* remove extra top padding */
+  margin-bottom: 0; /* remove any bottom gap */
 }
 
 .modal-send,
@@ -212,4 +214,113 @@
 .modal-cancel:hover {
   background: #4a4a6c;
   transform: translateY(-2px);
+}
+
+.request-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #2b2b3d;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.request-card:hover {
+  background-color: #3a3a5c;
+  transform: translateY(-2px);
+}
+
+.request-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: white;
+}
+
+.request-user .icon {
+  font-size: 1.4rem;
+  color: #9aa0b6;
+}
+
+.request-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.request-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.request-btn:hover {
+  transform: translateY(-2px);
+}
+
+.request-accept {
+  background-color: #23c483;
+  color: #0d3e2b;
+}
+
+.request-accept:hover {
+  background-color: #2fd69a;
+}
+
+.request-reject {
+  background-color: #e53935;
+  color: #4a0000;
+}
+
+.request-reject:hover {
+  background-color: #ef5350;
+}
+
+/* Scroll interno del modal de solicitudes */
+.modal-card .friends-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.modal-card .friends-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-card .friends-scroll::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 3px;
+}
+
+/* Confirm delete button (red) inside modals */
+.modal-delete {
+  padding: 0.72rem 1.25rem;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-size: 1.02rem; /* slightly larger text */
+  font-weight: 600;
+  min-width: 110px;
+  background: #e53935; /* red */
+  box-shadow: 0 4px 15px rgba(229, 57, 53, 0.18);
+}
+
+.modal-delete:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+}
+
+.modal-confirm-text {
+  text-align: center;
+  font-size: 1.16rem; /* increased font size to reduce perceived empty space */
+  margin: 0.6rem 0; /* smaller margins */
+  color: white;
+  line-height: 1.3;
 }

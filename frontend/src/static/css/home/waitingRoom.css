@@ -1,12 +1,14 @@
 .waiting-room-background {
-  background-image: url("https://img.freepik.com/vector-premium/isla-pequena_645480-1472.jpg?semt=ais_hybrid&w=740&q=80");
-  background-size: cover;
-  background-position: center;
-  height: 100vh;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    position: relative;
+    width: 100%;
+    height: 100vh; 
+    background-image: url('../../images/menuBackGround.png');
+    background-size: cover;
+    background-position: center; 
+    background-repeat: no-repeat; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .waiting-room-overlay {
@@ -38,4 +40,20 @@
 .waiting-room-box p {
   font-size: 1.2rem;
   color: #444;
+}
+
+.player-table {
+  width: 100%;
+  margin-top: 1.5rem;
+  border-radius: 20px;  
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.mt-4{
+  width: 100%;
+  margin-top: 1.5rem;
+  border-radius: 20px;  
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }

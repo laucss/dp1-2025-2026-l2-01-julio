@@ -37,9 +37,14 @@ const useRequestService = (jwt, message, setMessage) => {
     );
   };
 
-  const acceptRequest = async () => {
-    return await RequestService.acceptFriendRequest(jwt, message, setMessage);
-  };
+  const acceptRequest = async (requestId) => {
+  return await RequestService.acceptFriendRequest(
+    requestId,
+    jwt,
+    message,
+    setMessage
+  );
+};
 
   const rejectRequest = async () => {
     return await RequestService.rejectFriendRequest(jwt, message, setMessage);
