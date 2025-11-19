@@ -66,6 +66,22 @@ public class MatchService {
      */
 
     /*
+     * Reparte las cartas iniciales a un jugador 
+     * si se quiere cambiar el número de cartas repartidas inicialmente: cambiar variable en DeckService
+     */
+
+    @Transactional
+    public List<Card> distributeInitialCardsToPlayer(Integer matchId, Integer playerId) {
+        List<Card> cards = deckService.drawInitialCardsFromDeck(matchId); 
+
+        // handService.createPlayerHand(matchId, playerId);
+
+        handService.addFewCardsToPlayerHand(matchId, playerId, cards);
+
+        return cards; 
+    }
+
+    /*
      * Jugador roba una carta del mazo de robar
      */
     @Transactional

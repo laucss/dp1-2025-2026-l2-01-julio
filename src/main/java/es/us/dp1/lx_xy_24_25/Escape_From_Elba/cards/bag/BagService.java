@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
@@ -35,10 +36,15 @@ public class BagService {
     /*
      * Método que crea un BagInGame para un jugador
      */
-    public void createPlayerBag(Integer matchId, Integer playerId){
+    public void createPlayerbag(Integer matchId, Integer playerId){
         playerService.findById(playerId); 
         // TODO: revisar si tengo que checkear que match exista
 
+        activesBags.putIfAbsent(matchId, new HashMap<>()); 
+        BagInGame newBag = new BagInGame();
+
+        Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
+        playerMap.put(playerId, newBag); 
 
     }
 

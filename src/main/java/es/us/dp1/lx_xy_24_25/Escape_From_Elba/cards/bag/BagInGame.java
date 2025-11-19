@@ -1,5 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
@@ -25,10 +26,12 @@ public class BagInGame {
     @OneToMany
     private List<Card> cards; 
 
-
-    public BagInGame(Player player, List<Card> cards){
-        this.owner=player; 
+    
+    public BagInGame(List<Card> cards){
         this.cards= cards; 
     }
-    
+
+    public BagInGame(){ 
+        this.cards= new ArrayList<>(); 
+    }
 }
