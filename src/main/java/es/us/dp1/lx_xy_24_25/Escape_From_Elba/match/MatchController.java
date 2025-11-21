@@ -25,6 +25,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,10 +39,12 @@ import jakarta.validation.Valid;
 public class MatchController {
     MatchService ms;
     LobbyService ls;
+    PlayerService ps;
     @Autowired
-    public MatchController(MatchService ms, LobbyService ls){
+    public MatchController(MatchService ms, LobbyService ls, PlayerService ps){
         this.ms=ms;
         this.ls=ls;
+        this.ps=ps;
     }
 
     @GetMapping
@@ -74,6 +78,11 @@ public class MatchController {
     @GetMapping("/lobbies/privates")
     public List<Match> getPrivateLobbies(){
         return ls.getAllPrivateLobbies();
+    }
+
+    @GetMapping("/{matchId}/players")
+    public List<Player> getPlayersByMatchId(@PathVariable("matchId") Integer matchId) {
+        return ps.getPlayersByMatchId(matchId);
     }
 
     
