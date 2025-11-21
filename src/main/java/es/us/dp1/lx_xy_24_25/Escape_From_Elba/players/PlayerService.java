@@ -47,5 +47,10 @@ public class PlayerService {
     public void deleteById(Integer id) {
         playerRepository.deleteById(id);
     }
+
+    @Transactional
+    public List<Player> getPlayersByMatchId(Integer matchId) {
+        return playerRepository.findByMatchId(matchId);
+    }
 }
 

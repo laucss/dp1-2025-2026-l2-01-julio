@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import '../../static/css/match/Match.css';
 import getIdFromUrl from '../../util/getIdFromUrl'
 import { useEffect } from "react";
+import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
 
 const jwt = tokenService.getLocalAccessToken();
@@ -14,7 +15,17 @@ export default function Match(){
     const [drawnCards, setDrawnCards] = useState([])
     // const playerId = 
     // const [playerTurnId, setPlayerTurnId] = useState(null)
-
+    const [message, setMessage] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [player, setPlayer] = useFetchState(
+        [],
+        `/api/v1/matches/${matchId}/players`,
+        jwt,
+        setMessage,
+        setVisible
+    );
+    
+    console.log("Player info:", player);
 
     useEffect(() => {
         initializeDeck(); 
