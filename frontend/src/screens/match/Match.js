@@ -4,6 +4,8 @@ import getIdFromUrl from '../../util/getIdFromUrl'
 import { useEffect } from "react";
 import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
+//import Chat from "./chat";
+
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -173,9 +175,16 @@ const drawCard = () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO D
                         ))}
                 </div>
             </div>
-            
+            <div>
+            {/*}
++            <div className="match-chat-container">
++                <Chat />
++            </div>
+            */}
+            </div>
         </div>
-        
+
+
             )
 
         
