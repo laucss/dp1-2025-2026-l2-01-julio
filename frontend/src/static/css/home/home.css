@@ -8,7 +8,8 @@
     background-repeat: no-repeat; 
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-end;
+    padding-bottom: 15%;
 }
 
 .hero-div{
