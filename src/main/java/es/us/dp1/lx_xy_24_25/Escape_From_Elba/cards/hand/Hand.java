@@ -11,18 +11,16 @@ import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
+
 @Getter
 @Setter
 public class Hand extends BaseEntity {
 
-    @OneToOne 
     private Player playerOwner;
 
     // @OneToMany 
     // private Match match; 
 
-    @OneToMany 
     private List<Card> cards; 
     
 

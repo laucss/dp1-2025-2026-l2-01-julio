@@ -4,6 +4,7 @@ import getIdFromUrl from '../../util/getIdFromUrl'
 import { useEffect } from "react";
 import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
+import DiscardModal from "./DiscardModal";
 //import Chat from "./chat";
 
 
@@ -14,20 +15,30 @@ const currentUser = tokenService.getUser();
 export default function Match(){
     const matchId = getIdFromUrl(2);
     const [deck, setDeck] = useState(null)
-    const [drawnCards, setDrawnCards] = useState([])
-    const [whiteDice, setWhiteDice] = useState("1");
-    const [blackDice, setBlackDice] = useState("1");
+    const[discarPile, setDiscardPile] = useState([])
+    const [handCards, setHandCards] = useState([])
+    const [bagCards, setBagCards] = useState([])
+    const [whiteDice, setWhiteDice] = useState("1")
+    const [blackDice, setBlackDice] = useState("1")
+    const[numCardsDrawn, setNumCardsDrawn] = useState(0)
+
+    const[discardOpen, setDiscardOpen] = useState(false)
     // const playerId = 
     // const [playerTurnId, setPlayerTurnId] = useState(null)
+
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
-        const [match, setMatch] = useFetchState(
+        
+    // CARGAR DATOS PARTIDA 
+    const [match, setMatch] = useFetchState(
         [],
         `/api/v1/matches/${matchId}`,
         jwt,
         setMessage,
         setVisible
     )
+
+    // CARGAR DATOS JUGADORES 
     const [player, setPlayer] = useFetchState(
         [],
         `/api/v1/matches/${matchId}/players`,
@@ -43,73 +54,77 @@ export default function Match(){
         // TODO: cambiar esta funcion pq realmente hay que repartir primero a todos los jugadores
 }, [matchId]);
 
-const initializeDeck = () => {
-    fetch(`/api/v1/deck/${matchId}`, {
-        method: "GET",
-        headers: {
-            Authorization: `Bearer ${jwt}`,
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(async res => {
-        if (!res.ok) {
-            // TODO: CAMBIAR, ESTÁ SACADO DE CHATI A MODO DE PRUEBA DE FUNCIONALIDAD DE BACKEND, hay que ponerlo bien
-            let errorBody;
-            try {
-                errorBody = await res.json();
-            } catch {
-                errorBody = await res.text();
-            }
-            throw new Error(`Error al obtener el mazo: ${res.status} ${res.statusText} - ${JSON.stringify(errorBody)}`);
-        }
-        return res.json();
-    })
-    .then(data => {
-        setDeck(data);
-        console.log("Deck cargado:", data);
-    })
-    .catch(err => {
-        console.error("Fetch fallido:", err);
-    });
 
-}
 
-const drawCard = () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO DE CHATI PQ QUERIA SOLO PROBARLO
-        fetch(`/api/v1/deck/${matchId}/draw`, {
-            method: "POST",
+    // iNICIALIZAR BARAJA
+    const initializeDeck = () => {
+        fetch(`/api/v1/deck/${matchId}`, {
+            method: "GET",
             headers: {
-            Authorization: `Bearer ${jwt}`,
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-        },
+                Authorization: `Bearer ${jwt}`,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Error al robar carta");
+        .then(async res => {
+            if (!res.ok) {
+                // TODO: CAMBIAR, ESTÁ SACADO DE CHATI A MODO DE PRUEBA DE FUNCIONALIDAD DE BACKEND, hay que ponerlo bien
+                let errorBody;
+                try {
+                    errorBody = await res.json();
+                } catch {
+                    errorBody = await res.text();
+                }
+                throw new Error(`Error al obtener el mazo: ${res.status} ${res.statusText} - ${JSON.stringify(errorBody)}`);
             }
-            return response.json();
+            return res.json();
         })
-        .then(card => {
-            console.log("Carta robada:", card);
-
-            
-            setDrawnCards(prev => [...prev, card]);
+        .then(data => {
+            setDeck(data);
+            console.log("Deck cargado:", data);
         })
         .catch(err => {
-            console.error(err);
+            console.error("Fetch fallido:", err);
         });
 
-}
-
-const throwDice = (diceType) => {
-    const roll = Math.floor(Math.random() * 6) + 1;
-    if (diceType === 'Blanco') {
-        setWhiteDice(roll.toString());
-    } else {
-        setBlackDice(roll.toString());
     }
-}
+
+    // FUNCION ROBAR CARTA
+    const drawCard = () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO DE CHATI PQ QUERIA SOLO PROBARLO
+            fetch(`/api/v1/deck/${matchId}/draw`, {
+                method: "POST",
+                headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error al robar carta");
+                }
+                return response.json();
+            })
+            .then(card => {
+                console.log("Carta robada:", card);
+
+                
+                setHandCards(prev => [...prev, card]);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+
+    }
+
+    const throwDice = (diceType) => {
+        const roll = Math.floor(Math.random() * 6) + 1;
+        if (diceType === 'Blanco') {
+            setWhiteDice(roll.toString());
+        } else {
+            setBlackDice(roll.toString());
+        }
+    }
 
     
 
@@ -138,13 +153,13 @@ const throwDice = (diceType) => {
                                 border: "none", 
                                 background: "transparent", 
                                 padding: 0, 
-                                cursor: "pointer" 
+                                cursor: "pointer",
                             }}
                         >
                             <img 
                                 src="/backCard.png" 
                                 alt="Robar carta"
-                                style={{ width: "120px", height: "auto" }}
+                                style={{ width: "150px", height: "auto" }}
                             />
                         </button>
                     </div>
@@ -208,12 +223,36 @@ const throwDice = (diceType) => {
                 </div>
             </div>
             <div className="player-section">
-                {drawnCards.map((carta, index) => (
-                <div key={index} style={{padding: "10px", border: "1px solid black", borderRadius: "8px", background: "#f0f0f0"}}>
-                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} style={{ width: "120px", height: "auto", borderRadius: "8px" }}/>
+                <div className="player-hand">
+                    {handCards.map((carta, index) => (
+                                    <div key={index} >
+                                        <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                    </div>
+                    ))}
                 </div>
-             ))}
+                <div className="player-bag">
+
+                </div>
+                
             </div>
+            <div>
+                <button className="discard-button"
+                    onClick={() => setDiscardOpen(true)}
+                    title="Descartar cartas"
+                >
+                    Discard cards
+                </button>
+            </div>
+        
+        <DiscardModal
+            isVisible={discardOpen}
+            hand={handCards}
+            bag={bagCards}
+            onClose={() => setDiscardOpen(false)}
+            onSave={() =>
+                setDiscardOpen(false)}
+            />
+        
         </div>
             )
 

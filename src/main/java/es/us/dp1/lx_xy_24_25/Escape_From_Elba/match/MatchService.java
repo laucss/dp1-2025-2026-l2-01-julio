@@ -101,16 +101,13 @@ public class MatchService {
 
 
         // le creamos una mano y una bolsa asociadas a cada jugador 
-        /*List<Player> playersInGame = m.getPlayers(); 
+        List<Player> playersInGame = m.getPlayers(); 
         for (Player player : playersInGame){
             handService.createPlayerHand(matchId, player.getId());
             bagService.createPlayerbag(matchId, player.getId());
         }
 
-
-        
-
-        m.setDeck(deckService.initializeDeck(matchId)); */
+        m.setDeck(deckService.initializeDeck(matchId)); 
         mrepo.save(m);
         return m;
     }

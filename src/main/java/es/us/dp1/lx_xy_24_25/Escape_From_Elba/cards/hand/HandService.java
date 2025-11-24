@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
@@ -35,15 +36,14 @@ public class HandService {
      * Método que crea un HandInGame para un jugador
      */
     public void createPlayerHand(Integer matchId, Integer playerId){
-        playerService.findById(playerId); 
-        // TODO: revisar si tengo que checkear que match exista
 
-        activesHands.putIfAbsent(matchId, new HashMap<>()); 
+        Map<Integer, HandInGame> playerMap = new HashMap<>();
         HandInGame newHand = new HandInGame();
 
-        Map<Integer, HandInGame> playerMap = activesHands.get(matchId);
-        playerMap.put(playerId, newHand); 
+        playerMap.putIfAbsent(playerId, newHand); 
 
+        activesHands.putIfAbsent(matchId, playerMap); 
+        
     }
     /*
      * Método que tras acabar una partida, borra la mano en memoria del jugador 

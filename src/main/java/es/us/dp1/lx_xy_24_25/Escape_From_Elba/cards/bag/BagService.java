@@ -4,7 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
@@ -17,12 +21,14 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 @Service
 public class BagService {
     
+    RestTemplate restTemplate;
     Checkers checkers;
     PlayerService playerService; 
 
-    public BagService(Checkers checkers, PlayerService playerService){
+    public BagService(Checkers checkers, PlayerService playerService, RestTemplate restTemplate){
         this.checkers = checkers; 
         this.playerService = playerService; 
+        this.restTemplate=restTemplate; 
     }
 
     /*
@@ -36,21 +42,24 @@ public class BagService {
     /*
      * Método que crea un BagInGame para un jugador
      */
+    @Transactional
     public void createPlayerbag(Integer matchId, Integer playerId){
-        playerService.findById(playerId); 
         // TODO: revisar si tengo que checkear que match exista
 
-        activesBags.putIfAbsent(matchId, new HashMap<>()); 
+        Map<Integer, BagInGame> playerMap = new HashMap<>();
         BagInGame newBag = new BagInGame();
 
-        Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
-        playerMap.put(playerId, newBag); 
+        playerMap.putIfAbsent(playerId, newBag); 
+
+        activesBags.putIfAbsent(matchId, playerMap); 
+        
 
     }
 
     /*
      * Método que tras acabar una partida, borra la bolsa en memoria del jugador 
      */
+    @Transactional
     public void deletePlayerBag(Integer matchId, Integer playerId){
         playerService.findById(playerId); 
         // TODO: revisar si tengo que checkear que match exista
@@ -65,6 +74,7 @@ public class BagService {
      * Método que busca y devuelve el BagInGame del jugador
      */
 
+    @Transactional (readOnly = true)
     public BagInGame findPlayerBag(Integer matchId, Integer playerId){
         Map<Integer, BagInGame> playerMap = activesBags.get(matchId); 
         BagInGame playersBag = playerMap.get(playerId); 
@@ -79,6 +89,7 @@ public class BagService {
      * Método que quita una carta de la bolsa del jugador 
      */
 
+    @Transactional 
     public Card removeCardFromPlayerBag(Card card, Integer matchId, Integer playerId){
         checkers.checkCardExists(card);
         
@@ -98,7 +109,18 @@ public class BagService {
     }
     
 
+    /*
+     * Método que recibe un array de cartas y saca la palabra que forman
+     */
 
+    @Transactional 
+    public String wordFromCards (List<Card> cards) {
+        String word = ""; 
+        for (Card card : cards){
+            word.concat(card.getLetter()); 
+        }
+        return word;
+    }
 
 
 
@@ -108,29 +130,44 @@ public class BagService {
      * Despues, guarda y actualiza la nueva bolsa del juagador
      */
 
-    /*
+ 
     @Transactional 
     public Boolean isValidWordForBag (String word) {
 
         // hay que mirar a ver cómo hacer para que tampoco acepte nombres propios 
      
-        if (word.length >= 3){
+        if (word.length() >= 3){
 
             // hacer llamada a la api de free dictionary api: 
             // https://api.dictionaryapi.dev/api/v2/entries/en/<word>
-            
-            // basicamente hacerle una llamada a esa api con la palabra y ver si devuelve una respuesta válida
-
             // hay otra opción de api que es https://www.wordsapi.com/  aunque creo que es un poco menos completa pero ns 
 
-            
-            BagRepository.save(bag); 
-        
+            String url = "https://api.dictionaryapi.dev/api/v2/entries/en/"+ word; 
+
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class); 
+
+            if (response.getStatusCode().equals(404)){
+                return false; 
+            } else return true; 
+
             }
+        
+        return true; 
 
     }
+
+    /*
+     * Método que realiza la checkeación completa del array de cartas que manda el frontend 
+     * (la unión de las dos funciones anteriores, básicamente)
      */
 
+    @Transactional 
+    public Boolean checkBagIsValid (List<Card> cards){
+
+        String word = wordFromCards(cards); 
+        return isValidWordForBag(word); 
+
+    }
 
 
     /*
