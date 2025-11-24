@@ -6,8 +6,10 @@ import lombok.Getter;
 import lombok.Setter;
 //import scala.concurrent.duration.Duration;
 
+
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -16,6 +18,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.Deck;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -81,6 +84,17 @@ public class Match extends NamedEntity {
     @NotNull
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Player> players; 
+
+
+    //Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)
+
+    //Añadir notNull cuando edite el datasql
+    private Integer numNpcs = 3;
+
+
+    //Npcs 
+    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Npc> npcs = new ArrayList<>();
 
     
     @OneToOne(cascade = CascadeType.ALL)
