@@ -85,6 +85,11 @@ public class MatchController {
         return ps.getPlayersByMatchId(matchId);
     }
 
+    @GetMapping("/user/{userId}/in")
+    public Integer userInMatch(@PathVariable("userId") Integer userId) {
+        return ms.userInMatch(userId);
+    }
+
     
     @PostMapping("/lobbies")
     @ResponseStatus(HttpStatus.CREATED)

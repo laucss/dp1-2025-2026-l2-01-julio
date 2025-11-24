@@ -1,6 +1,6 @@
 -- One admin user, named admin1 with passwor 4dm1n and authority admin
 INSERT INTO authorities(id,authority) VALUES (1,'ADMIN');
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (1,'admin1','admin1@example.com','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS',1,25);
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (1,'admin1','admin1@example.com','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS',1,25,'/Avatar_default.png');
 
 
 INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (1,'Principiante','Si juegas 5 partidas',10.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED');
@@ -9,22 +9,22 @@ INSERT INTO achievement(id,name,description,threshold,metric) VALUES (3,'Experto
 
 -- Ten player users, named player1 with passwor 0wn3r
 INSERT INTO authorities(id,authority) VALUES (2,'PLAYER');
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (4,'player1','player1@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (5,'player2','player2@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (6,'player3','player3@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (7,'player4','player4@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (8,'player5','player5@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (9,'player6','player6@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (10,'player7','player7@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (11,'player8','player8@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (12,'player9','player9@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (13,'player10','player10@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (2, 'CYB6650','cyb6650@example.com','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (14,'QSS7721','qss7721@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (15,'QFL3393','qfl3393@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (16, 'SBJ4592', 'sbj4592@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (3, 'FSS8078', 'fss8078@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25);
-INSERT INTO appusers(id,username,email,password,authority,age) VALUES (17, 'XNT3290', 'xnt3290@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25);
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (4,'player1','player1@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (5,'player2','player2@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (6,'player3','player3@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (7,'player4','player4@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (8,'player5','player5@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (9,'player6','player6@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (10,'player7','player7@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (11,'player8','player8@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (12,'player9','player9@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (13,'player10','player10@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (2, 'CYB6650','cyb6650@example.com','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (14,'QSS7721','qss7721@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (15,'QFL3393','qfl3393@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (16, 'SBJ4592', 'sbj4592@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (3, 'FSS8078', 'fss8078@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (17, 'XNT3290', 'xnt3290@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar_default.png');
 
 -- Match
 
@@ -120,4 +120,5 @@ VALUES (1,'/images/cards/Carta 1.jpg','/images/cards/backCard.jpg','A'),
 INSERT INTO player (id, action_points, match_id, strength, user_id) 
         VALUES (7,null,1,null,4), 
                (8,null,1,null,5), 
-               (9,null,1,null,6); 
+               (9,null,1,null,6),
+               (10,null,2,null,7);

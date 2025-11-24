@@ -52,4 +52,8 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
            "(m.startTime IS NULL AND m.endTime IS NULL AND (SELECT COUNT(p) FROM Player p WHERE p.match = m) >= m.minPlayers)")
     List<Match> findPlayable();
 
+    // Devuelve el ID de la partida donde el usuario está
+    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN MAX(m.id) ELSE NULL END " +
+           "FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NULL")
+    Integer userInMatch(Integer userId);
 }

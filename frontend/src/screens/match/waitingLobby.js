@@ -49,7 +49,7 @@ export default function WaitingRoom() {
 
   const playerUsernames = lobby.players ? lobby.players.map((player) => (
     <tr key={player.user.id}>
-      <td className="text-center">{player.user.username}</td>
+      <td> {player.user.avatar ? <img src={player.user.avatar} alt={`${player.user.username}'s avatar`} className="player-avatar" /> : "/Avatar_default.png"}{player.user.username}</td>
     </tr>
   )) : [];
 
