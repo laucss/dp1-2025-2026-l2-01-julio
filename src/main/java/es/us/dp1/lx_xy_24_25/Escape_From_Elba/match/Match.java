@@ -12,10 +12,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.Deck;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
@@ -24,12 +26,11 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -97,7 +98,7 @@ public class Match extends NamedEntity {
     private List<Npc> npcs = new ArrayList<>();
 
     
-    @OneToOne(cascade = CascadeType.ALL)
+    @Transient
     private DeckInGame deck; //No se si es deck o deckInGame
 
     

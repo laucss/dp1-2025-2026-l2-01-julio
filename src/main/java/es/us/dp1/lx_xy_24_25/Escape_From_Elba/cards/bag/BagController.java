@@ -26,7 +26,7 @@ public class BagController {
 
 
 
-    @GetMapping("/validate/${cards}")
+    @GetMapping("/validate/{cards}")
     public ResponseEntity<Boolean> validateWord(@PathVariable List<Card> cards) {
         Boolean isValid = bagService.checkBagIsValid(cards);
         return ResponseEntity.ok(isValid);

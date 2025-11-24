@@ -44,14 +44,15 @@ public class BagService {
      */
     @Transactional
     public void createPlayerbag(Integer matchId, Integer playerId){
-        playerService.findById(playerId); 
         // TODO: revisar si tengo que checkear que match exista
 
-        activesBags.putIfAbsent(matchId, new HashMap<>()); 
+        Map<Integer, BagInGame> playerMap = new HashMap<>();
         BagInGame newBag = new BagInGame();
 
-        Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
-        playerMap.put(playerId, newBag); 
+        playerMap.putIfAbsent(playerId, newBag); 
+
+        activesBags.putIfAbsent(matchId, playerMap); 
+        
 
     }
 
