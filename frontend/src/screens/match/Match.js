@@ -10,13 +10,19 @@ const jwt = tokenService.getLocalAccessToken();
 
 export default function Match(){
     const matchId = getIdFromUrl(2);
-    // const [match, setMatch] = useState({})
     const [deck, setDeck] = useState(null)
     const [drawnCards, setDrawnCards] = useState([])
     // const playerId = 
     // const [playerTurnId, setPlayerTurnId] = useState(null)
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
+        const [match, setMatch] = useFetchState(
+        [],
+        `/api/v1/matches/${matchId}`,
+        jwt,
+        setMessage,
+        setVisible
+    )
     const [player, setPlayer] = useFetchState(
         [],
         `/api/v1/matches/${matchId}/players`,
@@ -94,9 +100,44 @@ const drawCard = () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO D
     
 
 
+    const playersList = Array.isArray(player) ? player : (player?.players || []);
+
     return (
-        <div>
-            <map name="Map">
+        <div className="match-container">
+            <div className="players-avatars-section">
+                {playersList.map((p) => (
+                    <div key={p.user.id} className="player-avatar-card">
+                        {p.user.avatar ? (
+                            <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" />
+                        ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" />}
+                        <p className="player-username">{p.user.username}</p>
+                    </div>
+                ))}
+            </div>
+            
+            <div className="match-board">
+                <div className="deck-column">
+                    <div className="deck-section">
+                        <button 
+                            onClick={drawCard}
+                            style={{ 
+                                border: "none", 
+                                background: "transparent", 
+                                padding: 0, 
+                                cursor: "pointer" 
+                            }}
+                        >
+                            <img 
+                                src="/backCard.png" 
+                                alt="Robar carta"
+                                style={{ width: "120px", height: "auto" }}
+                            />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="map-column">
+                    <map name="Map">
                 <area className="Area" href="" target="" alt="Safe Area" title="Safe Area" coords="321,251,84" shape="circle"/>
                 <area className="Area" href="" target="" alt="West Tower" title="West Tower" coords="13,489,98,388" shape="rect"/>
                 <area className="Area" href="" target="" alt="South Tower" title="South Tower" coords="541,389,628,488" shape="rect"/>
@@ -132,50 +173,18 @@ const drawCard = () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO D
                 <area className="Area" href="" target="" alt="Corridor 8" title="Corridor 8" coords="25,345,209,376" shape="rect"/>
                 <area className="Area" href="" target="" alt="Corridor 9" title="Corridor 9" coords="304,345,335,441" shape="rect"/>
                 <area className="Area" href="" target="" alt="Corridor 10" title="Corridor 10" coords="429,346,613,376" shape="rect"/>
-            </map>
-            <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
-
-            <div>
-                <button 
-                    onClick={drawCard}
-                    style={{ 
-                        border: "none", 
-                        background: "transparent", 
-                        padding: 0, 
-                        cursor: "pointer" 
-                    }}
-                >
-                    <img 
-                        src="/backCard.png" 
-                        alt="Robar carta"
-                        style={{ width: "120px", height: "auto" }}
-                    />
-                </button>
-
-                 <h2>Cartas robadas</h2>
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                        {drawnCards.map((carta, index) => (
-                            <div 
-                                key={index}
-                                style={{
-                                    padding: "10px",
-                                    border: "1px solid black",
-                                    borderRadius: "8px",
-                                    background: "#f0f0f0"
-                                }}
-                            >
-                                <img 
-                                    src={`/resources${carta.frontImage}`}
-                                    alt={`Carta ${carta.letter}`}
-                                    style={{ width: "120px", height: "auto", borderRadius: "8px" }}
-                                />
-                            </div>
-                        ))}
+                    </map>
+                    <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
                 </div>
             </div>
-            
+            <div className="player-section">
+                {drawnCards.map((carta, index) => (
+                <div key={index} style={{padding: "10px", border: "1px solid black", borderRadius: "8px", background: "#f0f0f0"}}>
+                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} style={{ width: "120px", height: "auto", borderRadius: "8px" }}/>
+                </div>
+             ))}
+            </div>
         </div>
-        
             )
 
         

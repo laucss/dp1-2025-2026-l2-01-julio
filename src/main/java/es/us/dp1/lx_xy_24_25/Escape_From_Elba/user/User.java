@@ -47,7 +47,7 @@ public class User extends BaseEntity {
     @Max(100)
     Integer age;
     
-    String avatar;
+    String avatar="/Avatar_default.png";
 
     @NotNull
     @ManyToOne(optional = false)
