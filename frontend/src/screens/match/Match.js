@@ -8,12 +8,15 @@ import tokenService from "../../services/token.service";
 
 
 const jwt = tokenService.getLocalAccessToken();
+const currentUser = tokenService.getUser();
 
 
 export default function Match(){
     const matchId = getIdFromUrl(2);
     const [deck, setDeck] = useState(null)
     const [drawnCards, setDrawnCards] = useState([])
+    const [whiteDice, setWhiteDice] = useState("1");
+    const [blackDice, setBlackDice] = useState("1");
     // const playerId = 
     // const [playerTurnId, setPlayerTurnId] = useState(null)
     const [message, setMessage] = useState(null);
@@ -99,10 +102,19 @@ const drawCard = () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO D
 
 }
 
+const throwDice = (diceType) => {
+    const roll = Math.floor(Math.random() * 6) + 1;
+    if (diceType === 'Blanco') {
+        setWhiteDice(roll.toString());
+    } else {
+        setBlackDice(roll.toString());
+    }
+}
+
     
 
 
-    const playersList = Array.isArray(player) ? player : (player?.players || []);
+    const playersList = (Array.isArray(player) ? player : (player?.players || [])).filter(p => p.user.id !== currentUser?.id);
 
     return (
         <div className="match-container">
@@ -177,6 +189,22 @@ const drawCard = () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO D
                 <area className="Area" href="" target="" alt="Corridor 10" title="Corridor 10" coords="429,346,613,376" shape="rect"/>
                     </map>
                     <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
+                </div>
+                <div className="Dice-pack">
+                    <button
+                        onClick={() => throwDice('Blanco')}
+                        style={{ border: "none", background: "transparent",padding: 0,cursor: "pointer",marginRight: "15px"}}
+                        title="Dado Blanco"
+                    >
+                        <img src={`/Dice/B${whiteDice}.png`} alt="Dado Blanco" style={{ width: "80px", height: "auto" }} />
+                    </button>
+                    <button
+                        onClick={() => throwDice('Negro')}
+                        style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
+                        title="Dado Negro"
+                    >
+                        <img src={`/Dice/N${blackDice}.png`} alt="Dado Negro" style={{ width: "80px", height: "auto" }} />
+                    </button>
                 </div>
             </div>
             <div className="player-section">

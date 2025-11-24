@@ -88,6 +88,26 @@
     margin-bottom: 12px;
 }
 
+.Dice-pack {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.Dice-pack button {
+    transition: transform 0.2s ease;
+}
+
+.Dice-pack button:hover {
+    transform: scale(1.1);
+}
+
+.Dice-pack button:active {
+    transform: scale(0.95);
+}
+
 @media (max-width: 900px) {
     .match-board {
         flex-direction: column;
