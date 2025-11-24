@@ -47,6 +47,34 @@ export default function WaitingRoom() {
     }
   };
 
+
+const startGame = async () => {
+  try {
+    const response = await fetch(`/api/v1/matches/lobbies/${matchId}/start`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+        Accept: 'application/json',
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Error al iniciar la partida");
+    }
+
+    // Opcional: si el endpoint devuelve el match actualizado
+    const match = await response.json();
+
+    // Redirigir a la pantalla de juego
+    navigate(`/match/${matchId}`);
+  } catch (error) {
+    alert("No se pudo iniciar la partida: " + error.message);
+  }
+};
+  
+
   const playerUsernames = lobby.players ? lobby.players.map((player) => (
     <tr key={player.user.id}>
       <td> {player.user.avatar ? <img src={player.user.avatar} alt={`${player.user.username}'s avatar`} className="player-avatar" /> : "/Avatar_default.png"}{player.user.username}</td>
@@ -78,7 +106,7 @@ export default function WaitingRoom() {
               color="success"
               disabled={!canStart} // deshabilitado si no hay suficientes jugadores
               style={{ marginTop: "1.5rem", padding: "0.7rem 1.5rem", fontWeight: "bold" }}
-              onClick={() => navigate(`/match/${matchId}`)} //CAMBIAR ESTO CUANDO SE HAGA LA FUNCION START GAME
+              onClick={startGame}
             >
               Comenzar Partida
             </Button>

@@ -29,22 +29,22 @@ INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (17
 -- Match
 
 -- Partida no iniciada, no empezada aún
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
-VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL, 'WAITING',NULL,NULL,6,3,false);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
+VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL, 'WAITING',NULL,NULL,6,3,3,false);
 
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
-VALUES (5,'Fiesta ',NULL, 'WAITING',NULL,NULL,5,3,false);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
+VALUES (5,'Fiesta ',NULL, 'WAITING',NULL,NULL,5,3,3,false);
 
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
-VALUES (4,'nerea!','DEF345', 'WAITING',NULL,NULL,5,3,true);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
+VALUES (4,'nerea!','DEF345', 'WAITING',NULL,NULL,5,3,4,true);
 
 -- Partida en progreso 
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
-VALUES (2,'Partida en curso','ABC123','PLAYING','2025-10-26 20:00:00',NULL,5,3,false);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
+VALUES (2,'Partida en curso','ABC123','PLAYING','2025-10-26 20:00:00',NULL,5,3,3,false);
 
 -- Partida finalizada
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,is_private)
-VALUES (3,'Partida terminada','XYZ789','FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,true);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
+VALUES (3,'Partida terminada','XYZ789','FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true);
 
 -- Cartas 
 INSERT INTO cards(id,front_image, back_image,letter ) 
@@ -120,4 +120,5 @@ VALUES (1,'/images/cards/Carta 1.jpg','/images/cards/backCard.jpg','A'),
 INSERT INTO player (id, action_points, match_id, strength, user_id) 
         VALUES (7,null,1,null,4), 
                (8,null,1,null,5), 
-               (9,null,1,null,6); 
+               (9,null,1,null,6),
+               (10,null,2,null,7);

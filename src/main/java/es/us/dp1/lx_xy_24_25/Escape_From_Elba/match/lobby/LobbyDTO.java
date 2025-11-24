@@ -20,5 +20,7 @@ public class LobbyDTO {
     @Min(3)
     @Max(6)
     private Integer maxPlayers;
+
+    private Integer numNpcs = 3;
 }
 

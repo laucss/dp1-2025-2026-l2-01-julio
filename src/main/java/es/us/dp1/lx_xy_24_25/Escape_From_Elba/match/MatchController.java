@@ -27,6 +27,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -71,6 +72,7 @@ public class MatchController {
     }
 
     @GetMapping("/lobbies")
+    @Operation(summary = "Get public matches", description = "Get all public matches available to join.")
     public List<Match> getPublicGames(){
         return ls.getAllPublicLobbies();
     }
@@ -85,16 +87,23 @@ public class MatchController {
         return ps.getPlayersByMatchId(matchId);
     }
 
+    @GetMapping("/user/{userId}/in")
+    public Integer userInMatch(@PathVariable("userId") Integer userId) {
+        return ms.userInMatch(userId);
+    }
+
     
     @PostMapping("/lobbies")
+    @Operation(summary = "Create lobby", description = "Create a new game.")
     @ResponseStatus(HttpStatus.CREATED)
     public  ResponseEntity<Match> createLobby(@RequestBody LobbyDTO lobbyDTO) {
         Match game = new Match();
-        Match saved= ls.createLobby(game, lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers());
+        Match saved= ls.createLobby(game, lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers(), lobbyDTO.getNumNpcs());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PostMapping("/lobbies/{matchId}/join")
+    @Operation(summary = "Join public lobby", description = "Join a public lobby from a list of available lobbies.")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Match> joinLobby(@Parameter(description = "Id of the lobby to join") @PathVariable Integer matchId) {
         Match joinedMatch = ls.joinLobby(matchId);
@@ -105,6 +114,7 @@ public class MatchController {
     }
     
     @PostMapping("/lobbies/join/private")
+    @Operation(summary = "Join private lobby", description = "Join a private lobby using its code.")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Match> joinPrivateLobby(@RequestParam String code) {
         Match joinedMatch = ls.joinPrivateLobby(code);
@@ -112,9 +122,17 @@ public class MatchController {
     }
 
     @PostMapping("/lobbies/{matchId}/leave")
+    @Operation(summary = "Leave a lobby", description = "Leva a lobby before the game starts.")
     public ResponseEntity<Match> leaveLobby(@Parameter(description = "Id of the lobby to leave") @PathVariable Integer matchId) {
         Match leftMatch = ls.leaveLobby(matchId);
         return ResponseEntity.ok(leftMatch);
+    }
+
+    @PostMapping("/lobbies/{matchId}/start")
+    @Operation(summary = "Start match", description = "Start a match from a lobby.")
+    public ResponseEntity<Match> startMatch(@Parameter(description = "Id of the lobby to start the match") @PathVariable Integer matchId) {
+        Match startedMatch = ms.startMatch(matchId);
+        return ResponseEntity.ok(startedMatch);
     }
 
 

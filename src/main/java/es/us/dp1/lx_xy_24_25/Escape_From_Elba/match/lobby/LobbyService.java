@@ -105,7 +105,7 @@ public class LobbyService {
     
     //Funcion para crear un lobby
     @Transactional
-    public  Match createLobby(Match game, Boolean isPrivate, String name, Integer maxPlayers) {
+    public  Match createLobby(Match game, Boolean isPrivate, String name, Integer maxPlayers, Integer numNpcs) {
         User currentUser = userService.findCurrentUser(); 
         Player player = new Player(); 
         player.setUser(currentUser);
@@ -115,6 +115,7 @@ public class LobbyService {
         game.setPlayers(new ArrayList<>(List.of(player)));
         game.setName(name);
         game.setMaxPlayers(maxPlayers);
+        game.setNumNpcs(numNpcs);
         game.setCreatorId(currentUser.getId());
         game.setIsPrivate(isPrivate);
         if(game.getIsPrivate()){
