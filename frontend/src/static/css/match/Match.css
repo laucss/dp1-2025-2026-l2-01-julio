@@ -2,6 +2,12 @@
     width: 100%;
 }
 
+.card{
+    width: 110px;
+    height: auto;
+
+}
+
 .players-avatars-section {
     display: flex;
     justify-content: center;
@@ -14,12 +20,40 @@
 
 .player-section{
     display: flex;
+    flex-direction: row;
     justify-content: center;
     gap: 20px;
     padding: 10px;
     background-color: rgb(249, 0, 0);
     flex-wrap: wrap;
     margin-bottom: 15px;
+}
+
+.player-hand{
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px;
+    background-color: rgb(253, 70, 70);
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    width: 48%;
+    border-radius: 10px;
+    min-height: 170px;
+}
+
+.player-bag{
+    display: flex;
+    justify-content: flex-start;
+    gap: 20px;
+    padding: 10px;
+    background-color: rgb(246, 135, 135);
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    width: 48%;
+    border-radius: 10px;
+    min-height: 170px;
+
 }
 
 .player-avatar-card {
@@ -114,4 +148,11 @@
         align-items: center;
     }
     .deck-column { width: auto; }
+}
+
+.discard-button{
+    padding: 10px;
+    margin-top: 10px;
+    justify-content: center;
+    display: flex;
 }
