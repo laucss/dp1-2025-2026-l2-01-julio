@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Card, CardText, Col, Row } from "reactstrap";
+import React, { useEffect, useState } from 'react';
 import './friends.css';
 import { FaSearch, FaUser } from 'react-icons/fa';
 import tokenService from '../../services/token.service';
@@ -28,7 +27,7 @@ export default function Friends() {
   const [inviteError, setInviteError] = useState(null);
   const [inviteSuccess, setInviteSuccess] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null); // { id, name }
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const openInviteModal = () => {
@@ -230,6 +229,9 @@ export default function Friends() {
 
   return (
     <div className="friends-page">
+
+      <div className="friends-container">
+
       <h1>Amigos</h1>
 
       <div className="friends-buttons">
@@ -247,7 +249,7 @@ export default function Friends() {
         </button>
       </div>
 
-        <div className="friends-search">
+      <div className="friends-search">
         <FaSearch className="search-icon" />
         <input
           type="text"
@@ -309,6 +311,8 @@ export default function Friends() {
           })()}
         </div>
       </div>
+
+      </div> {/* end .friends-container */}
 
       {showInviteModal && (
         <div className="modal-overlay">

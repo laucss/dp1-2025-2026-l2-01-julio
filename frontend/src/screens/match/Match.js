@@ -4,6 +4,8 @@ import getIdFromUrl from '../../util/getIdFromUrl'
 import { useEffect } from "react";
 import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
+//import Chat from "./chat";
+
 
 const jwt = tokenService.getLocalAccessToken();
 

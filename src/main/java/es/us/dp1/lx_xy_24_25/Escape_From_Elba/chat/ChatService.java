@@ -34,18 +34,14 @@ public class ChatService {
     public List<ChatMessage> findChatOfMyGame() {
         var user = userService.findCurrentUser();
         if (user == null) return Collections.emptyList();
-
         Integer userId = user.getId();
         Optional<Player> maybePlayer = playerService.findById(userId);
         if (maybePlayer.isEmpty()) return Collections.emptyList();
-
         Player me = maybePlayer.get();
         if (me.getMatch() == null || me.getMatch().getId() == null) return Collections.emptyList();
-
         Integer matchId = me.getMatch().getId();
         List<ChatMessage> chat = chatRepository.findByMatchId(matchId);
         if (chat == null) return Collections.emptyList();
-
         chat.sort(Comparator.comparing(ChatMessage::getTime, Comparator.nullsLast(Comparator.naturalOrder())));
         return chat;
     }
@@ -56,25 +52,19 @@ public class ChatService {
         try {
             var user = userService.findCurrentUser();
             if (user == null) throw new IllegalStateException("Usuario no autenticado");
-
             Integer userId = user.getId();
             Integer matchId = chatMessageDTO.getMatchId();
             if (matchId == null) throw new IllegalArgumentException("matchId es obligatorio en el DTO");
-
-            // playerService devuelve Optional<Player>, usar orElseThrow para obtener el Player
             Optional<Player> maybeAuthor = playerService.findByMatchIdAndUserId(matchId, userId);
             Player author = maybeAuthor.orElseThrow(() -> new IllegalStateException("Jugador no encontrado en la partida indicada"));
-
             Match match = author.getMatch();
             if (match == null || match.getId() == null)
                 throw new IllegalStateException("El jugador no está en ninguna partida");
-
             ChatMessage created = new ChatMessage();
             created.setPlayer(author);
             created.setMessage(chatMessageDTO.getMessage());
             created.setDate(LocalDateTime.now());
             created.setMatch(match);
-
             return chatRepository.save(created);
         } catch (ResourceNotFoundException ex) {
             throw new IllegalStateException("Jugador actual no encontrado", ex);

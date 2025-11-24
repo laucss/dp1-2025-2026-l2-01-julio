@@ -26,6 +26,12 @@ import MatchList from "./screens/prueba";
 import WaitingLobby from "./screens/match/waitingLobby";
 import Match from "./screens/match/Match";
 
+//import { useState } from "react";
+//import { fetchUser } from "./services/user.service";
+//import { CurrentUserContext } from "./context/currentUserContext";
+//import { ChatContext } from "./context/chatContext";
+
+
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
     <div role="alert">
@@ -37,7 +43,18 @@ function ErrorFallback({ error, resetErrorBoundary }) {
 }
 
 function App() {
+  //const [currentUser, setCurrentUser] = useState(null);
+  //const [chatIsShown, setChatIsShown] = useState(false);
+
   const jwt = tokenService.getLocalAccessToken();
+
+  //let userId = null;
+
+  //if (jwt) {
+    //const decoded = jwt_decode(jwt);
+    //userId = decoded.userId; // o el campo correcto que tengas en tu token
+  //}
+
   let roles = []
   if (jwt) {
     roles = getRolesFromJWT(jwt);
@@ -99,17 +116,18 @@ function App() {
   return (
     <div>
       <ErrorBoundary FallbackComponent={ErrorFallback} >
-        <AppNavbar />
-        <Routes>
-          <Route path="/" exact={true} element={<Home />} />
-          <Route path="/plans" element={<PlanList />} />
-          <Route path="/docs" element={<SwaggerDocs />} />
-          {publicRoutes}
-          {userRoutes}
-          {adminRoutes}
-          {ownerRoutes}
-          {vetRoutes}
-        </Routes>
+        {/*Poner cosas del chat*/}
+            <AppNavbar />
+            <Routes>
+              <Route path="/" exact={true} element={<Home />} />
+              <Route path="/plans" element={<PlanList />} />
+              <Route path="/docs" element={<SwaggerDocs />} />
+              {publicRoutes}
+              {userRoutes}
+              {adminRoutes}
+              {ownerRoutes}
+              {vetRoutes}
+            </Routes>         
       </ErrorBoundary>
     </div>
   );
