@@ -120,4 +120,5 @@ VALUES (1,'/images/cards/Carta 1.jpg','/images/cards/backCard.jpg','A'),
 INSERT INTO player (id, action_points, match_id, strength, user_id) 
         VALUES (7,null,1,null,4), 
                (8,null,1,null,5), 
-               (9,null,1,null,6); 
+               (9,null,1,null,6),
+               (10,null,2,null,7);
