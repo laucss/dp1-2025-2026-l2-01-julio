@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 
 @Service
@@ -76,20 +78,41 @@ public class MatchService {
 
     //Funcion para innicializar un match 
     @Transactional
-    public void startMatch(Integer matchId) {
+    public Match startMatch(Integer matchId) {
         Match m = mrepo.findById(matchId).orElseThrow(() -> new IllegalArgumentException("Match not found"));
         
+        //Cambiamos el estado de la partida a PLAYING
+        m.setStatus(MatchStatus.PLAYING);
+
+        //Inicializamos la fecha de inicio
+        m.setStartTime(LocalDateTime.now());
+
+
+        //Inicializamos los npcs de la partida 
+
+        for ( int i=0; i< m.getNumNpcs(); i++){
+            Npc npc = new Npc(); //Creamos el npc
+            npc.setIsNiallCampbell( i== m.getNumNpcs()-1); // Si es el último npc que creamos, es Niall Campbell
+            npc.setStrength(1); // El valor de la fuerza al inicio es 1
+            npc.setMatch(m);// Lo asociamos a la partida
+
+            m.getNpcs().add(npc);// Lo añadimos a la lista de npcs de la partida   
+        }
+
+
         // le creamos una mano y una bolsa asociadas a cada jugador 
-        List<Player> playersInGame = m.getPlayers(); 
+        /*List<Player> playersInGame = m.getPlayers(); 
         for (Player player : playersInGame){
             handService.createPlayerHand(matchId, player.getId());
             bagService.createPlayerbag(matchId, player.getId());
         }
+
+
         
-        m.setStatus(MatchStatus.PLAYING);
-        m.setStartTime(LocalDateTime.now());
-        m.setDeck(deckService.initializeDeck(matchId));
+
+        m.setDeck(deckService.initializeDeck(matchId)); */
         mrepo.save(m);
+        return m;
     }
 
 
