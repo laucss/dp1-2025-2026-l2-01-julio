@@ -62,6 +62,11 @@ public class MatchService {
         return mrepo.findById(matchId);
     }
 
+    @Transactional(readOnly = true)
+    public Integer userInMatch(Integer userId) {
+        return mrepo.userInMatch(userId);
+    }
+
     @Transactional
     public void delete(Integer id) {
         mrepo.deleteById(id);
