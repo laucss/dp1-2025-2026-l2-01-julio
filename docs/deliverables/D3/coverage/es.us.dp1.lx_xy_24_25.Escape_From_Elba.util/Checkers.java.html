@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Checkers.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.util</a> &gt; <span class="el_source">Checkers.java</span></div><h1>Checkers.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.util;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.*;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+
+import java.util.Optional;
+
+@Component
+public class Checkers {
+
+    private final MatchRepository matchRepository;
+    private final CardRepository cardRepository; 
+    private final PlayerRepository playerRepository;
+
+<span class="fc" id="L25">    public Checkers(MatchRepository matchRepository, PlayerRepository playerRepository, CardRepository cardRepository) {</span>
+<span class="fc" id="L26">        this.matchRepository = matchRepository;</span>
+<span class="fc" id="L27">        this.playerRepository = playerRepository;</span>
+<span class="fc" id="L28">        this.cardRepository = cardRepository; </span>
+<span class="fc" id="L29">    }</span>
+
+
+    public void checkGameStatus(Match match, String status){
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        if(!match.getStatus().equals(status)){</span>
+<span class="nc" id="L34">            throw new GameIsNotALobbyException(&quot;The game is not in the correct status&quot;);</span>
+        }
+<span class="nc" id="L36">    }</span>
+
+
+    public void checkNumberOfPlayers(Match match){
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if(match.getPlayers().size()&gt;=match.getMaxPlayers()){</span>
+<span class="nc" id="L41">            throw new LobbyIsFullException(&quot;The lobby is full&quot;);</span>
+        }
+<span class="nc" id="L43">    }</span>
+
+    
+    public void checkPlayerAlreadyInALobby(User user){
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if(matchRepository.findLobbyWhereUserIsIn(user.getId()).isPresent()){</span>
+<span class="nc" id="L48">            throw new PlayerAlreadyInALobbyException(&quot;The player is already in a lobby&quot;);</span>
+
+        }
+<span class="nc" id="L51">    }</span>
+
+    public void checkPlayerIsInTheGame(Match match, User user){
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if(playerRepository.findByMatchAndUser(match.getId(), user.getId()).isEmpty()) {</span>
+<span class="nc" id="L55">            throw new PlayerNotInTheGame(&quot;The player is not in the lobby&quot;);</span>
+        }
+<span class="nc" id="L57">    }</span>
+
+    // CARTAS 
+    public void checkCardExists(Card card) {
+<span class="nc" id="L61">        Optional&lt;Card&gt; givenCard = cardRepository.findById(card.getId()); </span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (givenCard == null)</span>
+<span class="nc" id="L63">            throw new ResourceNotFoundException(&quot;This card does not exist or is not found&quot;);</span>
+<span class="nc" id="L64">    }</span>
+     
+
+    
+
+
+
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

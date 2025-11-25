@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MapService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.map</a> &gt; <span class="el_source">MapService.java</span></div><h1>MapService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.map;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+
+@Service
+public class MapService {
+
+    // matchId -&gt; (roomId -&gt; occupants)
+<span class="nc" id="L21">    private final Map&lt;Integer, Map&lt;Integer, Set&lt;Integer&gt;&gt;&gt; occupants = new ConcurrentHashMap&lt;&gt;();</span>
+<span class="nc" id="L22">    private final Map&lt;Integer, Map&lt;Integer, List&lt;Integer&gt;&gt;&gt; adjacencies = new ConcurrentHashMap&lt;&gt;();</span>
+<span class="nc" id="L23">    private final Map&lt;Integer, ReentrantLock&gt; matchLocks = new ConcurrentHashMap&lt;&gt;();</span>
+<span class="nc" id="L24">    private final Map&lt;Integer, Long&gt; versions = new ConcurrentHashMap&lt;&gt;();</span>
+
+    private final SimpMessagingTemplate messagingTemplate;
+
+<span class="nc" id="L28">    public MapService(SimpMessagingTemplate messagingTemplate) {</span>
+<span class="nc" id="L29">        this.messagingTemplate = messagingTemplate;</span>
+<span class="nc" id="L30">    }</span>
+
+    private ReentrantLock lockForMatch(Integer matchId){
+<span class="nc" id="L33">        matchLocks.putIfAbsent(matchId, new ReentrantLock());</span>
+<span class="nc" id="L34">        return matchLocks.get(matchId);</span>
+    }
+
+    public void initializeMap(Integer matchId, Map&lt;Integer, List&lt;Integer&gt;&gt; roomAdjacencies, Map&lt;Integer, Integer&gt; initialPositions){
+        // set adjacencies
+<span class="nc" id="L39">        adjacencies.put(matchId, new HashMap&lt;&gt;(roomAdjacencies));</span>
+        // create occupants map
+<span class="nc" id="L41">        Map&lt;Integer, Set&lt;Integer&gt;&gt; roomOcc = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        for (Integer roomId : roomAdjacencies.keySet()){</span>
+<span class="nc" id="L43">            roomOcc.put(roomId, new HashSet&lt;&gt;());</span>
+<span class="nc" id="L44">        }</span>
+<span class="nc" id="L45">        occupants.put(matchId, roomOcc);</span>
+        // place players
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        for (Map.Entry&lt;Integer,Integer&gt; e : initialPositions.entrySet()){</span>
+<span class="nc" id="L48">            Integer playerId = e.getKey();</span>
+<span class="nc" id="L49">            Integer roomId = e.getValue();</span>
+<span class="nc" id="L50">            roomOcc.get(roomId).add(playerId);</span>
+<span class="nc" id="L51">        }</span>
+<span class="nc" id="L52">        versions.put(matchId, System.currentTimeMillis());</span>
+<span class="nc" id="L53">        broadcastMap(matchId);</span>
+<span class="nc" id="L54">    }</span>
+
+    public MatchMapDTO snapshot(Integer matchId){
+<span class="nc" id="L57">        Map&lt;Integer, List&lt;Integer&gt;&gt; adj = adjacencies.get(matchId);</span>
+<span class="nc" id="L58">        Map&lt;Integer, Set&lt;Integer&gt;&gt; occ = occupants.get(matchId);</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if (adj == null) return null;</span>
+<span class="nc" id="L60">        List&lt;RoomDTO&gt; rooms = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        for (Integer roomId : adj.keySet()){</span>
+<span class="nc" id="L62">            List&lt;Integer&gt; adjacent = adj.get(roomId);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            Set&lt;Integer&gt; occSet = (occ!=null)? occ.get(roomId) : new HashSet&lt;&gt;();</span>
+<span class="nc" id="L64">            rooms.add(new RoomDTO(roomId, &quot;room-&quot;+roomId, adjacent, new ArrayList&lt;&gt;(occSet)));</span>
+<span class="nc" id="L65">        }</span>
+<span class="nc" id="L66">        return new MatchMapDTO(matchId, rooms, versions.getOrDefault(matchId, System.currentTimeMillis()));</span>
+    }
+
+    public void broadcastMap(Integer matchId){
+<span class="nc" id="L70">        MatchMapDTO snap = snapshot(matchId);</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (snap != null){</span>
+<span class="nc" id="L72">            messagingTemplate.convertAndSend(String.format(&quot;/topic/matches/%d/map&quot;, matchId), snap);</span>
+        }
+<span class="nc" id="L74">    }</span>
+
+    public PlayerPositionDTO findPlayerPosition(Integer matchId, Integer playerId){
+<span class="nc" id="L77">        Map&lt;Integer, Set&lt;Integer&gt;&gt; occ = occupants.get(matchId);</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (occ==null) return null;</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        for (Map.Entry&lt;Integer, Set&lt;Integer&gt;&gt; e : occ.entrySet()){</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">            if (e.getValue().contains(playerId)){</span>
+<span class="nc" id="L81">                return new PlayerPositionDTO(playerId, e.getKey(), System.currentTimeMillis());</span>
+            }
+<span class="nc" id="L83">        }</span>
+<span class="nc" id="L84">        return null;</span>
+    }
+
+    // Attempt to move; returns MoveResponseDTO with battle if necessary
+    public MoveResponseDTO tryMove(Integer matchId, Integer playerId, Integer toRoomId){
+<span class="nc" id="L89">        ReentrantLock lock = lockForMatch(matchId);</span>
+<span class="nc" id="L90">        lock.lock();</span>
+        try{
+<span class="nc" id="L92">            Map&lt;Integer, List&lt;Integer&gt;&gt; adj = adjacencies.get(matchId);</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">            if (adj==null) return new MoveResponseDTO(false, null, false, null, &quot;Map not initialized&quot;);</span>
+
+<span class="nc" id="L95">            PlayerPositionDTO current = findPlayerPosition(matchId, playerId);</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">            if (current==null) return new MoveResponseDTO(false, null, false, null, &quot;Player not in any room&quot;);</span>
+
+<span class="nc" id="L98">            Integer fromRoom = current.getRoomId();</span>
+<span class="nc" id="L99">            List&lt;Integer&gt; neighbors = adj.get(fromRoom);</span>
+<span class="nc bnc" id="L100" title="All 4 branches missed.">            if (neighbors==null || !neighbors.contains(toRoomId)){</span>
+<span class="nc" id="L101">                return new MoveResponseDTO(false, null, false, null, &quot;Destination not adjacent&quot;);</span>
+            }
+
+<span class="nc" id="L104">            Map&lt;Integer, Set&lt;Integer&gt;&gt; rooms = occupants.get(matchId);</span>
+<span class="nc" id="L105">            Set&lt;Integer&gt; destOcc = rooms.get(toRoomId);</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">            if (destOcc==null) return new MoveResponseDTO(false, null, false, null, &quot;Destination room unknown&quot;);</span>
+
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            if (destOcc.isEmpty()){</span>
+                // move
+<span class="nc" id="L110">                rooms.get(fromRoom).remove(playerId);</span>
+<span class="nc" id="L111">                destOcc.add(playerId);</span>
+<span class="nc" id="L112">                versions.put(matchId, System.currentTimeMillis());</span>
+<span class="nc" id="L113">                broadcastMap(matchId);</span>
+                // broadcast position
+<span class="nc" id="L115">                messagingTemplate.convertAndSend(String.format(&quot;/topic/matches/%d/positions&quot;, matchId), new PlayerPositionDTO(playerId, toRoomId, System.currentTimeMillis()));</span>
+<span class="nc" id="L116">                return new MoveResponseDTO(true, toRoomId, false, null, null);</span>
+            } else {
+                // someone is here -&gt; battle with first occupant
+<span class="nc" id="L119">                Integer opponent = destOcc.iterator().next();</span>
+<span class="nc" id="L120">                return new MoveResponseDTO(false, null, true, opponent, &quot;Battle started&quot;);</span>
+            }
+        } finally {
+<span class="nc" id="L123">            lock.unlock();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

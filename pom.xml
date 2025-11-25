@@ -186,6 +186,11 @@
 			<artifactId>maven-model</artifactId>
 			<version>3.9.4</version>
 		</dependency>
+		<!-- WebSocket / STOMP support (SimpMessagingTemplate, @EnableWebSocketMessageBroker, etc.) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
 
 	</dependencies>
 

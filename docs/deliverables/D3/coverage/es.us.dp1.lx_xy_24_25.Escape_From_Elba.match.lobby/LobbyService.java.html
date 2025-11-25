@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LobbyService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby</a> &gt; <span class="el_source">LobbyService.java</span></div><h1>LobbyService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.LobbyNotFound;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.PlayerNotInTheGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+import jakarta.persistence.EntityManager;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.Authorities;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
+
+@Service
+public class LobbyService {
+
+    public MatchRepository mrepo;
+    public UserService userService;
+    public Checkers checkers;
+    public PlayerService playerService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Autowired
+<span class="fc" id="L41">    public LobbyService(MatchRepository mrepo, Checkers checkers, UserService userService, PlayerService playerService) {</span>
+<span class="fc" id="L42">        this.mrepo = mrepo;</span>
+<span class="fc" id="L43">        this.checkers = checkers;</span>
+<span class="fc" id="L44">        this.userService = userService;</span>
+<span class="fc" id="L45">        this.playerService = playerService;</span>
+<span class="fc" id="L46">    }</span>
+
+    
+    public void save(Match m) {
+<span class="nc" id="L50">        mrepo.save(m);</span>
+<span class="nc" id="L51">    }</span>
+
+    @Transactional(readOnly = true)
+    public List&lt;Match&gt; getAllPublicLobbies() {
+<span class="nc" id="L55">        return mrepo.findPublicLobbies();</span>
+    }
+
+        @Transactional(readOnly = true)
+    public List&lt;Match&gt; getAllPrivateLobbies() {
+<span class="nc" id="L60">        return mrepo.findPrivateLobbies();</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Optional&lt;Match&gt; getPrivateLobby(String codeLobby) {
+<span class="nc" id="L65">        return mrepo.findPrivateLobbyByCode(codeLobby);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Optional&lt;Match&gt; getById(Integer id) {
+<span class="nc" id="L70">        return mrepo.findById(id);</span>
+    }
+
+    
+    //Crear metodo para unirse a una partida publica
+    @Transactional
+    public Match joinLobby(Integer lobbyId) {
+<span class="nc" id="L77">        Match m = mrepo.findById(lobbyId).orElseThrow(() -&gt; new LobbyNotFound(&quot;Lobby not found&quot;)); </span>
+<span class="nc" id="L78">        checkers.checkNumberOfPlayers(m);</span>
+<span class="nc" id="L79">        User currentUser = userService.findCurrentUser(); </span>
+<span class="nc" id="L80">        checkers.checkPlayerAlreadyInALobby(currentUser);</span>
+<span class="nc" id="L81">        Player player = new Player(); </span>
+<span class="nc" id="L82">        player.setUser(currentUser);     </span>
+<span class="nc" id="L83">        player.setMatch(m);</span>
+<span class="nc" id="L84">        m.getPlayers().add(player);</span>
+<span class="nc" id="L85">        mrepo.save(m); </span>
+<span class="nc" id="L86">        return m;</span>
+}
+
+
+    @Transactional
+    public Match joinPrivateLobby(String code){
+<span class="nc" id="L92">        Match m = mrepo.findPrivateLobbyByCode(code).orElseThrow(() -&gt; new LobbyNotFound(&quot;Lobby not found&quot;));</span>
+<span class="nc" id="L93">        User currentUser = userService.findCurrentUser(); </span>
+<span class="nc" id="L94">        checkers.checkNumberOfPlayers(m);</span>
+<span class="nc" id="L95">        checkers.checkPlayerAlreadyInALobby(currentUser);</span>
+<span class="nc" id="L96">        Player player = new Player(); </span>
+<span class="nc" id="L97">        player.setUser(currentUser);</span>
+<span class="nc" id="L98">        player.setMatch(m);</span>
+<span class="nc" id="L99">        m.getPlayers().add(player);</span>
+<span class="nc" id="L100">        mrepo.save(m); </span>
+<span class="nc" id="L101">        return m;</span>
+
+    }
+        
+    
+    //Funcion para crear un lobby
+    @Transactional
+    public  Match createLobby(Match game, Boolean isPrivate, String name, Integer maxPlayers) {
+<span class="nc" id="L109">        User currentUser = userService.findCurrentUser(); </span>
+<span class="nc" id="L110">        Player player = new Player(); </span>
+<span class="nc" id="L111">        player.setUser(currentUser);</span>
+<span class="nc" id="L112">        player.setMatch(game);</span>
+<span class="nc" id="L113">        checkers.checkPlayerAlreadyInALobby(currentUser);</span>
+<span class="nc" id="L114">        game.setStatus(MatchStatus.WAITING);</span>
+<span class="nc" id="L115">        game.setPlayers(new ArrayList&lt;&gt;(List.of(player)));</span>
+<span class="nc" id="L116">        game.setName(name);</span>
+<span class="nc" id="L117">        game.setMaxPlayers(maxPlayers);</span>
+<span class="nc" id="L118">        game.setCreatorId(currentUser.getId());</span>
+<span class="nc" id="L119">        game.setIsPrivate(isPrivate);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if(game.getIsPrivate()){</span>
+<span class="nc" id="L121">            String code=game.generateCodeLobby();</span>
+<span class="nc" id="L122">            game.setCode(code);</span>
+        }
+<span class="nc" id="L124">        mrepo.save(game);</span>
+<span class="nc" id="L125">        return game;</span>
+    }
+
+
+
+
+    @Transactional
+    public Match leaveLobby(Integer matchId) {
+
+<span class="nc" id="L134">        Match m = mrepo.findById(matchId).orElseThrow(() -&gt; new LobbyNotFound(&quot;Lobby no encontrado&quot;));</span>
+<span class="nc" id="L135">        User currentUser = userService.findCurrentUser();</span>
+<span class="nc" id="L136">        Player player = playerService.findByMatchIdAndUserId(m.getId(), currentUser.getId())</span>
+<span class="nc" id="L137">                .orElseThrow(() -&gt; new PlayerNotInTheGame(&quot;El jugador no está en este lobby&quot;));</span>
+<span class="nc" id="L138">        m.getPlayers().remove(player);</span>
+<span class="nc" id="L139">        return mrepo.save(m);</span>
+
+    } 
+
+
+
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
