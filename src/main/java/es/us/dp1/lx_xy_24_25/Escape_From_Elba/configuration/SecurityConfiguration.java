@@ -106,6 +106,10 @@ public class SecurityConfiguration {
 
                 .requestMatchers("/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
 
+                .requestMatchers("/api/v1/players/**").authenticated()
+
+                .requestMatchers("/api/v1/statistics/**").authenticated()
+
                 
                 // El resto denegado
                 .anyRequest().denyAll()
