@@ -127,6 +127,30 @@ export default function Match(){
     }
 
     
+    const endMatch = () => {
+        if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return;
+
+        fetch(`/api/v1/matches/${matchId}/end`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(() => window.location.reload())
+        .catch(err => console.error(err));
+    };
+
+
+    if (match.status === "FINISHED") {
+        return (
+            <div className="match-ended">
+                <h2>La partida ha finalizado!!!!!</h2>
+                <p>Gracias por jugar.</p>
+            </div>
+        );
+    }
 
 
     const playersList = (Array.isArray(player) ? player : (player?.players || [])).filter(p => p.user.id !== currentUser?.id);
@@ -243,7 +267,24 @@ export default function Match(){
                     Discard cards
                 </button>
             </div>
-        
+            
+
+            <button
+                className="end-match-button"
+                onClick={endMatch}
+                style={{
+                    marginLeft: "10px",
+                    padding: "10px 15px",
+                    background: "#c0392b",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer"
+                }}
+            >
+                Finalizar partida
+            </button>
+
         <DiscardModal
             isVisible={discardOpen}
             hand={handCards}

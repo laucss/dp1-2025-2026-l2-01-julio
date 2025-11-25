@@ -112,6 +112,31 @@ public class MatchService {
         return m;
     }
 
+    @Transactional
+    public Match endMatch(Integer matchId) {
+        Match m = mrepo.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match not found"));
+
+        if (m.getStatus() == MatchStatus.FINISHED) {
+            return m;
+        }
+
+        //Cambiamos estado a FINISHED
+        m.setStatus(MatchStatus.FINISHED);
+
+        // Guuardardamos hora de fin
+        m.setEndTime(LocalDateTime.now());
+
+        if (m.getStartTime() != null) {
+            long durationSeconds = java.time.Duration.between(m.getStartTime(), m.getEndTime()).toSeconds();
+        }
+
+        mrepo.save(m);
+
+        return m;
+    }
+
+
 
     /*
      * METODOS RELACIONADOS CON LAS CARTAS 
