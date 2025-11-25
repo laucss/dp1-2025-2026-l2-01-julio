@@ -6,27 +6,31 @@ import lombok.Getter;
 import lombok.Setter;
 //import scala.concurrent.duration.Duration;
 
+
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.Deck;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -82,8 +86,19 @@ public class Match extends NamedEntity {
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Player> players; 
 
+
+    //Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)
+
+    //Añadir notNull cuando edite el datasql
+    private Integer numNpcs = 3;
+
+
+    //Npcs 
+    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Npc> npcs = new ArrayList<>();
+
     
-    @OneToOne(cascade = CascadeType.ALL)
+    @Transient
     private DeckInGame deck; //No se si es deck o deckInGame
 
     

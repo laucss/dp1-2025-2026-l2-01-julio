@@ -11,7 +11,6 @@ import lombok.Setter;
 
 @Setter
 @Getter
-@Embeddable
 public class HandInGame {
 
     /*
