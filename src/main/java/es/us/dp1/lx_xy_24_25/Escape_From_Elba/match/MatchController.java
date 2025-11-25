@@ -135,6 +135,12 @@ public class MatchController {
         return ResponseEntity.ok(startedMatch);
     }
 
+    @PostMapping("/{matchId}/end")
+    public ResponseEntity<Match> endMatch(@PathVariable("matchId") Integer matchId) {
+        Match ended = ms.endMatch(matchId);
+        return ResponseEntity.ok(ended);
+    }
+
 
 
     @PostMapping()
