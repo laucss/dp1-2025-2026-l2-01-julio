@@ -16,6 +16,7 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
     List<Match> findByName(String name);
 
+    Match findById(int id);
 
     //Devuelve todos los lobbies para unirse publicos
     @Query( "SELECT m FROM Match m WHERE m.isPrivate=false and m.status= 'WAITING'")

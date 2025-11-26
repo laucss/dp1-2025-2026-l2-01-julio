@@ -11,6 +11,8 @@ export default function CreateLobby() {
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [isPrivate, setIsPrivate] = useState(false);
   const [message, setMessage] = useState("");
+  const [numNpcs, setNumNpcs] = useState(3);
+
 
   const navigate = useNavigate();
 
@@ -74,6 +76,18 @@ export default function CreateLobby() {
           <button type="button" onClick={() => setMaxPlayers((prev) => Math.min(6, prev + 1))}>↑</button>
         </div>
       </div>
+
+      <div>
+        <label>Número de NPCs</label>
+        <div className="npc-count-container">
+          <button type="button" onClick={() => setNumNpcs(prev => Math.max(0, prev - 1))}>-</button>
+          <span>{numNpcs}</span>
+          <button type="button" onClick={() => setNumNpcs(prev => prev + 1)}>+</button>
+        </div>
+      </div>
+
+      
+
 
       <div>
         <label>
