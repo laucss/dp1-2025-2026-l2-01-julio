@@ -15,6 +15,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 
 @Service
 public class MatchService {
@@ -24,10 +25,12 @@ public class MatchService {
     BagService bagService; 
 
     MatchRepository mrepo;
+    PlayerRepository prepo;
 
     @Autowired
-    public MatchService(MatchRepository mrepo, DeckService deckService, HandService handService, BagService bagService) {
+    public MatchService(MatchRepository mrepo, PlayerRepository prepo, DeckService deckService, HandService handService, BagService bagService) {
         this.mrepo = mrepo;
+        this.prepo = prepo;
         this.deckService = deckService;
         this.handService = handService;
         this.bagService = bagService; 
@@ -105,11 +108,65 @@ public class MatchService {
         for (Player player : playersInGame){
             handService.createPlayerHand(matchId, player.getId());
             bagService.createPlayerbag(matchId, player.getId());
+
+            player.setDiceOrder(null); // Inicializamos el valor de la tirada de dado a null
+            player.setOrderInMatch(null);
         }
 
         m.setDeck(deckService.initializeDeck(matchId)); 
+        m.setCurrentTurnPlayerId(null);
+        m.setTurnNumber(0);
         mrepo.save(m);
         return m;
+    }
+
+
+@Transactional
+    public Match submitDiceAndAssignOrder(Integer matchId, Integer userId, Integer diceRoll) {
+
+        Match match = mrepo.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match not found"));
+
+
+        Player player = prepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
+ 
+        if (player.getDiceOrder() != null) {
+            throw new IllegalArgumentException("Jugador ya ha tirado el dado");
+        }
+
+
+        player.setDiceOrder(diceRoll);
+        prepo.save(player);
+
+
+        boolean allRolled = match.getPlayers().stream()
+                .allMatch(p -> p.getDiceOrder() != null);
+
+        if (allRolled) {
+            //  Asignar orden de turno
+            List<Player> ordered = match.getPlayers().stream()
+                    .sorted((a, b) -> {
+                        int cmp = b.getDiceOrder() - a.getDiceOrder(); // dado mayor primero
+                        if (cmp == 0) {
+                            // Desempate automático usando ID
+                            return a.getId().compareTo(b.getId());
+                        }
+                        return cmp;
+                    })
+                    .toList();
+
+            for (int i = 0; i < ordered.size(); i++) {
+                ordered.get(i).setOrderInMatch(i);
+                prepo.save(ordered.get(i));
+            }
+
+            match.setCurrentTurnPlayerId(ordered.get(0).getId());
+            match.setTurnNumber(1);
+            mrepo.save(match);
+        }
+
+        return match;
     }
 
     @Transactional

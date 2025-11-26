@@ -135,6 +135,22 @@ public class MatchController {
         return ResponseEntity.ok(startedMatch);
     }
 
+    @PostMapping("/{matchId}/submit-dice")
+    public ResponseEntity<Match> submitDice(@PathVariable Integer matchId, @RequestParam Integer userId, @RequestParam Integer diceRoll) {
+
+        try {
+            // Llamamos al servicio que guarda la tirada y asigna orden si todos tiraron
+            Match m = ms.submitDiceAndAssignOrder(matchId, userId, diceRoll);
+
+            // Devolvemos el jugador actualizado
+            return ResponseEntity.ok(m);
+
+        } catch (IllegalArgumentException e) {
+            // Si hubo algún error (jugador no encontrado, ya tiró, etc.)
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
     @PostMapping("/{matchId}/end")
     public ResponseEntity<Match> endMatch(@PathVariable("matchId") Integer matchId) {
         Match ended = ms.endMatch(matchId);
