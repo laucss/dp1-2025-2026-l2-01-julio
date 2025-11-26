@@ -1,5 +1,5 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs;
-
+//cambio para merge en FSS8078
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import jakarta.persistence.Entity;

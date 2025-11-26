@@ -1,5 +1,5 @@
 package es.us.dp1.lx_xy_24_25.room;
-
+//cambio para merge en FSS8078
 import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
