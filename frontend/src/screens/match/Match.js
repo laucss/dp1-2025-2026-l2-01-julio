@@ -5,7 +5,9 @@ import { useEffect } from "react";
 import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
 import DiscardModal from "./DiscardModal";
-//import Chat from "./chat";
+import ChatBox from "./chatBox";
+import { FaComments } from "react-icons/fa";
+
 
 
 const jwt = tokenService.getLocalAccessToken();
@@ -21,6 +23,7 @@ export default function Match(){
     const [whiteDice, setWhiteDice] = useState("1")
     const [blackDice, setBlackDice] = useState("1")
     const[numCardsDrawn, setNumCardsDrawn] = useState(0)
+    const [chatOpen, setChatOpen] = useState(false);
 
     const[discardOpen, setDiscardOpen] = useState(false)
     // const playerId = 
@@ -293,6 +296,17 @@ export default function Match(){
             onSave={() =>
                 setDiscardOpen(false)}
             />
+
+      
+            <div className="match-chat-icon">
+                <div className="chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
+                    <FaComments size={30} color="white" />
+                </div>
+            </div>
+
+            {chatOpen && <ChatBox matchId={matchId} />}
+    
+
         
         </div>
             )
