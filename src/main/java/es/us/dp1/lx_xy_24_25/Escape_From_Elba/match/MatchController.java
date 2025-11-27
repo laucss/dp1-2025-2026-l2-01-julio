@@ -87,6 +87,12 @@ public class MatchController {
         return ps.getPlayersByMatchId(matchId);
     }
 
+    @GetMapping("/{matchId}/winner")
+    public Player getWinnerByMatchId(@PathVariable("matchId") Integer matchId) {
+        Player matchWinner = ms.getMatchWinner(matchId);
+        return matchWinner;
+    }   
+
     @GetMapping("/user/{userId}/in")
     public Integer userInMatch(@PathVariable("userId") Integer userId) {
         return ms.userInMatch(userId);
@@ -136,8 +142,9 @@ public class MatchController {
     }
 
     @PostMapping("/{matchId}/end")
-    public ResponseEntity<Match> endMatch(@PathVariable("matchId") Integer matchId) {
-        Match ended = ms.endMatch(matchId);
+    public ResponseEntity<Match> endMatch(@PathVariable("matchId") Integer matchId, @PathVariable("winnerId") Integer winnerId) {
+        Player winner = ps.findById(winnerId).get();
+        Match ended = ms.endMatch(matchId,winner);
         return ResponseEntity.ok(ended);
     }
 

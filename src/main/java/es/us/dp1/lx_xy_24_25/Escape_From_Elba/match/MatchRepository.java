@@ -58,5 +58,4 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
            "FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NULL")
     Integer userInMatch(Integer userId);
 
-    //cambio para merge en FSS8078
 }

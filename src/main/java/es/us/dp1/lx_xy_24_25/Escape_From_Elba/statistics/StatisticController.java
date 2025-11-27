@@ -38,5 +38,34 @@ public class StatisticController {
         return ResponseEntity.ok(totalActionPoints);
     }
 
+    @GetMapping("/{userId}/totalVictories")
+    public ResponseEntity<Integer> getTotalVictoriesByUser(@PathVariable Integer userId) {
+        Integer totalVictories = statisticService.getTotalVictoriesByUser(userId);
+        return ResponseEntity.ok(totalVictories);
+    }
+
+    @GetMapping("/{userId}/matchesPlayed")
+    public ResponseEntity<Integer> getMatchesPlayedByUser(@PathVariable Integer userId) {
+        Integer matchesPlayed = statisticService.getMatchesPlayedByUser(userId);
+        return ResponseEntity.ok(matchesPlayed);
+    }
+
+    @GetMapping("/{userId}/totalTimePlayed")
+    public ResponseEntity<Integer> getTotalTimePlayedByUser(@PathVariable Integer userId) {
+        Integer totalTimePlayed = statisticService.getTotalTimePlayedByUserFOR(userId);
+        return ResponseEntity.ok(totalTimePlayed);
+    }
+
+    @GetMapping("/averagePlayersPerMatch")
+    public ResponseEntity<Double> getAveragePlayersPerMatch() {
+        Double averagePlayers = statisticService.getAveragePlayersPerMatch();
+        return ResponseEntity.ok(averagePlayers);
+    }
+
+    @GetMapping("/totalMatchesPlayed")
+    public ResponseEntity<Integer> getTotalMatchesPlayed() {
+        Integer totalMatchesPlayed = statisticService.getTotalMatchesPlayed();
+        return ResponseEntity.ok(totalMatchesPlayed);
+    }
     
 }

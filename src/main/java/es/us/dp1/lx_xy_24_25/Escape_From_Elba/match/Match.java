@@ -26,7 +26,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -101,7 +101,9 @@ public class Match extends NamedEntity {
     @Transient
     private DeckInGame deck; //No se si es deck o deckInGame
 
-    
+    @OneToOne(optional = true)
+    @JoinColumn(name = "winner_id")
+    private Player winner;
     /*
     @NotNull
     @OneToOne(cascade = CascadeType.ALL)
