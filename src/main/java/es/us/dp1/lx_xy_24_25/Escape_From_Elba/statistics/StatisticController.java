@@ -32,40 +32,25 @@ public class StatisticController {
         this.statisticService = statisticService;
     }    
     
-    @GetMapping("/{userId}/totalPoints") //muchas dudas
-    public ResponseEntity<Integer> getTotalAccionPointsByUser(@PathVariable Integer userId) {
-        Integer totalActionPoints = statisticService.getTotalAccionPointsByUser(userId);
-        return ResponseEntity.ok(totalActionPoints);
-    }
 
-    @GetMapping("/{userId}/totalVictories")
-    public ResponseEntity<Integer> getTotalVictoriesByUser(@PathVariable Integer userId) {
-        Integer totalVictories = statisticService.getTotalVictoriesByUser(userId);
-        return ResponseEntity.ok(totalVictories);
-    }
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserStatisticsDTO> getUserStatistics(@PathVariable Integer userId) {
+    UserStatisticsDTO dto = new UserStatisticsDTO();
+    dto.setTotalVictories(statisticService.getTotalVictoriesByUser(userId));
+    dto.setMatchesPlayed(statisticService.getMatchesPlayedByUser(userId));
+    dto.setTotalTimePlayed(statisticService.getTotalTimePlayedByUserFOR(userId));
+    Integer actionPoints = statisticService.getTotalAccionPointsByUser(userId);
+    dto.setTotalActionPoints(actionPoints != null ? actionPoints : 0);
+    return ResponseEntity.ok(dto);
+}
 
-    @GetMapping("/{userId}/matchesPlayed")
-    public ResponseEntity<Integer> getMatchesPlayedByUser(@PathVariable Integer userId) {
-        Integer matchesPlayed = statisticService.getMatchesPlayedByUser(userId);
-        return ResponseEntity.ok(matchesPlayed);
-    }
 
-    @GetMapping("/{userId}/totalTimePlayed")
-    public ResponseEntity<Integer> getTotalTimePlayedByUser(@PathVariable Integer userId) {
-        Integer totalTimePlayed = statisticService.getTotalTimePlayedByUserFOR(userId);
-        return ResponseEntity.ok(totalTimePlayed);
-    }
-
-    @GetMapping("/averagePlayersPerMatch")
-    public ResponseEntity<Double> getAveragePlayersPerMatch() {
-        Double averagePlayers = statisticService.getAveragePlayersPerMatch();
-        return ResponseEntity.ok(averagePlayers);
-    }
-
-    @GetMapping("/totalMatchesPlayed")
-    public ResponseEntity<Integer> getTotalMatchesPlayed() {
-        Integer totalMatchesPlayed = statisticService.getTotalMatchesPlayed();
-        return ResponseEntity.ok(totalMatchesPlayed);
+    @GetMapping("/general")
+    public ResponseEntity<GeneralStatisticsDTO> getGeneralStatistics() {
+        GeneralStatisticsDTO Gdto = new GeneralStatisticsDTO();
+        Gdto.setAveragePlayersPerMatch(statisticService.getAveragePlayersPerMatch());
+        Gdto.setTotalMatchesPlayed(statisticService.getTotalMatchesPlayed());
+        return ResponseEntity.ok(Gdto);
     }
     
 }
