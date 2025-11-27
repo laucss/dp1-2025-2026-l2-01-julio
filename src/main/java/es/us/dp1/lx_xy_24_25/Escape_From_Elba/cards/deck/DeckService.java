@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,7 @@ public class DeckService {
     public Checkers checkers;
 
     @Autowired
-    public DeckService(CardRepository cardRepository, @Lazy Checkers checkers) {
+    public DeckService(CardRepository cardRepository, Checkers checkers) {
         this.cardRepository = cardRepository;
         this.checkers = checkers; 
     }
@@ -105,6 +104,7 @@ public class DeckService {
         deck.setNotDiscardedCards(discardedCards);
 
         deck.setDiscardedCards(new ArrayList<Card>()); 
+        
 
         return deck; 
     }
@@ -117,11 +117,12 @@ public class DeckService {
     public Card drawCard(Integer matchId){
         DeckInGame deck = findDeckById(matchId); 
         if (deck.getNotDiscardedCards().isEmpty()) {
-            throw new RuntimeException("No hay cartas para robar");
+            getAndRemoveLastDiscardedCard(matchId); 
 }
 
         Card card = deck.getNotDiscardedCards().getLast();
         deck.getNotDiscardedCards().removeLast(); 
+        activesDecks.put(matchId, deck); // actualizo la baraja 
         return card; 
         
     }
@@ -213,6 +214,21 @@ public class DeckService {
         activesDecks.replace(matchId, deck); 
 
         return cards;  
+    }
+
+
+
+    public void update(DeckInGameDTO deck, Integer matchId){
+
+        //checkear que exista el player y tal 
+
+        DeckInGame newDeck = new DeckInGame(); 
+
+        //newDeck.setDiscardedCards(deck.getDiscardedCards());
+        //newDeck.setNotDiscardedCards(deck.getNotDiscardedCards());
+
+        activesDecks.put(matchId, newDeck); 
+
     }
 }
 

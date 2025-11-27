@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
@@ -72,6 +71,10 @@ public class HandService {
 
         return playerHand; 
     }
+
+    public Map<Integer, HandInGame> findPlayerMap (Integer matchId, Integer playerId){
+        return activesHands.get(matchId); 
+    }
     /*
      * Método que pasa la carta de la mano del jugador a su bolsa 
      * o método que quita una carta de la mano del jugador 
@@ -84,12 +87,19 @@ public class HandService {
      */
     
     @Transactional
-    public void addCardToPlayerHand(Card card, Integer matchId, Integer playerId){
+    public HandInGame addCardToPlayerHand(Card card, Integer matchId, Integer playerId){
         HandInGame playerHand = findPlayerHand(matchId, playerId); 
 
-        checkers.checkCardExists(card);
+        // checkers.checkCardExists(card);
 
         playerHand.getCards().add(card); 
+
+        activesHands
+            .computeIfAbsent(matchId, m -> new HashMap<>())
+            .put(playerId, playerHand);
+
+        return playerHand; 
+
     }
 
     /*
@@ -131,6 +141,22 @@ public class HandService {
 
        playerMap.replace(playerId, playerHand); 
        activesHands.replace(matchId, playerMap); 
+    }
+
+    public void update(HandInGameDTO hand, Integer playerId, Integer matchId){
+
+        //checkear que exista el player y tal 
+
+        HandInGame newHand = new HandInGame(); 
+
+        //newHand.setCards(hand.getCards());
+
+
+        Map<Integer, HandInGame> playerMap = activesHands.get(matchId);
+        playerMap.put(playerId,newHand); 
+
+        activesHands.put(matchId, playerMap); 
+
     }
     
 }

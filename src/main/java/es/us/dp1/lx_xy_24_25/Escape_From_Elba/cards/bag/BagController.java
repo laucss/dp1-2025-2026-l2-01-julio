@@ -1,15 +1,15 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag;
 
-import java.util.List;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+
 
 
 
@@ -26,9 +26,11 @@ public class BagController {
 
 
 
-    @GetMapping("/validate/{cards}")
-    public ResponseEntity<Boolean> validateWord(@PathVariable List<Card> cards) {
-        Boolean isValid = bagService.checkBagIsValid(cards);
+    @PostMapping("/validate")
+    public ResponseEntity<Boolean> validateWord(@RequestBody BagInGameDTO cardsDTO) {
+        System.out.println(cardsDTO);
+        Boolean isValid = bagService.checkBagIsValid(cardsDTO.getCards());
+        System.out.println(isValid);
         return ResponseEntity.ok(isValid);
     }
      
