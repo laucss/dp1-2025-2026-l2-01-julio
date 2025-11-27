@@ -3,7 +3,7 @@ import tokenService from "./token.service";
 
 export const ChatApi = {
 
-  // Obtener mensajes de una partida específica
+  //Obtener mensajes de una partida específica
   async getMyChat(matchId) {
     try {
       if (!matchId) {
@@ -17,7 +17,7 @@ export const ChatApi = {
         return [];
       }
 
-      const response = await api.get(`/chat/my?matchId=${matchId}`, {
+      const response = await api.get(`/match/${matchId}/chat/my`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -30,11 +30,11 @@ export const ChatApi = {
     }
   },
 
-  // Enviar mensaje a la partida
+  //Enviar mensaje a la partida
   async sendMessage(message, matchId) {
     try {
       if (!message || !matchId) {
-        console.error("matchId y message son obligatorios para enviar un mensaje");
+        console.error("message y matchId son obligatorios para enviar un mensaje");
         return;
       }
 
@@ -44,9 +44,10 @@ export const ChatApi = {
         return;
       }
 
+      
       const response = await api.post(
-        "/chat",
-        { matchId, message },
+        `/match/${matchId}/chat`,
+        { message },   
         {
           headers: {
             Authorization: `Bearer ${token}`,
