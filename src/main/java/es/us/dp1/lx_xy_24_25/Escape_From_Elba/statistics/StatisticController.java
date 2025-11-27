@@ -32,7 +32,7 @@ public class StatisticController {
         this.statisticService = statisticService;
     }    
     
-    @GetMapping("/{userId}") //muchas dudas
+    @GetMapping("/{userId}/totalPoints") //muchas dudas
     public ResponseEntity<Integer> getTotalAccionPointsByUser(@PathVariable Integer userId) {
         Integer totalActionPoints = statisticService.getTotalAccionPointsByUser(userId);
         return ResponseEntity.ok(totalActionPoints);

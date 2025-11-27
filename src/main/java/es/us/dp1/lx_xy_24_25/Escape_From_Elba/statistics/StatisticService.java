@@ -9,24 +9,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 
 @Service
 public class StatisticService {
 
-    @Autowired    
+       
     private PlayerService playerService;
-    @Autowired
+    private PlayerRepository playerRepository;
     private MatchService matchService;
 
+    @Autowired
+    public StatisticService(PlayerService playerService, PlayerRepository playerRepository, MatchService matchService) {
+        this.playerService = playerService;
+        this.playerRepository = playerRepository;
+        this.matchService = matchService;
+    }
     public Integer getTotalAccionPointsByUser(Integer currentUserId) {
-
-        List<Player> userPlayers = playerService.findByUserId(currentUserId);
-        if(userPlayers==null){
-            userPlayers=new ArrayList<>();
-        }
-        return userPlayers.stream()
-                .mapToInt(Player::getActionPoints)
-                .sum();
+        return playerRepository.getTotalAccionPointsByUser(currentUserId);
     }
 }

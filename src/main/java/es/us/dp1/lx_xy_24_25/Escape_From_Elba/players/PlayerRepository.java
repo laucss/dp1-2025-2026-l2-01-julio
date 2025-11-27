@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.security.access.method.P;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +16,8 @@ public interface PlayerRepository extends CrudRepository<Player, Integer> {
 
     List<Player> findAll();
 
+    Optional<Player> findById(Integer id);
+
     @NotNull
     List<Player> findByUserId(Integer userId);
     
@@ -23,5 +26,8 @@ public interface PlayerRepository extends CrudRepository<Player, Integer> {
     Optional<Player> findByMatchAndUser(Integer matchId, Integer userId);
 
     List<Player> findByMatchId(Integer matchId);
+
+    @Query("SELECT SUM(p.actionPoints) FROM Player p WHERE p.user.id = :userId")
+    Integer getTotalAccionPointsByUser(Integer userId);
 
 }
