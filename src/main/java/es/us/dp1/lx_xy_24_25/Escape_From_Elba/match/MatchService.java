@@ -9,12 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
@@ -286,6 +290,16 @@ public class MatchService {
         handService.addCardToPlayerHand(discardedCard, matchId, playerId);
     }
 
+    @Transactional(readOnly = true)
+    public AllCardsStatusDTO getAllCards (Integer matchId, Integer playerId){
+        DeckInGameDTO deck = new DeckInGameDTO(deckService.findDeckById(matchId)); 
+
+        HandInGameDTO hand = new HandInGameDTO(handService.findPlayerHand(matchId, playerId)); 
+
+        BagInGameDTO bag = new BagInGameDTO(bagService.findPlayerBag(matchId, playerId));
+
+        return new AllCardsStatusDTO(hand, bag, deck, playerId); 
+    }
 
     
 }

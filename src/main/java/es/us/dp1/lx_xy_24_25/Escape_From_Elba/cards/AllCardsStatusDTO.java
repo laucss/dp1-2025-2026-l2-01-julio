@@ -15,7 +15,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ConfirmDiscardDTO {
+public class AllCardsStatusDTO {
 
     @NotNull
     private HandInGameDTO hand; 
@@ -29,16 +29,16 @@ public class ConfirmDiscardDTO {
     @NotNull
     private Integer playerId; 
 
-    public ConfirmDiscardDTO(){}
+    public AllCardsStatusDTO(){}
 
-    public ConfirmDiscardDTO(HandInGame hand, BagInGame bag, DeckInGame deck, Integer playerId){
+    public AllCardsStatusDTO(HandInGame hand, BagInGame bag, DeckInGame deck, Integer playerId){
         this.hand= new HandInGameDTO(hand); 
         this.bag = new BagInGameDTO(bag); 
         this.deck = new DeckInGameDTO(deck); 
         this.playerId=playerId;
     }
 
-    public ConfirmDiscardDTO(HandInGameDTO hand, BagInGameDTO bag, DeckInGameDTO deck, Integer playerId){
+    public AllCardsStatusDTO(HandInGameDTO hand, BagInGameDTO bag, DeckInGameDTO deck, Integer playerId){
         this.hand= hand; 
         this.bag = bag; 
         this.deck = deck; 

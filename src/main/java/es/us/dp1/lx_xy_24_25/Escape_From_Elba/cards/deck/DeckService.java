@@ -179,7 +179,7 @@ public class DeckService {
 
         List<Card> discardedCards = deck.getDiscardedCards();
 
-        return discardedCards.remove(-1); 
+        return discardedCards.removeLast(); 
     }
      
     

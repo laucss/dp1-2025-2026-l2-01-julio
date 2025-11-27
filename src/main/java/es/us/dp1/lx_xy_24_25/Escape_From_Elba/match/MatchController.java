@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.ConfirmDiscardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
@@ -206,10 +206,14 @@ public class MatchController {
     }
 
     @PutMapping("/{matchId}/discardConfirmed")
-    public ResponseEntity<Void> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody ConfirmDiscardDTO data){
+    public ResponseEntity<Void> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
         handService.update(data.getHand(), matchId, data.getPlayerId());
         bagService.update(data.getBag(), matchId, data.getPlayerId());
         deckService.update(data.getDeck(), matchId);
+
+        System.out.println(handService.findPlayerMap(matchId, data.getPlayerId()));
+        //System.out.println(bagService.findPlayerMap(matchId, data.getPlayerId()));
+        System.out.println(deckService.findDeckById(matchId));
 
         return ResponseEntity.ok().build(); 
         
@@ -223,5 +227,11 @@ public class MatchController {
         return ResponseEntity.ok(result); 
 
     } 
+
+    @GetMapping("/{matchId}/{playerId}/getAllCards")
+    public ResponseEntity<AllCardsStatusDTO> getAllCards (@PathVariable Integer matchId, @PathVariable Integer playerId){
+        AllCardsStatusDTO result = ms.getAllCards(matchId, playerId); 
+        return ResponseEntity.ok(result); 
+    }
 }
 
