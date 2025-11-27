@@ -18,6 +18,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 
 @Service
 public class MatchService {
@@ -27,10 +28,12 @@ public class MatchService {
     BagService bagService; 
 
     MatchRepository mrepo;
+    PlayerRepository prepo;
 
     @Autowired
-    public MatchService(MatchRepository mrepo, DeckService deckService, HandService handService, BagService bagService) {
+    public MatchService(MatchRepository mrepo, PlayerRepository prepo, DeckService deckService, HandService handService, BagService bagService) {
         this.mrepo = mrepo;
+        this.prepo = prepo;
         this.deckService = deckService;
         this.handService = handService;
         this.bagService = bagService; 
@@ -108,12 +111,91 @@ public class MatchService {
         for (Player player : playersInGame){
             handService.createPlayerHand(matchId, player.getId());
             bagService.createPlayerbag(matchId, player.getId());
+
+            player.setDiceOrder(null); // Inicializamos el valor de la tirada de dado a null
+            player.setOrderInMatch(null);
         }
 
         m.setDeck(deckService.initializeDeck(matchId)); 
+        m.setCurrentTurnUserId(null);
+        m.setTurnNumber(0);
         mrepo.save(m);
         return m;
     }
+
+    //Función para decidir el orden de los jugadores en la partida según la tirada de dados.
+    @Transactional
+    public Match submitDiceAndAssignOrder(Integer matchId, Integer userId, Integer diceRoll) {
+
+        Match match = mrepo.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match not found"));
+
+
+        Player player = prepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
+ 
+        if (player.getDiceOrder() != null) {
+            throw new IllegalArgumentException("Jugador ya ha tirado el dado");
+        }
+
+
+        player.setDiceOrder(diceRoll);
+        prepo.save(player);
+
+
+        boolean allRolled = match.getPlayers().stream()
+                .allMatch(p -> p.getDiceOrder() != null);
+
+        if (allRolled) {
+            //  Asignar orden de turno
+            List<Player> ordered = match.getPlayers().stream()
+                    .sorted((a, b) -> {
+                        int cmp = b.getDiceOrder() - a.getDiceOrder(); // dado mayor primero
+                        if (cmp == 0) {
+                            // Desempate automático usando ID
+                            return a.getId().compareTo(b.getId());
+                        }
+                        return cmp;
+                    })
+                    .toList();
+
+            for (int i = 0; i < ordered.size(); i++) {
+                ordered.get(i).setOrderInMatch(i);
+                prepo.save(ordered.get(i));
+            }
+
+            match.setCurrentTurnUserId(ordered.get(0).getUser().getId());
+            match.setTurnNumber(1);
+            mrepo.save(match);
+        }
+
+        return match;
+    }
+
+
+    @Transactional
+    public void nextTurn(Integer matchId) {
+        Match m = mrepo.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match not found"));
+        //Obtenemos el id del user del jugador que tiene el turno actualmente
+        Integer currenUserTurnId = m.getCurrentTurnUserId();
+        //Buscamos el jugador correspondiente
+        Player currentPlayerTurn = prepo.findByMatchAndUser(matchId, currenUserTurnId)
+                .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
+        //Obtenemos el indice de orden del jugador actual
+        Integer currentIndx = currentPlayerTurn.getOrderInMatch();
+        //Calculamos el indice del siguiente jugador
+        Integer nextIndx = (currentIndx + 1) % m.getPlayers().size();
+        //Buscamos el siguiente jugador por su orden en la partida
+        Player nextPlayerTurn = prepo.findByMatchIdAndOrderInMatch(matchId, nextIndx)
+                .orElseThrow(() -> new IllegalArgumentException("Next player not found in this match"));
+        //Actualizamos el id del jugador que tiene el turno actualmente en la partida
+        m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());
+
+        mrepo.save(m);
+ 
+    }
+
 
     @Transactional
     public Match endMatch(Integer matchId) {

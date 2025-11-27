@@ -1,11 +1,13 @@
-package es.us.dp1.lx_xy_24_25.room;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.room;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,9 +34,8 @@ public class Room extends BaseEntity {
     @NotNull
     private Boolean playerInside;
 
-    @NotNull
-    @ManyToMany
-    private List<Npc> npcsInside;
+    @OneToMany(mappedBy = "room")
+    private List<Npc> npcsInside = new ArrayList<>();
 
     @NotNull
     @ManyToMany
