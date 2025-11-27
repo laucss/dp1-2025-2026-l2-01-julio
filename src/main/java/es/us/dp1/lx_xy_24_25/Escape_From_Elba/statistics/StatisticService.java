@@ -41,8 +41,10 @@ public class StatisticService {
         List<Player> players = playerRepository.findByUserId(currentUserId);
         int victories = 0;
         for (Player player : players) {
-            if (player.getMatch() != null && player.equals(player.getMatch().getWinner())) {
-                victories++;
+            if (player.getMatch() != null && player.getMatch().getWinner() != null) {
+                if (player.getId().equals(player.getMatch().getWinner().getId())) {
+                    victories++;
+                }
             }
         }
         return victories;
