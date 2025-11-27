@@ -148,6 +148,7 @@ public class MatchController {
     }
 
     @PostMapping("/{matchId}/submit-dice")
+    @Operation(summary = "Decide order", description = "Submit dice roll to decide player order at the start of the match.")
     public ResponseEntity<Match> submitDice(@PathVariable Integer matchId, @RequestParam Integer userId, @RequestParam Integer diceRoll) {
 
         try {
@@ -161,6 +162,13 @@ public class MatchController {
             // Si hubo algún error (jugador no encontrado, ya tiró, etc.)
             return ResponseEntity.badRequest().body(null);
         }
+    }
+
+    @PostMapping("/{matchId}/next-turn")
+    @Operation(summary = "Next turn", description = "Advance to the next player's turn in the match.")
+    public ResponseEntity<Void> nextTurn(@PathVariable("matchId") Integer matchId) {
+        ms.nextTurn(matchId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{matchId}/end")

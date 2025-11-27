@@ -117,14 +117,14 @@ public class MatchService {
         }
 
         m.setDeck(deckService.initializeDeck(matchId)); 
-        m.setCurrentTurnPlayerId(null);
+        m.setCurrentTurnUserId(null);
         m.setTurnNumber(0);
         mrepo.save(m);
         return m;
     }
 
-
-@Transactional
+    //Función para decidir el orden de los jugadores en la partida según la tirada de dados.
+    @Transactional
     public Match submitDiceAndAssignOrder(Integer matchId, Integer userId, Integer diceRoll) {
 
         Match match = mrepo.findById(matchId)
@@ -164,13 +164,38 @@ public class MatchService {
                 prepo.save(ordered.get(i));
             }
 
-            match.setCurrentTurnPlayerId(ordered.get(0).getId());
+            match.setCurrentTurnUserId(ordered.get(0).getUser().getId());
             match.setTurnNumber(1);
             mrepo.save(match);
         }
 
         return match;
     }
+
+
+    @Transactional
+    public void nextTurn(Integer matchId) {
+        Match m = mrepo.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match not found"));
+        //Obtenemos el id del user del jugador que tiene el turno actualmente
+        Integer currenUserTurnId = m.getCurrentTurnUserId();
+        //Buscamos el jugador correspondiente
+        Player currentPlayerTurn = prepo.findByMatchAndUser(matchId, currenUserTurnId)
+                .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
+        //Obtenemos el indice de orden del jugador actual
+        Integer currentIndx = currentPlayerTurn.getOrderInMatch();
+        //Calculamos el indice del siguiente jugador
+        Integer nextIndx = (currentIndx + 1) % m.getPlayers().size();
+        //Buscamos el siguiente jugador por su orden en la partida
+        Player nextPlayerTurn = prepo.findByMatchIdAndOrderInMatch(matchId, nextIndx)
+                .orElseThrow(() -> new IllegalArgumentException("Next player not found in this match"));
+        //Actualizamos el id del jugador que tiene el turno actualmente en la partida
+        m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());
+
+        mrepo.save(m);
+ 
+    }
+
 
     @Transactional
     public Match endMatch(Integer matchId) {

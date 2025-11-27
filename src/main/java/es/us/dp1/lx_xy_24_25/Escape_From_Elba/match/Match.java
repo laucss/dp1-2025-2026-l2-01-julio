@@ -96,7 +96,7 @@ public class Match extends NamedEntity {
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Npc> npcs = new ArrayList<>();
 
-    private Integer currentTurnPlayerId;
+    private Integer currentTurnUserId;
 
     private Integer turnNumber;
 
