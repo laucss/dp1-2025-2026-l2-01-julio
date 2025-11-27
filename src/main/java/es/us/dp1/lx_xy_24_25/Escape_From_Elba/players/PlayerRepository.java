@@ -30,7 +30,4 @@ public interface PlayerRepository extends CrudRepository<Player, Integer> {
     @Query("SELECT SUM(p.actionPoints) FROM Player p WHERE p.user.id = :userId")
     Integer getTotalAccionPointsByUser(Integer userId);
 
-    //Buscamos el jugador de una partida concreta por su orden en la partida
-    @Query("SELECT p FROM Player p WHERE p.match.id = :matchId AND p.orderInMatch = :orderInMatch")
-    Optional<Player> findByMatchIdAndOrderInMatch(Integer matchId, Integer orderInMatch);
 }

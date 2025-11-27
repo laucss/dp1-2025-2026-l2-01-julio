@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
 
 @Service
 public class MatchService {
@@ -26,14 +29,17 @@ public class MatchService {
     DeckService deckService; 
     HandService handService; 
     BagService bagService; 
+    Random ran = new Random();
 
     MatchRepository mrepo;
     PlayerRepository prepo;
+    RoomRepository roomRepository;
 
     @Autowired
-    public MatchService(MatchRepository mrepo, PlayerRepository prepo, DeckService deckService, HandService handService, BagService bagService) {
+    public MatchService(MatchRepository mrepo, PlayerRepository prepo, RoomRepository roomRepository, DeckService deckService, HandService handService, BagService bagService) {
         this.mrepo = mrepo;
         this.prepo = prepo;
+        this.roomRepository = roomRepository;
         this.deckService = deckService;
         this.handService = handService;
         this.bagService = bagService; 
@@ -93,7 +99,7 @@ public class MatchService {
         //Inicializamos la fecha de inicio
         m.setStartTime(LocalDateTime.now());
 
-
+        List<Room> availableRooms  = roomRepository.findAll();
         //Inicializamos los npcs de la partida 
 
         for ( int i=0; i< m.getNumNpcs(); i++){
@@ -101,9 +107,12 @@ public class MatchService {
             npc.setIsNiallCampbell( i== m.getNumNpcs()-1); // Si es el último npc que creamos, es Niall Campbell
             npc.setStrength(1); // El valor de la fuerza al inicio es 1
             npc.setMatch(m);// Lo asociamos a la partida
-
-            m.getNpcs().add(npc);// Lo añadimos a la lista de npcs de la partida   
-        }
+            m.getNpcs().add(npc);// Lo añadimos a la lista de npcs de la partida 
+            //Hay que añadir la asignación de niall.  
+            //Asignamos una sala aleatoria al npc
+            Room randomRoom = availableRooms.remove(ran.nextInt(availableRooms.size()));
+            npc.setRoom(randomRoom);
+        } 
 
 
         // le creamos una mano y una bolsa asociadas a cada jugador 
@@ -114,6 +123,11 @@ public class MatchService {
 
             player.setDiceOrder(null); // Inicializamos el valor de la tirada de dado a null
             player.setOrderInMatch(null);
+            player.setActionPoints(0);
+            player.setStrength(1);
+
+            Room randomRoom = availableRooms.remove(ran.nextInt(availableRooms.size()));
+            player.setRoom(randomRoom);
         }
 
         m.setDeck(deckService.initializeDeck(matchId)); 
@@ -180,15 +194,19 @@ public class MatchService {
         //Obtenemos el id del user del jugador que tiene el turno actualmente
         Integer currenUserTurnId = m.getCurrentTurnUserId();
         //Buscamos el jugador correspondiente
-        Player currentPlayerTurn = prepo.findByMatchAndUser(matchId, currenUserTurnId)
-                .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
+        Player currentPlayerTurn = m.getPlayers().stream()
+                .filter(p -> p.getUser().getId().equals(currenUserTurnId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Player not found"));
         //Obtenemos el indice de orden del jugador actual
         Integer currentIndx = currentPlayerTurn.getOrderInMatch();
         //Calculamos el indice del siguiente jugador
         Integer nextIndx = (currentIndx + 1) % m.getPlayers().size();
         //Buscamos el siguiente jugador por su orden en la partida
-        Player nextPlayerTurn = prepo.findByMatchIdAndOrderInMatch(matchId, nextIndx)
-                .orElseThrow(() -> new IllegalArgumentException("Next player not found in this match"));
+        Player nextPlayerTurn = m.getPlayers().stream()
+                .filter(p -> p.getOrderInMatch().equals(nextIndx))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Player not found"));
         //Actualizamos el id del jugador que tiene el turno actualmente en la partida
         m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());
 

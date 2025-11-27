@@ -51,6 +51,8 @@ public class Match extends NamedEntity {
     
     @Enumerated(EnumType.STRING)
     private MatchStatus status;
+
+    
     
     //Tiempos
     private LocalDateTime startTime;
@@ -100,6 +102,10 @@ public class Match extends NamedEntity {
 
     private Integer turnNumber;
 
+    //Indica la fase actual del turno
+    @Enumerated(EnumType.STRING)
+    private TurnPhase currentTurnPhase;
+
     
     @Transient
     private DeckInGame deck; //No se si es deck o deckInGame
@@ -116,9 +122,6 @@ public class Match extends NamedEntity {
     @OneToOne(cascade = CascadeType.ALL)
     private Board board;
 
-    @NotNull
-    @OneToMany(cascade = CascadeType.ALL)
-    private NPC npc;
     */
 
     //Indica si la partida es privada
@@ -178,14 +181,6 @@ public class Match extends NamedEntity {
             throw new IllegalStateException("No hay suficientes jugadores para comenzar (Mínimo=" 
                 + this.minPlayers + ", actuales=" + current + ")");
         }
-    }
-
-    //En principio devuelve un jugador aleatorio de la partida para empezar (o null si no hay jugadores)
-    public Player pickRandomStartingPlayer() {
-        if (players == null || players.isEmpty()) return null;
-        SecureRandom rnd = new SecureRandom();
-        int idx = rnd.nextInt(players.size());
-        return players.get(idx);
     }
 
     //Código que se genera al indicar que la partida es privada
