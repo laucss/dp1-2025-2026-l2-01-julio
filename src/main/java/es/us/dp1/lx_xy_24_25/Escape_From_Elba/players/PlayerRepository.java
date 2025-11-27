@@ -20,4 +20,7 @@ public interface PlayerRepository extends JpaRepository<Player, Integer> {
     @Query("SELECT p FROM Player p WHERE p.match.id = :matchId")
     java.util.List<Player> findByMatchId(Integer matchId);
 
+    //Buscamos el jugador de una partida concreta por su orden en la partida
+    @Query("SELECT p FROM Player p WHERE p.match.id = :matchId AND p.orderInMatch = :orderInMatch")
+    Optional<Player> findByMatchIdAndOrderInMatch(Integer matchId, Integer orderInMatch);
 }

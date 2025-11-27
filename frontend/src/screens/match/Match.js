@@ -24,6 +24,7 @@ export default function Match(){
     const [blackDice, setBlackDice] = useState("1")
     const [numCardsDrawn, setNumCardsDrawn] = useState(0)
     const [chatOpen, setChatOpen] = useState(false);
+    const [diceRolled, setDiceRolled] = useState(false);
 
     const [currentPlayer, setCurrentPlayer] = useState({})
 
@@ -127,14 +128,63 @@ export default function Match(){
 
     }
 
-    const throwDice = (diceType) => {
+
+    // Función que genera el número del dado y actualiza la UI
+    const rollDice = (diceType) => {
         const roll = Math.floor(Math.random() * 6) + 1;
+
         if (diceType === 'Blanco') {
             setWhiteDice(roll.toString());
         } else {
             setBlackDice(roll.toString());
         }
-    }
+
+        return roll; // Devuelve el número generado
+    };
+
+    // Función que envía la tirada al backend y actualiza el match
+    const submitDiceToBackend = (roll) => {
+        fetch(`/api/v1/matches/${matchId}/submit-dice?userId=${currentUser.id}&diceRoll=${roll}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${jwt}`,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(async res => {
+            if (!res.ok) {
+                let errorBody;
+                try {
+                    errorBody = await res.json();
+                } catch {
+                    errorBody = await res.text();
+                }
+                throw new Error(`Error al enviar tirada de dado: ${res.status} ${res.statusText} - ${JSON.stringify(errorBody)}`);
+            }
+            return res.json();
+        })
+        .then(updatedMatch => {
+            console.log("Match actualizado tras tirar dado:", updatedMatch);
+            setMatch(updatedMatch);
+
+            if (updatedMatch.players) {
+                setPlayer(updatedMatch.players);
+            }
+
+        })
+        .catch(err => console.error(err));
+    };
+
+    const throwDice = (diceType) => {
+    if (diceRolled) return; // Evitamos tirar más de una vez
+
+        const roll = rollDice(diceType);
+        submitDiceToBackend(roll);
+        setDiceRolled(true); // Marcamos que ya tiró
+    };
+
+
+
 
     
     const endMatch = () => {
@@ -165,7 +215,7 @@ export default function Match(){
 
     const playersList = (Array.isArray(player) ? player : (player?.players || [])).filter(p => p.user.id !== currentUser?.id);
 
-    return (
+return (
         <div className="match-container">
             <div className="players-avatars-section">
                 {playersList.map((p) => (
@@ -242,15 +292,18 @@ export default function Match(){
                 <div className="Dice-pack">
                     <button
                         onClick={() => throwDice('Blanco')}
-                        style={{ border: "none", background: "transparent",padding: 0,cursor: "pointer",marginRight: "15px"}}
+                        style={{ border: "none", background: "transparent",padding: 0,cursor: diceRolled ? "not-allowed" : "pointer",marginRight: "15px"}}
                         title="Dado Blanco"
+                        disabled={diceRolled} // Deshabilitado si ya tiró
                     >
                         <img src={`/Dice/B${whiteDice}.png`} alt="Dado Blanco" style={{ width: "80px", height: "auto" }} />
                     </button>
                     <button
                         onClick={() => throwDice('Negro')}
-                        style={{ border: "none", background: "transparent", padding: 0, cursor: "pointer" }}
+                        style={{ border: "none", background: "transparent", padding: 0, cursor: diceRolled ? "not-allowed" : "pointer" }}
                         title="Dado Negro"
+                        disabled={diceRolled}
+                        
                     >
                         <img src={`/Dice/N${blackDice}.png`} alt="Dado Negro" style={{ width: "80px", height: "auto" }} />
                     </button>

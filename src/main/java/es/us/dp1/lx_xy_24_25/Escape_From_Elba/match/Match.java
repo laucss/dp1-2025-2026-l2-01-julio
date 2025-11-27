@@ -89,13 +89,16 @@ public class Match extends NamedEntity {
 
     //Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)
 
-    //Añadir notNull cuando edite el datasql
     private Integer numNpcs = 3;
 
 
     //Npcs 
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Npc> npcs = new ArrayList<>();
+
+    private Integer currentTurnUserId;
+
+    private Integer turnNumber;
 
     
     @Transient

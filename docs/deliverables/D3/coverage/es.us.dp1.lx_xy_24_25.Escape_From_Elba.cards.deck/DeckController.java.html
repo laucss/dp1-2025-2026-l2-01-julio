@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeckController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck</a> &gt; <span class="el_source">DeckController.java</span></div><h1>DeckController.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
+
+
+@RestController
+@RequestMapping(&quot;/api/v1/deck&quot;)
+public class DeckController {
+
+    DeckService deckService;
+    MatchService matchService;  
+
+   @Autowired
+<span class="fc" id="L26">    public DeckController(DeckService deckService, MatchService matchService) {</span>
+<span class="fc" id="L27">        this.deckService=deckService;</span>
+<span class="fc" id="L28">        this.matchService=matchService;</span>
+<span class="fc" id="L29">    }</span>
+
+    @GetMapping(&quot;/{matchId}&quot;)
+    public ResponseEntity&lt;?&gt; iniciarDeck(@PathVariable Integer matchId) {
+<span class="nc" id="L33">        DeckInGame deck = deckService.initializeDeck(matchId); </span>
+    
+
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (deck == null) {</span>
+<span class="nc" id="L37">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L38">                    .body(&quot;Error: No se pudo crear el mazo de los cojones&quot;);</span>
+        }
+
+<span class="nc" id="L41">        return ResponseEntity.ok(deck);</span>
+
+    }
+
+
+    // @PostMapping(&quot;/{matchId}/{playerId}/draw&quot;)
+    // public ResponseEntity&lt;CardDTO&gt; drawCardFromDeck( @PathVariable Integer matchId, @PathVariable Integer playerId) {
+    @PostMapping(&quot;/{matchId}/draw&quot;)
+    public ResponseEntity&lt;CardDTO&gt; drawCardFromDeck( @PathVariable Integer matchId) {
+<span class="nc" id="L50">        Card card = deckService.drawCard(matchId); </span>
+        // Card card = matchService.playerDrawsCardFromDeck(matchId, playerId);
+
+<span class="nc" id="L53">        return ResponseEntity.ok(new CardDTO(card));</span>
+
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Match.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match</a> &gt; <span class="el_source">Match.java</span></div><h1>Match.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
+
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+//import scala.concurrent.duration.Duration;
+
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.Deck;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
+
+@Getter
+@Setter
+@Entity
+@Table(name = &quot;Match&quot;)
+@EqualsAndHashCode(of = &quot;id&quot;)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = &quot;id&quot;)
+<span class="fc" id="L42">public class Match extends NamedEntity {</span>
+    
+    private String code;
+
+     private Integer creatorId;
+    
+    @Enumerated(EnumType.STRING)
+    private MatchStatus status;
+    
+    //Tiempos
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    /** estaría bien?? hay proyectos que lo tienen
+    public Duration getDuration() {
+        if(startTime == null || endTime == null) return null;
+        return Duration.between(startTime, endTime);
+    }
+    */
+
+    //Máximo y mínimo de jugadores
+<span class="fc" id="L62">    @Min(3)</span>
+    @Max(6)
+    @NotNull
+<span class="fc" id="L65">    private Integer maxPlayers = 6;</span>
+
+<span class="fc" id="L67">    @NotNull</span>
+    @Min(3)
+    @Max(6)
+<span class="fc" id="L70">    private Integer minPlayers = 3;</span>
+
+    //Validación para asegurar que minplayers es menor o igual que maxplayers???
+    @AssertTrue(message = &quot;minPlayers debe ser menor o igual que maxPlayers&quot;)
+    private boolean isPlayerLimitsValid() {
+<span class="nc bnc" id="L75" title="All 4 branches missed.">        if (minPlayers == null || maxPlayers == null) </span>
+<span class="nc" id="L76">            return true;</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        return minPlayers &lt;= maxPlayers;</span>
+    }
+
+    //Jugadores 
+    @NotNull
+    @OneToMany(mappedBy = &quot;match&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List&lt;Player&gt; players; 
+
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    private DeckInGame deck; //No se si es deck o deckInGame
+
+    
+    /*
+    @NotNull
+    @OneToOne(cascade = CascadeType.ALL)
+    private Chat chat;
+
+    @NotNull
+    @OneToOne(cascade = CascadeType.ALL)
+    private Board board;
+
+    @NotNull
+    @OneToMany(cascade = CascadeType.ALL)
+    private NPC npc;
+    */
+
+    //Indica si la partida es privada
+    @NotNull
+    private Boolean isPrivate;
+
+    public Boolean isInProgress() {
+<span class="nc bnc" id="L109" title="All 4 branches missed.">		return this.getStartTime() != null &amp;&amp; this.getEndTime() == null;</span>
+	}
+    
+    public Boolean isFinished() {
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        return this.getEndTime() != null;</span>
+    }
+
+    //añade jugador 
+    /** Version cortita de la que está abajo, hablarlo.
+    public void addPlayer(PlayerInGame player) {
+        this.players.add(player);
+        player.setMatch(this); 
+    }
+    */
+
+    public void addPlayer(Player player) {
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        if (player == null) throw new IllegalArgumentException(&quot;El jugador no puede ser nulo&quot;);</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        if (isFull()) {</span>
+<span class="nc" id="L127">            throw new IllegalStateException(&quot;No se puede añadir otro jugador: la partida está llena (Máximo=&quot; + this.maxPlayers + &quot;)&quot;);</span>
+        }
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (this.players == null) {</span>
+<span class="nc" id="L130">            this.players = new java.util.ArrayList&lt;&gt;();</span>
+        }
+<span class="nc" id="L132">        this.players.add(player);</span>
+<span class="nc" id="L133">        player.setMatch(this); </span>
+<span class="nc" id="L134">    }</span>
+
+    // Devuelve true si se ha alcanzado el numero máximo de jugadores
+    public boolean isFull() {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (this.players == null) return false;</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (this.maxPlayers == null) return false;</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        return this.players.size() &gt;= this.maxPlayers;</span>
+    }
+
+    // Devuelve true si se ha alcanzado el número mínimo de jugadores para empezar
+    public boolean isMinReached() {
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (this.players == null) return false;</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (this.minPlayers == null) return false;</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        return this.players.size() &gt;= this.minPlayers;</span>
+    }
+    // Devuelve true si NO se ha alcanzado el número mínimo de jugadores
+    public boolean isMinNotReached() {
+<span class="nc bnc" id="L151" title="All 2 branches missed.">        return !isMinReached();</span>
+    }
+
+    // Lanza IllegalStateException si no se ha alcanzado el mínimo de jugadores
+    public void ensureMinReached() {
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        if (isMinNotReached()) {</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">            int current = (this.players == null) ? 0 : this.players.size();</span>
+<span class="nc" id="L158">            throw new IllegalStateException(&quot;No hay suficientes jugadores para comenzar (Mínimo=&quot; </span>
+                + this.minPlayers + &quot;, actuales=&quot; + current + &quot;)&quot;);
+        }
+<span class="nc" id="L161">    }</span>
+
+    //En principio devuelve un jugador aleatorio de la partida para empezar (o null si no hay jugadores)
+    public Player pickRandomStartingPlayer() {
+<span class="nc bnc" id="L165" title="All 4 branches missed.">        if (players == null || players.isEmpty()) return null;</span>
+<span class="nc" id="L166">        SecureRandom rnd = new SecureRandom();</span>
+<span class="nc" id="L167">        int idx = rnd.nextInt(players.size());</span>
+<span class="nc" id="L168">        return players.get(idx);</span>
+    }
+
+    //Código que se genera al indicar que la partida es privada
+    public String generateCodeLobby() {
+<span class="nc" id="L173">        String characters = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;;</span>
+<span class="nc" id="L174">        SecureRandom random = new SecureRandom();</span>
+        StringBuilder code;
+
+<span class="nc" id="L177">        code = new StringBuilder(8);</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        for (int i = 0; i &lt; 8; i++) {</span>
+<span class="nc" id="L179">            int index = random.nextInt(characters.length());</span>
+<span class="nc" id="L180">            code.append(characters.charAt(index));</span>
+        }
+<span class="nc" id="L182">        return code.toString();</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
