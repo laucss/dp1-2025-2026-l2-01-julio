@@ -56,4 +56,5 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
     @Query("SELECT CASE WHEN COUNT(m) > 0 THEN MAX(m.id) ELSE NULL END " +
            "FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NULL")
     Integer userInMatch(Integer userId);
+
 }

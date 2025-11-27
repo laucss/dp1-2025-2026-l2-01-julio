@@ -117,6 +117,14 @@ public class SecurityConfiguration {
                 
                 
 
+                .requestMatchers("/api/v1/players/**").authenticated()
+
+                .requestMatchers("/api/v1/statistics/**").authenticated()
+
+                .requestMatchers("/api/v1/players/**").authenticated()
+
+                .requestMatchers("/api/v1/statistics/**").authenticated()
+
                 .requestMatchers("/api/v1/chat/**").hasAnyAuthority(PLAYER, ADMIN)
                 
                 // El resto denegado

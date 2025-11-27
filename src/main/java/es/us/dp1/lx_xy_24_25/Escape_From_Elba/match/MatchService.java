@@ -216,7 +216,7 @@ public class MatchService {
 
 
     @Transactional
-    public Match endMatch(Integer matchId) {
+    public Match endMatch(Integer matchId, Player winner) {
         Match m = mrepo.findById(matchId)
                 .orElseThrow(() -> new IllegalArgumentException("Match not found"));
 
@@ -227,8 +227,9 @@ public class MatchService {
         //Cambiamos estado a FINISHED
         m.setStatus(MatchStatus.FINISHED);
 
-        // Guuardardamos hora de fin
+        // Guuardardamos hora de fin y el ganador
         m.setEndTime(LocalDateTime.now());
+        m.setWinner(winner);
 
         if (m.getStartTime() != null) {
             long durationSeconds = java.time.Duration.between(m.getStartTime(), m.getEndTime()).toSeconds();
@@ -304,6 +305,16 @@ public class MatchService {
         handService.addCardToPlayerHand(discardedCard, matchId, playerId);
     }
 
+    @Transactional
+    public Player getMatchWinner(Integer matchId) {
+        Match match = mrepo.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match not found"));
 
-    
+        if (match.getStatus() != MatchStatus.FINISHED) {
+            throw new IllegalStateException("Match is not finished yet");
+        }
+
+        return match.getWinner();
+    }
+
 }

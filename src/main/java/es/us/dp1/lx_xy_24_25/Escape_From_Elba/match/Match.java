@@ -1,5 +1,5 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
-
+//cambio para merge en FSS8078
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -26,7 +26,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -110,7 +110,9 @@ public class Match extends NamedEntity {
     @Transient
     private DeckInGame deck; //No se si es deck o deckInGame
 
-    
+    @OneToOne(optional = true)
+    @JoinColumn(name = "winner_id")
+    private Player winner;
     /*
     @NotNull
     @OneToOne(cascade = CascadeType.ALL)

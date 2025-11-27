@@ -29,22 +29,24 @@ INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (17
 -- Match
 
 -- Partida no iniciada, no empezada aún
-INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,4, 'WAITING',NULL,NULL,6,3,3,false);
+INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
+VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,4,'WAITING',NULL,NULL,6,3,3,false,null);
 
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (5,'Fiesta ',NULL, 'WAITING',NULL,NULL,5,3,3,false);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
+VALUES (5,'Fiesta ',NULL, 'WAITING',NULL,NULL,5,3,3,false,null);
 
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (4,'nerea!','DEF345', 'WAITING',NULL,NULL,5,3,4,true);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
+VALUES (4,'nerea!','DEF345', 'WAITING',NULL,NULL,5,3,4,true,null);
 
 -- Partida en progreso 
 INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (2,'Partida en curso','ABC123','PLAYING','2025-10-26 20:00:00',NULL,5,3,3,false);
+VALUES (2,'Partida en curso','ABC123','PLAYING','2025-10-26 20:00:00',NULL,5,3,3,true);
 
 -- Partida finalizada
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (3,'Partida terminada','XYZ789','FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
+VALUES (3,'Partida terminada','XYZ789','FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true,NULL),
+       (6,'Partida terminada 2',NULL,'FINISHED','2025-10-25 18:00:00','2025-10-25 19:00:00',6,3,3,false,NULL),
+        (7,'Partida terminada 3','GHI456','FINISHED','2025-11-24 18:00:00','2025-11-24 19:00:00',5,3,3,true,NULL);
 
 -- Cartas 
 INSERT INTO cards(id,front_image, back_image,letter ) 
@@ -121,4 +123,11 @@ INSERT INTO player (id, action_points, match_id, strength, user_id)
         VALUES (7,null,1,null,4), 
                (8,null,1,null,5), 
                (9,null,1,null,6),
-               (10,null,2,null,7);
+               (10,null,2,null,7),
+               (11,12,6,8,4),
+               (12,10,6,14,9),
+               (13,5,7,null,4);
+
+-- Actualizar ganadores de partidas finalizadas
+UPDATE match SET winner_id = 11 WHERE id = 6;
+UPDATE match SET winner_id = 13 WHERE id = 7;
