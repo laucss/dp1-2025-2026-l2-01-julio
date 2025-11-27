@@ -90,6 +90,10 @@ public class SecurityConfiguration {
                 
                 // API restringida para jugadores
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/lobbies").hasAnyAuthority(PLAYER)
+                .requestMatchers(HttpMethod.POST, "/api/v1/matches/{id}/discardConfirmed").hasAnyAuthority(PLAYER)
+                .requestMatchers(HttpMethod.GET,"/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck").hasAnyAuthority(PLAYER, ADMIN)
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
 
 
                 // API restringida para administradores
@@ -101,10 +105,12 @@ public class SecurityConfiguration {
 
                 // API restringida para jugadores o administradores
                 .requestMatchers("/api/v1/matches/**").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers(HttpMethod.POST,"/api/v1/bag/validate").permitAll()
                 
                 .requestMatchers("/api/v1/friendRequests/**").authenticated()
 
-                .requestMatchers("/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
+                
+                
 
                 
                 // El resto denegado

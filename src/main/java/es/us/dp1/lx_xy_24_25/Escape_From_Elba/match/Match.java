@@ -28,7 +28,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.AssertTrue;
@@ -47,7 +46,8 @@ public class Match extends NamedEntity {
     
     private String code;
 
-     private Integer creatorId;
+    //@NotNull
+    private Integer creatorId;
     
     @Enumerated(EnumType.STRING)
     private MatchStatus status;
