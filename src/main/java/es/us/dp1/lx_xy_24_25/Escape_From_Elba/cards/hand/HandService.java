@@ -143,16 +143,18 @@ public class HandService {
        activesHands.replace(matchId, playerMap); 
     }
 
-    public void update(HandInGameDTO hand, Integer playerId, Integer matchId){
+    public void update(HandInGameDTO hand, Integer matchId, Integer playerId){
 
         //checkear que exista el player y tal 
 
+        Map<Integer, HandInGame> playerMap = activesHands.get(matchId);
+        
         HandInGame newHand = new HandInGame(); 
 
-        //newHand.setCards(hand.getCards());
+        newHand.setCards(hand.getCards().stream()
+            .map(dto -> new Card(dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
 
-
-        Map<Integer, HandInGame> playerMap = activesHands.get(matchId);
+        System.out.println(activesHands);
         playerMap.put(playerId,newHand); 
 
         activesHands.put(matchId, playerMap); 

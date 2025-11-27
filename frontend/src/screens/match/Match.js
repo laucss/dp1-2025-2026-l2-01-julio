@@ -22,7 +22,7 @@ export default function Match(){
     const [bagCards, setBagCards] = useState([])
     const [whiteDice, setWhiteDice] = useState("1")
     const [blackDice, setBlackDice] = useState("1")
-    const[numCardsDrawn, setNumCardsDrawn] = useState(0)
+    const [numCardsDrawn, setNumCardsDrawn] = useState(0)
     const [chatOpen, setChatOpen] = useState(false);
 
     const [currentPlayer, setCurrentPlayer] = useState({})
@@ -274,7 +274,7 @@ export default function Match(){
                     onClick={() => setDiscardOpen(true)}
                     title="Descartar cartas"
                 >
-                    Discard cards
+                    Form my bag
                 </button>
             </div>
             

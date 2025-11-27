@@ -1,14 +1,14 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards;
 
 
+import org.springframework.boot.context.config.ConfigDataEnvironmentUpdateListener;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,6 +29,7 @@ public class ConfirmDiscardDTO {
     @NotNull
     private Integer playerId; 
 
+    public ConfirmDiscardDTO(){}
 
     public ConfirmDiscardDTO(HandInGame hand, BagInGame bag, DeckInGame deck, Integer playerId){
         this.hand= new HandInGameDTO(hand); 

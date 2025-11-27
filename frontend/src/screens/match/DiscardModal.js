@@ -102,7 +102,6 @@ export default function DiscardModal({isVisible, hand, bag, discardPile, deck, o
             }))
             };
 
-
         const response = await fetch(`/api/v1/matches/${matchId}/discardConfirmed`, {
             method: "PUT", 
             headers: {
@@ -161,7 +160,7 @@ export default function DiscardModal({isVisible, hand, bag, discardPile, deck, o
 
                 <div className="buttons"> 
                     <button onClick={confirm} className = "confirm-button">
-                        Form my bag
+                        Confirm
                     </button>
 
                     <button onClick={onClose} className = "confirm-button">

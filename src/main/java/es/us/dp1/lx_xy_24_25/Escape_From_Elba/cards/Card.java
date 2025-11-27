@@ -40,6 +40,12 @@ public class Card extends BaseEntity implements Prototype<Card> {
         this.letter = carta.letter;
     }
 
+    public Card(String frontImage, String backImage, String letter){
+        this.backImage = backImage;
+        this.frontImage = frontImage;
+        this.letter = letter;
+    }
+
     @JsonIgnore
     public Card getClone() {
         return new Card(this); 

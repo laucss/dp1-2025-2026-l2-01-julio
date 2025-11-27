@@ -182,7 +182,7 @@ public class MatchController {
     }
 
     @PutMapping("/{matchId}/discardConfirmed")
-    public ResponseEntity<?> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody ConfirmDiscardDTO data){
+    public ResponseEntity<Void> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody ConfirmDiscardDTO data){
         handService.update(data.getHand(), matchId, data.getPlayerId());
         bagService.update(data.getBag(), matchId, data.getPlayerId());
         deckService.update(data.getDeck(), matchId);

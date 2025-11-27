@@ -185,7 +185,7 @@ public class BagService {
 
 
     
-    public void update(BagInGameDTO bag, Integer playerId, Integer matchId){
+    public void update(BagInGameDTO bag, Integer matchId, Integer playerId){
 
         //checkear que exista el player y tal 
 
@@ -195,8 +195,9 @@ public class BagService {
 
 
         Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
-        playerMap.put(playerId,newBag); 
+        newBag.setCards(bag.getCards().stream().map(dto -> new Card(dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
 
+        playerMap.put(playerId, newBag); 
         activesBags.put(matchId, playerMap); 
 
     }
