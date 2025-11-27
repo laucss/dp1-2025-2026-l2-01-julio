@@ -6,12 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 
 
@@ -22,7 +19,7 @@ public class DeckController {
     DeckService deckService;
     MatchService matchService;  
 
-   @Autowired
+    @Autowired
     public DeckController(DeckService deckService, MatchService matchService) {
         this.deckService=deckService;
         this.matchService=matchService;
@@ -43,15 +40,18 @@ public class DeckController {
     }
 
 
+    /*
+     
     // @PostMapping("/{matchId}/{playerId}/draw")
     // public ResponseEntity<CardDTO> drawCardFromDeck( @PathVariable Integer matchId, @PathVariable Integer playerId) {
     @PostMapping("/{matchId}/draw")
-    public ResponseEntity<CardDTO> drawCardFromDeck( @PathVariable Integer matchId) {
-        Card card = deckService.drawCard(matchId); 
+    public ResponseEntity<DrawCardResultDTO> drawCardFromDeck( @PathVariable Integer matchId) {
+        DrawCardResultDTO cardAndDeck = deckService.drawCard(matchId); 
         // Card card = matchService.playerDrawsCardFromDeck(matchId, playerId);
 
-        return ResponseEntity.ok(new CardDTO(card));
+        return ResponseEntity.ok(cardAndDeck);
 
     }
+    */
     
 }

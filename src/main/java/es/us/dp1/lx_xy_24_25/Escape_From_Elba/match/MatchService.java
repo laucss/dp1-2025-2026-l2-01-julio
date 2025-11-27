@@ -10,8 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
@@ -160,10 +163,14 @@ public class MatchService {
      * Jugador roba una carta del mazo de robar
      */
     @Transactional
-    public void playerDrawsCardFromDeck(Integer matchId, Integer playerId){
+    public DrawCardResultDTO playerDrawsCardFromDeck(Integer matchId, Integer playerId){
         Card stolenCard =deckService.drawCard(matchId); 
+        DeckInGame deck = deckService.findDeckById(matchId); 
 
-        handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+        HandInGame hand = handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+        
+
+        return new DrawCardResultDTO(stolenCard, deck, hand); 
     }
 
     /*
