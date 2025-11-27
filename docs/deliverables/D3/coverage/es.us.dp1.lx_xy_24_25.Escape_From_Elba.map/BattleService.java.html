@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BattleService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.map</a> &gt; <span class="el_source">BattleService.java</span></div><h1>BattleService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.map;
+
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+
+import lombok.Data;
+
+@Service
+public class BattleService {
+
+    private final SimpMessagingTemplate messagingTemplate;
+
+<span class="nc" id="L13">    public BattleService(SimpMessagingTemplate messagingTemplate){</span>
+<span class="nc" id="L14">        this.messagingTemplate = messagingTemplate;</span>
+<span class="nc" id="L15">    }</span>
+
+    public BattleDTO startBattle(Integer matchId, Integer attackerId, Integer defenderId, Integer roomId){
+<span class="nc" id="L18">        BattleDTO b = new BattleDTO();</span>
+<span class="nc" id="L19">        b.setMatchId(matchId);</span>
+<span class="nc" id="L20">        b.setAttackerId(attackerId);</span>
+<span class="nc" id="L21">        b.setDefenderId(defenderId);</span>
+<span class="nc" id="L22">        b.setRoomId(roomId);</span>
+<span class="nc" id="L23">        b.setStarted(true);</span>
+<span class="nc" id="L24">        b.setMessage(&quot;Battle started between &quot; + attackerId + &quot; and &quot; + defenderId);</span>
+<span class="nc" id="L25">        messagingTemplate.convertAndSend(String.format(&quot;/topic/matches/%d/battles&quot;, matchId), b);</span>
+<span class="nc" id="L26">        return b;</span>
+    }
+
+    @Data
+    public static class BattleDTO{
+        private Integer matchId;
+        private Integer attackerId;
+        private Integer defenderId;
+        private Integer roomId;
+        private boolean started;
+        private String message;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MatchService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match</a> &gt; <span class="el_source">MatchService.java</span></div><h1>MatchService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+
+@Service
+public class MatchService {
+
+    DeckService deckService; 
+    HandService handService; 
+    BagService bagService; 
+
+    MatchRepository mrepo;
+
+    @Autowired
+<span class="nc" id="L27">    public MatchService(MatchRepository mrepo, DeckService deckService, HandService handService, BagService bagService) {</span>
+<span class="nc" id="L28">        this.mrepo = mrepo;</span>
+<span class="nc" id="L29">        this.deckService = deckService;</span>
+<span class="nc" id="L30">        this.handService = handService;</span>
+<span class="nc" id="L31">        this.bagService = bagService; </span>
+<span class="nc" id="L32">    }</span>
+
+    @Transactional(readOnly = true)
+    public List&lt;Match&gt; getAllMatchs() {
+<span class="nc" id="L36">        return mrepo.findAll();</span>
+    }
+
+    /*@Transactional(readOnly = true)  El metodo esta en LobbyService por ahora
+    public Page&lt;Match&gt; getAllPublicLobbies(Pageable pageable) {
+        return mrepo.findPublicLobbies(pageable);
+    }*/
+
+    @Transactional(readOnly = true)
+    public List&lt;Match&gt; getMatchsByName(String name) {
+<span class="nc" id="L46">        return mrepo.findByName(name);</span>
+    }
+
+    @Transactional(readOnly = true) //????
+    public List&lt;Match&gt; getRunningMatches(){
+<span class="nc" id="L51">        return mrepo.findAll();</span>
+    }
+
+    @Transactional
+    public Match save(Match m) {
+<span class="nc" id="L56">        mrepo.save(m);</span>
+<span class="nc" id="L57">        return m;</span>
+    }
+
+    @Transactional(readOnly=true)
+    public Optional&lt;Match&gt; getMatchById(Integer matchId){
+<span class="nc" id="L62">        return mrepo.findById(matchId);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Integer userInMatch(Integer userId) {
+<span class="nc" id="L67">        return mrepo.userInMatch(userId);</span>
+    }
+
+    @Transactional
+    public void delete(Integer id) {
+<span class="nc" id="L72">        mrepo.deleteById(id);</span>
+<span class="nc" id="L73">    }</span>
+
+
+
+    //Funcion para innicializar un match 
+    @Transactional
+    public void startMatch(Integer matchId) {
+<span class="nc" id="L80">        Match m = mrepo.findById(matchId).orElseThrow(() -&gt; new IllegalArgumentException(&quot;Match not found&quot;));</span>
+        
+        // le creamos una mano y una bolsa asociadas a cada jugador 
+<span class="nc" id="L83">        List&lt;Player&gt; playersInGame = m.getPlayers(); </span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        for (Player player : playersInGame){</span>
+<span class="nc" id="L85">            handService.createPlayerHand(matchId, player.getId());</span>
+<span class="nc" id="L86">            bagService.createPlayerbag(matchId, player.getId());</span>
+<span class="nc" id="L87">        }</span>
+        
+<span class="nc" id="L89">        m.setStatus(MatchStatus.PLAYING);</span>
+<span class="nc" id="L90">        m.setStartTime(LocalDateTime.now());</span>
+<span class="nc" id="L91">        m.setDeck(deckService.initializeDeck(matchId));</span>
+<span class="nc" id="L92">        mrepo.save(m);</span>
+<span class="nc" id="L93">    }</span>
+
+
+    /*
+     * METODOS RELACIONADOS CON LAS CARTAS 
+     */
+
+    /*
+     * Reparte las cartas iniciales a un jugador 
+     * si se quiere cambiar el número de cartas repartidas inicialmente: cambiar variable en DeckService
+     */
+
+    @Transactional
+    public List&lt;Card&gt; distributeInitialCardsToPlayer(Integer matchId, Integer playerId) {
+<span class="nc" id="L107">        List&lt;Card&gt; cards = deckService.drawInitialCardsFromDeck(matchId); </span>
+
+<span class="nc" id="L109">        handService.addFewCardsToPlayerHand(matchId, playerId, cards);</span>
+
+<span class="nc" id="L111">        return cards; </span>
+    }
+
+    /*
+     * Jugador roba una carta del mazo de robar
+     */
+    @Transactional
+    public void playerDrawsCardFromDeck(Integer matchId, Integer playerId){
+<span class="nc" id="L119">        Card stolenCard =deckService.drawCard(matchId); </span>
+
+<span class="nc" id="L121">        handService.addCardToPlayerHand(stolenCard, matchId, playerId);</span>
+<span class="nc" id="L122">    }</span>
+
+    /*
+     * Jugador roba una carta de la mano o bolsa de otro jugador
+     */
+
+    @Transactional
+    public void playerDrawsCardFromAnotherPlayer(Card card, Integer matchId, Integer playerIdWinner, Integer PlayerIdLoser){
+    
+
+<span class="nc" id="L132">    }</span>
+
+    /*
+     * Jugador descarta una carta de su bolsa o mano
+     * Jugador pierde contra no jugador
+     */
+
+    @Transactional
+    public void playerLosesAgaintsNonPlayer(Card card, Integer matchId, Integer playerId){
+    
+<span class="nc" id="L142">    }</span>
+
+    /*
+     * Jugador recibe la primera carta del mazo de descartes (si hay) tras vencer a niall
+     */
+
+    @Transactional
+    public void playerWinsNiallCampbell(Integer matchId, Integer playerId){
+<span class="nc" id="L150">        Card discardedCard = deckService.getAndRemoveLastDiscardedCard(matchId); </span>
+
+<span class="nc" id="L152">        handService.addCardToPlayerHand(discardedCard, matchId, playerId);</span>
+<span class="nc" id="L153">    }</span>
+
+
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

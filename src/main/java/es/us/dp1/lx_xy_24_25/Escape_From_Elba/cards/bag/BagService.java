@@ -8,10 +8,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
@@ -114,12 +115,12 @@ public class BagService {
      */
 
     @Transactional 
-    public String wordFromCards (List<Card> cards) {
-        String word = ""; 
-        for (Card card : cards){
-            word.concat(card.getLetter()); 
+    public String wordFromCards (List<CardDTO> cards) {
+        StringBuilder word = new StringBuilder();
+        for (CardDTO card : cards){
+            word.append(card.getLetter()); 
         }
-        return word;
+        return word.toString();
     }
 
 
@@ -135,7 +136,7 @@ public class BagService {
     public Boolean isValidWordForBag (String word) {
 
         // hay que mirar a ver cómo hacer para que tampoco acepte nombres propios 
-     
+      
         if (word.length() >= 3){
 
             // hacer llamada a la api de free dictionary api: 
@@ -144,15 +145,21 @@ public class BagService {
 
             String url = "https://api.dictionaryapi.dev/api/v2/entries/en/"+ word; 
 
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class); 
+            try {
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class); 
 
-            if (response.getStatusCode().equals(404)){
-                return false; 
-            } else return true; 
-
-            }
+                return response.getStatusCode().is2xxSuccessful(); // devuelve true
         
+            } 
+            catch (HttpClientErrorException e){
+                return false; 
+                
+            } catch (Exception e) {
+                // TODO: handle exception en el validadr bag
+                return false; 
+            }}
         return true; 
+        
 
     }
 
@@ -162,7 +169,7 @@ public class BagService {
      */
 
     @Transactional 
-    public Boolean checkBagIsValid (List<Card> cards){
+    public Boolean checkBagIsValid (List<CardDTO> cards){
 
         String word = wordFromCards(cards); 
         return isValidWordForBag(word); 
@@ -175,4 +182,22 @@ public class BagService {
      */
     
     
+
+
+    
+    public void update(BagInGameDTO bag, Integer playerId, Integer matchId){
+
+        //checkear que exista el player y tal 
+
+        BagInGame newBag = new BagInGame(); 
+
+        //newBag.setCards(bag.getCards());
+
+
+        Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
+        playerMap.put(playerId,newBag); 
+
+        activesBags.put(matchId, playerMap); 
+
+    }
 }

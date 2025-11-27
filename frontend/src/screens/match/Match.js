@@ -17,7 +17,7 @@ const currentUser = tokenService.getUser();
 export default function Match(){
     const matchId = getIdFromUrl(2);
     const [deck, setDeck] = useState(null)
-    const[discarPile, setDiscardPile] = useState([])
+    const [discarPile, setDiscardPile] = useState([])
     const [handCards, setHandCards] = useState([])
     const [bagCards, setBagCards] = useState([])
     const [whiteDice, setWhiteDice] = useState("1")
@@ -25,6 +25,8 @@ export default function Match(){
     const[numCardsDrawn, setNumCardsDrawn] = useState(0)
     const [chatOpen, setChatOpen] = useState(false);
     const [diceRolled, setDiceRolled] = useState(false);
+
+    const [currentPlayer, setCurrentPlayer] = useState({})
 
     const[discardOpen, setDiscardOpen] = useState(false)
     // const playerId = 
@@ -51,12 +53,12 @@ export default function Match(){
         setVisible
     );
     
-    console.log("Player info:", player);
 
     useEffect(() => {
         initializeDeck(); 
         // TODO: cambiar esta funcion pq realmente hay que repartir primero a todos los jugadores
-}, [matchId]);
+        setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
+}, [matchId, player]);
 
 
 
@@ -94,8 +96,9 @@ export default function Match(){
     }
 
     // FUNCION ROBAR CARTA
-    const drawCard = () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO DE CHATI PQ QUERIA SOLO PROBARLO
-            fetch(`/api/v1/deck/${matchId}/draw`, {
+    const drawCard = async () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO DE CHATI PQ QUERIA SOLO PROBARLO
+        try {
+            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/drawCardFromDeck`, {
                 method: "POST",
                 headers: {
                 Authorization: `Bearer ${jwt}`,
@@ -103,21 +106,25 @@ export default function Match(){
                 'Content-Type': 'application/json',
             },
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Error al robar carta");
-                }
-                return response.json();
-            })
-            .then(card => {
-                console.log("Carta robada:", card);
 
-                
-                setHandCards(prev => [...prev, card]);
-            })
-            .catch(err => {
-                console.error(err);
-            });
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${response.statusText}`)
+            }
+
+            const data = await response.json()
+            console.log('datos devueltos' ,data)
+            
+            setDeck(data.deck)
+            console.log('deck', deck)
+            setHandCards(prev => [...prev, data.card])
+
+            
+        } catch (error) {
+            console.log('error', error)
+            
+        }    
+        
+            
 
     }
 
@@ -345,6 +352,9 @@ return (
             isVisible={discardOpen}
             hand={handCards}
             bag={bagCards}
+            deck={deck}
+            discardPile={discarPile}
+            player={currentPlayer[0]}
             onClose={() => setDiscardOpen(false)}
             onSave={() =>
                 setDiscardOpen(false)}

@@ -29,8 +29,8 @@ INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (17
 -- Match
 
 -- Partida no iniciada, no empezada aún
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL, 'WAITING',NULL,NULL,6,3,3,false);
+INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
+VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,4, 'WAITING',NULL,NULL,6,3,3,false);
 
 INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
 VALUES (5,'Fiesta ',NULL, 'WAITING',NULL,NULL,5,3,3,false);
@@ -100,8 +100,8 @@ VALUES (1,'/images/cards/Carta 1.jpg','/images/cards/backCard.jpg','A'),
         (50,'/images/cards/Carta 50.jpg','/images/cards/backCard.jpg','P'),
         (51,'/images/cards/Carta 51.jpg','/images/cards/backCard.jpg','P'),
         (52,'/images/cards/Carta 52.jpg','/images/cards/backCard.jpg','P'),
-        (53,'/images/cards/Carta 53.jpg','/images/cards/backCard.jpg','R'),
-        (54,'/images/cards/Carta 54.jpg','/images/cards/backCard.jpg','R'),
+        (53,'/images/cards/Carta 53.jpg','/images/cards/backCard.jpg','P'),
+        (54,'/images/cards/Carta 54.jpg','/images/cards/backCard.jpg','P'),
         (55,'/images/cards/Carta 55.jpg','/images/cards/backCard.jpg','R'),
         (56,'/images/cards/Carta 56.jpg','/images/cards/backCard.jpg','R'),
         (57,'/images/cards/Carta 57.jpg','/images/cards/backCard.jpg','R'),
