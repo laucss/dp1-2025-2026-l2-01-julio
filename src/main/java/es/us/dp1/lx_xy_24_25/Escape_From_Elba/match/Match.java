@@ -28,7 +28,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.AssertTrue;
@@ -47,7 +46,8 @@ public class Match extends NamedEntity {
     
     private String code;
 
-     private Integer creatorId;
+    //@NotNull
+    private Integer creatorId;
     
     @Enumerated(EnumType.STRING)
     private MatchStatus status;
@@ -89,13 +89,16 @@ public class Match extends NamedEntity {
 
     //Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)
 
-    //Añadir notNull cuando edite el datasql
     private Integer numNpcs = 3;
 
 
     //Npcs 
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Npc> npcs = new ArrayList<>();
+
+    private Integer currentTurnUserId;
+
+    private Integer turnNumber;
 
     
     @Transient

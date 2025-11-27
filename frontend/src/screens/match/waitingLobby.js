@@ -25,6 +25,7 @@ export default function WaitingRoom() {
       setVisible
     );
 
+
   const leaveLobby = async () => {
     try {
       const response = await fetch(`/api/v1/matches/lobbies/${matchId}/leave`, {

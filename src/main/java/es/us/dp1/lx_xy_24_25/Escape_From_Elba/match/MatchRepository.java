@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 
 
 public interface MatchRepository extends CrudRepository<Match, Integer> {

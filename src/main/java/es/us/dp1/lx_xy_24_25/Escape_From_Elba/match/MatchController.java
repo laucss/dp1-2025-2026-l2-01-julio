@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.ConfirmDiscardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
@@ -41,11 +46,18 @@ public class MatchController {
     MatchService ms;
     LobbyService ls;
     PlayerService ps;
+    HandService handService; 
+    BagService bagService; 
+    DeckService deckService; 
+
     @Autowired
-    public MatchController(MatchService ms, LobbyService ls, PlayerService ps){
+    public MatchController(MatchService ms, LobbyService ls, PlayerService ps, HandService handService, BagService bagService, DeckService deckService){
         this.ms=ms;
         this.ls=ls;
         this.ps=ps;
+        this.handService=handService; 
+        this.bagService=bagService; 
+        this.deckService=deckService; 
     }
 
     @GetMapping
@@ -141,6 +153,30 @@ public class MatchController {
         return ResponseEntity.ok(startedMatch);
     }
 
+    @PostMapping("/{matchId}/submit-dice")
+    @Operation(summary = "Decide order", description = "Submit dice roll to decide player order at the start of the match.")
+    public ResponseEntity<Match> submitDice(@PathVariable Integer matchId, @RequestParam Integer userId, @RequestParam Integer diceRoll) {
+
+        try {
+            // Llamamos al servicio que guarda la tirada y asigna orden si todos tiraron
+            Match m = ms.submitDiceAndAssignOrder(matchId, userId, diceRoll);
+
+            // Devolvemos el jugador actualizado
+            return ResponseEntity.ok(m);
+
+        } catch (IllegalArgumentException e) {
+            // Si hubo algún error (jugador no encontrado, ya tiró, etc.)
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @PostMapping("/{matchId}/next-turn")
+    @Operation(summary = "Next turn", description = "Advance to the next player's turn in the match.")
+    public ResponseEntity<Void> nextTurn(@PathVariable("matchId") Integer matchId) {
+        ms.nextTurn(matchId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{matchId}/end")
     public ResponseEntity<Match> endMatch(@PathVariable("matchId") Integer matchId, @PathVariable("winnerId") Integer winnerId) {
         Player winner = ps.findById(winnerId).get();
@@ -175,5 +211,24 @@ public class MatchController {
             ms.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{matchId}/discardConfirmed")
+    public ResponseEntity<?> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody ConfirmDiscardDTO data){
+        handService.update(data.getHand(), matchId, data.getPlayerId());
+        bagService.update(data.getBag(), matchId, data.getPlayerId());
+        deckService.update(data.getDeck(), matchId);
+
+        return ResponseEntity.ok().build(); 
+        
+    }
+
+    @PostMapping("/{matchId}/{playerId}/drawCardFromDeck")
+    public ResponseEntity<DrawCardResultDTO> drawCardFromDeck (@PathVariable Integer matchId, @PathVariable Integer playerId){
+        DrawCardResultDTO result = ms.playerDrawsCardFromDeck(matchId, playerId); 
+
+        System.out.println(result);
+        return ResponseEntity.ok(result); 
+
+    } 
 }
 

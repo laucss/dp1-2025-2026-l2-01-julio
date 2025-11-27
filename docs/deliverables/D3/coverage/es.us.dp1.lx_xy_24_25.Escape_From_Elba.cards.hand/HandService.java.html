@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HandService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand</a> &gt; <span class="el_source">HandService.java</span></div><h1>HandService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+
+@Service
+public class HandService {
+
+    Checkers checkers; 
+    PlayerService playerService; 
+
+<span class="fc" id="L21">    public HandService(Checkers checkers, PlayerService playerService){</span>
+<span class="fc" id="L22">        this.checkers = checkers; </span>
+<span class="fc" id="L23">        this.playerService = playerService; </span>
+<span class="fc" id="L24">    }</span>
+
+    /*
+     * Variable que vamos a usar a modo de &quot;almacenamiento&quot; en memoria de las manos. 
+     * 
+     * Vamos a tener un map de la siguiente forma: 
+     * Map&lt;MatchId, Map&lt;PlayerId, HandInGame&gt;&gt; 
+     */
+<span class="fc" id="L32">    private final Map&lt;Integer, Map&lt;Integer, HandInGame&gt;&gt; activesHands = new HashMap&lt;&gt;(); </span>
+
+    /*
+     * Método que crea un HandInGame para un jugador
+     */
+    public void createPlayerHand(Integer matchId, Integer playerId){
+<span class="nc" id="L38">        playerService.findById(playerId); </span>
+        // TODO: revisar si tengo que checkear que match exista
+
+<span class="nc" id="L41">        activesHands.putIfAbsent(matchId, new HashMap&lt;&gt;()); </span>
+<span class="nc" id="L42">        HandInGame newHand = new HandInGame();</span>
+
+<span class="nc" id="L44">        Map&lt;Integer, HandInGame&gt; playerMap = activesHands.get(matchId);</span>
+<span class="nc" id="L45">        playerMap.put(playerId, newHand); </span>
+
+<span class="nc" id="L47">    }</span>
+    /*
+     * Método que tras acabar una partida, borra la mano en memoria del jugador 
+     */
+
+    public void deletePlayerHand(Integer matchId, Integer playerId){
+<span class="nc" id="L53">        playerService.findById(playerId); </span>
+        // TODO: revisar si tengo que checkear que match exista
+
+<span class="nc" id="L56">        Map&lt;Integer, HandInGame&gt; playerMap= activesHands.get(matchId); </span>
+<span class="nc" id="L57">        playerMap.remove(playerId); </span>
+<span class="nc" id="L58">    }</span>
+
+    /*
+     * Método que busca la HandInGame del jugador en la partida dada
+     */
+
+    @Transactional(readOnly = true)
+    public HandInGame findPlayerHand(Integer matchId, Integer playerId){
+<span class="nc" id="L66">        Map&lt;Integer, HandInGame&gt; playerMap = activesHands.get(matchId); </span>
+<span class="nc" id="L67">        HandInGame playerHand = playerMap.get(playerId); </span>
+
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (playerHand == null) {</span>
+<span class="nc" id="L70">            throw new ResourceNotFoundException(&quot;The player hands was not found or does not exits&quot;); </span>
+        }
+
+<span class="nc" id="L73">        return playerHand; </span>
+    }
+    /*
+     * Método que pasa la carta de la mano del jugador a su bolsa 
+     * o método que quita una carta de la mano del jugador 
+     */
+
+
+    /*
+     * Método para pasar la carta del mazo de robar a la mano del jugador que robe 
+     * O método que añade una carta a la mano 
+     */
+    
+    @Transactional
+    public void addCardToPlayerHand(Card card, Integer matchId, Integer playerId){
+<span class="nc" id="L88">        HandInGame playerHand = findPlayerHand(matchId, playerId); </span>
+
+<span class="nc" id="L90">        checkers.checkCardExists(card);</span>
+
+<span class="nc" id="L92">        playerHand.getCards().add(card); </span>
+<span class="nc" id="L93">    }</span>
+
+    /*
+     * Método que quita una carta de la mano del jugador 
+     */
+
+
+    @Transactional
+    public Card removeCardFromPlayerHand(Card card, Integer matchId, Integer playerId){
+<span class="nc" id="L102">        checkers.checkCardExists(card);</span>
+        
+<span class="nc" id="L104">        HandInGame playerHand = findPlayerHand(matchId, playerId); </span>
+<span class="nc" id="L105">        List&lt;Card&gt; playerCards = playerHand.getCards(); </span>
+<span class="nc" id="L106">        Card removedCard = null; </span>
+        
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        for (int i=0; i&lt;playerCards.size(); i++){</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">            if (playerCards.get(i).equals(card)){</span>
+<span class="nc" id="L110">                removedCard = playerCards.get(i); </span>
+<span class="nc" id="L111">                playerCards.remove(i); </span>
+<span class="nc" id="L112">                break; </span>
+            }
+        }
+<span class="nc" id="L115">        return removedCard; </span>
+
+    }
+    
+    /*
+     * Método que mete varias cartas a la mano del jugador 
+     */
+
+    public void addFewCardsToPlayerHand (Integer matchId, Integer playerId, List&lt;Card&gt; cards ){
+       //TODO: REVISAR ESTA DOS LINEAS, NS SI SON REPETITIVAS
+<span class="nc" id="L125">       Map&lt;Integer, HandInGame&gt; playerMap = activesHands.get(matchId); </span>
+<span class="nc" id="L126">       HandInGame playerHand= findPlayerHand(matchId, playerId); </span>
+
+<span class="nc bnc" id="L128" title="All 2 branches missed.">       for (Card card : cards){</span>
+<span class="nc" id="L129">        playerHand.getCards().add(card); </span>
+<span class="nc" id="L130">       }</span>
+
+<span class="nc" id="L132">       playerMap.replace(playerId, playerHand); </span>
+<span class="nc" id="L133">       activesHands.replace(matchId, playerMap); </span>
+<span class="nc" id="L134">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

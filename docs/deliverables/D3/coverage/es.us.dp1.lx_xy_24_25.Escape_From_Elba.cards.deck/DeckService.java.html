@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeckService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck</a> &gt; <span class="el_source">DeckService.java</span></div><h1>DeckService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+
+
+@Service
+public class DeckService {
+
+    /*
+     * Variable que vamos a usar a modo de &quot;almacenamiento&quot; del estado de la baraja, de los mazos. Es decir, vamos a usar un map
+     * en el que la clave sea el Id de la partida y el valor, la baraja en sí -&gt; DeckInGame (guardada en memoria)
+     */
+<span class="fc" id="L27">    private final Map&lt;Integer, DeckInGame&gt; activesDecks = new HashMap&lt;&gt;(); </span>
+
+    public CardRepository cardRepository;
+    public Checkers checkers;
+
+    @Autowired
+<span class="fc" id="L33">    public DeckService(CardRepository cardRepository, @Lazy Checkers checkers) {</span>
+<span class="fc" id="L34">        this.cardRepository = cardRepository;</span>
+<span class="fc" id="L35">        this.checkers = checkers; </span>
+<span class="fc" id="L36">    }</span>
+
+    // VARIABLES DE LOGICA DE NEGOCIO 
+<span class="fc" id="L39">    private static final Integer numberOfInitialCards = 3; </span>
+
+    /*
+     * Método para hacer una copia de la baraja original de la base de datos y barajarla para iniciar el mazo al empezar una partida
+     */
+
+    @Transactional(readOnly = true)
+    public DeckInGame initializeDeck(Integer macthId) {
+        // TODO: revisar si debería checkear que el match exista, creo que no pq no da tiempo pero bueno
+<span class="nc" id="L48">        List&lt;Card&gt; originalsCards = cardRepository.findAll();</span>
+
+        /*
+         * lo creo que de esta manera, con el new ArrayList antes para que se cree una lista mutable
+         * y se pueda hacer el shuffle. Si no le pongo eso delante, da error porque lo trata como una lista inmutable
+         */
+<span class="nc" id="L54">        List&lt;Card&gt; copiedCards = new ArrayList&lt;&gt;(</span>
+<span class="nc" id="L55">                originalsCards.stream().map(Card::getClone).toList());</span>
+        
+<span class="nc" id="L57">        Collections.shuffle(copiedCards); </span>
+
+<span class="nc" id="L59">        DeckInGame newDeck = new DeckInGame(copiedCards); </span>
+<span class="nc" id="L60">        activesDecks.put(macthId, newDeck); </span>
+<span class="nc" id="L61">        return newDeck; </span>
+
+    }
+
+    /*
+     * Método que tras acabar una partida, borra la baraja en memoria de la partida 
+     */
+
+    @Transactional
+    public void deleteDeckInGame(Integer matchId){ 
+        // TODO: revisar si tengo que checkear que match exista
+<span class="nc" id="L72">        activesDecks.remove(matchId); </span>
+<span class="nc" id="L73">    }</span>
+
+    /* 
+     * Método para buscar el mazo por su id 
+     *
+    */
+
+    @Transactional(readOnly = true)
+    public DeckInGame findDeckById(Integer macthId) {
+<span class="nc" id="L82">        DeckInGame deck = activesDecks.get(macthId); </span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (deck==null)</span>
+<span class="nc" id="L84">            throw new ResourceNotFoundException(&quot;This deck does not exist or is not found&quot;); </span>
+<span class="nc" id="L85">        return deck;   </span>
+    }
+
+     
+   
+
+    /*
+     * Método para una vez, acabadas las cartas para robar, coja las descartadas, las baraje de nuevo y las devuelva al mazo de robar
+     */
+
+    
+    @Transactional
+    public DeckInGame shuffleAndDicardedToNotDiscarded(Integer macthId){
+        // checkear si quedan menos de x cartas en vez de cero 
+
+<span class="nc" id="L100">        DeckInGame deck = findDeckById(macthId);</span>
+
+<span class="nc" id="L102">        List&lt;Card&gt; discardedCards = deck.getDiscardedCards();</span>
+<span class="nc" id="L103">        Collections.shuffle(discardedCards);</span>
+
+<span class="nc" id="L105">        deck.setNotDiscardedCards(discardedCards);</span>
+
+<span class="nc" id="L107">        deck.setDiscardedCards(new ArrayList&lt;Card&gt;()); </span>
+
+<span class="nc" id="L109">        return deck; </span>
+    }
+    
+    /*
+     * Método que roba la primera carta del mazo de robar
+     */
+
+    @Transactional
+    public Card drawCard(Integer matchId){
+<span class="nc" id="L118">        DeckInGame deck = findDeckById(matchId); </span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (deck.getNotDiscardedCards().isEmpty()) {</span>
+<span class="nc" id="L120">            throw new RuntimeException(&quot;No hay cartas para robar&quot;);</span>
+}
+
+<span class="nc" id="L123">        Card card = deck.getNotDiscardedCards().getLast();</span>
+<span class="nc" id="L124">        deck.getNotDiscardedCards().removeLast(); </span>
+<span class="nc" id="L125">        return card; </span>
+        
+    }
+
+    /*
+     * Método que añade una carta al mazo de descartes
+     */
+
+    @Transactional
+    public void addCardToDiscardedPile (Integer macthId, Card card){
+    
+<span class="nc" id="L136">        DeckInGame deck = findDeckById(macthId);</span>
+
+<span class="nc" id="L138">        List&lt;Card&gt; discardedCards = deck.getDiscardedCards();</span>
+
+<span class="nc" id="L140">        checkers.checkCardExists(card);</span>
+        
+<span class="nc" id="L142">        discardedCards.add(card); </span>
+<span class="nc" id="L143">    }</span>
+
+
+    
+
+    /*
+     * Método que añade VARIAS cartas al mazo de descartes
+     */
+
+     /*
+
+    public void addFewCardsToDiscardedPile (Integer macthId, List&lt;Card&gt; cards){
+    
+        DeckInGame deck = findDeckById(macthId);
+ 
+        List&lt;Card&gt; discardedCards = deck.getDiscardedCards();
+
+        for (const card in cards){
+            checkers.checkCardExists(card);
+            discardedCards.add(card);
+        } 
+         
+    }
+
+    */
+
+    /*
+     * Método que devuelve (y quita del mazo de descarte) la última carta que haya sido descartada
+     
+    */
+
+    @Transactional
+    public Card getAndRemoveLastDiscardedCard (Integer macthId){
+
+<span class="nc" id="L177">        DeckInGame deck = findDeckById(macthId);</span>
+
+<span class="nc" id="L179">        List&lt;Card&gt; discardedCards = deck.getDiscardedCards();</span>
+
+<span class="nc" id="L181">        return discardedCards.remove(-1); </span>
+    }
+     
+    
+
+    /*
+     * Método que comprueba si el mazo de cartas no descartadas está vacío 
+     */
+
+    @Transactional(readOnly = true)
+    public Boolean isEmpty (Integer macthId) { // (Integer deckId)
+<span class="nc" id="L192">        DeckInGame deck = findDeckById(macthId);</span>
+<span class="nc" id="L193">        return deck.getNotDiscardedCards().isEmpty();  </span>
+    }
+
+    /*
+     * CONTEXTO: cada jugador debe empezar con 3 cartas al inicio de la partida 
+     * Método que saca las 3 primeras cartas del mazo 
+     */
+
+    @Transactional
+    public List&lt;Card&gt; drawInitialCardsFromDeck (Integer matchId){
+<span class="nc" id="L203">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;(); </span>
+<span class="nc" id="L204">        DeckInGame deck = findDeckById(matchId); </span>
+        // TODO: REVISAR SI ES MEJOR HACER UNA COPIA DE DECK 
+
+<span class="nc bnc" id="L207" title="All 2 branches missed.">        for (int i = 0; i&lt;numberOfInitialCards; i++) {</span>
+<span class="nc" id="L208">            cards.add(deck.getNotDiscardedCards().getLast()); </span>
+<span class="nc" id="L209">            deck.getNotDiscardedCards().removeLast(); </span>
+        }
+        
+        // actualizamos la baraja en memoria 
+<span class="nc" id="L213">        activesDecks.replace(matchId, deck); </span>
+
+<span class="nc" id="L215">        return cards;  </span>
+    }
+}
+
+
+
+
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
