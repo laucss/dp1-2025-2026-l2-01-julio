@@ -86,7 +86,7 @@ function App() {
         <>
           <Route path="/users/:username" exact={true} element={<Profile />} />
           <Route path="users/:username/achievements" element={<PrivateRoute><AchievementUserList /></PrivateRoute>} />
-          <Route path="users/:username/statistics" element={<PrivateRoute><AchievementUserList /></PrivateRoute>} />
+          <Route path="users/:username/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
           <Route path="/match/:matchId" element={<PrivateRoute><Match /></PrivateRoute>} />
         </>)
     }    
