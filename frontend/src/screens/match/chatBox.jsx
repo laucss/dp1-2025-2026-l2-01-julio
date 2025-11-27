@@ -8,13 +8,15 @@ export default function ChatBox({ matchId }) {
   const [error, setError] = useState(null);
   const chatEndRef = useRef(null);
 
-  // Obtener mensajes del chat
+  //Obtener mensajes del chat
   const fetchMessages = async () => {
     if (!matchId) return;
 
     try {
       const data = await ChatApi.getMyChat(matchId);
-      setMessages(data);
+
+      //Asegurar que el array es válido
+      setMessages(Array.isArray(data) ? data : []);
       setError(null);
     } catch (err) {
       console.error(err);
@@ -22,21 +24,21 @@ export default function ChatBox({ matchId }) {
     }
   };
 
-  // Enviar mensaje
+  //Enviar mensaje
   const sendMessage = async () => {
     if (!text.trim()) return;
 
     try {
       await ChatApi.sendMessage(text, matchId);
       setText("");
-      await fetchMessages(); // refrescar mensajes
+      fetchMessages(); // refrescar mensajes
     } catch (err) {
       console.error(err);
       setError("Error enviando mensaje.");
     }
   };
 
-  // Polling: actualizar chat cada 2 segundos
+  //Polling cada 2 segundos
   useEffect(() => {
     if (!matchId) return;
 
@@ -45,12 +47,12 @@ export default function ChatBox({ matchId }) {
     return () => clearInterval(interval);
   }, [matchId]);
 
-  // Scroll automático al último mensaje
+  //Scroll automático hasta el último mensaje
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Enviar mensaje con Enter
+  //Enviar mensaje con Enter
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -60,13 +62,18 @@ export default function ChatBox({ matchId }) {
 
   return (
     <div className="chat-container">
+      
       <div className="chat-messages">
-        {messages.length === 0 && <div className="chat-empty">No hay mensajes aún</div>}
-        {messages.map((msg) => (
-          <div key={msg.id} className="chat-message">
-            <b>{msg.playerUsername || msg.playerId}:</b> {msg.message}
+        {messages.length === 0 && (
+          <div className="chat-empty">No hay mensajes aún</div>
+        )}
+
+        {messages.map((msg, i) => (
+          <div key={msg.id || i} className="chat-message">
+            <b>{msg.playerUsername ?? "Jugador"}:</b> {msg.message}
           </div>
         ))}
+
         <div ref={chatEndRef}></div>
       </div>
 

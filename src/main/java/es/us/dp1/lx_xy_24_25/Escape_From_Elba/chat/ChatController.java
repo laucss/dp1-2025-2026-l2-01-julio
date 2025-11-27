@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/chat")
+@RequestMapping("/api/v1/match/{matchId}/chat")
 public class ChatController {
     
     private final ChatService chatService;
@@ -18,10 +18,10 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    // Obtener todos los mensajes del chat de mi partida
+    //Obtener todos los mensajes del chat de mi partida
     @GetMapping("/my")
-    public ResponseEntity<List<ChatMessageDTO>> getMyChat() {
-        List<ChatMessageDTO> chat = chatService.findChatOfMyGame()
+    public ResponseEntity<List<ChatMessageDTO>> getMyChat(@PathVariable("matchId") Integer matchId) {
+        List<ChatMessageDTO> chat = chatService.findChatOfMyGame(matchId)
             .stream()
             .map(ChatMessageDTO::new)
             .collect(Collectors.toList());
@@ -29,10 +29,10 @@ public class ChatController {
         return ResponseEntity.ok(chat);
     }
 
-    // Crear un nuevo mensaje
+    //Crear un nuevo mensaje
     @PostMapping
-    public ResponseEntity<ChatMessageDTO> createMessage(@RequestBody ChatMessageDTO dto) {
-        ChatMessage created = chatService.createChatMessage(dto);
+    public ResponseEntity<ChatMessageDTO> createMessage(@PathVariable("matchId") Integer matchId, @RequestBody ChatMessageDTO dto) {
+        ChatMessage created = chatService.createChatMessage(matchId, dto);
         return ResponseEntity.ok(new ChatMessageDTO(created));
     }
 }
