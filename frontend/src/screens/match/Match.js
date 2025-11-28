@@ -16,7 +16,7 @@ const currentUser = tokenService.getUser();
 
 export default function Match(){
     const matchId = getIdFromUrl(2);
-    const [currentPlayer, setCurrentPlayer] = useState([])
+    const [currentPlayer, setCurrentPlayer] = useState({})
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
     const [match, setMatch] = useState(null)
@@ -57,6 +57,7 @@ export default function Match(){
                 setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
             }
     }, [match])
+    console.log('currentPlayer', currentPlayer)
 
     useEffect(() => {
         if (Array.isArray(currentPlayer) && currentPlayer[0]?.id){

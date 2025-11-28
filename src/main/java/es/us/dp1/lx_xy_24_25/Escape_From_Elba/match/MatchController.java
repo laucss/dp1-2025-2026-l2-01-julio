@@ -27,7 +27,6 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
@@ -66,11 +65,9 @@ public class MatchController {
     }
 
     @GetMapping("/{matchId}")
-    public Match getMatchById(@PathVariable("matchId")Integer matchId){
-        Optional<Match> m=ms.getMatchById(matchId);
-        if(!m.isPresent())
-            throw new ResourceNotFoundException("Match", "id", matchId);
-        return m.get();
+    public MatchDTO getMatchById(@PathVariable("matchId")Integer matchId){
+        Match m= ms.getMatchById(matchId);
+        return new MatchDTO(m);
     }
 
     @GetMapping("/lobbies/private/{matchId}")
@@ -200,7 +197,7 @@ public class MatchController {
 
     @PutMapping(value="/{id}")
     public ResponseEntity<Void> updateGame(@Valid @RequestBody Match m,@PathVariable("id")Integer id){
-        Match mToUpdate=getMatchById(id);
+        Match mToUpdate=ms.getMatchById(id); 
         BeanUtils.copyProperties(m,mToUpdate, "id");
         ms.save(mToUpdate);
         return ResponseEntity.noContent().build(); 

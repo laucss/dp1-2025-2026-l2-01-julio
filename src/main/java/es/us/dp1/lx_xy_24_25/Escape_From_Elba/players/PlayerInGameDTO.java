@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,12 +10,14 @@ import lombok.Setter;
 public class PlayerInGameDTO {
     
     // Jugador ID
-    private Integer playerId;
+    private Integer id;
     
     // Estado del jugador durante la partida
     private Integer strength;      
     
-    private Integer actionPoints;       
+    private Integer actionPoints;
+    
+    private User user; 
     
     // Cartas en juego
     /* 
@@ -28,9 +31,10 @@ public class PlayerInGameDTO {
     */
 
     public PlayerInGameDTO(Player player) {
-        this.playerId = player.getId();
+        this.id = player.getId();
         this.strength = player.getStrength();
         this.actionPoints = player.getActionPoints();
+        this.user= player.getUser();
         /*
         this.handCards = player.getHandCards();
         this.bagCards = player.getBagCards();

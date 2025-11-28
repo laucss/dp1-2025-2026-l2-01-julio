@@ -1,7 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -21,6 +20,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
@@ -76,8 +76,11 @@ public class MatchService {
     }
 
     @Transactional(readOnly=true)
-    public Optional<Match> getMatchById(Integer matchId){
-        return mrepo.findById(matchId);
+    public Match getMatchById(Integer matchId){
+        Optional<Match> m= mrepo.findById(matchId);
+        if(!m.isPresent())
+            throw new ResourceNotFoundException("Match", "id", matchId);
+        return m.get();
     }
 
     @Transactional(readOnly = true)

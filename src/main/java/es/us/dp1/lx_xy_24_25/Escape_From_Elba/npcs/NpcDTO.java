@@ -1,9 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+
 import lombok.Getter;
 import lombok.Setter;
 

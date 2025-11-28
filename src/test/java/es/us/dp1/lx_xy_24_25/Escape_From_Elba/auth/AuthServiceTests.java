@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth.AuthService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth.payload.request.SignupRequest;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.AuthoritiesService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
