@@ -5,12 +5,11 @@ import getIdFromUrl from "../../util/getIdFromUrl";
 
 const jwt = tokenService.getLocalAccessToken();
 
-export default function DiscardModal({isVisible, hand, bag, discardPile, deck, onClose, player}){
+export default function DiscardModal({isVisible, hand, bag, deck, onClose, player, onSave}){
     const matchId = getIdFromUrl(2);
     const[handCards, setHandCards] = useState([])
     const[bagCards, setBagCards] = useState([])
-    
-    const[discardedCards, setDiscardedCards] = useState([])
+
     const[deckCards, setDeckCards] = useState([])
 
     const[currentPlayer, setCurrentPlayer] = useState({})
@@ -21,7 +20,6 @@ export default function DiscardModal({isVisible, hand, bag, discardPile, deck, o
     useEffect(() => {
         setHandCards(hand)
         setBagCards(bag)
-        setDiscardedCards(discardPile)
         setDeckCards(deck)
         setCurrentPlayer(player)
     
@@ -52,21 +50,22 @@ export default function DiscardModal({isVisible, hand, bag, discardPile, deck, o
            
           
           if (response.ok) {
-            const isValid = await response.json();
-            console.log('Is valid word?:', isValid);
+            const isValid = await response.json()
+            console.log('Is valid word?:', isValid)
              
             if (isValid) {
-                await updateCards();
-                onClose();
+                await updateCards()
+                onSave()
+
             } else {
-                setMessage("Word not valid, try another");
+                setMessage("Word not valid, try another")
                 setVisible(true);
             }}
 
         } catch (error) {
-            console.error("Error during confirm:", error);
-            setMessage("An error occurred. Could not confirm discard.");
-            setVisible(true);
+            console.error("Error during confirm:", error)
+            setMessage("An error occurred. Could not confirm discard.")
+            setVisible(true)
                 
         }}
 
@@ -101,7 +100,6 @@ export default function DiscardModal({isVisible, hand, bag, discardPile, deck, o
                 letter: card.letter
             }))
             };
-
 
         const response = await fetch(`/api/v1/matches/${matchId}/discardConfirmed`, {
             method: "PUT", 
@@ -161,7 +159,7 @@ export default function DiscardModal({isVisible, hand, bag, discardPile, deck, o
 
                 <div className="buttons"> 
                     <button onClick={confirm} className = "confirm-button">
-                        Form my bag
+                        Confirm
                     </button>
 
                     <button onClick={onClose} className = "confirm-button">

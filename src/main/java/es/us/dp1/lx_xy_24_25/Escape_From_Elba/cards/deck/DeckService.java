@@ -179,7 +179,7 @@ public class DeckService {
 
         List<Card> discardedCards = deck.getDiscardedCards();
 
-        return discardedCards.remove(-1); 
+        return discardedCards.removeLast(); 
     }
      
     
@@ -224,8 +224,11 @@ public class DeckService {
 
         DeckInGame newDeck = new DeckInGame(); 
 
-        //newDeck.setDiscardedCards(deck.getDiscardedCards());
-        //newDeck.setNotDiscardedCards(deck.getNotDiscardedCards());
+        newDeck.setDiscardedCards(deck.getDiscardedCards().stream()
+            .map(dto -> new Card(dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
+        
+        newDeck.setNotDiscardedCards(deck.getNotDiscardedCards().stream()
+            .map(dto -> new Card(dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
 
         activesDecks.put(matchId, newDeck); 
 
