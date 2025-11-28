@@ -9,6 +9,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -36,9 +37,10 @@ public class Room extends BaseEntity {
     @Max(6)
     private Integer whiteDice;
     
-    @NotNull
     @ManyToMany(targetEntity = Room.class)
-    @JoinColumn(referencedColumnName = "id", name = "adjacencyList")
+    @JoinTable(name = "room_adjacency_list",
+        joinColumns = @JoinColumn(name = "room_id"),
+        inverseJoinColumns = @JoinColumn(name = "adjacency_list_id"))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Room> adjacencyList;
 

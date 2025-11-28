@@ -125,7 +125,7 @@ INSERT INTO player (id, action_points, match_id, strength, user_id)
                (9,null,1,null,6),
                (10,null,2,null,7);
 
-INSERT INTO Room (id, name, black_dice, white_dice, adjacency_list_id) 
+INSERT INTO Room (id, name, black_dice, white_dice) 
         VALUES (1, 'North Tower', 1, 1), 
                (2, 'Caesar Room',1,2), 
                (3, 'Opal Room',1,3),
