@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
@@ -40,6 +41,9 @@ public class BagService {
     private final Map<Integer, Map<Integer, BagInGame>> activesBags = new HashMap<>(); 
 
 
+    public Map<Integer, Map<Integer, BagInGame>> getActivesBags() {
+        return activesBags;
+    }
     /*
      * Método que crea un BagInGame para un jugador
      */
@@ -47,12 +51,10 @@ public class BagService {
     public void createPlayerbag(Integer matchId, Integer playerId){
         // TODO: revisar si tengo que checkear que match exista
 
-        Map<Integer, BagInGame> playerMap = new HashMap<>();
-        BagInGame newBag = new BagInGame();
+        Map<Integer, BagInGame> playerMap = activesBags.computeIfAbsent(matchId, m -> new HashMap<>());
 
-        playerMap.putIfAbsent(playerId, newBag); 
-
-        activesBags.putIfAbsent(matchId, playerMap); 
+        // Solo añadimos la mano si no existe
+        playerMap.putIfAbsent(playerId, new BagInGame());
         
 
     }
@@ -195,7 +197,7 @@ public class BagService {
 
 
         Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
-        newBag.setCards(bag.getCards().stream().map(dto -> new Card(dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
+        newBag.setCards(bag.getCards().stream().map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
 
         playerMap.put(playerId, newBag); 
         activesBags.put(matchId, playerMap); 

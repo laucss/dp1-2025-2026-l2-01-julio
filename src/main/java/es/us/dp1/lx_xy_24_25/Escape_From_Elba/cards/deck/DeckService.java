@@ -57,8 +57,13 @@ public class DeckService {
 
         DeckInGame newDeck = new DeckInGame(copiedCards); 
         activesDecks.put(macthId, newDeck); 
+        Map<Integer, DeckInGame> d = getActivesDecks(); 
         return newDeck; 
 
+    }
+
+    public Map<Integer, DeckInGame> getActivesDecks() {
+        return activesDecks;
     }
 
     /*
@@ -222,15 +227,14 @@ public class DeckService {
 
         //checkear que exista el player y tal 
 
-        DeckInGame newDeck = new DeckInGame(); 
+        DeckInGame newDeck = activesDecks.get(matchId); 
 
         newDeck.setDiscardedCards(deck.getDiscardedCards().stream()
-            .map(dto -> new Card(dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
+            .map(dto -> new Card(dto.getId(), dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
         
         newDeck.setNotDiscardedCards(deck.getNotDiscardedCards().stream()
-            .map(dto -> new Card(dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
+            .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
 
-        activesDecks.put(matchId, newDeck); 
 
     }
 }

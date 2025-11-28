@@ -90,8 +90,7 @@ export default function Match(){
     // iNICIALIZAR BARAJA
     const fetchCards = async () => {
         try {
-
-            console.log('currentPlayer', currentPlayer)
+            console.log('ENTRA EN EL FETCHCARDS')
             const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/getAllCards`, {
             method: "GET",
             headers: {
@@ -104,8 +103,8 @@ export default function Match(){
             if (response.ok){
                 const data = await response.json()
                 console.log('datos fetch cards' , data)
-                setHandCards(Array.isArray(data.hand) ? data.hand : [])
-                setBagCards(Array.isArray(data.bag) ? data.bag : [])
+                setHandCards(Array.isArray(data.hand.cards) ? data.hand.cards : [])
+                setBagCards(Array.isArray(data.bag.cards) ? data.bag.cards : [])
                 setDeck(data.deck || [])
                 return data
             } 
@@ -123,6 +122,9 @@ export default function Match(){
 
     }
 
+    console.log('hand' , handCards)
+    console.log('bag' , bagCards)
+    console.log('deck' , deck)
 
     // FUNCION ROBAR CARTA
     const drawCard = async () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO DE CHATI PQ QUERIA SOLO PROBARLO
@@ -154,9 +156,7 @@ export default function Match(){
             
 
     }
-    console.log('deck', deck)
-    console.log('hand', handCards)
-    console.log('bag', bagCards)
+
 
 
     // Función que genera el número del dado y actualiza la UI
