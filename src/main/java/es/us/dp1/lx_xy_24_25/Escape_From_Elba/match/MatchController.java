@@ -2,6 +2,7 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -24,8 +25,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
@@ -147,6 +151,9 @@ public class MatchController {
     @Operation(summary = "Start match", description = "Start a match from a lobby.")
     public ResponseEntity<MatchDTO> startMatch(@Parameter(description = "Id of the lobby to start the match") @PathVariable Integer matchId) {
         Match startedMatch = ms.startMatch(matchId);
+        Map<Integer, Map<Integer, HandInGame>> hands = handService.getActivesHands();
+        Map<Integer, Map<Integer, BagInGame>> bags = bagService.getActivesBags();
+        Map<Integer, DeckInGame> deck = deckService.getActivesDecks();
         return ResponseEntity.ok(new MatchDTO(startedMatch));
     }
 
@@ -216,9 +223,13 @@ public class MatchController {
         bagService.update(data.getBag(), matchId, data.getPlayerId());
         deckService.update(data.getDeck(), matchId);
 
-        System.out.println(handService.findPlayerMap(matchId, data.getPlayerId()));
-        //System.out.println(bagService.findPlayerMap(matchId, data.getPlayerId()));
-        System.out.println(deckService.findDeckById(matchId));
+        Map<Integer, Map<Integer, HandInGame>> hands = handService.getActivesHands();
+        Map<Integer, Map<Integer, BagInGame>> bags = bagService.getActivesBags();
+        Map<Integer, DeckInGame> deck = deckService.getActivesDecks();
+        System.out.println(hands);
+        System.out.println(bags);
+        System.out.println(deck);
+        System.out.println(bagService.findPlayerBag(matchId, data.getPlayerId()));
 
         return ResponseEntity.ok().build(); 
         

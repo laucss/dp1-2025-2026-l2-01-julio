@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -29,6 +30,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
 
 @Service
 public class MatchService {
+
+    private static final Integer initialCardsPerPlayer = 3; 
 
     DeckService deckService; 
     HandService handService; 
@@ -125,8 +128,6 @@ public class MatchService {
         // le creamos una mano y una bolsa asociadas a cada jugador 
         List<Player> playersInGame = m.getPlayers(); 
         for (Player player : playersInGame){
-            handService.createPlayerHand(matchId, player.getId());
-            bagService.createPlayerbag(matchId, player.getId());
 
             player.setDiceOrder(null); // Inicializamos el valor de la tirada de dado a null
             player.setOrderInMatch(null);
@@ -137,7 +138,9 @@ public class MatchService {
             player.setRoom(randomRoom);
         }
 
-        m.setDeck(deckService.initializeDeck(matchId)); 
+        DeckInGame deck = initializePlayerHandCards(matchId, playersInGame); 
+
+        m.setDeck(deck); 
         m.setCurrentTurnUserId(null);
         m.setTurnNumber(0);
         mrepo.save(m);
@@ -335,4 +338,20 @@ public class MatchService {
         return match.getWinner();
     }
     
+    public DeckInGame initializePlayerHandCards (Integer matchId, List<Player> players){
+        DeckInGame deck = deckService.initializeDeck(matchId); 
+        for (Player player : players) {
+            handService.createPlayerHand(matchId, player.getId());
+            bagService.createPlayerbag(matchId, player.getId());
+        }
+        for (int i = 0; i < initialCardsPerPlayer; i++) {
+            for (Player player : players) {
+                    // Sacamos la carta del mazo y se la damos al jugador
+                    Card card = deck.getNotDiscardedCards().remove(0); // carta del tope del deck
+                    handService.addCardToPlayerHand(card, matchId, player.getId());
+            }
+        }
+        return deck;     
+
+    }
 }
