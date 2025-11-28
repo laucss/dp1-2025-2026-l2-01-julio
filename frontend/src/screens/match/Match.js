@@ -131,15 +131,12 @@ export default function Match(){
 
     // Función que genera el número del dado y actualiza la UI
     const rollDice = (diceType) => {
-        const roll = Math.floor(Math.random() * 6) + 1;
+        const rollWhite = Math.floor(Math.random() * 6) + 1;
+        setWhiteDice(rollWhite.toString());
+        const rollBlack = Math.floor(Math.random() * 6) + 1;
+        setBlackDice(rollBlack.toString());
 
-        if (diceType === 'Blanco') {
-            setWhiteDice(roll.toString());
-        } else {
-            setBlackDice(roll.toString());
-        }
-
-        return roll; // Devuelve el número generado
+        return [rollWhite, rollBlack]; // Devuelve el número generado
     };
 
     // Función que envía la tirada al backend y actualiza el match
@@ -175,11 +172,11 @@ export default function Match(){
         .catch(err => console.error(err));
     };
 
-    const throwDice = (diceType) => {
+    const throwDice = () => {
     if (diceRolled) return; // Evitamos tirar más de una vez
 
-        const roll = rollDice(diceType);
-        submitDiceToBackend(roll);
+        const [white,black] = rollDice();
+        submitDiceToBackend(white+black);
         setDiceRolled(true); // Marcamos que ya tiró
     };
 
