@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BagService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag</a> &gt; <span class="el_source">BagService.java</span></div><h1>BagService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+
+
+
+@Service
+public class BagService {
+    
+    Checkers checkers;
+    PlayerService playerService; 
+
+<span class="fc" id="L23">    public BagService(Checkers checkers, PlayerService playerService){</span>
+<span class="fc" id="L24">        this.checkers = checkers; </span>
+<span class="fc" id="L25">        this.playerService = playerService; </span>
+<span class="fc" id="L26">    }</span>
+
+    /*
+     * Variable que vamos a usar a modo de &quot;almacenamiento&quot; en memoria del estado de la bolsa
+     * Map de la forma: 
+     * Map&lt;MatchId, Map&lt;PlayerId, BagInGame&gt;&gt; 
+     */
+<span class="fc" id="L33">    private final Map&lt;Integer, Map&lt;Integer, BagInGame&gt;&gt; activesBags = new HashMap&lt;&gt;(); </span>
+
+
+    /*
+     * Método que crea un BagInGame para un jugador
+     */
+    public void createPlayerbag(Integer matchId, Integer playerId){
+<span class="nc" id="L40">        playerService.findById(playerId); </span>
+        // TODO: revisar si tengo que checkear que match exista
+
+<span class="nc" id="L43">        activesBags.putIfAbsent(matchId, new HashMap&lt;&gt;()); </span>
+<span class="nc" id="L44">        BagInGame newBag = new BagInGame();</span>
+
+<span class="nc" id="L46">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.get(matchId);</span>
+<span class="nc" id="L47">        playerMap.put(playerId, newBag); </span>
+
+<span class="nc" id="L49">    }</span>
+
+    /*
+     * Método que tras acabar una partida, borra la bolsa en memoria del jugador 
+     */
+    public void deletePlayerBag(Integer matchId, Integer playerId){
+<span class="nc" id="L55">        playerService.findById(playerId); </span>
+        // TODO: revisar si tengo que checkear que match exista
+
+<span class="nc" id="L58">        Map&lt;Integer, BagInGame&gt; playerMap= activesBags.get(matchId); </span>
+<span class="nc" id="L59">        playerMap.remove(playerId); </span>
+<span class="nc" id="L60">    }</span>
+
+    
+
+    /*
+     * Método que busca y devuelve el BagInGame del jugador
+     */
+
+    public BagInGame findPlayerBag(Integer matchId, Integer playerId){
+<span class="nc" id="L69">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.get(matchId); </span>
+<span class="nc" id="L70">        BagInGame playersBag = playerMap.get(playerId); </span>
+
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if ( playersBag == null){</span>
+<span class="nc" id="L73">            throw new ResourceNotFoundException(&quot;The players bag does not exist or is not found&quot;); </span>
+        }
+<span class="nc" id="L75">        return playersBag; </span>
+    }
+
+    /*
+     * Método que quita una carta de la bolsa del jugador 
+     */
+
+    public Card removeCardFromPlayerBag(Card card, Integer matchId, Integer playerId){
+<span class="nc" id="L83">        checkers.checkCardExists(card);</span>
+        
+<span class="nc" id="L85">        BagInGame playerBag = findPlayerBag(matchId, playerId); </span>
+<span class="nc" id="L86">        List&lt;Card&gt; playerCards = playerBag.getCards(); </span>
+<span class="nc" id="L87">        Card removedCard = null; </span>
+        
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        for (int i=0; i&lt;playerCards.size(); i++){</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (playerCards.get(i).equals(card)){</span>
+<span class="nc" id="L91">                removedCard = playerCards.get(i); </span>
+<span class="nc" id="L92">                playerCards.remove(i); </span>
+<span class="nc" id="L93">                break; </span>
+            }
+        }
+<span class="nc" id="L96">        return removedCard; </span>
+
+    }
+    
+
+
+
+
+
+    /*
+     * Valida si la palabra que forma el usuario es valida para guardarse en la bolsa
+     * llamando a una api de diccionario si tiene más de letras
+     * Despues, guarda y actualiza la nueva bolsa del juagador
+     */
+
+    /*
+    @Transactional 
+    public Boolean isValidWordForBag (String word) {
+
+        // hay que mirar a ver cómo hacer para que tampoco acepte nombres propios 
+     
+        if (word.length &gt;= 3){
+
+            // hacer llamada a la api de free dictionary api: 
+            // https://api.dictionaryapi.dev/api/v2/entries/en/&lt;word&gt;
+            
+            // basicamente hacerle una llamada a esa api con la palabra y ver si devuelve una respuesta válida
+
+            // hay otra opción de api que es https://www.wordsapi.com/  aunque creo que es un poco menos completa pero ns 
+
+            
+            BagRepository.save(bag); 
+        
+            }
+
+    }
+     */
+
+
+
+    /*
+     * Método que checkea si palabra formada forma parte de la lista de armas ofrecida por el juego 
+     */
+    
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,7 +1,8 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs;
-
+//cambio para merge en FSS8078
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -23,6 +24,9 @@ public class Npc extends BaseEntity{
     private Match match;
 
 
-    //Añadir más adelante relación con room
+    //Un npc está en una habitación
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    private Room room;
     
 }

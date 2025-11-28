@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FriendRequestService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest</a> &gt; <span class="el_source">FriendRequestService.java</span></div><h1>FriendRequestService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.AlreadyCreatedException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.transaction.annotation.Transactional;
+
+<span class="fc" id="L16">@Slf4j</span>
+@Service
+public class FriendRequestService {
+
+    FriendRequestRepository friendRequestRepository;
+    UserRepository userRepository;
+
+    @Autowired
+<span class="fc" id="L24">    public FriendRequestService(FriendRequestRepository friendRequestRepository, UserRepository userRepository) {</span>
+<span class="fc" id="L25">        this.friendRequestRepository = friendRequestRepository;</span>
+<span class="fc" id="L26">        this.userRepository = userRepository;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Transactional(readOnly = true)
+    public FriendRequest findById(Integer FriendRequestId) throws ResourceNotFoundException {
+<span class="nc" id="L31">        return friendRequestRepository.findById(FriendRequestId)</span>
+<span class="nc" id="L32">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;FriendRequest&quot;, &quot;id&quot;, FriendRequestId));</span>
+    }
+
+    @Transactional(readOnly = true)
+    public FriendRequest findFriendRequestPendingById(Integer FriendRequestId) throws ResourceNotFoundException {
+<span class="nc" id="L37">        return friendRequestRepository.findRequestPendingById(FriendRequestId)</span>
+<span class="nc" id="L38">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;FriendRequest&quot;, &quot;id&quot;, FriendRequestId));</span>
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;FriendRequest&gt; findFriendRequestsByUserId(Integer userId) {
+<span class="nc" id="L43">        return friendRequestRepository.findAllRequestsByUserId(userId);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;FriendRequest&gt; findFriendRequestsForUserId(Integer userId) {
+<span class="nc" id="L48">        return friendRequestRepository.findAllRequestsForUserId(userId);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;FriendRequest&gt; findFriendsByUserId(Integer userId) {
+<span class="nc" id="L53">        return friendRequestRepository.findAllFriendsByUserId(userId);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Boolean isPendingOrFriendsUsers(Integer user1Id, Integer user2Id) {
+<span class="nc" id="L58">        return friendRequestRepository.findPendingOrFriendsUsers(user1Id, user2Id).isPresent();</span>
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;User&gt; findFriendsByPlayerId(Integer userId) {
+<span class="nc" id="L63">        return friendRequestRepository.findAllFriendsByUserId(userId).stream()</span>
+<span class="nc" id="L64">                .map(f -&gt; {</span>
+<span class="nc" id="L65">                    User receiver = f.getReceiver();</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                    if (receiver.getId() == userId) {</span>
+<span class="nc" id="L67">                        return f.getSender();</span>
+                    }
+<span class="nc" id="L69">                    return receiver;</span>
+<span class="nc" id="L70">                }).toList();</span>
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;FriendRequest&gt; findAcceptedFriendRequestsByUserId(Integer userId) {
+<span class="nc" id="L75">        return friendRequestRepository.findAllFriendsByUserId(userId);</span>
+}
+
+    @Transactional(readOnly = true)
+    public User findPlayerById(Integer playerId) throws ResourceNotFoundException {
+<span class="nc" id="L80">        return userRepository.findById(playerId)</span>
+<span class="nc" id="L81">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Player&quot;, &quot;id&quot;, playerId));</span>
+    }
+
+    @Transactional(rollbackFor = AlreadyCreatedException.class)
+    public FriendRequest sendRequest(Integer senderId, Integer receiverId) throws AlreadyCreatedException {
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if (isPendingOrFriendsUsers(senderId, receiverId)) {</span>
+<span class="nc" id="L87">            log.error(&quot;Friend request already exists: senderId={}, receiverId={}&quot;, senderId, receiverId);</span>
+<span class="nc" id="L88">            throw new AlreadyCreatedException(&quot;Friend request&quot;);</span>
+        }
+
+<span class="nc" id="L91">        log.info(&quot;Creating a new friend request: senderId={}, receiverId={}&quot;, senderId, receiverId);</span>
+
+<span class="nc" id="L93">        FriendRequest newFriendRequest = new FriendRequest();</span>
+<span class="nc" id="L94">        User sender = findPlayerById(senderId);</span>
+<span class="nc" id="L95">        newFriendRequest.setSender(sender);</span>
+<span class="nc" id="L96">        User receiver = findPlayerById(receiverId);</span>
+<span class="nc" id="L97">        newFriendRequest.setReceiver(receiver);</span>
+<span class="nc" id="L98">        newFriendRequest.setStatus(StatusType.PENDING);</span>
+<span class="nc" id="L99">        FriendRequest savedFriendRequest = friendRequestRepository.save(newFriendRequest);</span>
+
+<span class="nc" id="L101">        log.info(&quot;Friend request created successfully: requestId={}, senderId={}, receiverId={}&quot;, savedFriendRequest.getId(), senderId, receiverId);</span>
+<span class="nc" id="L102">        return newFriendRequest;</span>
+    }
+
+    @Transactional
+    public FriendRequest acceptRequest(FriendRequest toUpdate) {
+<span class="nc" id="L107">        log.info(&quot;Accepting friend request: requestId={}&quot;, toUpdate.getId());</span>
+<span class="nc" id="L108">        toUpdate.setStatus(StatusType.ACCEPTED);</span>
+<span class="nc" id="L109">        friendRequestRepository.save(toUpdate);</span>
+<span class="nc" id="L110">        log.info(&quot;Friend request accepted: requestId={}&quot;, toUpdate.getId());</span>
+<span class="nc" id="L111">        return toUpdate;</span>
+    }
+
+    @Transactional
+    public FriendRequest rejectRequest(FriendRequest toUpdate) {
+<span class="nc" id="L116">        log.info(&quot;Rejecting friend request: requestId={}&quot;, toUpdate.getId());</span>
+<span class="nc" id="L117">        toUpdate.setStatus(StatusType.REJECTED);</span>
+<span class="nc" id="L118">        friendRequestRepository.save(toUpdate);</span>
+<span class="nc" id="L119">        log.info(&quot;Friend request rejected: requestId={}&quot;, toUpdate.getId());</span>
+<span class="nc" id="L120">        return toUpdate;</span>
+    }
+
+    @Transactional
+    public void deleteFriend(FriendRequest toDelete) {
+<span class="nc" id="L125">        friendRequestRepository.deleteById(toDelete.getId());</span>
+<span class="nc" id="L126">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

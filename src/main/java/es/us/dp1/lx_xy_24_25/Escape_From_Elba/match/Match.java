@@ -1,5 +1,5 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
-
+//cambio para merge en FSS8078
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -26,7 +26,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -47,10 +47,13 @@ public class Match extends NamedEntity {
     
     private String code;
 
-     private Integer creatorId;
+    //@NotNull
+    private Integer creatorId;
     
     @Enumerated(EnumType.STRING)
     private MatchStatus status;
+
+    
     
     //Tiempos
     private LocalDateTime startTime;
@@ -89,7 +92,6 @@ public class Match extends NamedEntity {
 
     //Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)
 
-    //Añadir notNull cuando edite el datasql
     private Integer numNpcs = 3;
 
 
@@ -97,11 +99,21 @@ public class Match extends NamedEntity {
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Npc> npcs = new ArrayList<>();
 
+    private Integer currentTurnUserId;
+
+    private Integer turnNumber;
+
+    //Indica la fase actual del turno
+    @Enumerated(EnumType.STRING)
+    private TurnPhase currentTurnPhase;
+
     
     @Transient
     private DeckInGame deck; //No se si es deck o deckInGame
 
-    
+    @OneToOne(optional = true)
+    @JoinColumn(name = "winner_id")
+    private Player winner;
     /*
     @NotNull
     @OneToOne(cascade = CascadeType.ALL)
@@ -111,9 +123,6 @@ public class Match extends NamedEntity {
     @OneToOne(cascade = CascadeType.ALL)
     private Board board;
 
-    @NotNull
-    @OneToMany(cascade = CascadeType.ALL)
-    private NPC npc;
     */
 
     //Indica si la partida es privada
@@ -173,14 +182,6 @@ public class Match extends NamedEntity {
             throw new IllegalStateException("No hay suficientes jugadores para comenzar (Mínimo=" 
                 + this.minPlayers + ", actuales=" + current + ")");
         }
-    }
-
-    //En principio devuelve un jugador aleatorio de la partida para empezar (o null si no hay jugadores)
-    public Player pickRandomStartingPlayer() {
-        if (players == null || players.isEmpty()) return null;
-        SecureRandom rnd = new SecureRandom();
-        int idx = rnd.nextInt(players.size());
-        return players.get(idx);
     }
 
     //Código que se genera al indicar que la partida es privada

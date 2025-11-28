@@ -7,6 +7,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
  * and open the template in the editor.
  */
 
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.jwt.AuthEntryPointJwt;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.jwt.AuthTokenFilter;
@@ -91,6 +96,10 @@ public class SecurityConfiguration {
                 
                 // API restringida para jugadores
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/lobbies").hasAnyAuthority(PLAYER)
+                .requestMatchers(HttpMethod.POST, "/api/v1/matches/{id}/discardConfirmed").hasAnyAuthority(PLAYER)
+                .requestMatchers(HttpMethod.GET,"/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck").hasAnyAuthority(PLAYER, ADMIN)
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
 
 
                 // API restringida para administradores
@@ -102,11 +111,22 @@ public class SecurityConfiguration {
 
                 // API restringida para jugadores o administradores
                 .requestMatchers("/api/v1/matches/**").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers(HttpMethod.POST,"/api/v1/bag/validate").permitAll()
                 
                 .requestMatchers("/api/v1/friendRequests/**").authenticated()
 
-                .requestMatchers("/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
+                
+                
 
+                .requestMatchers("/api/v1/players/**").authenticated()
+
+                .requestMatchers("/api/v1/statistics/**").authenticated()
+
+                .requestMatchers("/api/v1/players/**").authenticated()
+
+                .requestMatchers("/api/v1/statistics/**").authenticated()
+
+                .requestMatchers("/api/v1/match/{matchId}/chat/**").hasAnyAuthority(PLAYER, ADMIN)
                 
                 // El resto denegado
                 .anyRequest().denyAll()
@@ -133,6 +153,17 @@ public class SecurityConfiguration {
 		return new BCryptPasswordEncoder();
 	}
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true); // Permite enviar JWT en headers/cookies
 
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
 }

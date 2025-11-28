@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 
 
 public interface MatchRepository extends CrudRepository<Match, Integer> {
@@ -16,6 +15,7 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
     List<Match> findByName(String name);
 
+    Match findById(int id);
 
     //Devuelve todos los lobbies para unirse publicos
     @Query( "SELECT m FROM Match m WHERE m.isPrivate=false and m.status= 'WAITING'")
@@ -56,4 +56,5 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
     @Query("SELECT CASE WHEN COUNT(m) > 0 THEN MAX(m.id) ELSE NULL END " +
            "FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NULL")
     Integer userInMatch(Integer userId);
+
 }
