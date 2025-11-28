@@ -32,8 +32,8 @@ public class PlayerService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Player> findById(Integer id) {
-        return playerRepository.findById(id);
+    public Player findById(Integer id) {
+        return playerRepository.findById(id).orElse(null);
     }
 
     @Transactional(readOnly = true)

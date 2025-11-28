@@ -186,16 +186,17 @@ export default function Match(){
     
     const endMatch = () => {
         if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return;
-
+        const body ={ winnerId: 10};
         fetch(`/api/v1/matches/${matchId}/end`, {
-            method: "POST",
+            method: "PUT",
             headers: {
                 Authorization: `Bearer ${jwt}`,
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify(body)
         })
         .then(res => res.json())
-        .then(() => window.location.reload())
+        //.then(() => window.location.reload())
         .catch(err => console.error(err));
     };
 

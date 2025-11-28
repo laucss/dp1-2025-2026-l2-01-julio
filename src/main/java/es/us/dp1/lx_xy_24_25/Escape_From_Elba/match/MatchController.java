@@ -177,9 +177,9 @@ public class MatchController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{matchId}/end")
-    public ResponseEntity<Match> endMatch(@PathVariable("matchId") Integer matchId, @PathVariable("winnerId") Integer winnerId) {
-        Player winner = ps.findById(winnerId).get();
+    @PutMapping("/{matchId}/end")
+    public ResponseEntity<Match> endMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer winnerId) {
+        Player winner = ps.findById(winnerId);
         Match ended = ms.endMatch(matchId,winner);
         return ResponseEntity.ok(ended);
     }

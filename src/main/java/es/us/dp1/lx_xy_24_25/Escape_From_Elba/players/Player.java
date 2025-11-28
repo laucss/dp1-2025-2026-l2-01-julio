@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
@@ -31,6 +32,7 @@ public class Player extends BaseEntity {
 
 	@ManyToOne
 	@JoinColumn(name = "match_id")
+	@JsonIgnore
 	private Match match;
 
 	@OneToOne
