@@ -29,22 +29,24 @@ INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (17
 -- Match
 
 -- Partida no iniciada, no empezada aún
-INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,4, 'WAITING',NULL,NULL,6,3,3,false);
+INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
+VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,4,'WAITING',NULL,NULL,6,3,3,false,null);
 
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (5,'Fiesta ',NULL, 'WAITING',NULL,NULL,5,3,3,false);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
+VALUES (5,'Fiesta ',NULL, 'WAITING',NULL,NULL,5,3,3,false,null);
 
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (4,'nerea!','DEF345', 'WAITING',NULL,NULL,5,3,4,true);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
+VALUES (4,'nerea!','DEF345', 'WAITING',NULL,NULL,5,3,4,true,null);
 
 -- Partida en progreso 
 INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (2,'Partida en curso','ABC123','PLAYING','2025-10-26 20:00:00',NULL,5,3,3,false);
+VALUES (2,'Partida en curso','ABC123','PLAYING','2025-10-26 20:00:00',NULL,5,3,3,true);
 
 -- Partida finalizada
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (3,'Partida terminada','XYZ789','FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true);
+INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
+VALUES (3,'Partida terminada','XYZ789','FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true,NULL),
+       (6,'Partida terminada 2',NULL,'FINISHED','2025-10-25 18:00:00','2025-10-25 19:00:00',6,3,3,false,NULL),
+        (7,'Partida terminada 3','GHI456','FINISHED','2025-11-24 18:00:00','2025-11-24 19:00:00',5,3,3,true,NULL);
 
 -- Cartas 
 INSERT INTO cards(id,front_image, back_image,letter ) 
@@ -114,7 +116,7 @@ VALUES (1,'/images/cards/Carta 1.jpg','/images/cards/backCard.jpg','A'),
         (64,'/images/cards/Carta 64.jpg','/images/cards/backCard.jpg','S'); 
 
 
-        
+
         
 
 INSERT INTO player (id, action_points, match_id, strength, user_id) 
@@ -122,3 +124,148 @@ INSERT INTO player (id, action_points, match_id, strength, user_id)
                (8,null,1,null,5), 
                (9,null,1,null,6),
                (10,null,2,null,7);
+
+INSERT INTO Room (id, name, black_dice, white_dice) 
+        VALUES (1, 'North Tower', 1, 1), 
+               (2, 'Caesar Room',1,2), 
+               (3, 'Opal Room',1,3),
+               (4, 'Coral Room', 1, 4),
+               (5, 'Roof', 1, 5),
+               (6, 'East Tower', 1, 6),
+               (7, 'Corridor 1', 2, 1),
+               (8, 'Cafe',2,2),
+               (9, 'Corridor 2', 2, 3),
+               (10, 'Corridor 2', 2, 4),
+               (11, 'Parlor', 2, 5),
+               (12, 'Corridor 3', 2, 6),
+               (13, 'Ball Room', 3, 1),
+               (14, 'Corridor 4', 3, 2),
+               (15, 'Spa', 3, 3),
+               (16, 'Pool', 3, 4),
+               (17, 'Corridor 5', 3, 5),
+               (18, 'Sleep Room', 3, 6),
+               (19, 'Class Room', 4, 1),
+               (20, 'Corridor 6', 4, 2),
+               (21, 'Arbor', 4, 3),
+               (22, 'Farm', 4, 4),
+               (23, 'Corridor 7', 4, 5),
+               (24, 'Meal Room', 4, 6),
+               (25, 'Corridor 8', 5, 1),
+               (26, 'Bar', 5, 2),
+               (27, 'Corridor 9', 5, 3),
+               (28, 'Corridor 9', 5, 4),
+               (29, 'Lab', 5, 5),
+               (30, 'Corridor 10', 5, 6),
+               (31, 'West Tower', 6, 1),
+               (32, 'Cellar', 6, 2),
+               (33, 'Apple Room', 6, 3),
+               (34, 'Map Room', 6, 4),
+               (35, 'Parole Room', 6, 5),
+               (36, 'South Tower', 6, 6),
+               (37, 'Safe Area', null, null);
+
+INSERT INTO room_adjacency_list (room_id, adjacency_list_id) 
+        VALUES (1,2),
+               (1,7),
+               (2,1),
+               (2,3),
+               (3,2),
+               (3,8),
+               (4,5),
+               (4,11),
+               (5,4),
+               (5,6),
+               (6,5),
+               (6,12),
+               (7,1),
+               (7,8),
+               (7,14),
+               (8,3),
+               (8,7),
+               (8,9),
+               (8,10),
+               (8,15),
+               (9,8),
+               (9,11),
+               (9,37),
+               (10,8),
+               (10,11),
+               (10,37),
+               (11,4),
+               (11,9),
+               (11,10),
+               (11,12),
+               (11,16),
+               (12,6),
+               (12,11),
+               (12,17),
+               (13,14),
+               (13,19),
+               (14,13),
+               (14,7),
+               (14,15),
+               (15,14),
+               (15,37),
+               (15,21),
+               (16,11),
+               (16,17),
+               (16,37),
+               (16,22),
+               (17,12),
+               (17,16),
+               (17,18),
+               (18,17),
+               (18,24),
+               (19,13),
+               (19,20),
+               (20,19),
+               (20,21),
+               (20,25),
+               (21,20),
+               (21,15),
+               (21,37),
+               (21,26),
+               (22,16),
+               (22,23),
+               (22,37),
+               (22,29),
+               (23,22),
+               (23,24),
+               (23,30),
+               (24,18),
+               (24,23),
+               (25,20),
+               (25,26),
+               (25,31),
+               (26,21),
+               (26,25),
+               (26,27),
+               (26,28),
+               (26,33),
+               (27,26),
+               (27,37),
+               (27,29),
+               (28,26),
+               (28,37),
+               (28,29),
+               (29,22),
+               (29,27),
+               (29,28),
+               (29,30),
+               (29,34),
+               (30,23),
+               (30,29),
+               (30,36),
+               (31,25),
+               (31,32),
+               (32,31),
+               (32,33),
+               (33,32),
+               (33,26),
+               (34,29),
+               (34,35),
+               (35,34),
+               (35,36),
+               (36,30),
+               (36,35);
+

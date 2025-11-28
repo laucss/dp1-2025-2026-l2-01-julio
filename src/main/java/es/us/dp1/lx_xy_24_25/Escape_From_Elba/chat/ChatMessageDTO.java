@@ -1,8 +1,6 @@
-// ...existing code...
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.chat;
 
 import java.time.LocalDateTime;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -16,12 +14,17 @@ public class ChatMessageDTO {
 
     private LocalDateTime time;
 
+    private String playerUsername;
+
     public ChatMessageDTO() { }
 
     public ChatMessageDTO(ChatMessage chatMessage) {
         if (chatMessage == null) return;
+
         if (chatMessage.getPlayer() != null) {
             this.playerId = chatMessage.getPlayer().getId();
+            
+            this.playerUsername = chatMessage.getPlayer().getUser().getUsername();
         }
         if (chatMessage.getMatch() != null) {
             this.matchId = chatMessage.getMatch().getId();
@@ -42,4 +45,7 @@ public class ChatMessageDTO {
 
     public LocalDateTime getTime() { return time; }
     public void setTime(LocalDateTime time) { this.time = time; }
+
+    public String getPlayerUsername() { return playerUsername; }
+    public void setPlayerUsername(String playerUsername) { this.playerUsername = playerUsername; }
 }

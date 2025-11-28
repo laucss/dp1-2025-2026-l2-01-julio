@@ -1,5 +1,5 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.user;
-
+//cambio para merge en FSS8078
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.MiniUserDTO;
 import jakarta.persistence.Column;

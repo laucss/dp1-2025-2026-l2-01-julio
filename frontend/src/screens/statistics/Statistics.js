@@ -1,12 +1,97 @@
-export default function Statistics(){
+import React, { useState, useEffect } from 'react';
+import './Statistics.css';
+import tokenService from "../../services/token.service";
+import useFetchState from '../../util/useFetchState';
 
+const jwt = tokenService.getLocalAccessToken();
+const currentUser = tokenService.getUser();
+
+export default function Statistics(){
+    const userId = currentUser.id;
+
+    const [message, setMessage] = useState(null);
+    const [visible, setVisible] = useState(false);
+
+    const [statisticsUser, setStatistics] = useFetchState(
+        {},
+        `/api/v1/statistics/${userId}`,
+        jwt,
+        setMessage,
+        setVisible
+    );
+
+    const [generalStatistics, setGeneralStatistics] = useFetchState(
+        {},
+        `/api/v1/statistics/general`,
+        jwt,
+        setMessage,
+        setVisible
+    );
+
+    const [activeTab, setActiveTab] = useState('personal');
+    
+    const data = activeTab === 'personal' ? statisticsUser : generalStatistics;
 
     return (
         <div>
             <div className="admin-page-container">
-                <h1 className="text-center"> ESTADISTICAS </h1>
+                
+                <div className="statistics-header">
+                    <button 
+                        className={`stats-button ${activeTab === 'personal' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('personal')}
+                    >
+                        Mis Estadísticas
+                    </button>
+                    <button 
+                        className={`stats-button ${activeTab === 'general' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('general')}
+                    >
+                        Estadísticas Generales
+                    </button>
+                </div>
+                
+                {activeTab === 'personal' ?
+                <div className="statistics-container">
+                    <div className="stat-card">
+                        <div className="stat-icon">🏆</div>
+                        <h2>Victorias</h2>
+                        <p className="stat-value">{data.totalVictories}</p>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">🎮</div>
+                        <h2>Partidas Jugadas</h2>
+                        <p className="stat-value">{data.matchesPlayed}</p>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">⏱️</div>
+                        <h2>Tiempo Total Jugado</h2>
+                        <p className="stat-value">{data.totalTimePlayed} min</p>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">⚡</div>
+                        <h2>Puntos de Acción</h2>
+                        <p className="stat-value">{data.totalActionPoints}</p>
+                    </div>
+                </div>
+                :
+                <div className="statistics-container">
+                    <div className="stat-card">
+                        <div className="stat-icon">👥</div>
+                        <h2>Promedio Jugadores/Partida</h2>
+                        <p className="stat-value">{data.averagePlayersPerMatch}</p>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-icon">🎮</div>
+                        <h2>Total partidas Jugadas</h2>
+                        <p className="stat-value">{data.totalMatchesPlayed}</p>
+                    </div>
+                </div>
+                }
             </div>
         </div>
-
     );
 }

@@ -92,6 +92,7 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET,"/api/v1/achievements/**").authenticated()
                 .requestMatchers(HttpMethod.PUT,"/api/v1/users/**").authenticated()
                 .requestMatchers(HttpMethod.GET,"/api/v1/users/**").authenticated()
+                .requestMatchers(HttpMethod.GET,"/api/v1/rooms/**").authenticated()
                 
                 // API restringida para jugadores
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/lobbies").hasAnyAuthority(PLAYER)
@@ -117,7 +118,15 @@ public class SecurityConfiguration {
                 
                 
 
-                .requestMatchers("/api/v1/chat/**").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers("/api/v1/players/**").authenticated()
+
+                .requestMatchers("/api/v1/statistics/**").authenticated()
+
+                .requestMatchers("/api/v1/players/**").authenticated()
+
+                .requestMatchers("/api/v1/statistics/**").authenticated()
+
+                .requestMatchers("/api/v1/match/{matchId}/chat/**").hasAnyAuthority(PLAYER, ADMIN)
                 
                 // El resto denegado
                 .anyRequest().denyAll()

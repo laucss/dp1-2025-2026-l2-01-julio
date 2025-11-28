@@ -27,7 +27,7 @@ public class RoomService {
         return roomRepository.findByDices(blackDice, whiteDice).orElse(null);
     }
 
-    public Room save(Room room) {
+    public Room save(RoomDTO room) {
         return roomRepository.save(room);
     }
 
@@ -41,7 +41,7 @@ public class RoomService {
         return room1.getAdjacencyList().contains(room2);
     }
 
-    public void incrementTimesVisited(Room room) {
+    public void incrementTimesVisited(RoomDTO room) {
         room.setTimesVisited(room.getTimesVisited() + 1);
         roomRepository.save(room);
     }
