@@ -148,9 +148,9 @@ public class MatchController {
 
     @PostMapping("/lobbies/{matchId}/start")
     @Operation(summary = "Start match", description = "Start a match from a lobby.")
-    public ResponseEntity<Match> startMatch(@Parameter(description = "Id of the lobby to start the match") @PathVariable Integer matchId) {
+    public ResponseEntity<MatchDTO> startMatch(@Parameter(description = "Id of the lobby to start the match") @PathVariable Integer matchId) {
         Match startedMatch = ms.startMatch(matchId);
-        return ResponseEntity.ok(startedMatch);
+        return ResponseEntity.ok(new MatchDTO(startedMatch));
     }
 
     @PostMapping("/{matchId}/submit-dice")
@@ -178,10 +178,11 @@ public class MatchController {
     }
 
     @PutMapping("/{matchId}/end")
-    public ResponseEntity<Match> endMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer winnerId) {
+    public ResponseEntity<MatchDTO> endMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer winnerId) {
         Player winner = ps.findById(winnerId);
         Match ended = ms.endMatch(matchId,winner);
-        return ResponseEntity.ok(ended);
+        System.out.println(ended);
+        return ResponseEntity.ok(new MatchDTO(ended));
     }
 
 

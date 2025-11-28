@@ -1,15 +1,11 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 
-import java.util.List;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class PlayerInGameDTO {
     
     // Jugador ID
@@ -21,10 +17,27 @@ public class PlayerInGameDTO {
     private Integer actionPoints;       
     
     // Cartas en juego
+    /* 
     @JsonProperty("hand")
     private List<Card> handCards;       
     
     @JsonProperty("bag")
-    private List<Card> bagCards;        
+    private List<Card> bagCards;  
+    
+    
+    */
+
+    public PlayerInGameDTO(Player player) {
+        this.playerId = player.getId();
+        this.strength = player.getStrength();
+        this.actionPoints = player.getActionPoints();
+        /*
+        this.handCards = player.getHandCards();
+        this.bagCards = player.getBagCards();
+        */
+    }
+
+    public PlayerInGameDTO() {
+    }
     
 }

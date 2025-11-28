@@ -215,7 +215,8 @@ export default function Match(){
     
     const endMatch = () => {
         if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return;
-        const body ={ winnerId: 10};
+        const body =10;
+        console.log('body end match', body)
         fetch(`/api/v1/matches/${matchId}/end`, {
             method: "PUT",
             headers: {
@@ -226,8 +227,14 @@ export default function Match(){
         })
         .then(res => res.json())
         //.then(() => window.location.reload())
+        .then(updated => {
+            console.log("Match finalizado:", updated);
+            setMatch(updated)
+        })
         .catch(err => console.error(err));
     };
+
+    console.log('match', match)
 
 
     if (match?.status === "FINISHED") {
