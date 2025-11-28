@@ -1,4 +1,4 @@
-package es.us.dp1.lx_xy_24_25.room;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.room;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,5 +16,8 @@ public interface RoomRepository extends CrudRepository<Room, Integer> {
     Optional<Room> findByDices(Integer blackDice, Integer whiteDice);
 
     Optional<Room> findById(int id);
+
+    //save con DTO
+    Room save(RoomDTO roomDTO);
 
 }
