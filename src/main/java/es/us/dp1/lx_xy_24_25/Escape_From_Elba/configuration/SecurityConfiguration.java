@@ -92,6 +92,7 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET,"/api/v1/achievements/**").authenticated()
                 .requestMatchers(HttpMethod.PUT,"/api/v1/users/**").authenticated()
                 .requestMatchers(HttpMethod.GET,"/api/v1/users/**").authenticated()
+                .requestMatchers(HttpMethod.GET,"/api/v1/rooms/**").authenticated()
                 
                 // API restringida para jugadores
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/lobbies").hasAnyAuthority(PLAYER)

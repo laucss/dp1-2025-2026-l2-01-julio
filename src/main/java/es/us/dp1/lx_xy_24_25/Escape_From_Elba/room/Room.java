@@ -1,54 +1,52 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.room;
 
 
-import java.util.ArrayList;
 import java.util.List;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "rooms")
+@Table(name = "Room")
+@NoArgsConstructor
 public class Room extends BaseEntity {
 
     @NotNull
     private String name;
 
-    @NotNull
-    private Integer timesVisited;
-
-    @NotNull
+    @Min(1)
+    @Max(6)
     private Integer blackDice;
 
-    @NotNull
+    @Min(1)
+    @Max(6)
     private Integer whiteDice;
     
     @NotNull
-    private Boolean playerInside;
-
-    @OneToMany(mappedBy = "room")
-    private List<Npc> npcsInside = new ArrayList<>();
-
-    @NotNull
-    @ManyToMany
+    @ManyToMany(targetEntity = Room.class)
+    @JoinColumn(referencedColumnName = "id", name = "adjacencyList")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Room> adjacencyList;
 
-    public Room(String name, Integer timesVisited, Integer blackDice, Integer whiteDice, 
-        Boolean playerInside, List<Npc> npcsInside, List<Room> adjacencyList) {
+    public Room(String name, Integer blackDice, Integer whiteDice, 
+        List<Room> adjacencyList) {
         this.name = name;
-        this.timesVisited = timesVisited;
         this.blackDice = blackDice;
         this.whiteDice = whiteDice;
-        this.playerInside = playerInside;
-        this.npcsInside = npcsInside;
         this.adjacencyList = adjacencyList;
     }
 }
