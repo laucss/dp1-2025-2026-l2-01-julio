@@ -160,15 +160,12 @@ export default function Match(){
 
     // Función que genera el número del dado y actualiza la UI
     const rollDice = (diceType) => {
-        const roll = Math.floor(Math.random() * 6) + 1;
+        const rollWhite = Math.floor(Math.random() * 6) + 1;
+        setWhiteDice(rollWhite.toString());
+        const rollBlack = Math.floor(Math.random() * 6) + 1;
+        setBlackDice(rollBlack.toString());
 
-        if (diceType === 'Blanco') {
-            setWhiteDice(roll.toString());
-        } else {
-            setBlackDice(roll.toString());
-        }
-
-        return roll; // Devuelve el número generado
+        return [rollWhite, rollBlack]; // Devuelve el número generado
     };
 
     // Función que envía la tirada al backend y actualiza el match
@@ -204,11 +201,11 @@ export default function Match(){
         .catch(err => console.error(err));
     };
 
-    const throwDice = (diceType) => {
+    const throwDice = () => {
     if (diceRolled) return; // Evitamos tirar más de una vez
 
-        const roll = rollDice(diceType);
-        submitDiceToBackend(roll);
+        const [white,black] = rollDice();
+        submitDiceToBackend(white+black);
         setDiceRolled(true); // Marcamos que ya tiró
     };
 
@@ -218,16 +215,17 @@ export default function Match(){
     
     const endMatch = () => {
         if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return;
-
+        const body ={ winnerId: 10};
         fetch(`/api/v1/matches/${matchId}/end`, {
-            method: "POST",
+            method: "PUT",
             headers: {
                 Authorization: `Bearer ${jwt}`,
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify(body)
         })
         .then(res => res.json())
-        .then(() => window.location.reload())
+        //.then(() => window.location.reload())
         .catch(err => console.error(err));
     };
 
