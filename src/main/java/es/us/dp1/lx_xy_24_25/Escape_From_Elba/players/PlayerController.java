@@ -7,16 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.jwt.JwtUtils;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.AuthoritiesService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
-import io.micrometer.core.ipc.http.HttpSender.Response;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController

@@ -2,6 +2,7 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -22,12 +23,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.ConfirmDiscardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
@@ -66,11 +69,9 @@ public class MatchController {
     }
 
     @GetMapping("/{matchId}")
-    public Match getMatchById(@PathVariable("matchId")Integer matchId){
-        Optional<Match> m=ms.getMatchById(matchId);
-        if(!m.isPresent())
-            throw new ResourceNotFoundException("Match", "id", matchId);
-        return m.get();
+    public MatchDTO getMatchById(@PathVariable("matchId")Integer matchId){
+        Match m= ms.getMatchById(matchId);
+        return new MatchDTO(m);
     }
 
     @GetMapping("/lobbies/private/{matchId}")
@@ -148,9 +149,12 @@ public class MatchController {
 
     @PostMapping("/lobbies/{matchId}/start")
     @Operation(summary = "Start match", description = "Start a match from a lobby.")
-    public ResponseEntity<Match> startMatch(@Parameter(description = "Id of the lobby to start the match") @PathVariable Integer matchId) {
+    public ResponseEntity<MatchDTO> startMatch(@Parameter(description = "Id of the lobby to start the match") @PathVariable Integer matchId) {
         Match startedMatch = ms.startMatch(matchId);
-        return ResponseEntity.ok(startedMatch);
+        Map<Integer, Map<Integer, HandInGame>> hands = handService.getActivesHands();
+        Map<Integer, Map<Integer, BagInGame>> bags = bagService.getActivesBags();
+        Map<Integer, DeckInGame> deck = deckService.getActivesDecks();
+        return ResponseEntity.ok(new MatchDTO(startedMatch));
     }
 
     @PostMapping("/{matchId}/submit-dice")
@@ -177,11 +181,12 @@ public class MatchController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{matchId}/end")
-    public ResponseEntity<Match> endMatch(@PathVariable("matchId") Integer matchId, @PathVariable("winnerId") Integer winnerId) {
-        Player winner = ps.findById(winnerId).get();
+    @PutMapping("/{matchId}/end")
+    public ResponseEntity<MatchDTO> endMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer winnerId) {
+        Player winner = ps.findById(winnerId);
         Match ended = ms.endMatch(matchId,winner);
-        return ResponseEntity.ok(ended);
+        System.out.println(ended);
+        return ResponseEntity.ok(new MatchDTO(ended));
     }
 
 
@@ -199,7 +204,7 @@ public class MatchController {
 
     @PutMapping(value="/{id}")
     public ResponseEntity<Void> updateGame(@Valid @RequestBody Match m,@PathVariable("id")Integer id){
-        Match mToUpdate=getMatchById(id);
+        Match mToUpdate=ms.getMatchById(id); 
         BeanUtils.copyProperties(m,mToUpdate, "id");
         ms.save(mToUpdate);
         return ResponseEntity.noContent().build(); 
@@ -213,10 +218,18 @@ public class MatchController {
     }
 
     @PutMapping("/{matchId}/discardConfirmed")
-    public ResponseEntity<?> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody ConfirmDiscardDTO data){
+    public ResponseEntity<Void> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
         handService.update(data.getHand(), matchId, data.getPlayerId());
         bagService.update(data.getBag(), matchId, data.getPlayerId());
         deckService.update(data.getDeck(), matchId);
+
+        Map<Integer, Map<Integer, HandInGame>> hands = handService.getActivesHands();
+        Map<Integer, Map<Integer, BagInGame>> bags = bagService.getActivesBags();
+        Map<Integer, DeckInGame> deck = deckService.getActivesDecks();
+        System.out.println(hands);
+        System.out.println(bags);
+        System.out.println(deck);
+        System.out.println(bagService.findPlayerBag(matchId, data.getPlayerId()));
 
         return ResponseEntity.ok().build(); 
         
@@ -230,5 +243,11 @@ public class MatchController {
         return ResponseEntity.ok(result); 
 
     } 
+
+    @GetMapping("/{matchId}/{playerId}/getAllCards")
+    public ResponseEntity<AllCardsStatusDTO> getAllCards (@PathVariable Integer matchId, @PathVariable Integer playerId){
+        AllCardsStatusDTO result = ms.getAllCards(matchId, playerId); 
+        return ResponseEntity.ok(result); 
+    }
 }
 

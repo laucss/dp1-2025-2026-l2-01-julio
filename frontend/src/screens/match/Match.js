@@ -16,84 +16,115 @@ const currentUser = tokenService.getUser();
 
 export default function Match(){
     const matchId = getIdFromUrl(2);
-    const [deck, setDeck] = useState(null)
-    const [discarPile, setDiscardPile] = useState([])
+    const [currentPlayer, setCurrentPlayer] = useState({})
+    const [player, setPlayer] = useState([])
+    const [playersList, setPlayersList] = useState([])
+    const [match, setMatch] = useState(null)
+
+    // CARTAS
+    const [deck, setDeck] = useState([])
     const [handCards, setHandCards] = useState([])
     const [bagCards, setBagCards] = useState([])
+    const [numCardsDrawn, setNumCardsDrawn] = useState(0)
+    const [discardOpen, setDiscardOpen] = useState(false)
+
+    // DADOS 
     const [whiteDice, setWhiteDice] = useState("1")
     const [blackDice, setBlackDice] = useState("1")
-    const[numCardsDrawn, setNumCardsDrawn] = useState(0)
-    const [chatOpen, setChatOpen] = useState(false);
     const [diceRolled, setDiceRolled] = useState(false);
 
-    const [currentPlayer, setCurrentPlayer] = useState({})
+    const [chatOpen, setChatOpen] = useState(false);
 
-    const[discardOpen, setDiscardOpen] = useState(false)
-    // const playerId = 
+    
     // const [playerTurnId, setPlayerTurnId] = useState(null)
 
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
         
     // CARGAR DATOS PARTIDA 
-    const [match, setMatch] = useFetchState(
-        [],
-        `/api/v1/matches/${matchId}`,
-        jwt,
-        setMessage,
-        setVisible
-    )
 
     // CARGAR DATOS JUGADORES 
-    const [player, setPlayer] = useFetchState(
-        [],
-        `/api/v1/matches/${matchId}/players`,
-        jwt,
-        setMessage,
-        setVisible
-    );
+   
     
 
     useEffect(() => {
-        initializeDeck(); 
-        // TODO: cambiar esta funcion pq realmente hay que repartir primero a todos los jugadores
-        setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
-}, [matchId, player]);
+        fetchMatchAndPlayers()
+    }, [matchId])
 
+    useEffect(() => {
+            if (player && Array.isArray(player)){
+                setPlayersList(player.filter(p => p.user.id !== currentUser?.id))
+                setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
+            }
+    }, [match])
+    console.log('currentPlayer', currentPlayer)
+
+    useEffect(() => {
+        if (Array.isArray(currentPlayer) && currentPlayer[0]?.id){
+            fetchCards()
+        }     
+    }, [currentPlayer])
+
+
+    const fetchMatchAndPlayers = async () => {
+            try {
+                const response = await fetch(`/api/v1/matches/${matchId}`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    })
+                const data = await response.json()
+
+                setMatch(data)
+                setPlayer(data.players)
+                
+            } catch (error) {
+                
+            }
+    }
 
 
     // iNICIALIZAR BARAJA
-    const initializeDeck = () => {
-        fetch(`/api/v1/deck/${matchId}`, {
+    const fetchCards = async () => {
+        try {
+            console.log('ENTRA EN EL FETCHCARDS')
+            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/getAllCards`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${jwt}`,
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             },
-        })
-        .then(async res => {
-            if (!res.ok) {
-                // TODO: CAMBIAR, ESTÁ SACADO DE CHATI A MODO DE PRUEBA DE FUNCIONALIDAD DE BACKEND, hay que ponerlo bien
-                let errorBody;
-                try {
-                    errorBody = await res.json();
-                } catch {
-                    errorBody = await res.text();
-                }
-                throw new Error(`Error al obtener el mazo: ${res.status} ${res.statusText} - ${JSON.stringify(errorBody)}`);
-            }
-            return res.json();
-        })
-        .then(data => {
-            setDeck(data);
-            console.log("Deck cargado:", data);
-        })
-        .catch(err => {
-            console.error("Fetch fallido:", err);
-        });
+            })
+
+            if (response.ok){
+                const data = await response.json()
+                console.log('datos fetch cards' , data)
+                setHandCards(Array.isArray(data.hand.cards) ? data.hand.cards : [])
+                setBagCards(Array.isArray(data.bag.cards) ? data.bag.cards : [])
+                setDeck(data.deck || [])
+                return data
+            } 
+
+        
+            
+        } catch (error) {
+            console.log('error', error)
+            setMessage("Could not get the cards.");
+            setVisible(true);
+            
+        }
+        
+        
 
     }
+
+    console.log('hand' , handCards)
+    console.log('bag' , bagCards)
+    console.log('deck' , deck)
 
     // FUNCION ROBAR CARTA
     const drawCard = async () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO DE CHATI PQ QUERIA SOLO PROBARLO
@@ -112,10 +143,8 @@ export default function Match(){
             }
 
             const data = await response.json()
-            console.log('datos devueltos' ,data)
             
             setDeck(data.deck)
-            console.log('deck', deck)
             setHandCards(prev => [...prev, data.card])
 
             
@@ -129,17 +158,15 @@ export default function Match(){
     }
 
 
+
     // Función que genera el número del dado y actualiza la UI
     const rollDice = (diceType) => {
-        const roll = Math.floor(Math.random() * 6) + 1;
+        const rollWhite = Math.floor(Math.random() * 6) + 1;
+        setWhiteDice(rollWhite.toString());
+        const rollBlack = Math.floor(Math.random() * 6) + 1;
+        setBlackDice(rollBlack.toString());
 
-        if (diceType === 'Blanco') {
-            setWhiteDice(roll.toString());
-        } else {
-            setBlackDice(roll.toString());
-        }
-
-        return roll; // Devuelve el número generado
+        return [rollWhite, rollBlack]; // Devuelve el número generado
     };
 
     // Función que envía la tirada al backend y actualiza el match
@@ -175,11 +202,11 @@ export default function Match(){
         .catch(err => console.error(err));
     };
 
-    const throwDice = (diceType) => {
+    const throwDice = () => {
     if (diceRolled) return; // Evitamos tirar más de una vez
 
-        const roll = rollDice(diceType);
-        submitDiceToBackend(roll);
+        const [white,black] = rollDice();
+        submitDiceToBackend(white+black);
         setDiceRolled(true); // Marcamos que ya tiró
     };
 
@@ -189,21 +216,29 @@ export default function Match(){
     
     const endMatch = () => {
         if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return;
-
+        const body =10;
+        console.log('body end match', body)
         fetch(`/api/v1/matches/${matchId}/end`, {
-            method: "POST",
+            method: "PUT",
             headers: {
                 Authorization: `Bearer ${jwt}`,
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify(body)
         })
         .then(res => res.json())
-        .then(() => window.location.reload())
+        //.then(() => window.location.reload())
+        .then(updated => {
+            console.log("Match finalizado:", updated);
+            setMatch(updated)
+        })
         .catch(err => console.error(err));
     };
 
+    console.log('match', match)
 
-    if (match.status === "FINISHED") {
+
+    if (match?.status === "FINISHED") {
         return (
             <div className="match-ended">
                 <h2>La partida ha finalizado!!!!!</h2>
@@ -213,7 +248,6 @@ export default function Match(){
     }
 
 
-    const playersList = (Array.isArray(player) ? player : (player?.players || [])).filter(p => p.user.id !== currentUser?.id);
 
 return (
         <div className="match-container">
@@ -311,13 +345,18 @@ return (
             </div>
             <div className="player-section">
                 <div className="player-hand">
-                    {handCards.map((carta, index) => (
+                    {Array.isArray(handCards) && handCards.map((carta, index) => (
                                     <div key={index} >
                                         <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
                                     </div>
                     ))}
                 </div>
                 <div className="player-bag">
+                    {Array.isArray(bagCards) && bagCards.map((carta, index) => (
+                                    <div key={index} >
+                                        <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                    </div>
+                    ))}
 
                 </div>
                 
@@ -327,7 +366,7 @@ return (
                     onClick={() => setDiscardOpen(true)}
                     title="Descartar cartas"
                 >
-                    Discard cards
+                    Form my bag
                 </button>
             </div>
             
@@ -353,11 +392,14 @@ return (
             hand={handCards}
             bag={bagCards}
             deck={deck}
-            discardPile={discarPile}
             player={currentPlayer[0]}
             onClose={() => setDiscardOpen(false)}
-            onSave={() =>
-                setDiscardOpen(false)}
+            onSave={async () =>{
+                await fetchCards()
+                setDiscardOpen(false)
+
+            }
+                }
             />
 
       

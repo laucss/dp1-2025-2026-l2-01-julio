@@ -10,6 +10,9 @@ import lombok.Setter;
 public class CardDTO {
 
     @NotNull
+    private Integer id; 
+
+    @NotNull
     private String frontImage; 
 
     @NotNull
@@ -19,6 +22,7 @@ public class CardDTO {
     private String letter; 
 
     public CardDTO(Card card){
+        this.id = card.getId(); 
         this.backImage = card.getBackImage(); 
         this.frontImage = card.getFrontImage(); 
         this.letter = card.getLetter(); 

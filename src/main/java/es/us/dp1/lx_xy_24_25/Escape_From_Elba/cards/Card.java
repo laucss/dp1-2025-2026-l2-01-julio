@@ -35,9 +35,17 @@ public class Card extends BaseEntity implements Prototype<Card> {
      */
 
     public Card(Card carta){
+        setId(carta.getId());
         this.backImage = carta.backImage;
         this.frontImage = carta.frontImage;
         this.letter = carta.letter;
+    }
+
+    public Card(Integer id, String frontImage, String backImage, String letter){
+        this.id = id;
+        this.backImage = backImage;
+        this.frontImage = frontImage;
+        this.letter = letter;
     }
 
     @JsonIgnore

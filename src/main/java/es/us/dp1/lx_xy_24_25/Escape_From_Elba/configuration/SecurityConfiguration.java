@@ -92,10 +92,11 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET,"/api/v1/achievements/**").authenticated()
                 .requestMatchers(HttpMethod.PUT,"/api/v1/users/**").authenticated()
                 .requestMatchers(HttpMethod.GET,"/api/v1/users/**").authenticated()
+                .requestMatchers(HttpMethod.GET,"/api/v1/rooms/**").authenticated()
                 
                 // API restringida para jugadores
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/lobbies").hasAnyAuthority(PLAYER)
-                .requestMatchers(HttpMethod.POST, "/api/v1/matches/{id}/discardConfirmed").hasAnyAuthority(PLAYER)
+                .requestMatchers(HttpMethod.PUT, "/api/v1/matches/{id}/discardConfirmed").hasAnyAuthority(PLAYER)
                 .requestMatchers(HttpMethod.GET,"/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck").hasAnyAuthority(PLAYER, ADMIN)
 
                 .requestMatchers(HttpMethod.GET, "/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
@@ -125,7 +126,7 @@ public class SecurityConfiguration {
 
                 .requestMatchers("/api/v1/statistics/**").authenticated()
 
-                .requestMatchers("/api/v1/chat/**").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers("/api/v1/match/{matchId}/chat/**").hasAnyAuthority(PLAYER, ADMIN)
                 
                 // El resto denegado
                 .anyRequest().denyAll()

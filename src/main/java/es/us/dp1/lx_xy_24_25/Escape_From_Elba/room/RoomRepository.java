@@ -17,4 +17,7 @@ public interface RoomRepository extends CrudRepository<Room, Integer> {
 
     Optional<Room> findById(int id);
 
+    //save con DTO
+    Room save(RoomDTO roomDTO);
+
 }

@@ -36,12 +36,10 @@ public class HandService {
      */
     public void createPlayerHand(Integer matchId, Integer playerId){
 
-        Map<Integer, HandInGame> playerMap = new HashMap<>();
-        HandInGame newHand = new HandInGame();
+        Map<Integer, HandInGame> playerMap = activesHands.computeIfAbsent(matchId, m -> new HashMap<>());
 
-        playerMap.putIfAbsent(playerId, newHand); 
-
-        activesHands.putIfAbsent(matchId, playerMap); 
+        // Solo añadimos la mano si no existe
+        playerMap.putIfAbsent(playerId, new HandInGame());
         
     }
     /*
@@ -143,20 +141,27 @@ public class HandService {
        activesHands.replace(matchId, playerMap); 
     }
 
-    public void update(HandInGameDTO hand, Integer playerId, Integer matchId){
+    public void update(HandInGameDTO hand, Integer matchId, Integer playerId){
 
         //checkear que exista el player y tal 
 
+        Map<Integer, Map<Integer, HandInGame>> allHands1 = activesHands;
+        Map<Integer, HandInGame> playerMap = activesHands.get(matchId);
+        
         HandInGame newHand = new HandInGame(); 
 
-        //newHand.setCards(hand.getCards());
+        newHand.setCards(hand.getCards().stream()
+            .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
 
-
-        Map<Integer, HandInGame> playerMap = activesHands.get(matchId);
+        Map<Integer, Map<Integer, HandInGame>> allHands2 = activesHands;
         playerMap.put(playerId,newHand); 
 
         activesHands.put(matchId, playerMap); 
 
+    }
+
+    public Map<Integer, Map<Integer, HandInGame>> getActivesHands() {
+        return activesHands;
     }
     
 }
