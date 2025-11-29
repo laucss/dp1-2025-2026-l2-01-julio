@@ -1,5 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -197,7 +198,8 @@ public class BagService {
 
 
         Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
-        newBag.setCards(bag.getCards().stream().map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
+        newBag.setCards(new ArrayList<>(bag.getCards().stream()
+            .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
 
         playerMap.put(playerId, newBag); 
         activesBags.put(matchId, playerMap); 

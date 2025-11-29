@@ -279,6 +279,8 @@ public class MatchService {
         DeckInGame deck = deckService.findDeckById(matchId); 
 
         HandInGame hand = handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+        Class<?> cd= deck.getNotDiscardedCards().getClass();
+        System.out.println(cd);
         
 
         return new DrawCardResultDTO(stolenCard, deck, hand); 
