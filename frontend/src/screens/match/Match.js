@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import {useNavigate} from "react-router-dom";
 import '../../static/css/match/Match.css';
 import getIdFromUrl from '../../util/getIdFromUrl'
 import { useEffect } from "react";
@@ -16,6 +17,7 @@ const currentUser = tokenService.getUser();
 
 export default function Match(){
     const matchId = getIdFromUrl(2);
+    const navigate = useNavigate();
     const [currentPlayer, setCurrentPlayer] = useState({})
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
@@ -241,8 +243,13 @@ export default function Match(){
     if (match?.status === "FINISHED") {
         return (
             <div className="match-ended">
-                <h2>La partida ha finalizado!!!!!</h2>
-                <p>Gracias por jugar.</p>
+                <div className="end-overlay">
+                <div className="end-text-box">
+                    <h2>La partida ha finalizado!!!!!</h2>
+                    <p>Gracias por jugar.</p>
+                    <button className="return-button" onClick={() => navigate(`/`)}>Return to main menu</button>
+                </div>
+                </div>
             </div>
         );
     }
