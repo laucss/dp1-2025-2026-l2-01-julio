@@ -40,5 +40,8 @@ public class RoomDTO extends BaseEntity {
         this.setBlackDice(room.getBlackDice());
         this.setWhiteDice(room.getWhiteDice());
         this.setAdjacencyList(room.getAdjacencyList());
+        this.setTimesVisited(0);
+        this.setNpcsInside(new java.util.ArrayList<>());
+        this.setPlayerInside(null);
     }
 }
