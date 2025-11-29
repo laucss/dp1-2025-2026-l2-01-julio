@@ -6,7 +6,10 @@ import java.util.List;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.patterns.Prototype;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -24,7 +27,7 @@ import jakarta.validation.constraints.NotNull;
 @Setter
 @Table(name = "Room")
 @NoArgsConstructor
-public class Room extends BaseEntity {
+public class Room extends BaseEntity implements Prototype<Room> {
 
     @NotNull
     private String name;
@@ -50,5 +53,17 @@ public class Room extends BaseEntity {
         this.blackDice = blackDice;
         this.whiteDice = whiteDice;
         this.adjacencyList = adjacencyList;
+    }
+
+    public Room(Room room) {
+        this.name = room.name;
+        this.blackDice = room.blackDice;
+        this.whiteDice = room.whiteDice;
+        this.adjacencyList = room.adjacencyList;
+    }
+
+    @JsonIgnore
+    public Room getClone() {
+        return new Room(this);
     }
 }
