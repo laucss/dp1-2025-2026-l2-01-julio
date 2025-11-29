@@ -71,6 +71,14 @@ export default function ChatBox({ matchId }) {
         {messages.map((msg, i) => (
           <div key={msg.id || i} className="chat-message">
             <b>{msg.playerUsername ?? "Jugador"}:</b> {msg.message}
+            <span className="chat-time">
+              {msg.time
+                ? ` ${new Date(msg.time).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}`
+                : ""}
+            </span>
           </div>
         ))}
 

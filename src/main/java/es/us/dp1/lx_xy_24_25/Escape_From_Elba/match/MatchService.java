@@ -354,4 +354,33 @@ public class MatchService {
         return deck;     
 
     }
+
+    /*
+    //Función para mover un jugador de una sala a otra adyacente
+    @Transactional
+    public Player movePlayer(Integer matchId, Integer userId, String targetRoomName) {
+        //Recuperar el jugador dentro del match
+        Player player = prepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        Room currentRoom = player.getRoom();
+        if (currentRoom == null) {
+            throw new RuntimeException("Jugador no tiene sala asignada");
+        }
+        //Recuperar la sala destino
+        Room targetRoom = roomRepository.findByName(targetRoomName)
+            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
+        //Validar si la sala destino es adyacente
+        List<Room> adjacent = currentRoom.getAdjacencyList();
+        boolean canMove = adjacent.stream()
+                .anyMatch(r -> r.getId().equals(targetRoom.getId()));
+        if (!canMove) {
+            throw new RuntimeException("Movimiento no permitido: la sala destino no es adyacente");
+        }
+        //Actualizar la sala del jugador
+        player.setRoom(targetRoom);
+        //Guardar cambios
+        return prepo.save(player);
+    }
+     */ 
+
 }
