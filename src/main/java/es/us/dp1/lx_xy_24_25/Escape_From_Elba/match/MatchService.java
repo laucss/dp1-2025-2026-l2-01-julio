@@ -27,6 +27,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 
 @Service
 public class MatchService {
@@ -41,12 +42,14 @@ public class MatchService {
     MatchRepository mrepo;
     PlayerRepository prepo;
     RoomRepository roomRepository;
+    RoomService roomService;
 
     @Autowired
-    public MatchService(MatchRepository mrepo, PlayerRepository prepo, RoomRepository roomRepository, DeckService deckService, HandService handService, BagService bagService) {
+    public MatchService(MatchRepository mrepo, PlayerRepository prepo, RoomRepository roomRepository, RoomService roomService, DeckService deckService, HandService handService, BagService bagService) {
         this.mrepo = mrepo;
         this.prepo = prepo;
         this.roomRepository = roomRepository;
+        this.roomService = roomService;
         this.deckService = deckService;
         this.handService = handService;
         this.bagService = bagService; 
@@ -137,10 +140,8 @@ public class MatchService {
             Room randomRoom = availableRooms.remove(ran.nextInt(availableRooms.size()));
             player.setRoom(randomRoom);
         }
-
-        DeckInGame deck = initializePlayerHandCards(matchId, playersInGame); 
-
-        m.setDeck(deck); 
+        m.setDeck(deckService.initializeDeck(matchId)); 
+        m.setRoomsState(roomService.initializeRoomsForMatch(m));
         m.setCurrentTurnUserId(null);
         m.setTurnNumber(0);
         mrepo.save(m);
