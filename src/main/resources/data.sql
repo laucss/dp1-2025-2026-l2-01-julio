@@ -3,9 +3,9 @@ INSERT INTO authorities(id,authority) VALUES (1,'ADMIN');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (1,'admin1','admin1@example.com','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS',1,25,'/Avatar_default.png');
 
 
-INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (1,'Principiante','Si juegas 5 partidas',10.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED');
-INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (2,'Explorador','Si juegas 25 partidas',25.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','GAMES_PLAYED');
-INSERT INTO achievement(id,name,description,threshold,metric) VALUES (3,'Experto','Si ganas 20 partidas',20.0,'VICTORIES');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (1,'Si juegas 5 partidas',5.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (2,'Si juegas 25 partidas',25.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','GAMES_PLAYED','DIFICIL');
+INSERT INTO achievement(id,description,threshold,metric,tier) VALUES (3,'Si ganas 20 partidas',20.0,'VICTORIES','DIFICIL');
 
 -- Ten player users, named player1 with passwor 0wn3r
 INSERT INTO authorities(id,authority) VALUES (2,'PLAYER');
