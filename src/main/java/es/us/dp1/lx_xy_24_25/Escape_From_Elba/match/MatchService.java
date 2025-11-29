@@ -102,6 +102,7 @@ public class MatchService {
 
 
     //Funcion para innicializar un match 
+    //Hay que hacer que esto devuelva un MatchDTO
     @Transactional
     public Match startMatch(Integer matchId) {
         Match m = mrepo.findById(matchId).orElseThrow(() -> new IllegalArgumentException("Match not found"));
@@ -112,7 +113,6 @@ public class MatchService {
         //Inicializamos la fecha de inicio
         m.setStartTime(LocalDateTime.now());
 
-        List<Room> availableRooms  = roomRepository.findAll();
         //Inicializamos los npcs de la partida 
 
         for ( int i=0; i< m.getNumNpcs(); i++){
@@ -121,10 +121,6 @@ public class MatchService {
             npc.setStrength(1); // El valor de la fuerza al inicio es 1
             npc.setMatch(m);// Lo asociamos a la partida
             m.getNpcs().add(npc);// Lo añadimos a la lista de npcs de la partida 
-            //Hay que añadir la asignación de niall.  
-            //Asignamos una sala aleatoria al npc
-            Room randomRoom = availableRooms.remove(ran.nextInt(availableRooms.size()));
-            npc.setRoom(randomRoom);
         } 
 
 
@@ -137,10 +133,12 @@ public class MatchService {
             player.setActionPoints(0);
             player.setStrength(1);
 
-            Room randomRoom = availableRooms.remove(ran.nextInt(availableRooms.size()));
-            player.setRoom(randomRoom);
+
         }
-        m.setDeck(deckService.initializeDeck(matchId)); 
+
+        
+        DeckInGame deck = initializePlayerHandCards(matchId, playersInGame); 
+        m.setDeck(deck);
         m.setRoomsState(roomService.initializeRoomsForMatch(m));
         m.setCurrentTurnUserId(null);
         m.setTurnNumber(0);
