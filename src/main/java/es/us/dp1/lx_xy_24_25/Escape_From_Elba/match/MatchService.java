@@ -10,13 +10,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
@@ -26,6 +31,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 
 @Service
 public class MatchService {
+
+    private static final Integer initialCardsPerPlayer = 3; 
 
     DeckService deckService; 
     HandService handService; 
@@ -75,8 +82,11 @@ public class MatchService {
     }
 
     @Transactional(readOnly=true)
-    public Optional<Match> getMatchById(Integer matchId){
-        return mrepo.findById(matchId);
+    public Match getMatchById(Integer matchId){
+        Optional<Match> m= mrepo.findById(matchId);
+        if(!m.isPresent())
+            throw new ResourceNotFoundException("Match", "id", matchId);
+        return m.get();
     }
 
     @Transactional(readOnly = true)
@@ -121,8 +131,6 @@ public class MatchService {
         // le creamos una mano y una bolsa asociadas a cada jugador 
         List<Player> playersInGame = m.getPlayers(); 
         for (Player player : playersInGame){
-            handService.createPlayerHand(matchId, player.getId());
-            bagService.createPlayerbag(matchId, player.getId());
 
             player.setDiceOrder(null); // Inicializamos el valor de la tirada de dado a null
             player.setOrderInMatch(null);
@@ -308,6 +316,17 @@ public class MatchService {
         handService.addCardToPlayerHand(discardedCard, matchId, playerId);
     }
 
+@Transactional(readOnly = true)
+    public AllCardsStatusDTO getAllCards (Integer matchId, Integer playerId){
+        DeckInGameDTO deck = new DeckInGameDTO(deckService.findDeckById(matchId)); 
+
+        HandInGameDTO hand = new HandInGameDTO(handService.findPlayerHand(matchId, playerId)); 
+
+        BagInGameDTO bag = new BagInGameDTO(bagService.findPlayerBag(matchId, playerId));
+
+        return new AllCardsStatusDTO(hand, bag, deck, playerId); 
+    }
+
     @Transactional
     public Player getMatchWinner(Integer matchId) {
         Match match = mrepo.findById(matchId)
@@ -319,5 +338,21 @@ public class MatchService {
 
         return match.getWinner();
     }
+    
+    public DeckInGame initializePlayerHandCards (Integer matchId, List<Player> players){
+        DeckInGame deck = deckService.initializeDeck(matchId); 
+        for (Player player : players) {
+            handService.createPlayerHand(matchId, player.getId());
+            bagService.createPlayerbag(matchId, player.getId());
+        }
+        for (int i = 0; i < initialCardsPerPlayer; i++) {
+            for (Player player : players) {
+                    // Sacamos la carta del mazo y se la damos al jugador
+                    Card card = deck.getNotDiscardedCards().remove(0); // carta del tope del deck
+                    handService.addCardToPlayerHand(card, matchId, player.getId());
+            }
+        }
+        return deck;     
 
+    }
 }

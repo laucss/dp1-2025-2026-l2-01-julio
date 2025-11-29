@@ -2,6 +2,8 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.chat;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
@@ -25,6 +27,7 @@ public class ChatMessage extends BaseEntity implements Comparable<ChatMessage>{
     
     @NotNull
     @ManyToOne
+    @JsonIgnore
     private Player player;
 
     @NotBlank
@@ -41,6 +44,7 @@ public class ChatMessage extends BaseEntity implements Comparable<ChatMessage>{
 
 
     @ManyToOne
+    @JsonIgnore
     private Match match;
 
 

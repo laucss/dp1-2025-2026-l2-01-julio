@@ -3,12 +3,9 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.security.access.method.P;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import jakarta.validation.constraints.NotNull;
 
 public interface PlayerRepository extends CrudRepository<Player, Integer> {

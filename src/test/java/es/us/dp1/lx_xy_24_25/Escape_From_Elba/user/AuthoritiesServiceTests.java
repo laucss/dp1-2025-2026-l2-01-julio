@@ -15,8 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.Authorities;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.AuthoritiesService;
+
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Owner;

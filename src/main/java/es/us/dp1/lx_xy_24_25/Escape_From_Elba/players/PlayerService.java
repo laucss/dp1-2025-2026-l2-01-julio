@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.validation.constraints.NotNull;
+
 
 @Service
 public class PlayerService {
@@ -32,8 +32,8 @@ public class PlayerService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Player> findById(Integer id) {
-        return playerRepository.findById(id);
+    public Player findById(Integer id) {
+        return playerRepository.findById(id).orElse(null);
     }
 
     @Transactional(readOnly = true)
