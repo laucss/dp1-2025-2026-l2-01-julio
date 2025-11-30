@@ -88,7 +88,7 @@ public class Match extends NamedEntity {
     //Jugadores 
     @NotNull
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Player> players; 
+    private List<Player> players = new ArrayList<>(); 
 
 
     //Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)

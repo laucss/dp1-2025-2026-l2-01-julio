@@ -115,9 +115,8 @@ public class MatchController {
     @PostMapping("/lobbies")
     @Operation(summary = "Create lobby", description = "Create a new game.")
     @ResponseStatus(HttpStatus.CREATED)
-    public  ResponseEntity<Match> createLobby(@RequestBody LobbyDTO lobbyDTO) {
-        Match game = new Match();
-        Match saved= ls.createLobby(game, lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers(), lobbyDTO.getNumNpcs());
+    public  ResponseEntity<Match> createLobby(@Valid @RequestBody LobbyDTO lobbyDTO) {
+        Match saved= ls.createLobby(lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers(), lobbyDTO.getNumNpcs());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 

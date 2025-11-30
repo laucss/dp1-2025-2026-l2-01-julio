@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,30 @@ public class RoomService {
 
     public List<RoomDTO> initializeRoomsForMatch(Match match) {
         List<Room> rooms = roomRepository.findAll();
+        Room safeZone = roomRepository.findById(37).orElseThrow(() -> 
+        new IllegalStateException("Safe zone (ID 37) not found")); //La safe zone es la habitacion con id 37
+        List<Room> availableRooms = new ArrayList<>(rooms);
+        availableRooms.remove(safeZone); //Quitamos la safe zone de las habitaciones disponibles
+        Random rand = new Random();
+
+        //Asignamos habitaciones aleatoriamente a los NPCs
+        //Niall Campbell debe de ir en la safe zone
+        for ( Npc npc: match.getNpcs()) {
+        Room room;
+        if (npc.getIsNiallCampbell()) {
+        room = safeZone; // Niall Campbell va en la safe zone
+        } else {
+            room = availableRooms.remove(rand.nextInt(availableRooms.size())); //Los demas NPCs en habitaciones aleatorias
+        }
+        npc.setRoom(room);
+        }
+        //Asignamos habitaciones aleatoriamente a los jugadores 
+        for (Player p: match.getPlayers()) {
+        Room room = availableRooms.remove(rand.nextInt(availableRooms.size()));
+        p.setRoom(room);
+        }
+
+
         Map<Integer, RoomDTO> map = new HashMap<>();
 
         for (Room r : rooms) {

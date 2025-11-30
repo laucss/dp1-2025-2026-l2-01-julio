@@ -9,8 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 import jakarta.persistence.EntityManager;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
@@ -101,14 +104,19 @@ public class LobbyService {
     
     //Funcion para crear un lobby
     @Transactional
-    public  Match createLobby(Match game, Boolean isPrivate, String name, Integer maxPlayers, Integer numNpcs) {
+    public  Match createLobby(Boolean isPrivate, String name, Integer maxPlayers, Integer numNpcs) {
         User currentUser = userService.findCurrentUser(); 
+            if (currentUser == null) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Usuario no autenticado");
+            }
+        Match game = new Match();
         Player player = new Player(); 
         player.setUser(currentUser);
-        player.setMatch(game);
         checkers.checkPlayerAlreadyInALobby(currentUser);
         game.setStatus(MatchStatus.WAITING);
-        game.setPlayers(new ArrayList<>(List.of(player)));
+        game.setPlayers(new ArrayList<>());
+        game.getPlayers().add(player);
+        player.setMatch(game);
         game.setName(name);
         game.setMaxPlayers(maxPlayers);
         game.setNumNpcs(numNpcs);
