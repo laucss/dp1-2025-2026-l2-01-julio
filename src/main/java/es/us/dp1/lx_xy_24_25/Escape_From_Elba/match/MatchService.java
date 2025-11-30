@@ -189,6 +189,7 @@ public class MatchService {
 
             match.setCurrentTurnUserId(ordered.get(0).getUser().getId());
             match.setTurnNumber(1);
+            match.setCurrentTurnPhase(TurnPhase.DRAW);
             mrepo.save(match);
         }
 

@@ -7,6 +7,7 @@ import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
 import BagModal from "./BagModal";
 import DiscardHandModal from "./DiscardHandModal";
+import ActionsModal from "./ActionsModal";
 import ChatBox from "./chatBox";
 import { FaComments } from "react-icons/fa";
 
@@ -46,6 +47,10 @@ export default function Match(){
 
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
+
+    const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+
+
         
     // CARGAR DATOS PARTIDA 
 
@@ -249,6 +254,9 @@ export default function Match(){
         .catch(err => console.error(err))
     }
 
+    const currentPlayerTurn = match?.players.find(p => p.user.id === match.currentTurnUserId);
+
+
 
     const calculateActionPoints = () => {
         if (handCards > 7 ){
@@ -257,6 +265,8 @@ export default function Match(){
             setActionPoints(7-handCards.length)
         }
         }
+
+
     
 
 
@@ -276,6 +286,10 @@ export default function Match(){
             </div>
         );
     }
+
+if (!match) {
+    return <div>Cargando partida...</div>;
+}
 
 
 
@@ -301,9 +315,12 @@ return (
                                 border: "none", 
                                 background: "transparent", 
                                 padding: 0, 
-                                cursor: "pointer",
+                                cursor: (match.currentTurnUserId === currentUser?.id && match.currentTurnPhase === 'DRAW')
+                                            ? "pointer" 
+                                            : "not-allowed"
                             }}
-                        >
+                            disabled={!(match.currentTurnUserId === currentUser?.id && match.currentTurnPhase === 'DRAW')}
+>
                             <img 
                                 src="/backCard.png" 
                                 alt="Robar carta"
@@ -479,17 +496,37 @@ return (
             <div>
                 <button className="bag-button"
                     onClick={() => setBagOpen(true)}
+                    disabled={
+                    match.currentTurnUserId !== currentUser.id }
                     title="Accede to your bag"
                 >
                     Form my bag
                 </button>
                 <button className="bag-button"
                     onClick={() => setDiscardHandOpen(true)}
+                    disabled={
+                    match.currentTurnUserId !== currentUser.id }
                     title="Discard cards from hand"
                     style={{ marginLeft: "10px" }}
                 >
                     Discard
                 </button>
+                 <button className="bag-button"
+                    title="Discard cards from hand"
+                    onClick={() => setIsActionsModalOpen(true) }
+                     disabled={
+                    match.currentTurnUserId !== currentUser.id || 
+                    actionPoints <= 0 }
+                    style={{ marginLeft: "15px" }}
+                >
+                    Actions
+                </button>
+
+                <ActionsModal
+                isOpen={isActionsModalOpen}
+                onClose={() => setIsActionsModalOpen(false)}
+            />
+
             </div>
             
 
@@ -498,7 +535,8 @@ return (
                     onClick={endMatch}
                     style={{
                         marginLeft: "10px",
-                        padding: "10px 15px",
+                        marginTop: "20px",
+                        padding: "10px 25px",
                         background: "#c0392b",
                         color: "white",
                         border: "none",
@@ -549,7 +587,7 @@ return (
             <div
                 style={{
                     position: 'absolute',
-                    bottom: '-330px',
+                    bottom: '-460px',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     backgroundColor: '#c0392b',
@@ -560,13 +598,16 @@ return (
                     textAlign: 'center',
                     boxShadow: '0 0 10px rgba(0,0,0,0.3)',
                     zIndex: 1001,
-                    fontSize: '34px',
-                    minWidth: '250px'
+                    fontSize: '24px',
+                    minWidth: '200px'
                 }}
             >
-                {match?.currentTurnUserId === currentUser?.id
+                {!match?.currentTurnUserId
+                ? "Esperando..."
+                : match.currentTurnUserId === currentUser?.id
                     ? "Tu turno"
-                    : `${match?.currentTurnUserId ? match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username : 'Esperando...'} está en su turno`}
+                    : `${match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username} está en su turno`}
+
             </div>
         </div>
     );

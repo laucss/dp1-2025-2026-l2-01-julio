@@ -78,7 +78,7 @@ export default function CreateLobby() {
         <div className="npc-count-container">
           <button type="button" onClick={() => setNumNpcs(prev => Math.max(3, prev - 1))}>-</button>
           <span>{numNpcs}</span>
-          <button type="button" onClick={() => setNumNpcs(prev => Math.max(8,prev + 1))}>+</button>
+          <button type="button" onClick={() => setNumNpcs(prev => Math.min(8,prev + 1))}>+</button>
         </div>
       </div>
 
