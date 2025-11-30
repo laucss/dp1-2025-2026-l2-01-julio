@@ -1,15 +1,20 @@
 import React from "react";
 import "./actionsModal.css";
 
-export default function ActionsModal({ isOpen, onClose }) {
+export default function ActionsModal({ isOpen, onClose, moveToAdyacent }) {
     if (!isOpen) return null;
+
+    const move = () => {
+        moveToAdyacent()
+        onClose()
+    }
 
     return (
         <div className="actions-modal-overlay">
             <div className="actions-modal-content">
                 <h2>Acciones</h2>
 
-                <button>Mover a habitación adyacente</button>
+                <button onClick={move}>Mover a habitación adyacente</button>
                 <button>Mover a habitación con tu palabra</button>
                 <button>Mover a un jugador</button>
                 <button>Intentar escapar</button>
