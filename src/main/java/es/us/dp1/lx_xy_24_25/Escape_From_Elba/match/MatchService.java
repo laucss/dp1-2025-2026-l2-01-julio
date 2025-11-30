@@ -244,9 +244,19 @@ public class MatchService {
             long durationSeconds = java.time.Duration.between(m.getStartTime(), m.getEndTime()).toSeconds();
         }
 
+        deleteMatchCards(matchId); 
+
         mrepo.save(m);
 
         return m;
+    }
+
+
+    @Transactional
+    public void deleteMatchCards(Integer matchId){
+        deckService.deleteDeckInGame(matchId);
+        handService.deleteMatchHands(matchId);
+        bagService.deleteMatchBags(matchId);
     }
 
 

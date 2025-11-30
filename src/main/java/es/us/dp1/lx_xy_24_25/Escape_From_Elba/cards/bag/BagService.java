@@ -64,12 +64,11 @@ public class BagService {
      * Método que tras acabar una partida, borra la bolsa en memoria del jugador 
      */
     @Transactional
-    public void deletePlayerBag(Integer matchId, Integer playerId){
-        playerService.findById(playerId); 
+    public void deleteMatchBags(Integer matchId){
+        //playerService.findById(playerId); 
         // TODO: revisar si tengo que checkear que match exista
 
-        Map<Integer, BagInGame> playerMap= activesBags.get(matchId); 
-        playerMap.remove(playerId); 
+        activesBags.remove(matchId); 
     }
 
     

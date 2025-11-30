@@ -150,9 +150,6 @@ public class MatchController {
     @Operation(summary = "Start match", description = "Start a match from a lobby.")
     public ResponseEntity<MatchDTO> startMatch(@Parameter(description = "Id of the lobby to start the match") @PathVariable Integer matchId) {
         Match startedMatch = ms.startMatch(matchId);
-        Map<Integer, Map<Integer, HandInGame>> hands = handService.getActivesHands();
-        Map<Integer, Map<Integer, BagInGame>> bags = bagService.getActivesBags();
-        Map<Integer, DeckInGame> deck = deckService.getActivesDecks();
         return ResponseEntity.ok(new MatchDTO(startedMatch));
     }
 
@@ -184,7 +181,6 @@ public class MatchController {
     public ResponseEntity<MatchDTO> endMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer winnerId) {
         Player winner = ps.findById(winnerId);
         Match ended = ms.endMatch(matchId,winner);
-        System.out.println(ended);
         return ResponseEntity.ok(new MatchDTO(ended));
     }
 
@@ -222,14 +218,6 @@ public class MatchController {
         bagService.update(data.getBag(), matchId, data.getPlayerId());
         deckService.update(data.getDeck(), matchId);
 
-        Map<Integer, Map<Integer, HandInGame>> hands = handService.getActivesHands();
-        Map<Integer, Map<Integer, BagInGame>> bags = bagService.getActivesBags();
-        Map<Integer, DeckInGame> deck = deckService.getActivesDecks();
-        System.out.println(hands);
-        System.out.println(bags);
-        System.out.println(deck);
-        System.out.println(bagService.findPlayerBag(matchId, data.getPlayerId()));
-
         return ResponseEntity.ok().build(); 
         
     }
@@ -237,8 +225,6 @@ public class MatchController {
     @PostMapping("/{matchId}/{playerId}/drawCardFromDeck")
     public ResponseEntity<DrawCardResultDTO> drawCardFromDeck (@PathVariable Integer matchId, @PathVariable Integer playerId){
         DrawCardResultDTO result = ms.playerDrawsCardFromDeck(matchId, playerId); 
-
-        System.out.println(result);
         return ResponseEntity.ok(result); 
 
     } 

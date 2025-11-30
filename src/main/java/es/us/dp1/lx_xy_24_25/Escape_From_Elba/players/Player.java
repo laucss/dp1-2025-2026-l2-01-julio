@@ -38,7 +38,6 @@ public class Player extends BaseEntity {
 	private Room room;
 
 
-
     private Integer strength; //vamos a guarda la fuerza gastada
 
     private Integer actionPoints; // realmente tendría que ser una función de getActionPoints no?
