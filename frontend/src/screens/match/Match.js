@@ -257,6 +257,8 @@ export default function Match(){
                 if (response.ok){
                     const data = await response.json()
                     setMatch(data)
+
+                    setActionPoints(prev => Math.max(prev - 1, 0));
                     setMoveToAdyacentRoom(false)
                 }
 
@@ -304,6 +306,9 @@ export default function Match(){
 
 
     const calculateActionPoints = () => {
+        if (!match) return;
+        if (match.currentTurnPhase !== "DRAW")
+            return;
         if (handCards.length > 7 ){
             setActionPoints(0)
         } else {
@@ -350,6 +355,25 @@ return (
                     </div>
                 ))}
             </div>
+
+            {match?.currentTurnPhase === null  && !diceRolled && (
+                <div style={{
+                    position: "absolute",
+                    top: '47%',
+                    right: '-10%',
+                    transform: "translateX(-50%)",
+                    background: "rgba(214, 28, 28, 0.6)",
+                    padding: "10px 20px",
+                    borderRadius: "10px",
+                    fontSize: "16px",
+                    color: "white",
+                    textAlign: "center"
+                }}>
+ 
+                    "Tira los dados para decidir el turno"
+                </div>
+            )}
+
             
             <div className="match-board">
                 <div className="deck-column">
@@ -473,7 +497,7 @@ return (
             className="entities-panel"
             style={{
                 position: 'absolute',
-                top: '70%',
+                top: '80%',
                 right: '30px',
                 transform: 'translateY(-50%)',
                 width: '320px',
@@ -556,7 +580,7 @@ return (
                 <button className="bag-button"
                     onClick={() => setDiscardHandOpen(true)}
                     disabled={
-                    match.currentTurnUserId !== currentUser.id }
+                    match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
                     title="Discard cards from hand"
                     style={{ marginLeft: "10px" }}
                 >
