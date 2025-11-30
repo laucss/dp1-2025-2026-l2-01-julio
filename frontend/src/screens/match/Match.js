@@ -508,7 +508,6 @@ return (
                 >
                     Finalizar partida
                 </button>
-            </div>
 
         <BagModal
             isVisible={bagOpen}
@@ -550,7 +549,7 @@ return (
             <div
                 style={{
                     position: 'absolute',
-                    bottom: '-330px',          // 20px desde abajo
+                    bottom: '-330px',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     backgroundColor: '#c0392b',
@@ -561,7 +560,7 @@ return (
                     textAlign: 'center',
                     boxShadow: '0 0 10px rgba(0,0,0,0.3)',
                     zIndex: 1001,
-                    fontSize: '34px',           // tamaño del texto grande
+                    fontSize: '34px',
                     minWidth: '250px'
                 }}
             >
@@ -569,13 +568,6 @@ return (
                     ? "Tu turno"
                     : `${match?.currentTurnUserId ? match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username : 'Esperando...'} está en su turno`}
             </div>
-    
-
-        
         </div>
-
-        
-            )
-
-        
-    }
+    );
+}

@@ -20,7 +20,7 @@ public class NpcDTO {
     public NpcDTO(Npc npc) {
         this.strength = npc.getStrength();
         this.isNiallCampbell = npc.getIsNiallCampbell();
-        this.room = new RoomDTO(npc.getRoom());
+        this.room = npc.getRoom() != null ? new RoomDTO(npc.getRoom()) : null;
     }
 
     public NpcDTO() {
