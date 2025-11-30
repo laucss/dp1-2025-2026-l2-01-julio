@@ -23,6 +23,7 @@ export default function Match(){
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
     const [match, setMatch] = useState(null)
+    const [currentTurnUserId, setCurrentTurnUserId] = useState(null)
 
     // CARTAS
     const [deck, setDeck] = useState([])
@@ -63,7 +64,6 @@ export default function Match(){
                 setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
             }
     }, [match])
-    console.log('currentPlayer', currentPlayer)
 
     useEffect(() => {
         if (Array.isArray(currentPlayer) && currentPlayer[0]?.id){
@@ -91,6 +91,7 @@ export default function Match(){
 
                 setMatch(data)
                 setPlayer(data.players)
+                
                 
             } catch (error) {
                 
@@ -160,6 +161,7 @@ export default function Match(){
             
             setDeck(data.deck)
             setHandCards(prev => [...prev, data.card])
+            setNumCardsDrawn(prev => prev + 1)
 
             
         } catch (error) {
@@ -206,10 +208,12 @@ export default function Match(){
         })
         .then(updatedMatch => {
             console.log("Match actualizado tras tirar dado:", updatedMatch);
-            setMatch(updatedMatch);
+            setMatch(updatedMatch)
+            
+            //setCurrentTurnUserId(updatedMatch.currentTurnUserId)
 
             if (updatedMatch.players) {
-                setPlayer(updatedMatch.players);
+                setPlayer(updatedMatch.players)
             }
 
         })
@@ -251,7 +255,7 @@ export default function Match(){
 
 
     const calculateActionPoints = () => {
-        if (handCards > 7 ){
+        if (handCards.length > 7 ){
             setActionPoints(0)
         } else {
             setActionPoints(7-handCards.length)
@@ -296,18 +300,26 @@ return (
                 <div className="deck-column">
                     <div className="deck-section">
                         <button 
-                            onClick={drawCard}
+                            onClick={ () => {
+                                if (numCardsDrawn < 7) {
+                                    drawCard()
+                                } else {
+                                    alert("No puedes robar más de 7 cartas")
+                                } 
+                            }}
                             style={{ 
                                 border: "none", 
                                 background: "transparent", 
                                 padding: 0, 
-                                cursor: "pointer",
+                                cursor: numCardsDrawn >= 7 ? "not-allowed" : "pointer",
+                                opacity: numCardsDrawn >= 7 ? 0.5 : 1,
+                                outline: "none",
                             }}
                         >
                             <img 
                                 src="/backCard.png" 
                                 alt="Robar carta"
-                                style={{ width: "150px", height: "auto" }}
+                                style={{ width: "150px", height: "auto", outline: "none", }}
                             />
                         </button>
                     </div>
@@ -530,6 +542,7 @@ return (
             deck={deck}
             player={currentPlayer[0]}
             onClose={() => setDiscardHandOpen(false)}
+            updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
             onSave={async () =>{
                 await fetchCards()
                 setDiscardHandOpen(false)
