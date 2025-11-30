@@ -16,7 +16,7 @@
 .window {
     width: 50%;            
     max-width: 80%;
-    height: 50%;
+    height: 80%;
     background: white;
     border-radius: 15px;
     padding: 20px;
@@ -45,7 +45,6 @@
     margin-bottom: 15px;
     flex-wrap: wrap;
     background-color:  rgba(202, 49, 49, 0.7) ;
-    min-height: 170px;
     border-radius: 8px;
 }
 
@@ -62,4 +61,10 @@
     cursor: pointer;
     width:100px;
     height: 40px;
+}
+.section-title{
+    width: 100%;
+    text-align: center;
+    margin: 0 0 10px 0;
+    font-weight: 600;
 }

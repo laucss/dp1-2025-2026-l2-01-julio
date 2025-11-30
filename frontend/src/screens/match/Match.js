@@ -1,10 +1,12 @@
 import React, { useState } from "react"
+import {useNavigate} from "react-router-dom";
 import '../../static/css/match/Match.css';
 import getIdFromUrl from '../../util/getIdFromUrl'
 import { useEffect } from "react";
 import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
-import DiscardModal from "./DiscardModal";
+import BagModal from "./BagModal";
+import DiscardHandModal from "./DiscardHandModal";
 import ChatBox from "./chatBox";
 import { FaComments } from "react-icons/fa";
 
@@ -16,6 +18,7 @@ const currentUser = tokenService.getUser();
 
 export default function Match(){
     const matchId = getIdFromUrl(2);
+    const navigate = useNavigate();
     const [currentPlayer, setCurrentPlayer] = useState({})
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
@@ -23,10 +26,12 @@ export default function Match(){
 
     // CARTAS
     const [deck, setDeck] = useState([])
+    const [discardPile, setDiscardPile] = useState([])
     const [handCards, setHandCards] = useState([])
     const [bagCards, setBagCards] = useState([])
     const [numCardsDrawn, setNumCardsDrawn] = useState(0)
-    const [discardOpen, setDiscardOpen] = useState(false)
+    const [bagOpen, setBagOpen] = useState(false)
+    const [discardHandOpen, setDiscardHandOpen] = useState(false)
 
     // DADOS 
     const [whiteDice, setWhiteDice] = useState("1")
@@ -112,6 +117,7 @@ export default function Match(){
                 setHandCards(Array.isArray(data.hand.cards) ? data.hand.cards : [])
                 setBagCards(Array.isArray(data.bag.cards) ? data.bag.cards : [])
                 setDeck(data.deck || [])
+                setDiscardPile(Array.isArray(data.deck?.discardedCards) ? data.deck.discardedCards : [])
                 return data
             } 
 
@@ -260,8 +266,13 @@ export default function Match(){
     if (match?.status === "FINISHED") {
         return (
             <div className="match-ended">
-                <h2>La partida ha finalizado!!!!!</h2>
-                <p>Gracias por jugar.</p>
+                <div className="end-overlay">
+                <div className="end-text-box">
+                    <h2>La partida ha finalizado!!!!!</h2>
+                    <p>Gracias por jugar.</p>
+                    <button className="return-menu-button" onClick={() => navigate(`/`)}>Return to main menu</button>
+                </div>
+                </div>
             </div>
         );
     }
@@ -299,6 +310,28 @@ return (
                                 style={{ width: "150px", height: "auto" }}
                             />
                         </button>
+                    </div>
+                    <div className="discard-pile-section">
+                        {discardPile.length > 0 ? (
+                            <img 
+                                src={`/resources${discardPile[discardPile.length - 1].frontImage}`} 
+                                alt="Última carta descartada"
+                                style={{ width: "150px", height: "auto" }}
+                            />
+                        ) : (
+                            <div style={{ 
+                                width: "150px", 
+                                height: "210px", 
+                                border: "2px dashed #ccc", 
+                                borderRadius: "8px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "#999"
+                            }}>
+                                Empty
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -443,39 +476,21 @@ return (
                 </div>
                 
             </div>
-            <div className="buttons-section">
-                <button className="discard-button"
-                    onClick={() => setDiscardOpen(true)}
-                    style={{
-                        marginLeft: "10px",
-                        padding: "10px 15px",
-                        background: "#ffffffff",
-                        color: "black",
-                        borderColor: "black",
-                        borderRadius: "8px",
-                        cursor: "pointer"
-                    }}
-                    title="Descartar cartas"
+            <div>
+                <button className="bag-button"
+                    onClick={() => setBagOpen(true)}
+                    title="Accede to your bag"
                 >
                     Form my bag
                 </button>
-
-                <button className="discard-button"
-                    // onClick={() => setDiscardOpen(true)}
-                    style={{
-                        marginLeft: "10px",
-                        padding: "10px 15px",
-                        background: "#ffffffff",
-                        color: "black",
-                        borderColor: "black",
-                        borderRadius: "8px",
-                        cursor: "pointer"
-                    }}
-                    title="Descartar cartas"
+                <button className="bag-button"
+                    onClick={() => setDiscardHandOpen(true)}
+                    title="Discard cards from hand"
+                    style={{ marginLeft: "10px" }}
                 >
-                    Actions
+                    Discard
                 </button>
-           
+            </div>
             
 
                 <button
@@ -493,21 +508,32 @@ return (
                 >
                     Finalizar partida
                 </button>
-            </div>
 
-        <DiscardModal
-            isVisible={discardOpen}
+        <BagModal
+            isVisible={bagOpen}
             hand={handCards}
             bag={bagCards}
             deck={deck}
             player={currentPlayer[0]}
-            onClose={() => setDiscardOpen(false)}
+            onClose={() => setBagOpen(false)}
             onSave={async () =>{
                 await fetchCards()
-                setDiscardOpen(false)
+                setBagOpen(false)
 
             }
                 }
+            />
+
+        <DiscardHandModal
+            isVisible={discardHandOpen}
+            hand={handCards}
+            deck={deck}
+            player={currentPlayer[0]}
+            onClose={() => setDiscardHandOpen(false)}
+            onSave={async () =>{
+                await fetchCards()
+                setDiscardHandOpen(false)
+            }}
             />
 
       
@@ -523,7 +549,7 @@ return (
             <div
                 style={{
                     position: 'absolute',
-                    bottom: '-330px',          // 20px desde abajo
+                    bottom: '-330px',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     backgroundColor: '#c0392b',
@@ -534,7 +560,7 @@ return (
                     textAlign: 'center',
                     boxShadow: '0 0 10px rgba(0,0,0,0.3)',
                     zIndex: 1001,
-                    fontSize: '34px',           // tamaño del texto grande
+                    fontSize: '34px',
                     minWidth: '250px'
                 }}
             >
@@ -542,13 +568,6 @@ return (
                     ? "Tu turno"
                     : `${match?.currentTurnUserId ? match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username : 'Esperando...'} está en su turno`}
             </div>
-    
-
-        
         </div>
-
-        
-            )
-
-        
-    }
+    );
+}

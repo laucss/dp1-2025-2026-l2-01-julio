@@ -41,6 +41,7 @@ export default function Home(){
 
     return(
         <div className="home-page-container">
+            <img src="/title.png" alt="Título" className="home-title-image" />
             {jwt ? (
                 <div className='home-buttons'>
                 {((Array.isArray(currentMatch) && currentMatch.length>0) || (typeof currentMatch === 'number' && currentMatch>0) || (typeof currentMatch === 'string' && currentMatch.length>0)) ? (

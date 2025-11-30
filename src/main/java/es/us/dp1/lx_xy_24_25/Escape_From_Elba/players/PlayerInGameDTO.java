@@ -38,7 +38,7 @@ public class PlayerInGameDTO {
         this.strength = player.getStrength();
         this.actionPoints = player.getActionPoints();
         this.user= player.getUser();
-        this.currentRoom = new RoomDTO(player.getRoom());
+        this.currentRoom = player.getRoom() != null ? new RoomDTO(player.getRoom()) : null;
         /*
         this.handCards = player.getHandCards();
         this.bagCards = player.getBagCards();
