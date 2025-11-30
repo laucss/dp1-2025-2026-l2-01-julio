@@ -368,7 +368,7 @@ public class MatchService {
 
     }
 
-    /*
+
     //Función para mover un jugador de una sala a otra adyacente
     @Transactional
     public Player movePlayer(Integer matchId, Integer userId, String targetRoomName) {
@@ -392,8 +392,8 @@ public class MatchService {
         //Actualizar la sala del jugador
         player.setRoom(targetRoom);
         //Guardar cambios
+        
         return prepo.save(player);
     }
-     */ 
 
 }
