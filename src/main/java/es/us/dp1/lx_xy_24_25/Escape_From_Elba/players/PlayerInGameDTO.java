@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +19,8 @@ public class PlayerInGameDTO {
     private Integer actionPoints;
     
     private User user; 
+
+    private RoomDTO currentRoom;
     
     // Cartas en juego
     /* 
@@ -35,6 +38,7 @@ public class PlayerInGameDTO {
         this.strength = player.getStrength();
         this.actionPoints = player.getActionPoints();
         this.user= player.getUser();
+        this.currentRoom = new RoomDTO(player.getRoom());
         /*
         this.handCards = player.getHandCards();
         this.bagCards = player.getBagCards();

@@ -203,4 +203,14 @@ public class Match extends NamedEntity {
     }
 
 
+    public List<RoomDTO> getRoomsState() {
+    return roomsState;
+    }
+
+    public void setRoomsState(List<RoomDTO> roomsState) {
+    this.roomsState = roomsState;
+    }
+
+
+
 }

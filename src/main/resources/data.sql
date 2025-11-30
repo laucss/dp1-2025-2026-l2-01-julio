@@ -140,7 +140,7 @@ INSERT INTO Room (id, name, black_dice, white_dice)
                (12, 'Corridor 3', 2, 6),
                (13, 'Ball Room', 3, 1),
                (14, 'Corridor 4', 3, 2),
-               (15, 'Spa', 3, 3),
+               (15, 'SPA', 3, 3),
                (16, 'Pool', 3, 4),
                (17, 'Corridor 5', 3, 5),
                (18, 'Sleep Room', 3, 6),

@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
@@ -34,6 +35,7 @@ public class Player extends BaseEntity {
 	private Match match;
 
 	@OneToOne
+	@JsonManagedReference
 	@JoinColumn(name = "room_id")
 	private Room room;
 

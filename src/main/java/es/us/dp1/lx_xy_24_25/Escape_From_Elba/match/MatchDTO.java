@@ -7,6 +7,7 @@ import java.util.List;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomDTO;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Max;
@@ -55,6 +56,8 @@ public class MatchDTO {
     @Enumerated(EnumType.STRING)
     private TurnPhase currentTurnPhase;
 
+    private List<RoomDTO> roomsState = new ArrayList<>();
+
     
     //@Transient
     //private DeckInGameDTO deck;
@@ -80,6 +83,8 @@ public class MatchDTO {
         this.npcs = match.getNpcs().stream().map(n-> new NpcDTO(n)).toList();
         this.turnNumber = match.getTurnNumber();
         this.currentTurnPhase = match.getCurrentTurnPhase();
+        this.currentTurnUserId = match.getCurrentTurnUserId();
+        this.roomsState = match.getRoomsState();
         //this.deck = new DeckInGameDTO(match.getDeck());
         this.winner = match.getWinner();
         this.isPrivate = match.getIsPrivate();

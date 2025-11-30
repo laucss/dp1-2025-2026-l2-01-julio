@@ -155,14 +155,14 @@ public class MatchController {
 
     @PostMapping("/{matchId}/submit-dice")
     @Operation(summary = "Decide order", description = "Submit dice roll to decide player order at the start of the match.")
-    public ResponseEntity<Match> submitDice(@PathVariable Integer matchId, @RequestParam Integer userId, @RequestParam Integer diceRoll) {
+    public ResponseEntity<MatchDTO> submitDice(@PathVariable Integer matchId, @RequestParam Integer userId, @RequestParam Integer diceRoll) {
 
         try {
             // Llamamos al servicio que guarda la tirada y asigna orden si todos tiraron
             Match m = ms.submitDiceAndAssignOrder(matchId, userId, diceRoll);
 
-            // Devolvemos el jugador actualizado
-            return ResponseEntity.ok(m);
+            // Devolvemos el estado actualizado de la partida
+            return ResponseEntity.ok(new MatchDTO(m));
 
         } catch (IllegalArgumentException e) {
             // Si hubo algún error (jugador no encontrado, ya tiró, etc.)
