@@ -8,6 +8,21 @@
 
 }
 
+.action-points-section{
+    background-color: rgb(251, 251, 251);
+    border-color: rgb(0, 0, 0);
+    border-style: solid;
+    border-radius: 10px;
+    width: 150px;
+    height: 120px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    align-content: center;
+    text-align: center;
+    align-items: center;
+
+}
+
 .players-avatars-section {
     display: flex;
     justify-content: center;
@@ -157,7 +172,12 @@
     .deck-column { width: auto; }
 }
 
-.discard-button{
+
+.buttons-section{
+    justify-content: flex-start;
+    align-items: stretch;
+    display: flex;
+    margin-bottom: 10px;
     padding: 10px;
     margin-top: 10px;
     justify-content: center;

@@ -1,5 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,18 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+// import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 
 @Service
 public class HandService {
 
     Checkers checkers; 
-    PlayerService playerService; 
+    //PlayerService playerService; 
 
-    public HandService(Checkers checkers, PlayerService playerService){
+    public HandService(Checkers checkers){
         this.checkers = checkers; 
-        this.playerService = playerService; 
+        //this.playerService = playerService; 
     }
 
     /*
@@ -46,12 +47,11 @@ public class HandService {
      * Método que tras acabar una partida, borra la mano en memoria del jugador 
      */
 
-    public void deletePlayerHand(Integer matchId, Integer playerId){
-        playerService.findById(playerId); 
+    public void deleteMatchHands(Integer matchId){
+        //playerService.findById(playerId); 
         // TODO: revisar si tengo que checkear que match exista
 
-        Map<Integer, HandInGame> playerMap= activesHands.get(matchId); 
-        playerMap.remove(playerId); 
+        activesHands.remove(matchId);  
     }
 
     /*
@@ -89,8 +89,10 @@ public class HandService {
         HandInGame playerHand = findPlayerHand(matchId, playerId); 
 
         // checkers.checkCardExists(card);
+        Class<?> pc =  playerHand.getCards().getClass(); 
 
         playerHand.getCards().add(card); 
+
 
         activesHands
             .computeIfAbsent(matchId, m -> new HashMap<>())
@@ -150,8 +152,8 @@ public class HandService {
         
         HandInGame newHand = new HandInGame(); 
 
-        newHand.setCards(hand.getCards().stream()
-            .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
+        newHand.setCards(new ArrayList<>(hand.getCards().stream()
+            .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
 
         Map<Integer, Map<Integer, HandInGame>> allHands2 = activesHands;
         playerMap.put(playerId,newHand); 

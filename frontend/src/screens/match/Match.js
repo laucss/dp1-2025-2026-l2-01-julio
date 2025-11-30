@@ -36,9 +36,10 @@ export default function Match(){
     // DADOS 
     const [whiteDice, setWhiteDice] = useState("1")
     const [blackDice, setBlackDice] = useState("1")
-    const [diceRolled, setDiceRolled] = useState(false);
+    const [diceRolled, setDiceRolled] = useState(false)
 
-    const [chatOpen, setChatOpen] = useState(false);
+    const [chatOpen, setChatOpen] = useState(false)
+    const [actionPoints, setActionPoints] = useState(null)
 
     
     // const [playerTurnId, setPlayerTurnId] = useState(null)
@@ -69,6 +70,11 @@ export default function Match(){
             fetchCards()
         }     
     }, [currentPlayer])
+
+    useEffect(() => {
+        calculateActionPoints()
+          
+    }, [handCards])
 
 
     const fetchMatchAndPlayers = async () => {
@@ -128,9 +134,11 @@ export default function Match(){
 
     }
 
+    /*
     console.log('hand' , handCards)
     console.log('bag' , bagCards)
     console.log('deck' , deck)
+    */
 
     // FUNCION ROBAR CARTA
     const drawCard = async () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO DE CHATI PQ QUERIA SOLO PROBARLO
@@ -221,7 +229,7 @@ export default function Match(){
 
     
     const endMatch = () => {
-        if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return;
+        if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return; 
         const body =10;
         console.log('body end match', body)
         fetch(`/api/v1/matches/${matchId}/end`, {
@@ -235,11 +243,22 @@ export default function Match(){
         .then(res => res.json())
         //.then(() => window.location.reload())
         .then(updated => {
-            console.log("Match finalizado:", updated);
+            console.log("Match finalizado:", updated)
             setMatch(updated)
         })
-        .catch(err => console.error(err));
-    };
+        .catch(err => console.error(err))
+    }
+
+
+    const calculateActionPoints = () => {
+        if (handCards > 7 ){
+            setActionPoints(0)
+        } else {
+            setActionPoints(7-handCards.length)
+        }
+        }
+    
+
 
     console.log('match', match)
 
@@ -376,6 +395,69 @@ return (
                     </button>
                 </div>
             </div>
+            <div className="action-points-section">
+                <h1>{actionPoints}</h1>
+                <p>Action points </p>
+            </div>
+
+            {/* TABLA DE JUGADORES Y NPCS */}
+            <div
+            className="entities-panel"
+            style={{
+                position: 'absolute',
+                top: '70%',
+                right: '30px',
+                transform: 'translateY(-50%)',
+                width: '320px',
+                backgroundColor:  '#c0392b',
+                color: 'white',
+                borderRadius: '8px',
+                padding: '10px',
+                fontSize: '14px',
+                zIndex: 1000,
+                boxShadow: '0 0 10px rgba(0,0,0,0.3)'
+            }}
+            >
+            <h4 style={{ textAlign: 'center', margin: '5px 0' }}>Ubicación de Jugadores y NPCs</h4>
+                <table style={{ width: '100%', textAlign: 'center', borderCollapse: 'collapse' }}>
+                    <thead>
+                        <tr>
+                            <th style={{ borderBottom: '1px solid #fff', padding: '3px' }}>Nombre</th>
+                            <th style={{ borderBottom: '1px solid #fff', padding: '3px' }}>Tipo</th>
+                            <th style={{ borderBottom: '1px solid #fff', padding: '3px' }}>Habitación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {match?.players.map(player => (
+                            <tr 
+                                key={player.id} 
+                                style={{
+                                    backgroundColor: '#ff4c4cff', // Color de fondo para jugadores
+                                    color: 'white',
+                                    fontWeight: currentPlayer[0]?.id === player.id ? 'bold' : 'normal' // Resalta tu jugador
+                                }}
+                            >
+                                <td style={{ padding: '3px' }}>{player.user.username}</td>
+                                <td style={{ padding: '3px' }}>Jugador</td>
+                                <td style={{ padding: '3px' }}>{player.currentRoom?.name}</td>
+                            </tr>
+                        ))}
+                        {match?.npcs.map((npc, index) => (
+                            <tr 
+                                key={index}
+                                style={{
+                                    backgroundColor: '#f87575ff',
+                                    color: 'white'
+                                }}
+                            >
+                                <td style={{ padding: '3px' }}>{npc.name || `NPC ${index+1}`}{npc.isNiallCampbell ? ' (Niall)' : ''}</td>
+                                <td style={{ padding: '3px' }}>NPC</td>
+                                <td style={{ padding: '3px' }}>{npc.room?.name}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
             <div className="player-section">
                 <div className="player-hand">
                     {Array.isArray(handCards) && handCards.map((carta, index) => (
@@ -411,21 +493,22 @@ return (
             </div>
             
 
-            <button
-                className="end-match-button"
-                onClick={endMatch}
-                style={{
-                    marginLeft: "10px",
-                    padding: "10px 15px",
-                    background: "#c0392b",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer"
-                }}
-            >
-                Finalizar partida
-            </button>
+                <button
+                    className="end-match-button"
+                    onClick={endMatch}
+                    style={{
+                        marginLeft: "10px",
+                        padding: "10px 15px",
+                        background: "#c0392b",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer"
+                    }}
+                >
+                    Finalizar partida
+                </button>
+            </div>
 
         <BagModal
             isVisible={bagOpen}
@@ -462,10 +545,36 @@ return (
             </div>
 
             {chatOpen && <ChatBox matchId={matchId} />}
+
+            {/* Mensaje de turno */}
+            <div
+                style={{
+                    position: 'absolute',
+                    bottom: '-330px',          // 20px desde abajo
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    backgroundColor: '#c0392b',
+                    color: 'white',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    boxShadow: '0 0 10px rgba(0,0,0,0.3)',
+                    zIndex: 1001,
+                    fontSize: '34px',           // tamaño del texto grande
+                    minWidth: '250px'
+                }}
+            >
+                {match?.currentTurnUserId === currentUser?.id
+                    ? "Tu turno"
+                    : `${match?.currentTurnUserId ? match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username : 'Esperando...'} está en su turno`}
+            </div>
     
 
         
         </div>
+
+        
             )
 
         

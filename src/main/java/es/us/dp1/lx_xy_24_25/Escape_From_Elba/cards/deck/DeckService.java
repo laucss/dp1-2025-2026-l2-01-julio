@@ -229,11 +229,14 @@ public class DeckService {
 
         DeckInGame newDeck = activesDecks.get(matchId); 
 
-        newDeck.setDiscardedCards(deck.getDiscardedCards().stream()
-            .map(dto -> new Card(dto.getId(), dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
+        newDeck.setDiscardedCards(new ArrayList<>(deck.getDiscardedCards().stream()
+            .map(dto -> new Card(dto.getId(), dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
         
-        newDeck.setNotDiscardedCards(deck.getNotDiscardedCards().stream()
-            .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
+        newDeck.setNotDiscardedCards(new ArrayList<>(deck.getNotDiscardedCards().stream()
+            .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
+
+        DeckInGame d = findDeckById(matchId); 
+        System.out.println(d);
 
 
     }
