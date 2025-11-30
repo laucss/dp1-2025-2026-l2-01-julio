@@ -181,7 +181,7 @@ Al diseñar el backend, lo planteamos como un sistema compuesto por diversas ent
 
 
 *Clases o paquetes creados*
--Cards
+·Cards
    -bag
       -bag
       -bagInGame
@@ -192,26 +192,26 @@ Al diseñar el backend, lo planteamos como un sistema compuesto por diversas ent
       -hand
       -handInGame
    -card
--Chat
+·Chat
    -chatMessage
--FriendRequest
+·FriendRequest
    -friendRequest
--Match
+·Match
    -lobby
    -match
--Npcs
+·Npcs
    -npc
--Players
+·Players
    -player
--Room
+·Room
    -room
--Statistics
+·Statistics
    -achievements
       -achievement
    -statistics
--User
+·User
    -user
--Util
+·Util
    -checkers
 
 *Ventajas alcanzadas al aplicar el patrón*
