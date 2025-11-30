@@ -7,7 +7,7 @@ import React, {useState, useEffect} from "react";
 import getIdFromUrl from "../../util/getIdFromUrl";
 import useFetchState from "../../util/useFetchState";
 import useFetchData from "../../util/useFetchData";
-import StandardImageList from "./ImageList";
+import SimpleImageList from "./ImageList";
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -94,8 +94,8 @@ const Profile = ({ }) => {
 
   return (
     <div className="profile-container">
-      <h2>Edit Profile</h2>
     <div className="profile-card">
+      <h2>Edit Profile</h2>
       <div className="profile-info">
         <img src={selectedAvatarUrl} alt="User Avatar" className="user-avatar" onClick={toggleModal} />
       </div>
@@ -103,7 +103,7 @@ const Profile = ({ }) => {
           <div className="modal-backdrop" onClick={toggleModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h2 className="modal-text">Edit avatar</h2>
-              <StandardImageList onImageSelect={handleImageSelect} />
+              <SimpleImageList onImageSelect={handleImageSelect} />
             </div>
           </div>
         )}
