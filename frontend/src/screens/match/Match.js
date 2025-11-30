@@ -5,7 +5,8 @@ import getIdFromUrl from '../../util/getIdFromUrl'
 import { useEffect } from "react";
 import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
-import DiscardModal from "./DiscardModal";
+import BagModal from "./BagModal";
+import DiscardHandModal from "./DiscardHandModal";
 import ChatBox from "./chatBox";
 import { FaComments } from "react-icons/fa";
 
@@ -25,10 +26,12 @@ export default function Match(){
 
     // CARTAS
     const [deck, setDeck] = useState([])
+    const [discardPile, setDiscardPile] = useState([])
     const [handCards, setHandCards] = useState([])
     const [bagCards, setBagCards] = useState([])
     const [numCardsDrawn, setNumCardsDrawn] = useState(0)
-    const [discardOpen, setDiscardOpen] = useState(false)
+    const [bagOpen, setBagOpen] = useState(false)
+    const [discardHandOpen, setDiscardHandOpen] = useState(false)
 
     // DADOS 
     const [whiteDice, setWhiteDice] = useState("1")
@@ -108,6 +111,7 @@ export default function Match(){
                 setHandCards(Array.isArray(data.hand.cards) ? data.hand.cards : [])
                 setBagCards(Array.isArray(data.bag.cards) ? data.bag.cards : [])
                 setDeck(data.deck || [])
+                setDiscardPile(Array.isArray(data.deck?.discardedCards) ? data.deck.discardedCards : [])
                 return data
             } 
 
@@ -247,7 +251,7 @@ export default function Match(){
                 <div className="end-text-box">
                     <h2>La partida ha finalizado!!!!!</h2>
                     <p>Gracias por jugar.</p>
-                    <button className="return-button" onClick={() => navigate(`/`)}>Return to main menu</button>
+                    <button className="return-menu-button" onClick={() => navigate(`/`)}>Return to main menu</button>
                 </div>
                 </div>
             </div>
@@ -287,6 +291,28 @@ return (
                                 style={{ width: "150px", height: "auto" }}
                             />
                         </button>
+                    </div>
+                    <div className="discard-pile-section">
+                        {discardPile.length > 0 ? (
+                            <img 
+                                src={`/resources${discardPile[discardPile.length - 1].frontImage}`} 
+                                alt="Última carta descartada"
+                                style={{ width: "150px", height: "auto" }}
+                            />
+                        ) : (
+                            <div style={{ 
+                                width: "150px", 
+                                height: "210px", 
+                                border: "2px dashed #ccc", 
+                                borderRadius: "8px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "#999"
+                            }}>
+                                Empty
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -369,11 +395,18 @@ return (
                 
             </div>
             <div>
-                <button className="discard-button"
-                    onClick={() => setDiscardOpen(true)}
-                    title="Descartar cartas"
+                <button className="bag-button"
+                    onClick={() => setBagOpen(true)}
+                    title="Accede to your bag"
                 >
                     Form my bag
+                </button>
+                <button className="bag-button"
+                    onClick={() => setDiscardHandOpen(true)}
+                    title="Discard cards from hand"
+                    style={{ marginLeft: "10px" }}
+                >
+                    Discard
                 </button>
             </div>
             
@@ -394,19 +427,31 @@ return (
                 Finalizar partida
             </button>
 
-        <DiscardModal
-            isVisible={discardOpen}
+        <BagModal
+            isVisible={bagOpen}
             hand={handCards}
             bag={bagCards}
             deck={deck}
             player={currentPlayer[0]}
-            onClose={() => setDiscardOpen(false)}
+            onClose={() => setBagOpen(false)}
             onSave={async () =>{
                 await fetchCards()
-                setDiscardOpen(false)
+                setBagOpen(false)
 
             }
                 }
+            />
+
+        <DiscardHandModal
+            isVisible={discardHandOpen}
+            hand={handCards}
+            deck={deck}
+            player={currentPlayer[0]}
+            onClose={() => setDiscardHandOpen(false)}
+            onSave={async () =>{
+                await fetchCards()
+                setDiscardHandOpen(false)
+            }}
             />
 
       

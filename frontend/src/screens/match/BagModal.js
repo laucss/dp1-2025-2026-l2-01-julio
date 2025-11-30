@@ -5,7 +5,7 @@ import getIdFromUrl from "../../util/getIdFromUrl";
 
 const jwt = tokenService.getLocalAccessToken();
 
-export default function DiscardModal({isVisible, hand, bag, deck, onClose, player, onSave}){
+export default function BagModal({isVisible, hand, bag, deck, onClose, player, onSave}){
     const matchId = getIdFromUrl(2);
     const[handCards, setHandCards] = useState([])
     const[bagCards, setBagCards] = useState([])
@@ -22,7 +22,6 @@ export default function DiscardModal({isVisible, hand, bag, deck, onClose, playe
         setBagCards(bag)
         setDeckCards(deck)
         setCurrentPlayer(player)
-    
     }, [isVisible])
 
     if (!isVisible) return null
@@ -134,24 +133,34 @@ export default function DiscardModal({isVisible, hand, bag, deck, onClose, playe
         <div className="modal-overlay">
             <div className="window">
                 <div className="hand-section">
+                <h3 className="section-title">Hand</h3>
                 {handCards.map((card, index) => (
                     <div key={index} >
                         <img 
                             src={`/resources${card.frontImage}`} 
                             alt={`Carta ${card.letter}`}  
                             className="card"
-                            onClick={()=> setBagCards(prev => [...prev, card])}/>
+                            onClick={() => {
+                                setBagCards(prev => [...prev, card]);
+                                setHandCards(prev => prev.filter((_, i) => i !== index));
+                            }}/>
                     </div>
                     ))}
                 </div>
 
                 <div className="bag-section">
+                    <h3 className="section-title">Bag</h3>
                     {bagCards.map((card, index) => (
                     <div key={index} >
                         <img 
                             src={`/resources${card.frontImage}`} 
                             alt={`Carta ${card.letter}`}  
-                            className="card"/>
+                            className="card"
+                            onClick={() => {
+                                setHandCards(prev => [...prev, card]);
+                                setBagCards(prev => prev.filter((_, i) => i !== index));
+                            }}
+                        />
                     </div>
                     ))}
                     

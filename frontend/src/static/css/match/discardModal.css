@@ -43,3 +43,10 @@
     margin-bottom: 15px;
     flex-wrap: wrap;
 }
+
+.section-title{
+    width: 100%;
+    text-align: center;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
