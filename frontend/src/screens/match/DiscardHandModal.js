@@ -102,52 +102,54 @@ export default function DiscardHandModal({isVisible, hand, deck, onClose, player
     return (
         <div className="modal-overlay">
             <div className="window">
-                <div className="hand-section">
-                    <h3 className="section-title">Hand</h3>
-                    {handCards.map((card, index) => (
-                        <div key={index}>
-                            <img 
-                                src={`/resources${card.frontImage}`} 
-                                alt={`Carta ${card.letter}`}  
-                                className="card"
-                                onClick={() => {
-                                    // Mover a descarte y eliminar de mano
-                                    setCardsToDiscard(prev => [...prev, card]);
-                                    setHandCards(prev => prev.filter((_, i) => i !== index));
-                                }}
-                                style={{ cursor: 'pointer' }}
-                            />
+                <div className="modal-content-wrapper">
+                    <div className="sections-container">
+                        <div className="hand-section">
+                            <h3 className="section-title">Hand</h3>
+                            {handCards.map((card, index) => (
+                                <div key={index}>
+                                    <img 
+                                        src={`/resources${card.frontImage}`} 
+                                        alt={`Carta ${card.letter}`}  
+                                        className="card"
+                                        onClick={() => {
+                                            setCardsToDiscard(prev => [...prev, card]);
+                                            setHandCards(prev => prev.filter((_, i) => i !== index));
+                                        }}
+                                        style={{ cursor: 'pointer' }}
+                                    />
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
 
-                <div className="bag-section">
-                    <h3 className="section-title">To Discard</h3>
-                    {cardsToDiscard.map((card, index) => (
-                        <div key={index}>
-                            <img 
-                                src={`/resources${card.frontImage}`} 
-                                alt={`Carta ${card.letter}`}  
-                                className="card"
-                                onClick={() => {
-                                    // Volver al hand y eliminar de descarte
-                                    setHandCards(prev => [...prev, card]);
-                                    setCardsToDiscard(prev => prev.filter((_, i) => i !== index));
-                                }}
-                                style={{ cursor: 'pointer' }}
-                            />
+                        <div className="bag-section">
+                            <h3 className="section-title">To Discard</h3>
+                            {cardsToDiscard.map((card, index) => (
+                                <div key={index}>
+                                    <img 
+                                        src={`/resources${card.frontImage}`} 
+                                        alt={`Carta ${card.letter}`}  
+                                        className="card"
+                                        onClick={() => {
+                                            setHandCards(prev => [...prev, card]);
+                                            setCardsToDiscard(prev => prev.filter((_, i) => i !== index));
+                                        }}
+                                        style={{ cursor: 'pointer' }}
+                                    />
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </div>
 
-                <div className="buttons"> 
-                    <button onClick={confirm} className="confirm-button">
-                        Confirm
-                    </button>
+                    <div className="buttons"> 
+                        <button onClick={confirm} className="confirm-button">
+                            Confirm
+                        </button>
 
-                    <button onClick={handleCancel} className="confirm-button">
-                        Cancel
-                    </button>
+                        <button onClick={handleCancel} className="confirm-button">
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
