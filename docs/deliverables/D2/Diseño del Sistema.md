@@ -65,9 +65,11 @@ Puedes gastar tus puntos en diferentes acciones:<br>
 
 ### Diagrama de Dominio/Diseño
 
-![alt text](<images/WhatsApp Image 2025-10-29 at 09.32.01.png>)
+![alt text](<images/diagramaBase.png>)
 
-![alt text](<images/imagee.png>)
+![alt text](<images/dragramadeclasesss.drawio.png>)
+
+![alt text](<images/diagramadeclasessss2.drawio.png>)
 
 ### Diagrama de Capas (incluyendo Controladores, Servicios y Repositorios)
 
