@@ -21,6 +21,24 @@
   align-items: center;
 }
 
+.back-arrow-btn {
+    position: absolute;
+    top: 00px;
+    left: 50px;
+    font-size: 5rem;
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 1001;
+    transition: color 0.2s;
+}
+
+.back-arrow-btn:hover {
+    color: #ffcc00;
+}
+
 /* Cuadro del listado */
 .lobbies-box {
   background-color: rgba(0, 15, 83, 0.9); /* blanco semitransparente */
@@ -68,7 +86,7 @@
 /* Botón de lobby privado */
 .join-private-btn {
   margin-top: 1.5rem;
-  background-color: #7493fa;
+  background-color: #1e52fd;
   color: white;
   border: none;
   border-radius: 8px;

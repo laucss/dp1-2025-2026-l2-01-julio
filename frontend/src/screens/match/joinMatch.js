@@ -112,6 +112,15 @@ export default function JoinMatch() {
   <div className="admin-page-container">
     <div className="lobbies-overlay">
     <div className="lobbies-box">
+
+                {/* Flecha de volver al inicio */}
+        <button 
+            className="back-arrow-btn"
+            onClick={() => navigate('/')}
+          >
+            ←
+      </button>
+
       <h1>Lobbies</h1>
 
       <Table aria-label="lobbies" className="mt-4">

@@ -138,8 +138,26 @@
     margin-top: 1rem;
 }
 
+.lobby-creation-content button[type="cancel"] {
+    background-color: #970000;
+    color: #fff;
+    border: 3px solid #ffffff;
+    border-radius: 10px;
+    padding: 0.8rem 3rem;  /* más ancho sin hacerlo más alto */
+    font-size: 1.2rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
 .lobby-creation-content button[type="submit"]:hover {
     background-color: #2e00c2;
+}
+
+.lobby-creation-content button[type="cancel"] :hover {
+    background-color: #f1bfbf;
 }
 
 /* === MENSAJE FINAL === */
