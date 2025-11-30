@@ -5,7 +5,7 @@ import getIdFromUrl from "../../util/getIdFromUrl";
 
 const jwt = tokenService.getLocalAccessToken();
 
-export default function DiscardHandModal({isVisible, hand, deck, onClose, player, onSave}){
+export default function DiscardHandModal({isVisible, hand, bag, deck, onClose, player, onSave}){
     const matchId = getIdFromUrl(2);
     const[handCards, setHandCards] = useState([])
     const[cardsToDiscard, setCardsToDiscard] = useState([])
@@ -19,6 +19,7 @@ export default function DiscardHandModal({isVisible, hand, deck, onClose, player
 
     useEffect(() => {
         setHandCards(hand)
+        setBagCards(bag)
         setCardsToDiscard([])
         setDeckCards(deck)
         setCurrentPlayer(player)

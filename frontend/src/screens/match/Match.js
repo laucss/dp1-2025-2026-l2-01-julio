@@ -527,6 +527,7 @@ return (
         <DiscardHandModal
             isVisible={discardHandOpen}
             hand={handCards}
+            bag={bagCards}
             deck={deck}
             player={currentPlayer[0]}
             onClose={() => setDiscardHandOpen(false)}
