@@ -572,7 +572,7 @@ return (
                 <button className="bag-button"
                     onClick={() => setBagOpen(true)}
                     disabled={
-                    match.currentTurnUserId !== currentUser.id }
+                    match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
                     title="Accede to your bag"
                 >
                     Form my bag

@@ -219,6 +219,7 @@ public class MatchService {
                 .orElseThrow(() -> new IllegalArgumentException("Player not found"));
         //Actualizamos el id del jugador que tiene el turno actualmente en la partida
         m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());
+        m.setCurrentTurnPhase(TurnPhase.DRAW);
 
         mrepo.save(m);
         return m;
