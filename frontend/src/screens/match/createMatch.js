@@ -96,7 +96,10 @@ export default function CreateLobby() {
         </label>
       </div>
 
-      <button type="submit">Crear</button>
+    <div className="button-row" style={{ display: "flex", justifyContent: "center", gap: "15px", marginTop: "1rem" }}>
+        <button type="submit">Crear</button>
+        <button type="cancel" onClick={() => navigate("/")}>Cancelar</button>
+    </div>      
     </form>
 
     {message && <p>{message}</p>}
