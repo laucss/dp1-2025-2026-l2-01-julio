@@ -6,6 +6,7 @@ import java.util.List;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
@@ -45,6 +46,7 @@ public class Room extends BaseEntity implements Prototype<Room> {
         joinColumns = @JoinColumn(name = "room_id"),
         inverseJoinColumns = @JoinColumn(name = "adjacency_list_id"))
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonBackReference
     private List<Room> adjacencyList;
 
     public Room(String name, Integer blackDice, Integer whiteDice, 

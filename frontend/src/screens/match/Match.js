@@ -343,6 +343,65 @@ return (
                     </button>
                 </div>
             </div>
+
+            {/* TABLA DE JUGADORES Y NPCS */}
+            <div
+            className="entities-panel"
+            style={{
+                position: 'absolute',
+                top: '70%',
+                right: '30px',
+                transform: 'translateY(-50%)',
+                width: '320px',
+                backgroundColor:  '#c0392b',
+                color: 'white',
+                borderRadius: '8px',
+                padding: '10px',
+                fontSize: '14px',
+                zIndex: 1000,
+                boxShadow: '0 0 10px rgba(0,0,0,0.3)'
+            }}
+            >
+            <h4 style={{ textAlign: 'center', margin: '5px 0' }}>Ubicación de Jugadores y NPCs</h4>
+                <table style={{ width: '100%', textAlign: 'center', borderCollapse: 'collapse' }}>
+                    <thead>
+                        <tr>
+                            <th style={{ borderBottom: '1px solid #fff', padding: '3px' }}>Nombre</th>
+                            <th style={{ borderBottom: '1px solid #fff', padding: '3px' }}>Tipo</th>
+                            <th style={{ borderBottom: '1px solid #fff', padding: '3px' }}>Habitación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {match?.players.map(player => (
+                            <tr 
+                                key={player.id} 
+                                style={{
+                                    backgroundColor: '#ff4c4cff', // Color de fondo para jugadores
+                                    color: 'white',
+                                    fontWeight: currentPlayer[0]?.id === player.id ? 'bold' : 'normal' // Resalta tu jugador
+                                }}
+                            >
+                                <td style={{ padding: '3px' }}>{player.user.username}</td>
+                                <td style={{ padding: '3px' }}>Jugador</td>
+                                <td style={{ padding: '3px' }}>{player.currentRoom?.name}</td>
+                            </tr>
+                        ))}
+                        {match?.npcs.map((npc, index) => (
+                            <tr 
+                                key={index}
+                                style={{
+                                    backgroundColor: '#f87575ff',
+                                    color: 'white'
+                                }}
+                            >
+                                <td style={{ padding: '3px' }}>{npc.name || `NPC ${index+1}`}{npc.isNiallCampbell ? ' (Niall)' : ''}</td>
+                                <td style={{ padding: '3px' }}>NPC</td>
+                                <td style={{ padding: '3px' }}>{npc.room?.name}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
             <div className="player-section">
                 <div className="player-hand">
                     {Array.isArray(handCards) && handCards.map((carta, index) => (
@@ -410,10 +469,36 @@ return (
             </div>
 
             {chatOpen && <ChatBox matchId={matchId} />}
+
+            {/* Mensaje de turno */}
+            <div
+                style={{
+                    position: 'absolute',
+                    bottom: '-330px',          // 20px desde abajo
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    backgroundColor: '#c0392b',
+                    color: 'white',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    boxShadow: '0 0 10px rgba(0,0,0,0.3)',
+                    zIndex: 1001,
+                    fontSize: '34px',           // tamaño del texto grande
+                    minWidth: '250px'
+                }}
+            >
+                {match?.currentTurnUserId === currentUser?.id
+                    ? "Tu turno"
+                    : `${match?.currentTurnUserId ? match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username : 'Esperando...'} está en su turno`}
+            </div>
     
 
         
         </div>
+
+        
             )
 
         
