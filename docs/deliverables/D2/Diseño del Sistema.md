@@ -74,7 +74,7 @@ _En esta sección debe proporcionar un diagrama UML de clases que describa el co
 
 ![alt text](images/image.png)
 
-![alt text](images/diagrama%20capas%20cartas.png)
+![alt text](images/diagrama%20de%20capas%202.png)
 
 ![Diagrama de Capas Actualizado](images/Diagrama.png)
 
