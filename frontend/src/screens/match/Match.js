@@ -24,6 +24,7 @@ export default function Match(){
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
     const [match, setMatch] = useState(null)
+    const [currentTurnUserId, setCurrentTurnUserId] = useState(null)
 
     // CARTAS
     const [deck, setDeck] = useState([])
@@ -68,7 +69,6 @@ export default function Match(){
                 setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
             }
     }, [match])
-    console.log('currentPlayer', currentPlayer)
 
     useEffect(() => {
         if (Array.isArray(currentPlayer) && currentPlayer[0]?.id){
@@ -96,6 +96,7 @@ export default function Match(){
 
                 setMatch(data)
                 setPlayer(data.players)
+                
                 
             } catch (error) {
                 
@@ -165,6 +166,7 @@ export default function Match(){
             
             setDeck(data.deck)
             setHandCards(prev => [...prev, data.card])
+            setNumCardsDrawn(prev => prev + 1)
 
             
         } catch (error) {
@@ -211,10 +213,12 @@ export default function Match(){
         })
         .then(updatedMatch => {
             console.log("Match actualizado tras tirar dado:", updatedMatch);
-            setMatch(updatedMatch);
+            setMatch(updatedMatch)
+            
+            setCurrentTurnUserId(updatedMatch.currentTurnUserId)
 
             if (updatedMatch.players) {
-                setPlayer(updatedMatch.players);
+                setPlayer(updatedMatch.players)
             }
 
         })
@@ -256,10 +260,15 @@ export default function Match(){
 
     const currentPlayerTurn = match?.players.find(p => p.user.id === match.currentTurnUserId);
 
+    const canDraw = match?.currentTurnUserId === currentUser?.id &&
+                match?.currentTurnPhase === "DRAW" &&
+                numCardsDrawn < 7;
+
+
 
 
     const calculateActionPoints = () => {
-        if (handCards > 7 ){
+        if (handCards.length > 7 ){
             setActionPoints(0)
         } else {
             setActionPoints(7-handCards.length)
@@ -310,21 +319,27 @@ return (
                 <div className="deck-column">
                     <div className="deck-section">
                         <button 
-                            onClick={drawCard}
+                            onClick={ () => {
+                                if (numCardsDrawn < 7) {
+                                    drawCard()
+                                } else {
+                                    alert("No puedes robar más de 7 cartas")
+                                } 
+                            }}
+                            disabled={!canDraw}
                             style={{ 
                                 border: "none", 
                                 background: "transparent", 
                                 padding: 0, 
-                                cursor: (match.currentTurnUserId === currentUser?.id && match.currentTurnPhase === 'DRAW')
-                                            ? "pointer" 
-                                            : "not-allowed"
+                                cursor: !canDraw ? "not-allowed" : "pointer", 
+                                opacity: !canDraw ? 0.4 : 1,
+                                outline: "none",
                             }}
-                            disabled={!(match.currentTurnUserId === currentUser?.id && match.currentTurnPhase === 'DRAW')}
->
+                        >
                             <img 
                                 src="/backCard.png" 
                                 alt="Robar carta"
-                                style={{ width: "150px", height: "auto" }}
+                                style={{ width: "150px", height: "auto", outline: "none", }}
                             />
                         </button>
                     </div>
@@ -568,6 +583,7 @@ return (
             deck={deck}
             player={currentPlayer[0]}
             onClose={() => setDiscardHandOpen(false)}
+            updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
             onSave={async () =>{
                 await fetchCards()
                 setDiscardHandOpen(false)
@@ -586,20 +602,20 @@ return (
             {/* Mensaje de turno */}
             <div
                 style={{
-                    position: 'absolute',
-                    bottom: '-460px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    backgroundColor: '#c0392b',
-                    color: 'white',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    boxShadow: '0 0 10px rgba(0,0,0,0.3)',
-                    zIndex: 1001,
-                    fontSize: '24px',
-                    minWidth: '200px'
+                        marginLeft: "050px",
+                        position: "absolute",
+                        left: "10%",                 
+                        transform: "translateX(90%)",
+                        marginTop: "-80px",
+                        padding: "15px 35px", 
+                        fontSize: "22px",
+                        background: "#c0392b",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        maxWidth: "500px",
+                        minWidth: "230px",
+                        cursor: "pointer"
                 }}
             >
                 {!match?.currentTurnUserId

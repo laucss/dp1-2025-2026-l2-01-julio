@@ -213,12 +213,13 @@ public class MatchController {
     }
 
     @PutMapping("/{matchId}/discardConfirmed")
-    public ResponseEntity<Void> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
+    public ResponseEntity<Integer> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
         handService.update(data.getHand(), matchId, data.getPlayerId());
         bagService.update(data.getBag(), matchId, data.getPlayerId());
         deckService.update(data.getDeck(), matchId);
+        Integer nextTurnId = ms.nextTurn(matchId).getCurrentTurnUserId(); 
 
-        return ResponseEntity.ok().build(); 
+        return ResponseEntity.ok(nextTurnId); 
         
     }
 
