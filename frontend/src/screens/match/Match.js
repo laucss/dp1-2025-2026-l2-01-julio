@@ -31,9 +31,10 @@ export default function Match(){
     // DADOS 
     const [whiteDice, setWhiteDice] = useState("1")
     const [blackDice, setBlackDice] = useState("1")
-    const [diceRolled, setDiceRolled] = useState(false);
+    const [diceRolled, setDiceRolled] = useState(false)
 
-    const [chatOpen, setChatOpen] = useState(false);
+    const [chatOpen, setChatOpen] = useState(false)
+    const [actionPoints, setActionPoints] = useState(null)
 
     
     // const [playerTurnId, setPlayerTurnId] = useState(null)
@@ -64,6 +65,11 @@ export default function Match(){
             fetchCards()
         }     
     }, [currentPlayer])
+
+    useEffect(() => {
+        calculateActionPoints()
+          
+    }, [handCards])
 
 
     const fetchMatchAndPlayers = async () => {
@@ -122,9 +128,11 @@ export default function Match(){
 
     }
 
+    /*
     console.log('hand' , handCards)
     console.log('bag' , bagCards)
     console.log('deck' , deck)
+    */
 
     // FUNCION ROBAR CARTA
     const drawCard = async () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO DE CHATI PQ QUERIA SOLO PROBARLO
@@ -215,7 +223,7 @@ export default function Match(){
 
     
     const endMatch = () => {
-        if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return;
+        if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return; 
         const body =10;
         console.log('body end match', body)
         fetch(`/api/v1/matches/${matchId}/end`, {
@@ -229,11 +237,22 @@ export default function Match(){
         .then(res => res.json())
         //.then(() => window.location.reload())
         .then(updated => {
-            console.log("Match finalizado:", updated);
+            console.log("Match finalizado:", updated)
             setMatch(updated)
         })
-        .catch(err => console.error(err));
-    };
+        .catch(err => console.error(err))
+    }
+
+
+    const calculateActionPoints = () => {
+        if (handCards > 7 ){
+            setActionPoints(0)
+        } else {
+            setActionPoints(7-handCards.length)
+        }
+        }
+    
+
 
     console.log('match', match)
 
@@ -343,6 +362,10 @@ return (
                     </button>
                 </div>
             </div>
+            <div className="action-points-section">
+                <h1>{actionPoints}</h1>
+                <p>Action points </p>
+            </div>
 
             {/* TABLA DE JUGADORES Y NPCS */}
             <div
@@ -420,31 +443,57 @@ return (
                 </div>
                 
             </div>
-            <div>
+            <div className="buttons-section">
                 <button className="discard-button"
                     onClick={() => setDiscardOpen(true)}
+                    style={{
+                        marginLeft: "10px",
+                        padding: "10px 15px",
+                        background: "#ffffffff",
+                        color: "black",
+                        borderColor: "black",
+                        borderRadius: "8px",
+                        cursor: "pointer"
+                    }}
                     title="Descartar cartas"
                 >
                     Form my bag
                 </button>
-            </div>
+
+                <button className="discard-button"
+                    // onClick={() => setDiscardOpen(true)}
+                    style={{
+                        marginLeft: "10px",
+                        padding: "10px 15px",
+                        background: "#ffffffff",
+                        color: "black",
+                        borderColor: "black",
+                        borderRadius: "8px",
+                        cursor: "pointer"
+                    }}
+                    title="Descartar cartas"
+                >
+                    Actions
+                </button>
+           
             
 
-            <button
-                className="end-match-button"
-                onClick={endMatch}
-                style={{
-                    marginLeft: "10px",
-                    padding: "10px 15px",
-                    background: "#c0392b",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer"
-                }}
-            >
-                Finalizar partida
-            </button>
+                <button
+                    className="end-match-button"
+                    onClick={endMatch}
+                    style={{
+                        marginLeft: "10px",
+                        padding: "10px 15px",
+                        background: "#c0392b",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer"
+                    }}
+                >
+                    Finalizar partida
+                </button>
+            </div>
 
         <DiscardModal
             isVisible={discardOpen}

@@ -7,16 +7,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+
 
 
 @Service
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
+    private final HandService handService; 
 
     @Autowired
-    public PlayerService(PlayerRepository playerRepository) {
+    public PlayerService(PlayerRepository playerRepository, HandService handService) {
         this.playerRepository = playerRepository;
+        this.handService= handService; 
     }
 
     /* Encuentra un Player por su User asociado
@@ -61,6 +66,18 @@ public class PlayerService {
     @Transactional
     public List<Player> getPlayersByMatchId(Integer matchId) {
         return playerRepository.findByMatchId(matchId);
+    }
+
+    @Transactional
+    public Integer getPlayerActionPoints(Integer matchId, Integer playerId){
+        HandInGame playerHand = handService.findPlayerHand(matchId, playerId); 
+        Integer totalCards = playerHand.getCards().size(); 
+
+        if (totalCards > 7 ){
+            return 0; 
+        } else {
+            return 7 - totalCards; 
+        } 
     }
 
 

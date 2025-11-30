@@ -1,5 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,12 +64,11 @@ public class BagService {
      * Método que tras acabar una partida, borra la bolsa en memoria del jugador 
      */
     @Transactional
-    public void deletePlayerBag(Integer matchId, Integer playerId){
-        playerService.findById(playerId); 
+    public void deleteMatchBags(Integer matchId){
+        //playerService.findById(playerId); 
         // TODO: revisar si tengo que checkear que match exista
 
-        Map<Integer, BagInGame> playerMap= activesBags.get(matchId); 
-        playerMap.remove(playerId); 
+        activesBags.remove(matchId); 
     }
 
     
@@ -197,7 +197,8 @@ public class BagService {
 
 
         Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
-        newBag.setCards(bag.getCards().stream().map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
+        newBag.setCards(new ArrayList<>(bag.getCards().stream()
+            .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
 
         playerMap.put(playerId, newBag); 
         activesBags.put(matchId, playerMap); 
