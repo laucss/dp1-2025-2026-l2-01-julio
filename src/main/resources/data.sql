@@ -3,9 +3,18 @@ INSERT INTO authorities(id,authority) VALUES (1,'ADMIN');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (1,'admin1','admin1@example.com','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS',1,25,'/Avatar_default.png');
 
 
-INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (1,'Principiante','Si juegas 5 partidas',10.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED');
-INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (2,'Explorador','Si juegas 25 partidas',25.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','GAMES_PLAYED');
-INSERT INTO achievement(id,name,description,threshold,metric) VALUES (3,'Experto','Si ganas 20 partidas',20.0,'VICTORIES');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (1,'Si juegas 5 partidas',5.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (2,'Si juegas 15 partidas',15.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED','INTERMEDIO');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (3,'Si juegas 25 partidas',25.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED','DIFICIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (4,'Si ganas 5 partidas',5.0,'https://cdn-icons-png.flaticon.com/512/5021/5021877.png','VICTORIES','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (5,'Si ganas 10 partidas',10.0,'https://cdn-icons-png.flaticon.com/512/5021/5021877.png','VICTORIES','INTERMEDIO');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (6,'Si ganas 20 partidas',20.0,'https://cdn-icons-png.flaticon.com/512/5021/5021877.png','VICTORIES','DIFICIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (7,'Si juegas mas de 20 minutos',20.1,'https://cdn-icons-png.flaticon.com/512/15452/15452718.png','TOTAL_PLAY_TIME','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (8,'Si juegas mas de 60 minutos',60.1,'https://cdn-icons-png.flaticon.com/512/15452/15452718.png','TOTAL_PLAY_TIME','INTERMEDIO');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (9,'Si juegas mas de 120 minutos',120.1,'https://cdn-icons-png.flaticon.com/512/15452/15452718.png','TOTAL_PLAY_TIME','DIFICIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (10,'Si acumulas 50 puntos de accion',50.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (11,'Si acumulas 100 puntos de accion',100.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','INTERMEDIO');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (12,'Si acumulas 200 puntos de accion',200.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','DIFICIL');
 
 -- Ten player users, named player1 with passwor 0wn3r
 INSERT INTO authorities(id,authority) VALUES (2,'PLAYER');
@@ -25,6 +34,8 @@ INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (15
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (16, 'SBJ4592', 'sbj4592@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar_default.png');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (3, 'FSS8078', 'fss8078@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar_default.png');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (17, 'XNT3290', 'xnt3290@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar_default.png');
+
+
 
 -- Match
 
@@ -117,13 +128,16 @@ VALUES (1,'/images/cards/Carta 1.jpg','/images/cards/backCard.jpg','A'),
 
 
 
-        
-
+--Players
 INSERT INTO player (id, action_points, match_id, strength, user_id) 
         VALUES (7,null,1,null,4), 
                (8,null,1,null,5), 
                (9,null,1,null,6),
-               (10,null,2,null,7);
+               (10,null,2,null,7),
+               (11,12,3,null,9),
+               (12,5,6,null,9),
+               (13,7,7,null,9);
+
 
 INSERT INTO Room (id, name, black_dice, white_dice) 
         VALUES (1, 'North Tower', 1, 1), 

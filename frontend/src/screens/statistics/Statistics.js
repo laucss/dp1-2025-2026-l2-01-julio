@@ -82,7 +82,7 @@ export default function Statistics(){
                     <div className="stat-card">
                         <div className="stat-icon">👥</div>
                         <h2>Promedio Jugadores/Partida</h2>
-                        <p className="stat-value">{data.averagePlayersPerMatch}</p>
+                        <p className="stat-value">{parseFloat(data.averagePlayersPerMatch).toFixed(2)}</p>
                     </div>
                     <div className="stat-card">
                         <div className="stat-icon">🎮</div>

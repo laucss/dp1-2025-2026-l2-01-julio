@@ -1,6 +1,8 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics.achievements;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,7 +15,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Achievement extends NamedEntity{
+public class Achievement extends BaseEntity {
 
     @NotBlank
     private String description;
@@ -26,6 +28,11 @@ public class Achievement extends NamedEntity{
     @Enumerated(EnumType.STRING)
     @NotNull
     Metric metric;
+
+    @NotNull
+    @Column(name="tier")
+    @Enumerated(EnumType.STRING)
+    TierType tier;
 
     public String getActualDescription(){
         return description.replace("<THRESHOLD>",String.valueOf(threshold));
