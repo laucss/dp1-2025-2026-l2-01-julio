@@ -53,9 +53,55 @@ export default function Match(){
     const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
 
     console.log('moveToAdyacentRoom', moveToAdyacentRoom)
-
-
-        
+    
+    // Función para obtener un color único para cada jugador
+    const getPlayerColor = (playerId) => {
+        const colors = ['#FF6B6B', '#4ECDC4', '#e838caff', '#e5541aff', '#6c034cff', '#2a15ceff'];
+        const allPlayers = match?.players || [];
+        const playerIndex = allPlayers.findIndex(p => p.id === playerId);
+        return colors[playerIndex % colors.length];
+    };
+    
+    // const posiciones de las habitaciones en el mapa 
+    const roomPositions = {
+        1: { left: '26%', top: '12%' },   // North Tower v
+        2: { left: '35.5%', top: '15%' },   // Caesar Room v
+        3: { left: '44.5%', top: '9%' },   // Opal Room v
+        4: { left: '56%', top: '8%' },   // Coral Room v 
+        5: { left: '64.5%', top: '15%' },   // Roof v
+        6: { left: '74%', top: '13%' },   // East Tower v 
+        7: { left: '32%', top: '27.5%' },   // Corridor 1 v
+        8: { left: '44.5%', top: '23.5%' },   // Cafe v
+        9: { left: '50%', top: '21%' },   // Corridor 2 v
+        10: { left: '50%', top: '21%' },  // Corridor 2 (dup) v
+        11: { left: '55.5%', top: '23.5%' },  // Parlor v
+        12: { left: '68%', top: '27.5%' },  // Corridor 3 v 
+        13: { left: '26.5%', top: '41%' },  // Ball Room v
+        14: { left: '32.5%', top: '40%' },  // Corridor 4 v
+        15: { left: '38.5%', top: '41%' },  // SPA v 
+        16: { left: '61.5%', top: '41%' },  // Pool v
+        17: { left: '67.5%', top: '41%' },  // Corridor 5 v
+        18: { left: '73.5%', top: '41%' },  // Sleep Room v
+        19: { left: '26.5%', top: '58%' },  // Class Room v
+        20: { left: '32.5%', top: '58%' },  // Corridor 6 v
+        21: { left: '38.5%', top: '58%' },  // Arbor v
+        22: { left: '61.5%', top: '58%' },  // Farm v
+        23: { left: '67.5%', top: '58%' },  // Corridor 7 v
+        24: { left: '73.5%', top: '58%' },  // Meal Room v
+        25: { left: '32%', top: '72%' },  // Corridor 8 v
+        26: { left: '44.5%', top: '76%' },  // Bar v
+        27: { left: '50%', top: '78%' },  // Corridor 9 v
+        28: { left: '50%', top: '78%' },  // Corridor 9 (dup) v
+        29: { left: '55.5%', top: '76%' },  // Lab v
+        30: { left: '68%', top: '72%' },  // Corridor 10 v
+        31: { left: '26%', top: '87%' },  // West Tower v
+        32: { left: '35.5%', top: '85%' },  // Cellar v
+        33: { left: '44.5%', top: '92%' },  // Apple Room v
+        34: { left: '56%', top: '92%' },  // Map Room v 
+        35: { left: '64.5%', top: '85%' },  // Parole Room v
+        36: { left: '86%', top: '87%' },  // South Tower v
+        37: { left: '50%', top: '50%' },  // Safe Area v
+    };
     // CARGAR DATOS PARTIDA 
 
     // CARGAR DATOS JUGADORES 
@@ -99,7 +145,6 @@ export default function Match(){
 
                 setMatch(data)
                 setPlayer(data.players)
-                
                 
             } catch (error) {
                 
@@ -316,10 +361,6 @@ export default function Match(){
         }
         }
 
-
-    
-
-
     console.log('match', match)
 
 
@@ -348,9 +389,16 @@ return (
             <div className="players-avatars-section">
                 {playersList.map((p) => (
                     <div key={p.user.id} className="player-avatar-card">
-                        {p.user.avatar ? (
-                            <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" />
-                        ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" />}
+                        <div style={{
+                            borderRadius: '50%',
+                            border: `4px solid ${getPlayerColor(p.id)}`,
+                            display: 'inline-block',
+                            padding: '3px'
+                        }}>
+                            {p.user.avatar ? (
+                                <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" style={{ borderRadius: '50%' }} />
+                            ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" style={{ borderRadius: '50%' }} />}
+                        </div>
                         <p className="player-username">{p.user.username}</p>
                     </div>
                 ))}
@@ -427,7 +475,7 @@ return (
                     </div>
                 </div>
 
-                <div className="map-column">
+                <div className="map-column" style={{ position: 'relative' }}>
                     <map name="Map">
                 <area className="Area" href="#" target="" alt="Safe Area" title="Safe Area" coords="321,251,84" shape="circle" onClick={(e)=>{e.preventDefault(); move("Safe Area")}}/>
                 <area className="Area" href="#" target="" alt="West Tower" title="West Tower" coords="13,489,98,388" shape="rect" onClick={(e)=>{e.preventDefault(); move("West Tower")}}/>
@@ -466,6 +514,69 @@ return (
                 <area className="Area" href="" target="" alt="Corridor 10" title="Corridor 10" coords="429,346,613,376" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 10")}}/>
                     </map>
                     <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
+                    
+                    {/* Fichas de jugadores sobre el mapa */}
+                    {match?.players.map(player => {
+                        if (!player.currentRoom) return null;                      
+                        const position = roomPositions[player.currentRoom.id];
+                        if (!position) return null;
+                        return (
+                            <img 
+                                key={player.id}
+                                src={player.user.avatar || "/Avatar_default.png"}
+                                alt={player.user.username}
+                                title={player.user.username}
+                                style={{
+                                    position: 'absolute',
+                                    left: position.left,
+                                    top: position.top,
+                                    transform: 'translate(-50%, -50%)',
+                                    width: '30px',
+                                    height: '30px',
+                                    borderRadius: '50%',
+                                    border: currentPlayer[0]?.id === player.id ? '3px solid yellow' : `3px solid ${getPlayerColor(player.id)}`,
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                                    zIndex: 10,
+                                    pointerEvents: 'none'
+                                }}
+                            />
+                        );
+                    })}
+                    
+                    {/* Fichas de NPCs sobre el mapa */}
+                    {match?.npcs.map((npc, index) => {
+                        if (!npc.room) return null;                        
+                        const position = roomPositions[npc.room.id];
+                        if (!position) return null;
+                        return (
+                            <div
+                                key={`npc-${index}`}
+                                title={npc.name || `NPC ${index+1}`}
+                                style={{
+                                    position: 'absolute',
+                                    left: position.left,
+                                    top: position.top,
+                                    transform: 'translate(-50%, -50%)',
+                                    width: '25px',
+                                    height: '25px',
+                                    borderRadius: '50%',
+                                    backgroundColor: npc.isNiallCampbell ? '#ff0000' : '#666',
+                                    border: '2px solid white',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                                    zIndex: 10,
+                                    pointerEvents: 'none',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontSize: '10px',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                {npc.isNiallCampbell ? 'N' : 'X'}
+                            </div>
+                        );
+                    })}
                 </div>
                 <div className="Dice-pack">
                     <button
@@ -641,6 +752,7 @@ return (
         <DiscardHandModal
             isVisible={discardHandOpen}
             hand={handCards}
+            bag={bagCards}
             deck={deck}
             player={currentPlayer[0]}
             onClose={() => setDiscardHandOpen(false)}
