@@ -34,6 +34,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -115,9 +116,8 @@ public class MatchController {
     @PostMapping("/lobbies")
     @Operation(summary = "Create lobby", description = "Create a new game.")
     @ResponseStatus(HttpStatus.CREATED)
-    public  ResponseEntity<Match> createLobby(@RequestBody LobbyDTO lobbyDTO) {
-        Match game = new Match();
-        Match saved= ls.createLobby(game, lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers(), lobbyDTO.getNumNpcs());
+    public  ResponseEntity<Match> createLobby(@Valid @RequestBody LobbyDTO lobbyDTO) {
+        Match saved= ls.createLobby(lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers(), lobbyDTO.getNumNpcs());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
@@ -151,22 +151,19 @@ public class MatchController {
     @Operation(summary = "Start match", description = "Start a match from a lobby.")
     public ResponseEntity<MatchDTO> startMatch(@Parameter(description = "Id of the lobby to start the match") @PathVariable Integer matchId) {
         Match startedMatch = ms.startMatch(matchId);
-        Map<Integer, Map<Integer, HandInGame>> hands = handService.getActivesHands();
-        Map<Integer, Map<Integer, BagInGame>> bags = bagService.getActivesBags();
-        Map<Integer, DeckInGame> deck = deckService.getActivesDecks();
         return ResponseEntity.ok(new MatchDTO(startedMatch));
     }
 
     @PostMapping("/{matchId}/submit-dice")
     @Operation(summary = "Decide order", description = "Submit dice roll to decide player order at the start of the match.")
-    public ResponseEntity<Match> submitDice(@PathVariable Integer matchId, @RequestParam Integer userId, @RequestParam Integer diceRoll) {
+    public ResponseEntity<MatchDTO> submitDice(@PathVariable Integer matchId, @RequestParam Integer userId, @RequestParam Integer diceRoll) {
 
         try {
             // Llamamos al servicio que guarda la tirada y asigna orden si todos tiraron
             Match m = ms.submitDiceAndAssignOrder(matchId, userId, diceRoll);
 
-            // Devolvemos el jugador actualizado
-            return ResponseEntity.ok(m);
+            // Devolvemos el estado actualizado de la partida
+            return ResponseEntity.ok(new MatchDTO(m));
 
         } catch (IllegalArgumentException e) {
             // Si hubo algún error (jugador no encontrado, ya tiró, etc.)
@@ -185,7 +182,6 @@ public class MatchController {
     public ResponseEntity<MatchDTO> endMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer winnerId) {
         Player winner = ps.findById(winnerId);
         Match ended = ms.endMatch(matchId,winner);
-        System.out.println(ended);
         return ResponseEntity.ok(new MatchDTO(ended));
     }
 
@@ -218,28 +214,19 @@ public class MatchController {
     }
 
     @PutMapping("/{matchId}/discardConfirmed")
-    public ResponseEntity<Void> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
+    public ResponseEntity<Integer> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
         handService.update(data.getHand(), matchId, data.getPlayerId());
         bagService.update(data.getBag(), matchId, data.getPlayerId());
         deckService.update(data.getDeck(), matchId);
+        Integer nextTurnId = ms.nextTurn(matchId).getCurrentTurnUserId(); 
 
-        Map<Integer, Map<Integer, HandInGame>> hands = handService.getActivesHands();
-        Map<Integer, Map<Integer, BagInGame>> bags = bagService.getActivesBags();
-        Map<Integer, DeckInGame> deck = deckService.getActivesDecks();
-        System.out.println(hands);
-        System.out.println(bags);
-        System.out.println(deck);
-        System.out.println(bagService.findPlayerBag(matchId, data.getPlayerId()));
-
-        return ResponseEntity.ok().build(); 
+        return ResponseEntity.ok(nextTurnId); 
         
     }
 
     @PostMapping("/{matchId}/{playerId}/drawCardFromDeck")
     public ResponseEntity<DrawCardResultDTO> drawCardFromDeck (@PathVariable Integer matchId, @PathVariable Integer playerId){
         DrawCardResultDTO result = ms.playerDrawsCardFromDeck(matchId, playerId); 
-
-        System.out.println(result);
         return ResponseEntity.ok(result); 
 
     } 
@@ -248,6 +235,13 @@ public class MatchController {
     public ResponseEntity<AllCardsStatusDTO> getAllCards (@PathVariable Integer matchId, @PathVariable Integer playerId){
         AllCardsStatusDTO result = ms.getAllCards(matchId, playerId); 
         return ResponseEntity.ok(result); 
+    }
+
+    @PutMapping("/{matchId}/move")
+    public ResponseEntity<MatchDTO> moveToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
+        ms.movePlayer(matchId, data.getUserId(), data.getRoomName()); 
+        Match match = ms.getMatchById(matchId);
+        return ResponseEntity.ok(new MatchDTO(match)); 
     }
 }
 

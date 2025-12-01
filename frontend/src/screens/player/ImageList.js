@@ -5,7 +5,7 @@ import '../../static/css/Profile/ImageList.css';
 const images = [
   { id: 1, src: "/Avatar1.jpg", alt: 'Avatar 1' },
   { id: 2, src: "/Avatar2.jpg", alt: 'Avatar 2' },
- 
+  { id: 3, src: "/Avatar_default.png", alt: "Avatar por defecto" },
 ];
 
 function SimpleImageList({ onImageSelect }) {
@@ -27,9 +27,6 @@ function SimpleImageList({ onImageSelect }) {
           src={image.src}
           alt={image.alt}
           onClick={() => handleClick(image)}
-          style={{
-            
-          }}
         />
       ))}
     </div>

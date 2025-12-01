@@ -22,6 +22,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomDTO;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -87,7 +88,7 @@ public class Match extends NamedEntity {
     //Jugadores 
     @NotNull
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Player> players; 
+    private List<Player> players = new ArrayList<>(); 
 
 
     //Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)
@@ -110,6 +111,9 @@ public class Match extends NamedEntity {
     
     @Transient
     private DeckInGame deck; //No se si es deck o deckInGame
+
+    @Transient
+    private List<RoomDTO> roomsState = new ArrayList<>();
 
     @OneToOne(optional = true)
     @JoinColumn(name = "winner_id")
@@ -197,6 +201,16 @@ public class Match extends NamedEntity {
         }
         return code.toString();
     }
+
+
+    public List<RoomDTO> getRoomsState() {
+    return roomsState;
+    }
+
+    public void setRoomsState(List<RoomDTO> roomsState) {
+    this.roomsState = roomsState;
+    }
+
 
 
 }

@@ -57,7 +57,6 @@ public class DeckService {
 
         DeckInGame newDeck = new DeckInGame(copiedCards); 
         activesDecks.put(macthId, newDeck); 
-        Map<Integer, DeckInGame> d = getActivesDecks(); 
         return newDeck; 
 
     }
@@ -98,10 +97,9 @@ public class DeckService {
 
     
     @Transactional
-    public DeckInGame shuffleAndDicardedToNotDiscarded(Integer macthId){
+    public DeckInGame shuffleAndDicardedToNotDiscarded(Integer macthId, DeckInGame deck){
         // checkear si quedan menos de x cartas en vez de cero 
 
-        DeckInGame deck = findDeckById(macthId);
 
         List<Card> discardedCards = deck.getDiscardedCards();
         Collections.shuffle(discardedCards);
@@ -110,7 +108,6 @@ public class DeckService {
 
         deck.setDiscardedCards(new ArrayList<Card>()); 
         
-
         return deck; 
     }
     
@@ -122,7 +119,7 @@ public class DeckService {
     public Card drawCard(Integer matchId){
         DeckInGame deck = findDeckById(matchId); 
         if (deck.getNotDiscardedCards().isEmpty()) {
-            getAndRemoveLastDiscardedCard(matchId); 
+            deck = shuffleAndDicardedToNotDiscarded(matchId, deck); 
 }
 
         Card card = deck.getNotDiscardedCards().getLast();
@@ -229,11 +226,14 @@ public class DeckService {
 
         DeckInGame newDeck = activesDecks.get(matchId); 
 
-        newDeck.setDiscardedCards(deck.getDiscardedCards().stream()
-            .map(dto -> new Card(dto.getId(), dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
+        newDeck.setDiscardedCards(new ArrayList<>(deck.getDiscardedCards().stream()
+            .map(dto -> new Card(dto.getId(), dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
         
-        newDeck.setNotDiscardedCards(deck.getNotDiscardedCards().stream()
-            .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList());
+        newDeck.setNotDiscardedCards(new ArrayList<>(deck.getNotDiscardedCards().stream()
+            .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
+
+        DeckInGame d = findDeckById(matchId); 
+        System.out.println(d);
 
 
     }

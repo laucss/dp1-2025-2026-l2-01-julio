@@ -8,6 +8,21 @@
 
 }
 
+.action-points-section{
+    background-color: rgb(251, 251, 251);
+    border-color: rgb(0, 0, 0);
+    border-style: solid;
+    border-radius: 10px;
+    width: 150px;
+    height: 120px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    align-content: center;
+    text-align: center;
+    align-items: center;
+
+}
+
 .players-avatars-section {
     display: flex;
     justify-content: center;
@@ -54,6 +69,13 @@
     border-radius: 10px;
     min-height: 170px;
 
+}
+
+.section-title{
+    width: 100%;
+    text-align: center;
+    margin: 0 0 10px 0;
+    font-weight: 600;
 }
 
 .player-avatar-card {
@@ -150,9 +172,66 @@
     .deck-column { width: auto; }
 }
 
-.discard-button{
+
+.buttons-section{
+    justify-content: flex-start;
+    align-items: stretch;
+    display: flex;
+    margin-bottom: 10px;
     padding: 10px;
     margin-top: 10px;
     justify-content: center;
     display: flex;
+}
+
+.match-ended {
+    position: relative;
+    width: 100%;
+    height: 100vh; 
+    background-image: url('../../images/menuBackGround.png');
+    background-size: cover;
+    background-position: center; 
+    background-repeat: no-repeat; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.end-overlay {
+    background-color: rgba(0, 0, 0, 0.4); /* oscurece ligeramente la imagen */
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.end-text-box {
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+    font-weight: 700;
+    background-color: rgba(0, 15, 83, 0.9); /* blanco semitransparente */
+    border-radius: 20px;
+    padding: 2rem 3rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    width: 70%;
+    max-width: 900px;
+    text-align: center;
+}
+.return-menu-button {
+    background-color: #ff941a;         
+    color: #fff;                       
+    border: 4px solid #b46000;         
+    border-radius: 10px;               
+    padding: 1rem 1rem;                
+    font-size: 3rem;                 
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    -webkit-text-stroke: 2px #b46000; 
+    cursor: pointer;
+    transition: all 0.3s ease;  
+}
+.return-menu-button:hover {
+    background-color: #4a90e2;         
+    border-color: #2c70d3;
+    -webkit-text-stroke: 2px #2c70d3;
+    transform: scale(1.05);           
 }

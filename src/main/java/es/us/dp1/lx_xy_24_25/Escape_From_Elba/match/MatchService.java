@@ -27,6 +27,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 
 @Service
 public class MatchService {
@@ -41,12 +42,14 @@ public class MatchService {
     MatchRepository mrepo;
     PlayerRepository prepo;
     RoomRepository roomRepository;
+    RoomService roomService;
 
     @Autowired
-    public MatchService(MatchRepository mrepo, PlayerRepository prepo, RoomRepository roomRepository, DeckService deckService, HandService handService, BagService bagService) {
+    public MatchService(MatchRepository mrepo, PlayerRepository prepo, RoomRepository roomRepository, RoomService roomService, DeckService deckService, HandService handService, BagService bagService) {
         this.mrepo = mrepo;
         this.prepo = prepo;
         this.roomRepository = roomRepository;
+        this.roomService = roomService;
         this.deckService = deckService;
         this.handService = handService;
         this.bagService = bagService; 
@@ -99,6 +102,7 @@ public class MatchService {
 
 
     //Funcion para innicializar un match 
+    //Hay que hacer que esto devuelva un MatchDTO
     @Transactional
     public Match startMatch(Integer matchId) {
         Match m = mrepo.findById(matchId).orElseThrow(() -> new IllegalArgumentException("Match not found"));
@@ -109,7 +113,6 @@ public class MatchService {
         //Inicializamos la fecha de inicio
         m.setStartTime(LocalDateTime.now());
 
-        List<Room> availableRooms  = roomRepository.findAll();
         //Inicializamos los npcs de la partida 
 
         for ( int i=0; i< m.getNumNpcs(); i++){
@@ -118,10 +121,6 @@ public class MatchService {
             npc.setStrength(1); // El valor de la fuerza al inicio es 1
             npc.setMatch(m);// Lo asociamos a la partida
             m.getNpcs().add(npc);// Lo añadimos a la lista de npcs de la partida 
-            //Hay que añadir la asignación de niall.  
-            //Asignamos una sala aleatoria al npc
-            Room randomRoom = availableRooms.remove(ran.nextInt(availableRooms.size()));
-            npc.setRoom(randomRoom);
         } 
 
 
@@ -134,13 +133,13 @@ public class MatchService {
             player.setActionPoints(0);
             player.setStrength(1);
 
-            Room randomRoom = availableRooms.remove(ran.nextInt(availableRooms.size()));
-            player.setRoom(randomRoom);
+
         }
 
+        
         DeckInGame deck = initializePlayerHandCards(matchId, playersInGame); 
-
-        m.setDeck(deck); 
+        m.setDeck(deck);
+        m.setRoomsState(roomService.initializeRoomsForMatch(m));
         m.setCurrentTurnUserId(null);
         m.setTurnNumber(0);
         mrepo.save(m);
@@ -190,6 +189,7 @@ public class MatchService {
 
             match.setCurrentTurnUserId(ordered.get(0).getUser().getId());
             match.setTurnNumber(1);
+            match.setCurrentTurnPhase(TurnPhase.DRAW);
             mrepo.save(match);
         }
 
@@ -198,7 +198,7 @@ public class MatchService {
 
 
     @Transactional
-    public void nextTurn(Integer matchId) {
+    public Match nextTurn(Integer matchId) {
         Match m = mrepo.findById(matchId)
                 .orElseThrow(() -> new IllegalArgumentException("Match not found"));
         //Obtenemos el id del user del jugador que tiene el turno actualmente
@@ -219,8 +219,10 @@ public class MatchService {
                 .orElseThrow(() -> new IllegalArgumentException("Player not found"));
         //Actualizamos el id del jugador que tiene el turno actualmente en la partida
         m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());
+        m.setCurrentTurnPhase(TurnPhase.DRAW);
 
         mrepo.save(m);
+        return m;
  
     }
 
@@ -245,9 +247,19 @@ public class MatchService {
             long durationSeconds = java.time.Duration.between(m.getStartTime(), m.getEndTime()).toSeconds();
         }
 
+        deleteMatchCards(matchId); 
+
         mrepo.save(m);
 
         return m;
+    }
+
+
+    @Transactional
+    public void deleteMatchCards(Integer matchId){
+        deckService.deleteDeckInGame(matchId);
+        handService.deleteMatchHands(matchId);
+        bagService.deleteMatchBags(matchId);
     }
 
 
@@ -279,6 +291,8 @@ public class MatchService {
         DeckInGame deck = deckService.findDeckById(matchId); 
 
         HandInGame hand = handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+        Class<?> cd= deck.getNotDiscardedCards().getClass();
+        System.out.println(cd);
         
 
         return new DrawCardResultDTO(stolenCard, deck, hand); 
@@ -354,4 +368,39 @@ public class MatchService {
         return deck;     
 
     }
+
+
+    //Función para mover un jugador de una sala a otra adyacente
+    @Transactional
+    public Player movePlayer(Integer matchId, Integer userId, String targetRoomName) {
+        Match match = mrepo.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
+        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
+            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+        }
+        mrepo.save(match);
+        //Recuperar el jugador dentro del match
+        Player player = prepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        Room currentRoom = player.getRoom();
+        if (currentRoom == null) {
+            throw new RuntimeException("Jugador no tiene sala asignada");
+        }
+        //Recuperar la sala destino
+        Room targetRoom = roomRepository.findByName(targetRoomName)
+            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
+        //Validar si la sala destino es adyacente
+        List<Room> adjacent = currentRoom.getAdjacencyList();
+        boolean canMove = adjacent.stream()
+                .anyMatch(r -> r.getId().equals(targetRoom.getId()));
+        if (!canMove) {
+            throw new RuntimeException("Movimiento no permitido: la sala destino no es adyacente");
+        }
+        //Actualizar la sala del jugador
+        player.setRoom(targetRoom);
+        //Guardar cambios
+        
+        return prepo.save(player);
+    }
+
 }

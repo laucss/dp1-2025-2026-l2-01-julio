@@ -27,11 +27,7 @@ export default function CreateLobby() {
             Accept: 'application/json',
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: name,
-          maxPlayers: maxPlayers,
-          isPrivate: isPrivate,
-        }),
+        body: JSON.stringify({name,maxPlayers,numNpcs,isPrivate}),
       });
 
       if (!response.ok) {
@@ -80,9 +76,9 @@ export default function CreateLobby() {
       <div>
         <label>Número de NPCs</label>
         <div className="npc-count-container">
-          <button type="button" onClick={() => setNumNpcs(prev => Math.max(0, prev - 1))}>-</button>
+          <button type="button" onClick={() => setNumNpcs(prev => Math.max(3, prev - 1))}>-</button>
           <span>{numNpcs}</span>
-          <button type="button" onClick={() => setNumNpcs(prev => prev + 1)}>+</button>
+          <button type="button" onClick={() => setNumNpcs(prev => Math.min(8,prev + 1))}>+</button>
         </div>
       </div>
 
@@ -100,7 +96,10 @@ export default function CreateLobby() {
         </label>
       </div>
 
-      <button type="submit">Crear</button>
+    <div className="button-row" style={{ display: "flex", justifyContent: "center", gap: "15px", marginTop: "1rem" }}>
+        <button type="submit">Crear</button>
+        <button type="cancel" onClick={() => navigate("/")}>Cancelar</button>
+    </div>      
     </form>
 
     {message && <p>{message}</p>}

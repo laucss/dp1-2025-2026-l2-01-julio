@@ -26,6 +26,7 @@ export default function WaitingRoom() {
     );
 
 
+
   const leaveLobby = async () => {
     try {
       const response = await fetch(`/api/v1/matches/lobbies/${matchId}/leave`, {
@@ -101,6 +102,12 @@ const startGame = async () => {
             {playerUsernames}
             </tbody>
           </Table>
+
+          {lobby.isPrivate && <div>
+            <h5> Código de la partida: {lobby.code} </h5>
+          </div>
+          }
+          
 
           {isCreator && (
             <Button
