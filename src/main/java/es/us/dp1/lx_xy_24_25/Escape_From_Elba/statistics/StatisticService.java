@@ -11,19 +11,16 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 
 @Service
 public class StatisticService {
 
-       
-    private PlayerService playerService;
+    
     private PlayerRepository playerRepository;
     private MatchService matchService;
 
     @Autowired
-    public StatisticService(PlayerService playerService, PlayerRepository playerRepository, MatchService matchService) {
-        this.playerService = playerService;
+    public StatisticService( PlayerRepository playerRepository, MatchService matchService) {
         this.playerRepository = playerRepository;
         this.matchService = matchService;
     }

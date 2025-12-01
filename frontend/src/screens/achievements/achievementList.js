@@ -1,6 +1,4 @@
-import { 
-    Table, Button 
-} from "reactstrap"; 
+import { Table, Button } from "reactstrap"; 
 
 import tokenService from "../../services/token.service";
 import useFetchState from "../../util/useFetchState";
@@ -11,23 +9,19 @@ import getErrorModal from "../../util/getErrorModal";
 
 const imgnotfound = "https://cdn-icons-png.flaticon.com/512/5778/5778223.png"; 
 const jwt = tokenService.getLocalAccessToken();
-
-
-/*const achievements = [ 
-    {id:1, name:"Experiencia básica", description:"Si juegas 10 partidas", badgeImage:"https://cdn-icons-png.flaticon.com/512/5243/5243423.png", threshold:"10", metric:"GAMES_PLAYED"}, 
-    {id:2, name:"Explorador", description:"Si juegas 25 partidas", badgeImage:"https://cdn-icons-png.flaticon.com/512/603/603855.png", threshold:"25", metric:"GAMES_PLAYED"}, 
-    {id:3, name:"Experto", description:"Si ganas 20 partidas", badgeImage:"https://cdn-icons-png.flaticon.com/512/4737/4737471.png", threshold:"20", metric:"VICTORIES"} 
-    ];
-*/
+const currentUser = tokenService.getUser();
     
 export default function AchievementList() {
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
+
     const [alerts, setAlerts] = useState([]); 
     const [achievements, setAchievements] = useFetchState(
         [],
         `/api/v1/achievements`,
-        jwt
+        jwt,
+        setMessage,
+        setVisible
     );
     const achievementList = achievements.map((a) => { 
         return ( 
@@ -36,6 +30,7 @@ export default function AchievementList() {
                 <td className="text-center"> <img src={a.badgeImage? a.badgeImage : imgnotfound } alt={a.name} width="50px"/> </td> 
                 <td className="text-center"> {a.threshold} </td> 
                 <td className="text-center"> {a.metric} </td> 
+                <td className="text-center"> {a.tier} </td>
                 <td className="text-center">
                     <Button outline color="warning" >
                         <Link to={`/achievements/`+a.id} className="btn sm"

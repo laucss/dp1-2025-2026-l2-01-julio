@@ -48,6 +48,7 @@ public class AchievementService {
     public void deleteAchievementById(int id){
         repo.deleteById(id);
     }
+
     public boolean isAchievementUnlocked(Achievement achievement, User user){
         Boolean unlocked=false;
         if(achievement.metric==Metric.GAMES_PLAYED){
@@ -67,5 +68,9 @@ public class AchievementService {
             unlocked=actionPoints>=achievement.getThreshold();
         }
         return unlocked;
+    }
+
+    public List<Achievement> getAchievementsByTier(TierType tier){
+        return repo.findByTier(tier);
     }
 }

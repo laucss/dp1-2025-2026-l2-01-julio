@@ -1,9 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics.achievements;
 
-import com.fasterxml.jackson.databind.JsonSerializable.Base;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -38,17 +36,6 @@ public class Achievement extends BaseEntity {
 
     public String getActualDescription(){
         return description.replace("<THRESHOLD>",String.valueOf(threshold));
-    }
-
-    public Achievement(Integer id, Integer threshold, TierType tier, String description, String badgeImage, Metric metric) {
-
-            this.id = id;
-            this.description = description;
-            this.badgeImage = badgeImage;
-            this.threshold = threshold;
-            this.metric = metric;
-            this.tier = tier;
-
     }
     
 }

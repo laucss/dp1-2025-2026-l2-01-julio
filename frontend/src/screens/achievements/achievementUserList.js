@@ -1,59 +1,83 @@
-import { 
-    Table 
-} from "reactstrap"; 
-
+import React, { useState } from 'react';
 import tokenService from "../../services/token.service";
 import useFetchState from "../../util/useFetchState";
+import './AchievementUserList.css';
 
-
-const imgnotfound = "https://cdn-icons-png.flaticon.com/512/5778/5778223.png"; 
 const jwt = tokenService.getLocalAccessToken();
+const currentUser = tokenService.getUser();
 
-
-/*const achievements = [ 
-    {id:1, name:"Experiencia básica", description:"Si juegas 10 partidas", badgeImage:"https://cdn-icons-png.flaticon.com/512/5243/5243423.png", threshold:"10", metric:"GAMES_PLAYED"}, 
-    {id:2, name:"Explorador", description:"Si juegas 25 partidas", badgeImage:"https://cdn-icons-png.flaticon.com/512/603/603855.png", threshold:"25", metric:"GAMES_PLAYED"}, 
-    {id:3, name:"Experto", description:"Si ganas 20 partidas", badgeImage:"https://cdn-icons-png.flaticon.com/512/4737/4737471.png", threshold:"20", metric:"VICTORIES"} 
-    ];
-*/
-    
 export default function AchievementUserList() {
+    const [message, setMessage] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const userId = currentUser.id;
+
     const [achievements, setAchievements] = useFetchState(
         [],
         `/api/v1/achievements`,
-        jwt
+        jwt,
+        setMessage,
+        setVisible
     );
-    const achievementList = achievements.map((a) => { 
-        return ( 
-            <tr key={a.id}> <td className="text-center">{a.name}</td> 
-                <td className="text-center"> {a.description} </td> 
-                <td className="text-center"> <img src={a.badgeImage? a.badgeImage : imgnotfound } alt={a.name} width="50px"/> </td> 
-                <td className="text-center"> {a.threshold} </td> 
-                <td className="text-center"> {a.metric} </td> 
-                <td className="text-center">
-                </td>
-            </tr> 
-        ); 
+
+    const [statisticsUser, setStatistics] = useFetchState(
+        {},
+        `/api/v1/statistics/${userId}`,
+        jwt,
+        setMessage,
+        setVisible
+    );
+
+    const getMetricValue = (metric) => {
+        switch (metric) {
+            case 'GAMES_PLAYED':
+                return statisticsUser.matchesPlayed || 0;
+            case 'VICTORIES':
+                return statisticsUser.totalVictories || 0;
+            case 'TOTAL_PLAY_TIME':
+                return statisticsUser.totalTimePlayed || 0;
+            case 'ACTION_POINTS_EARNED':
+                return statisticsUser.totalActionPoints || 0;
+            default:
+                return 0;
+        }
+    };
+
+    const formatValue = (value, metric) => {
+        if (metric === 'TOTAL_PLAY_TIME') {
+            return `${value} min`;
+        }
+        return value;
+    };
+
+    const sortedAchievements = [...achievements].sort((a, b) =>
+        a.metric.localeCompare(b.metric)
+    );
+    
+    const achievementCards = sortedAchievements.map((a) => { 
+        const value = getMetricValue(a.metric);
+        const completed = value >= a.threshold;
+        const cardClass = completed ? 'achievement-card completed' : 'achievement-card pending';
+        
+        return (
+            <div key={a.id} className={cardClass}>
+                <div className="achievement-badge">
+                    <img src={a.badgeImage} alt={a.name} />
+                </div>
+                <h3 className="achievement-title">{a.description}</h3>
+                <p className="achievement-value">{formatValue(value, a.metric)}</p>
+                <p className="achievement-threshold">Meta: {a.threshold}</p>
+            </div>
+        );
     }); 
+
     return ( 
-        <div> 
-            <div className="admin-page-container"> 
-                <h1 className="text-center">Logros</h1> 
-                <div> 
-                    <Table aria-label="achievements" className="mt-4"> 
-                        <thead> 
-                            <tr> 
-                                <th className="text-center">Name</th> 
-                                <th className="text-center">Description</th> 
-                                <th className="text-center">Image</th> 
-                                <th className="text-center">Threshold</th> 
-                                <th className="text-center">Metric</th> 
-                                <th className="text-center">Actions</th> 
-                            </tr> 
-                        </thead> 
-                        <tbody>{achievementList}</tbody> 
-                    </Table> 
-                </div> 
+        <div className="achievement-user-container"> 
+            <div className="achievement-header">
+                <h1>Logros</h1>
+                <p className="subtitle">Demuestra tu dominio en el juego</p>
+            </div>
+            <div className="achievement-grid"> 
+                {achievementCards}
             </div> 
         </div> 
     ); 
