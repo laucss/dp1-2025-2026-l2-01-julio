@@ -85,6 +85,30 @@ Checklist de cumplimiento de uso ético de la IA del sprint 2:
 
 - [x] Se usó la IA sin dar datos personales/sensibles que puedieran quedar expuestos a herramientas externas.
 
+### Sprint 3 — Resumen de uso de IA
+
+Usos registrados: 7
+
+Ámbitos principales: Generación de código, resolución de dudas y de errores.
+
+Valor aportado: Resolución de dudas para poder seguir adelante en el desarrollo del proyecto.
+
+Riesgos relevantes y mitigaciones: Sin muchos riesgos y mitigaciones. Pequeños riesgos a la hora de generar y estructurar código de forma "no limpia".
+
+Lecciones aprendidas: Aplicar lo aprendido para comprobar que el código obtenido e integrado tiene sentido y utilidad.
+
+Checklist de cumplimiento de uso ético de la IA del sprint 2:
+
+- [x] Toda interacción significativa está en el Registro Detallado con enlace a conversación.
+
+- [x] No se usó IA para narrativa (o hay autorización documentada).
+
+- [x] Toda pieza aceptada fue comprendida y verificada por humanos (tests/revisión).
+
+- [x] Citas/Atribuciones incluidas cuando corresponde.
+
+- [x] Se usó la IA sin dar datos personales/sensibles que puedieran quedar expuestos a herramientas externas.
+
 ## Registro detallado de uso de AI por Sprint
 
 ### Sprint 1 registro detallado de uso de IA por sprint
@@ -93,7 +117,7 @@ Checklist de cumplimiento de uso ético de la IA del sprint 2:
 |---:|--------------|:-----:|---------------|----------------------------|------------|------------------------------------|---------------|---------------------------|--------------------------|-----------------------------|---------------|
 | 1.1 | 01/10/2025 18:19 | 1 | Alberto Pardina Miñón | PerplexityPro | Web | https://www.perplexity.ai/search/basandose-en-el-documento-adju-7CH7jqJ5R8aPAoXZ_BmEjA#0 | Ideas para Diagrama UML | D1 (Diagrama UML) | Comprobación concordancia | Sin riesgos ni mitigaciones | Aceptado |
 | 1.2 | 04/10/2025 11:13 | 1 | Lucía Baltasar Muñoz | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/68e10413-d83c-8002-8981-30d4597900d4 | Resolución duda Diagrama UML | D1 (Diagrama UML) | Corroboración de información dada | Sin riesgos ni mitigaciones | Aceptado |
-| 1.1 | 05/10/2025 10:36 | 1 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/68e26609-0264-800a-b1b1-8ca7e320c074 | Obtención de código | Ninguno | Razonamiento propio y pruebas | Exposición de datos provocando vulnerabilidad a usuarios | Rechazado (Sin cambios en código) |
+| 1.3 | 05/10/2025 10:36 | 1 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/68e26609-0264-800a-b1b1-8ca7e320c074 | Obtención de código | Ninguno | Razonamiento propio y pruebas | Exposición de datos provocando vulnerabilidad a usuarios | Rechazado (Sin cambios en código) |
 
 
 ### Sprint 2
@@ -102,14 +126,22 @@ Checklist de cumplimiento de uso ético de la IA del sprint 2:
 |---:|--------------|:-----:|---------------|----------------------------|------------|------------------------------------|---------------|---------------------------|--------------------------|-----------------------------|---------------|
 | 2.1 | 24/10/2025 13:22 | 2 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/c/68fb5ff9-df78-8332-83af-b3a039650727 | Aclaración de dudas | <!-- ficheros, issue, PR, commit --> | Criterio humano | Sin riesgos ni mitigaciones | Aceptado parcialmente |
 | 2.2 | 27/10/2025 19:41 | 2 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/g/g-p-68fe107d069481919138c5cb4b6d12e1-dp1/shared/c/68ffbd58-0cd0-832a-acb5-bf4effab99d9?owner_user_id=user-avQXrJCP35cKMG1fC3E1w3D4 | Obtención de código | Card, CardRepository | Razonamiento propio y pruebas | Posibles errores de implementación | Aceptado Parcialmente |
-| 1.1 | 01/11/2025 18:31 | 2 | Nerea Camacho Pérez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/6907ba76-bb80-8006-9829-c04f106dcce6 | Obtención de código | Match, MatchController, MatchRepository, MatchService, MatchStatus | Criterio humano y pruebas | Riesgos generales (Match = Clase más importante) | Aceptado |
-| 1.1 | 26/10/2025 10:36 | 2 | Nerea Camacho Pérez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/6907bc59-3de8-8006-a022-a27071207568 | Obtención de código | Player, PlayerRepository, UserService, LobbyService | Pruebas | Sin riesgos ni mitigaciones | Aceptado |
+| 2.3 | 01/11/2025 18:31 | 2 | Nerea Camacho Pérez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/6907ba76-bb80-8006-9829-c04f106dcce6 | Obtención de código | Match, MatchController, MatchRepository, MatchService, MatchStatus | Criterio humano y pruebas | Riesgos generales (Match = Clase más importante) | Aceptado |
+| 2.4 | 26/10/2025 10:36 | 2 | Nerea Camacho Pérez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/6907bc59-3de8-8006-a022-a27071207568 | Obtención de código | Player, PlayerRepository, UserService, LobbyService | Pruebas | Sin riesgos ni mitigaciones | Aceptado |
+
 
 ### Sprint 3
 
-| # | Fecha y hora | Sprint | Integrante(s) | **Herramienta & versión** | **Acceso** | **Enlace a conversación / Prompt** | **Finalidad** | **Artefactos afectados** | **Verificación humana** | **Riesgos & mitigaciones** | **Resultado** |
+| # | Fecha y hora | Sprint | Integrante(s) | **Herramienta & versión** | **Acceso** | **Enlace a conversación / Prompt** | **Finalidad** | **Artefactos afectados** | **Verificación humana** | **Riesgos & modificaciones** | **Resultado** |
 |---:|--------------|:-----:|---------------|----------------------------|------------|------------------------------------|---------------|---------------------------|--------------------------|-----------------------------|---------------|
-| 3.1 | <!-- 04/09/2025 18:40 --> | 3 | <!-- Nombre --> | <!-- p.ej., ChatGPT (GPT-5, OpenAI, 2025) --> | <!-- web/plugin/integración --> | <!-- URL al chat o prompt resumido --> | <!-- idea / código / depuración / pruebas / documentación técnica* --> | <!-- ficheros, issue, PR, commit --> | <!-- pruebas, revisión por pares, reasoning propio --> | <!-- plagio, licencias, datos personales; mitigación --> | <!-- aceptado / rechazado / aceptado con cambios parciales --> |
+| 3.1 | 01/11/2025 19:29 | 3 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/692c7244-0984-800a-b4cf-4ceb4ec2d0b4 | Consulta | MatchService.java | Aplicación de conocimientos | Sin riesgos ni mitigaciones | Aceptado |
+| 3.2 | 14/11/2025 12:50 | 3 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/692c71fd-76a0-800a-af10-b725feb17495 | Resolución de Duda | DeckInGame.java | Razonamiento propio | Realentización y generación de memoria basura | Aceptado Parcialmente |
+| 3.3 | 29/11/2025 17:11 | 3 | Alberto Pardina Miñón | Perplexity | Web | https://www.perplexity.ai/search/por-que-me-sale-este-error-en-guRKq951Qfqk19pQQ9Ktiw#1 | Obtención de código y resolución de duda | Match.js | Criterio propio y pruebas | Ningún riesgo (Frontend) | Aceptado |
+| 3.4 | 25/11/2025 11:03 | 3 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/692c70f4-00e8-800a-ae3e-b5e50eda843b | Obtención de código y resolución de dudas | HandInGame.java | Criterio propio | Sin riesgos ni mitigaciones | Aceptado Parcialmente |
+| 3.5 | 26/11/2025 20:21 | 3 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/692c70a2-f758-800a-a1b3-bc22cf68594c | Obtención código para resolución de error | HandService.java | Funcionamiento | Sin riesgos ni mitigaciones | Aceptado |
+| 3.6 | 27/11/2025 11:41 | 3 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/692c7068-e430-800a-8fd1-fc48f21ac9da | Obtención de código | Match.js | Funcionamiento | Sin riesgos ni mitigaciones | Aceptado |
+| 3.7 | 29/11/2025 13:22 | 3 | Laura Cubero Sánchez | ChatGPT (GPT-5) | Web | https://chatgpt.com/share/692c7010-678c-800a-95ee-4d6d786fd462 | Resolución errores | MatchService.java | Pruebas y criterio propio | Sin riesgos ni mitigaciones | Aceptado Parcialmente |
+
 
 ### Sprint 4
 

@@ -34,6 +34,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -213,12 +214,13 @@ public class MatchController {
     }
 
     @PutMapping("/{matchId}/discardConfirmed")
-    public ResponseEntity<Void> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
+    public ResponseEntity<Integer> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
         handService.update(data.getHand(), matchId, data.getPlayerId());
         bagService.update(data.getBag(), matchId, data.getPlayerId());
         deckService.update(data.getDeck(), matchId);
+        Integer nextTurnId = ms.nextTurn(matchId).getCurrentTurnUserId(); 
 
-        return ResponseEntity.ok().build(); 
+        return ResponseEntity.ok(nextTurnId); 
         
     }
 
@@ -233,6 +235,13 @@ public class MatchController {
     public ResponseEntity<AllCardsStatusDTO> getAllCards (@PathVariable Integer matchId, @PathVariable Integer playerId){
         AllCardsStatusDTO result = ms.getAllCards(matchId, playerId); 
         return ResponseEntity.ok(result); 
+    }
+
+    @PutMapping("/{matchId}/move")
+    public ResponseEntity<MatchDTO> moveToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
+        ms.movePlayer(matchId, data.getUserId(), data.getRoomName()); 
+        Match match = ms.getMatchById(matchId);
+        return ResponseEntity.ok(new MatchDTO(match)); 
     }
 }
 

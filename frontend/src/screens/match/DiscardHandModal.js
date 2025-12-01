@@ -5,12 +5,13 @@ import getIdFromUrl from "../../util/getIdFromUrl";
 
 const jwt = tokenService.getLocalAccessToken();
 
-export default function DiscardHandModal({isVisible, hand, bag, deck, onClose, player, onSave}){
+export default function DiscardHandModal({isVisible, hand, bag, deck, onClose, player, onSave, updateCurrentTurnId}){
     const matchId = getIdFromUrl(2);
     const[handCards, setHandCards] = useState([])
     const[cardsToDiscard, setCardsToDiscard] = useState([])
     const[deckCards, setDeckCards] = useState({})
     const[bagCards, setBagCards] = useState([])
+    const[playerTurnId, setPlayerTurnId] = useState(null)
 
     const[currentPlayer, setCurrentPlayer] = useState({})
 
@@ -23,6 +24,7 @@ export default function DiscardHandModal({isVisible, hand, bag, deck, onClose, p
         setCardsToDiscard([])
         setDeckCards(deck)
         setCurrentPlayer(player)
+        setPlayerTurnId()
     }, [isVisible])
 
     if (!isVisible) return null
@@ -79,7 +81,9 @@ export default function DiscardHandModal({isVisible, hand, bag, deck, onClose, p
             });
             
             if (response.ok) {
+                const nextTurnId = await response.json()
                 console.log('Cards discarded successfully')
+                updateCurrentTurnId(nextTurnId)
                 onSave()
             } else {
                 setMessage("Could not discard cards.")

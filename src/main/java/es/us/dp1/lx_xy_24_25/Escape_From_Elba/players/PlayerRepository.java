@@ -9,7 +9,6 @@ import org.springframework.data.repository.CrudRepository;
 import jakarta.validation.constraints.NotNull;
 
 public interface PlayerRepository extends CrudRepository<Player, Integer> {
-    Player save(Player player);
 
     List<Player> findAll();
 

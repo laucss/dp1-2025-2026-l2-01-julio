@@ -7,6 +7,7 @@ import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
 import BagModal from "./BagModal";
 import DiscardHandModal from "./DiscardHandModal";
+import ActionsModal from "./ActionsModal";
 import ChatBox from "./chatBox";
 import { FaComments } from "react-icons/fa";
 
@@ -23,6 +24,7 @@ export default function Match(){
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
     const [match, setMatch] = useState(null)
+    const [currentTurnUserId, setCurrentTurnUserId] = useState(null)
 
     // CARTAS
     const [deck, setDeck] = useState([])
@@ -40,12 +42,17 @@ export default function Match(){
 
     const [chatOpen, setChatOpen] = useState(false)
     const [actionPoints, setActionPoints] = useState(null)
+    const [moveToAdyacentRoom, setMoveToAdyacentRoom] = useState(false)
 
     
     // const [playerTurnId, setPlayerTurnId] = useState(null)
 
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
+
+    const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+
+    console.log('moveToAdyacentRoom', moveToAdyacentRoom)
     
     // Función para obtener un color único para cada jugador
     const getPlayerColor = (playerId) => {
@@ -111,7 +118,6 @@ export default function Match(){
                 setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
             }
     }, [match])
-    console.log('currentPlayer', currentPlayer)
 
     useEffect(() => {
         if (Array.isArray(currentPlayer) && currentPlayer[0]?.id){
@@ -208,6 +214,7 @@ export default function Match(){
             
             setDeck(data.deck)
             setHandCards(prev => [...prev, data.card])
+            setNumCardsDrawn(prev => prev + 1)
 
             
         } catch (error) {
@@ -238,7 +245,7 @@ export default function Match(){
             headers: {
                 'Authorization': `Bearer ${jwt}`,
                 'Content-Type': 'application/json',
-            },
+            }
         })
         .then(async res => {
             if (!res.ok) {
@@ -254,10 +261,12 @@ export default function Match(){
         })
         .then(updatedMatch => {
             console.log("Match actualizado tras tirar dado:", updatedMatch);
-            setMatch(updatedMatch);
+            setMatch(updatedMatch)
+            
+            setCurrentTurnUserId(updatedMatch.currentTurnUserId)
 
             if (updatedMatch.players) {
-                setPlayer(updatedMatch.players);
+                setPlayer(updatedMatch.players)
             }
 
         })
@@ -272,6 +281,41 @@ export default function Match(){
         setDiceRolled(true); // Marcamos que ya tiró
     };
 
+    const move = async (roomName) => {
+        console.log('roomNAme', roomName)
+        if (moveToAdyacentRoom===false) return ;
+        if (moveToAdyacentRoom === true){
+            try {
+                const response = await fetch (`/api/v1/matches/${matchId}/move`, {
+                method: "PUT",
+                headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                }, body: JSON.stringify({
+                    userId: currentUser.id,
+                    roomName: roomName
+                }) 
+
+                })
+
+                if (response.ok){
+                    const data = await response.json()
+                    setMatch(data)
+
+                    setActionPoints(prev => Math.max(prev - 1, 0));
+                    setMoveToAdyacentRoom(false)
+                }
+
+                else if (!response.ok) {
+                    setMoveToAdyacentRoom(false)
+                    throw new Error(`Error ${response.status}: ${response.statusText}`)
+                }
+            } catch (error) {
+                console.log('error', error)
+            }
+        }
+    }
 
 
 
@@ -297,16 +341,25 @@ export default function Match(){
         .catch(err => console.error(err))
     }
 
+    const currentPlayerTurn = match?.players.find(p => p.user.id === match.currentTurnUserId);
+
+    const canDraw = match?.currentTurnUserId === currentUser?.id &&
+                match?.currentTurnPhase === "DRAW" &&
+                numCardsDrawn < 7;
+
+
+
 
     const calculateActionPoints = () => {
-        if (handCards > 7 ){
+        if (!match) return;
+        if (match.currentTurnPhase !== "DRAW")
+            return;
+        if (handCards.length > 7 ){
             setActionPoints(0)
         } else {
             setActionPoints(7-handCards.length)
         }
         }
-    
-
 
     console.log('match', match)
 
@@ -324,6 +377,10 @@ export default function Match(){
             </div>
         );
     }
+
+if (!match) {
+    return <div>Cargando partida...</div>;
+}
 
 
 
@@ -346,23 +403,51 @@ return (
                     </div>
                 ))}
             </div>
+
+            {match?.currentTurnPhase === null  && !diceRolled && (
+                <div style={{
+                    position: "absolute",
+                    top: '47%',
+                    right: '-10%',
+                    transform: "translateX(-50%)",
+                    background: "rgba(214, 28, 28, 0.6)",
+                    padding: "10px 20px",
+                    borderRadius: "10px",
+                    fontSize: "16px",
+                    color: "white",
+                    textAlign: "center"
+                }}>
+ 
+                    "Tira los dados para decidir el turno"
+                </div>
+            )}
+
             
             <div className="match-board">
                 <div className="deck-column">
                     <div className="deck-section">
                         <button 
-                            onClick={drawCard}
+                            onClick={ () => {
+                                if (numCardsDrawn < 7) {
+                                    drawCard()
+                                } else {
+                                    alert("No puedes robar más de 7 cartas")
+                                } 
+                            }}
+                            disabled={!canDraw}
                             style={{ 
                                 border: "none", 
                                 background: "transparent", 
                                 padding: 0, 
-                                cursor: "pointer",
+                                cursor: !canDraw ? "not-allowed" : "pointer", 
+                                opacity: !canDraw ? 0.4 : 1,
+                                outline: "none",
                             }}
                         >
                             <img 
                                 src="/backCard.png" 
                                 alt="Robar carta"
-                                style={{ width: "150px", height: "auto" }}
+                                style={{ width: "150px", height: "auto", outline: "none", }}
                             />
                         </button>
                     </div>
@@ -392,41 +477,41 @@ return (
 
                 <div className="map-column" style={{ position: 'relative' }}>
                     <map name="Map">
-                <area className="Area" href="" target="" alt="Safe Area" title="Safe Area" coords="321,251,84" shape="circle"/>
-                <area className="Area" href="" target="" alt="West Tower" title="West Tower" coords="13,489,98,388" shape="rect"/>
-                <area className="Area" href="" target="" alt="South Tower" title="South Tower" coords="541,389,628,488" shape="rect"/>
-                <area className="Area" href="" target="" alt="North Tower" title="North Tower" coords="13,12,99,113" shape="rect"/>
-                <area className="Area" href="" target="" alt="East Tower" title="East Tower" coords="542,11,626,111" shape="rect"/>
-                <area className="Area" href="" target="" alt="Caesar Room" title="Caesar Room" coords="110,40,210,114" shape="rect"/>
-                <area className="Area" href="" target="" alt="Opal Room" title="Opal Room" coords="220,10,292,69" shape="rect"/>
-                <area className="Area" href="" target="" alt="Coral Room" title="Coral Room" coords="345,11,418,69" shape="rect"/>
-                <area className="Area" href="" target="" alt="Roof" title="Roof" coords="429,38,530,112" shape="rect"/>
-                <area className="Area" href="" target="" alt="Cafe" title="Cafe" coords="293,154,221,80" shape="rect"/>
-                <area className="Area" href="" target="" alt="Parlor" title="Parlor" coords="345,81,417,152" shape="rect"/>
-                <area className="Area" href="" target="" alt="Pool" title="Pool" coords="369,165,488,166,488,251,419,251,407,206" shape="poly"/>
-                <area className="Area" href="" target="" alt="SPA" title="SPA" coords="271,166,237,197,221,236,153,237,152,165" shape="poly"/>
-                <area className="Area" href="" target="" alt="Arbor" title="Arbor" coords="151,248,151,334,266,334,236,299,221,250" shape="poly"/>
-                <area className="Area" href="" target="" alt="Farm" title="Farm" coords="488,264,488,334,371,334,403,296,416,265" shape="poly"/>
-                <area className="Area" href="" target="" alt="Ball Room" title="Ball Room" coords="25,166,98,251" shape="rect"/>
-                <area className="Area" href="" target="" alt="Sleep Room" title="Sleep Room" coords="540,165,614,238" shape="rect"/>
-                <area className="Area" href="" target="" alt="Class Room" title="Class Room" coords="25,263,97,334" shape="rect"/>
-                <area className="Area" href="" target="" alt="Meal Room" title="Meal Room" coords="541,249,613,335" shape="rect"/>
-                <area className="Area" href="" target="" alt="Bar" title="Bar" coords="221,346,292,417" shape="rect"/>
-                <area className="Area" href="" target="" alt="Lab" title="Lab" coords="346,346,418,418" shape="rect"/>
-                <area className="Area" href="" target="" alt="Cellar" title="Cellar" coords="109,387,209,460" shape="rect"/>
-                <area className="Area" href="" target="" alt="Apple Room" title="Apple Room" coords="221,430,293,488" shape="rect"/>
-                <area className="Area" href="" target="" alt="Parole Room" title="Parole Room" coords="429,387,529,459" shape="rect"/>
-                <area className="Area" href="" target="" alt="Map Room" title="Map Room" coords="345,430,419,490" shape="rect"/>
-                <area className="Area" href="" target="" alt="Corridor 1" title="Corridor 1" coords="25,123,209,153" shape="rect"/>
-                <area className="Area" href="" target="" alt="Corridor 2" title="Corridor 2" coords="304,57,335,155" shape="rect"/>
-                <area className="Area" href="" target="" alt="Corridor 3" title="Corridor 3" coords="430,122,613,154" shape="rect"/>
-                <area className="Area" href="" target="" alt="Corridor 4" title="Corridor 4" coords="109,164,141,250" shape="rect"/>
-                <area className="Area" href="" target="" alt="Corridor 5" title="Corridor 5" coords="500,164,529,238" shape="rect"/>
-                <area className="Area" href="" target="" alt="Corridor 6" title="Corridor 6" coords="109,262,141,334" shape="rect"/>
-                <area className="Area" href="" target="" alt="Corridor 7" title="Corridor 7" coords="500,248,529,333" shape="rect"/>
-                <area className="Area" href="" target="" alt="Corridor 8" title="Corridor 8" coords="25,345,209,376" shape="rect"/>
-                <area className="Area" href="" target="" alt="Corridor 9" title="Corridor 9" coords="304,345,335,441" shape="rect"/>
-                <area className="Area" href="" target="" alt="Corridor 10" title="Corridor 10" coords="429,346,613,376" shape="rect"/>
+                <area className="Area" href="#" target="" alt="Safe Area" title="Safe Area" coords="321,251,84" shape="circle" onClick={(e)=>{e.preventDefault(); move("Safe Area")}}/>
+                <area className="Area" href="#" target="" alt="West Tower" title="West Tower" coords="13,489,98,388" shape="rect" onClick={(e)=>{e.preventDefault(); move("West Tower")}}/>
+                <area className="Area" href="#" target="" alt="South Tower" title="South Tower" coords="541,389,628,488" shape="rect" onClick={(e)=>{e.preventDefault(); move("South Tower")}}/>
+                <area className="Area" href="#" target="" alt="North Tower" title="North Tower" coords="13,12,99,113" shape="rect" onClick={(e)=>{e.preventDefault(); move("North Tower")}}/>
+                <area className="Area" href="#" target="" alt="East Tower" title="East Tower" coords="542,11,626,111" shape="rect" onClick={(e)=>{e.preventDefault(); move("East Tower")}}/>
+                <area className="Area" href="#" target="" alt="Caesar Room" title="Caesar Room" coords="110,40,210,114" shape="rect" onClick={(e)=>{e.preventDefault();move("Caesar Room")}}/>
+                <area className="Area" href="#" target="" alt="Opal Room" title="Opal Room" coords="220,10,292,69" shape="rect" onClick={(e)=>{e.preventDefault(); move("Opal Room")}}/>
+                <area className="Area" href="#" target="" alt="Coral Room" title="Coral Room" coords="345,11,418,69" shape="rect" onClick={(e)=>{e.preventDefault(); move("Coral Room")}}/>
+                <area className="Area" href="#" target="" alt="Roof" title="Roof" coords="429,38,530,112" shape="rect" onClick={(e)=>{e.preventDefault(); move("Roof")}}/>
+                <area className="Area" href="#" target="" alt="Cafe" title="Cafe" coords="293,154,221,80" shape="rect" onClick={(e)=>{e.preventDefault(); move("Cafe")}}/>
+                <area className="Area" href="#" target="" alt="Parlor" title="Parlor" coords="345,81,417,152" shape="rect" onClick={(e)=>{e.preventDefault(); move("Parlor")}}/>
+                <area className="Area" href="#" target="" alt="Pool" title="Pool" coords="369,165,488,166,488,251,419,251,407,206" shape="poly" onClick={(e)=>{e.preventDefault(); move("Pool")}}/>
+                <area className="Area" href="#" target="" alt="SPA" title="SPA" coords="271,166,237,197,221,236,153,237,152,165" shape="poly" onClick={(e)=>{e.preventDefault(); move("SPA")}}/>
+                <area className="Area" href="#" target="" alt="Arbor" title="Arbor" coords="151,248,151,334,266,334,236,299,221,250" shape="poly" onClick={(e)=>{e.preventDefault(); move("Arbor")}}/>
+                <area className="Area" href="#" target="" alt="Farm" title="Farm" coords="488,264,488,334,371,334,403,296,416,265" shape="poly" onClick={(e)=>{e.preventDefault(); move("Farm")}}/>
+                <area className="Area" href="" target="" alt="Ball Room" title="Ball Room" coords="25,166,98,251" shape="rect" onClick={(e)=>{e.preventDefault(); move("Ball Room")}}/>
+                <area className="Area" href="" target="" alt="Sleep Room" title="Sleep Room" coords="540,165,614,238" shape="rect" onClick={(e)=>{e.preventDefault(); move("Sleep Room")}} />
+                <area className="Area" href="" target="" alt="Class Room" title="Class Room" coords="25,263,97,334" shape="rect" onClick={(e)=>{e.preventDefault(); move("Class Room")}}/>
+                <area className="Area" href="" target="" alt="Meal Room" title="Meal Room" coords="541,249,613,335" shape="rect" onClick={(e)=>{e.preventDefault(); move("Meal Room")}}/>
+                <area className="Area" href="" target="" alt="Bar" title="Bar" coords="221,346,292,417" shape="rect" onClick={(e)=>{e.preventDefault(); move("Bar")}}/>
+                <area className="Area" href="" target="" alt="Lab" title="Lab" coords="346,346,418,418" shape="rect" onClick={(e)=>{e.preventDefault(); move("Lab")}}/>
+                <area className="Area" href="" target="" alt="Cellar" title="Cellar" coords="109,387,209,460" shape="rect" onClick={(e)=>{e.preventDefault(); move("Cellar")}}/>
+                <area className="Area" href="" target="" alt="Apple Room" title="Apple Room" coords="221,430,293,488" shape="rect" onClick={(e)=>{e.preventDefault(); move("Apple Room")}}/>
+                <area className="Area" href="" target="" alt="Parole Room" title="Parole Room" coords="429,387,529,459" shape="rect" onClick={(e)=>{e.preventDefault(); move("Parole Room")}}/>
+                <area className="Area" href="" target="" alt="Map Room" title="Map Room" coords="345,430,419,490" shape="rect" onClick={(e)=>{e.preventDefault(); move("Map Room")}}/>
+                <area className="Area" href="" target="" alt="Corridor 1" title="Corridor 1" coords="25,123,209,153" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 1")}}/>
+                <area className="Area" href="" target="" alt="Corridor 2" title="Corridor 2" coords="304,57,335,155" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 2")}}/>
+                <area className="Area" href="" target="" alt="Corridor 3" title="Corridor 3" coords="430,122,613,154" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 3")}}/>
+                <area className="Area" href="" target="" alt="Corridor 4" title="Corridor 4" coords="109,164,141,250" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 4")}}/>
+                <area className="Area" href="" target="" alt="Corridor 5" title="Corridor 5" coords="500,164,529,238" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 5")}}/>
+                <area className="Area" href="" target="" alt="Corridor 6" title="Corridor 6" coords="109,262,141,334" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 6")}}/>
+                <area className="Area" href="" target="" alt="Corridor 7" title="Corridor 7" coords="500,248,529,333" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 7")}}/>
+                <area className="Area" href="" target="" alt="Corridor 8" title="Corridor 8" coords="25,345,209,376" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 8")}}/>
+                <area className="Area" href="" target="" alt="Corridor 9" title="Corridor 9" coords="304,345,335,441" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 9")}}/>
+                <area className="Area" href="" target="" alt="Corridor 10" title="Corridor 10" coords="429,346,613,376" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 10")}}/>
                     </map>
                     <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
                     
@@ -523,7 +608,7 @@ return (
             className="entities-panel"
             style={{
                 position: 'absolute',
-                top: '70%',
+                top: '80%',
                 right: '30px',
                 transform: 'translateY(-50%)',
                 width: '320px',
@@ -597,17 +682,38 @@ return (
             <div>
                 <button className="bag-button"
                     onClick={() => setBagOpen(true)}
+                    disabled={
+                    match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
                     title="Accede to your bag"
                 >
                     Form my bag
                 </button>
                 <button className="bag-button"
                     onClick={() => setDiscardHandOpen(true)}
+                    disabled={
+                    match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
                     title="Discard cards from hand"
                     style={{ marginLeft: "10px" }}
                 >
                     Discard
                 </button>
+                 <button className="bag-button"
+                    title="Discard cards from hand"
+                    onClick={() => setIsActionsModalOpen(true) }
+                     disabled={
+                    match.currentTurnUserId !== currentUser.id || 
+                    actionPoints <= 0 }
+                    style={{ marginLeft: "15px" }}
+                >
+                    Actions
+                </button>
+
+                <ActionsModal
+                isOpen={isActionsModalOpen}
+                onClose={() => setIsActionsModalOpen(false)}
+                moveToAdyacent={() => setMoveToAdyacentRoom(true) }
+            />
+
             </div>
             
 
@@ -616,7 +722,8 @@ return (
                     onClick={endMatch}
                     style={{
                         marginLeft: "10px",
-                        padding: "10px 15px",
+                        marginTop: "20px",
+                        padding: "10px 25px",
                         background: "#c0392b",
                         color: "white",
                         border: "none",
@@ -649,6 +756,7 @@ return (
             deck={deck}
             player={currentPlayer[0]}
             onClose={() => setDiscardHandOpen(false)}
+            updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
             onSave={async () =>{
                 await fetchCards()
                 setDiscardHandOpen(false)
@@ -667,25 +775,28 @@ return (
             {/* Mensaje de turno */}
             <div
                 style={{
-                    position: 'absolute',
-                    bottom: '-330px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    backgroundColor: '#c0392b',
-                    color: 'white',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    boxShadow: '0 0 10px rgba(0,0,0,0.3)',
-                    zIndex: 1001,
-                    fontSize: '34px',
-                    minWidth: '250px'
+                        marginLeft: "050px",
+                        position: "absolute",
+                        left: "10%",                 
+                        transform: "translateX(90%)",
+                        marginTop: "-80px",
+                        padding: "15px 35px", 
+                        fontSize: "22px",
+                        background: "#c0392b",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        maxWidth: "500px",
+                        minWidth: "230px",
+                        cursor: "pointer"
                 }}
             >
-                {match?.currentTurnUserId === currentUser?.id
+                {!match?.currentTurnUserId
+                ? "Esperando..."
+                : match.currentTurnUserId === currentUser?.id
                     ? "Tu turno"
-                    : `${match?.currentTurnUserId ? match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username : 'Esperando...'} está en su turno`}
+                    : `${match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username} está en su turno`}
+
             </div>
         </div>
     );

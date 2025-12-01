@@ -189,6 +189,7 @@ public class MatchService {
 
             match.setCurrentTurnUserId(ordered.get(0).getUser().getId());
             match.setTurnNumber(1);
+            match.setCurrentTurnPhase(TurnPhase.DRAW);
             mrepo.save(match);
         }
 
@@ -218,6 +219,7 @@ public class MatchService {
                 .orElseThrow(() -> new IllegalArgumentException("Player not found"));
         //Actualizamos el id del jugador que tiene el turno actualmente en la partida
         m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());
+        m.setCurrentTurnPhase(TurnPhase.DRAW);
 
         mrepo.save(m);
         return m;
@@ -367,10 +369,16 @@ public class MatchService {
 
     }
 
-    /*
+
     //Función para mover un jugador de una sala a otra adyacente
     @Transactional
     public Player movePlayer(Integer matchId, Integer userId, String targetRoomName) {
+        Match match = mrepo.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
+        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
+            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+        }
+        mrepo.save(match);
         //Recuperar el jugador dentro del match
         Player player = prepo.findByMatchAndUser(matchId, userId)
                 .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
@@ -391,8 +399,8 @@ public class MatchService {
         //Actualizar la sala del jugador
         player.setRoom(targetRoom);
         //Guardar cambios
+        
         return prepo.save(player);
     }
-     */ 
 
 }

@@ -65,12 +65,13 @@ Puedes gastar tus puntos en diferentes acciones:<br>
 
 ### Diagrama de Dominio/Diseño
 
-![alt text](<images/WhatsApp Image 2025-10-29 at 09.32.01.png>)
+![alt text](<images/diagramaBase.png>)
 
-![alt text](<images/imagee.png>)
+![alt text](<images/dragramadeclasesss.drawio.png>)
+
+![alt text](<images/diagramadeclasessss2.drawio.png>)
 
 ### Diagrama de Capas (incluyendo Controladores, Servicios y Repositorios)
-_En esta sección debe proporcionar un diagrama UML de clases que describa el conjunto de controladores, servicios, y repositorios implementados, incluya la división en capas del sistema como paquetes horizontales tal y como se muestra en el siguiente ejemplo:_
 
 ![alt text](images/image.png)
 
@@ -78,17 +79,9 @@ _En esta sección debe proporcionar un diagrama UML de clases que describa el co
 
 ![Diagrama de Capas Actualizado](images/Diagrama.png)
 
-*Nota importante para el alumno*: A la hora de entregar el proyecto, debes modificar la url para que esté asociada al respositorio concreto de tu proyecto. Date cuenta de que ahora mismo apunta al repositorio _gii-is-DP1/group-project-seed_.
-
-
-_El diagrama debe especificar además las relaciones de uso entre controladores y servicios, entre servicios y servicios, y entre servicios y repositorios._
-_Tal y como se muestra en el diagrama de ejemplo, para el caso de los repositorios se deben especificar las consultas personalizadas creadas (usando la signatura de su método asociado)._
-
-_En este caso, como mermaid no soporta la definición de paquetes, hemos usado una [herramienta muy similar llamada plantUML}(https://www.plantuml.com/). Esta otra herramienta tiene un formulario para visualizar los diagramas previamente disponible en [https://www.plantuml.com/plantuml/uml/}(https://www.plantuml.com/plantuml/uml/). Lo que hemos hecho es preparar el diagrama en ese formulario, y una vez teníamos el diagrama lista, grabarlo en un fichero aparte dentro del propio repositorio, y enlazarlo con el formulario para que éste nos genera la imagen del diagrama usando una funcionalizad que nos permite especificar el código del diagrama a partir de una url. Por ejemplo, si accedes a esta url verás el editor con el código cargado a partir del fichero del repositorio original: [http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/gii-is-DP1/group-project-seed/main/docs/diagrams/LayersUMLPackageDiagram.iuml](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/gii-is-DP1/group-project-seed/main/docs/diagrams/LayersUMLPackageDiagram.iuml)._
 
 ## Descomposición del mockups del tablero de juego en componentes
 
-En esta sección procesaremos los mockup del tablero de juego. Etiquetaremos las zonas de cada una de las pantallas para identificar componentes a implementar. Para cada mockup se especificará el árbol de jerarquía de componentes, así como, para cada componente el estado que necesita mantener, las llamadas a la API que debe realizar y los parámetros de configuración global que consideramos que necesita usar cada componente concreto. 
 Componentes de la pantalla de juego principal:
 
 ![Descomposición en componentes de la interfaz de estadísticas](![componentes](https://github.com/user-attachments/assets/f86606a6-f837-48f6-a669-fa1ff02937e0)
@@ -112,7 +105,6 @@ Componentes de la pantalla de juego principal:
 
 
 ## Patrones de diseño y arquitectónicos aplicados
-En esta sección de especificar el conjunto de patrones de diseño y arquitectónicos aplicados durante el proyecto.
 
 ### Patrón: Modelo-Vista-Controlador(MVC)
 *Tipo*: de Diseño
@@ -134,7 +126,7 @@ La aplicación del patrón MVC permite una clara separación entre la lógica de
 
 
 ### Patrón: Dependency Injection
-*Tipo*: de Diseño?
+*Tipo*: de Diseño
 
 *Contexto de Aplicación*
 
@@ -183,19 +175,49 @@ Usamos este patrón sobre todo al iniciar elementos de la partida como en nuestr
 *Ventajas alcanzadas al aplicar el patrón*
 Conseguimos crear copias exacta de una entidad de forma sencilla. 
 
-### Patrón: 
-*Tipo*: Arquitectónico o De Diseño
+### Patrón: Domain Model
+*Tipo*: Arquitectónico
 
 *Contexto de Aplicación*
-
+Al diseñar el backend, lo planteamos como un sistema compuesto por diversas entidades que se relacionan entre sí.
 
 
 *Clases o paquetes creados*
-
- 
+·Cards
+   -bag
+      -bag
+      -bagInGame
+   -deck
+      -deck
+      -deckInGame
+   -hand
+      -hand
+      -handInGame
+   -card
+·Chat
+   -chatMessage
+·FriendRequest
+   -friendRequest
+·Match
+   -lobby
+   -match
+·Npcs
+   -npc
+·Players
+   -player
+·Room
+   -room
+·Statistics
+   -achievements
+      -achievement
+   -statistics
+·User
+   -user
+·Util
+   -checkers
 
 *Ventajas alcanzadas al aplicar el patrón*
-
+Aunque el tamaño de nuestro proyecto ha dado lugar a un modelo relativamente complejo, el uso de este patrón nos ha facilitado comprender de forma más clara cómo los cambios de estado en unas entidades influyen sobre otras.
 
 
 ## Decisiones de diseño
