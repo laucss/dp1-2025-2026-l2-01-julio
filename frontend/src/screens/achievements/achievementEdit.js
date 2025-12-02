@@ -8,6 +8,7 @@ import getErrorModal from "../../util/getErrorModal";
 import getIdFromUrl from "../../util/getIdFromUrl"; 
 import useFetchState from "../../util/useFetchState"; 
 import { useNavigate } from "react-router-dom"; 
+import './AchievementUserList.css';
 
 const jwt = tokenService.getLocalAccessToken(); 
 
@@ -74,44 +75,45 @@ export default function AchievementEdit() {
     }
 
     return ( 
-        <div className="auth-page-container"> 
-            <h2 className="text-center"> 
-                {achievement.id ? "Edit Achievement" : "Add Achievement"} 
-            </h2> 
-            <div className="auth-form-container"> 
-                {modal} 
-                <Form onSubmit={handleSubmit}> 
-                    <div className="custom-form-input"> 
-                        <Label for="name" className="custom-form-input-label"> Name </Label> 
-                        <Input type="text" required name="name" id="name" value={achievement.name || ""} onChange={handleChange} className="custom-input" /> 
-                    </div> 
-                    <div className="custom-form-input"> 
-                        <Label for="description" className="custom-form-input-label"> Description </Label> 
-                        <Input type="text" required name="description" id="description" value={achievement.description || ""} onChange={handleChange} className="custom-input" /> 
-                    </div> 
-                    <div className="custom-form-input"> 
-                        <Label for="badgeImage" className="custom-form-input-label"> Badge Image Url: </Label> 
-                        <Input type="text" required name="badgeImage" id="badgeImage" value={achievement.badgeImage || ""} onChange={handleChange} className="custom-input" /> 
-                    </div> 
-                    <div className="custom-form-input"> 
-                        <Label for="metric" className="custom-form-input-label"> Metric </Label> 
-                        <Input type="select" required name="metric" id="metric" value={achievement.metric || ""} onChange={handleChange} className="custom-input" > 
-                            <option value="">None</option> 
-                            <option value="GAMES_PLAYED">GAMES_PLAYED</option> 
-                            <option value="VICTORIES">VICTORIES</option> 
-                            <option value="TOTAL_PLAY_TIME">TOTAL_PLAY_TIME</option> 
-                        </Input> 
-                    </div> 
-                    <div className="custom-form-input"> 
-                        <Label for="theshold" className="custom-form-input-label"> Threshold value: </Label> 
-                        <Input type="number" required name="threshold" id="threshold" value={achievement.threshold || ""} onChange={handleChange} className="custom-input" /> 
-                    </div> 
-                    <div className="custom-button-row"> 
-                        <button className="auth-button">Save</button> 
-                        <Link to={`/achievements`} className="auth-button" style={{ textDecoration: "none" }} > Cancel </Link> 
-                    </div> 
-                </Form> 
+        <div className="achievement-user-container"> 
+            <div className="auth-page-container"> 
+                <div className="waiting-room-box">
+                <h2 className="text-center"> 
+                    {achievement.id ? "Edit Achievement" : "Add Achievement"} 
+                </h2> 
+                <div className="auth-form-container"> 
+                    {modal} 
+                    <Form onSubmit={handleSubmit}> 
+                        <div className="custom-form-input"> 
+                            <Label for="description" className="custom-form-input-label"> Description </Label> 
+                            <Input type="text" required name="description" id="description" value={achievement.description || ""} onChange={handleChange} className="custom-input" /> 
+                        </div> 
+                        <div className="custom-form-input"> 
+                            <Label for="badgeImage" className="custom-form-input-label"> Badge Image Url: </Label> 
+                            <Input type="text" required name="badgeImage" id="badgeImage" value={achievement.badgeImage || ""} onChange={handleChange} className="custom-input" /> 
+                        </div> 
+                        <div className="custom-form-input"> 
+                            <Label for="metric" className="custom-form-input-label"> Metric </Label> 
+                            <Input type="select" required name="metric" id="metric" value={achievement.metric || ""} onChange={handleChange} className="custom-input" > 
+                                <option value="">None</option> 
+                                <option value="GAMES_PLAYED">GAMES_PLAYED</option> 
+                                <option value="VICTORIES">VICTORIES</option> 
+                                <option value="TOTAL_PLAY_TIME">TOTAL_PLAY_TIME</option> 
+                                <option value="ACTION_POINTS_EARNED">ACTION_POINTS_EARNED</option>
+                            </Input> 
+                        </div> 
+                        <div className="custom-form-input"> 
+                            <Label for="theshold" className="custom-form-input-label"> Threshold value: </Label> 
+                            <Input type="number" required name="threshold" id="threshold" value={achievement.threshold || ""} onChange={handleChange} className="custom-input" /> 
+                        </div> 
+                        <div className="custom-button-row"> 
+                            <button className="auth-button">Save</button> 
+                            <Link to={`/achievements`} className="auth-button" style={{ textDecoration: "none" }} > Cancel </Link> 
+                        </div> 
+                    </Form> 
+                </div>
+                </div> 
             </div> 
         </div> 
-    ); 
+    );
 }
