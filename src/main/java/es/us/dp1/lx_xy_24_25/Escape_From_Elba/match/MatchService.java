@@ -403,4 +403,24 @@ public class MatchService {
         return prepo.save(player);
     }
 
+    @Transactional
+    public Player moveLoserPlayer(Integer matchId, Integer userId, String targetRoomName) {
+        Match match = mrepo.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
+        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
+            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+        }
+        //Recuperar el jugador dentro del match
+        Player player = prepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        //Recuperar la sala destino
+        Room targetRoom = roomRepository.findByName(targetRoomName)
+            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
+        //Actualizar la sala del jugador
+        player.setRoom(targetRoom);
+        //Guardar cambios
+        
+        return prepo.save(player);
+    }
+
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import "./actionsModal.css";
+import "../../static/css/match/actionsModal.css";
 
 export default function ActionsModal({ isOpen, onClose, moveToAdyacent }) {
     if (!isOpen) return null;
