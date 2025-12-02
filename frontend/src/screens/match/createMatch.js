@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import tokenService from "../../services/token.service";
 import { useNavigate } from 'react-router-dom';
-import './createMatch.css';
+import '../../static/css/match/createMatch.css';
 
 
 const jwt = tokenService.getLocalAccessToken();

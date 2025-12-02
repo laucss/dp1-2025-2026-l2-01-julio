@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
 import tokenService from "../../services/token.service";
 import useFetchState from "../../util/useFetchState";
-import './listingLobbies.css';
+import '../../static/css/match/listingLobbies.css';
 import { Button, ButtonGroup, Table, Modal, ModalHeader, ModalBody, ModalFooter, Input } from "reactstrap";
 
 const jwt = tokenService.getLocalAccessToken();
