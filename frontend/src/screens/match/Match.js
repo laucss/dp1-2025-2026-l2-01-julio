@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react"
 import {useNavigate} from "react-router-dom";
 import '../../static/css/match/Match.css';
 import getIdFromUrl from '../../util/getIdFromUrl'
-import { useEffect } from "react";
 import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
 import BagModal from "./BagModal";
@@ -101,7 +100,7 @@ export default function Match(){
         33: { left: '44.5%', top: '92%' },  // Apple Room v
         34: { left: '56%', top: '92%' },  // Map Room v 
         35: { left: '64.5%', top: '85%' },  // Parole Room v
-        36: { left: '86%', top: '87%' },  // South Tower v
+        36: { left: '74%', top: '87%' },  // South Tower v
         37: { left: '50%', top: '50%' },  // Safe Area v
     };
     // CARGAR DATOS PARTIDA 

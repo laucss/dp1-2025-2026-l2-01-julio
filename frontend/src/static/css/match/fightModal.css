@@ -1,4 +1,4 @@
-.modal-overlay {
+.modal-fight-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -10,7 +10,7 @@
     align-items: center;
     z-index: 1000;
 }
-.modal-content-wrapper{
+.modal-fight-content-wrapper{
     background: rgba(26, 26, 26, 0.9);
     border-radius: 10px;
     padding: 20px;

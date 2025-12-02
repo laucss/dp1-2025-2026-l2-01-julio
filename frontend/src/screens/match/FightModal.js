@@ -42,8 +42,8 @@ export default function FightModal({ isOpen, onClose, opponent, attacker, onReso
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content-wrapper" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-fight-overlay" onClick={onClose}>
+            <div className="modal-fight-content-wrapper" onClick={(e) => e.stopPropagation()}>
                 <img src={Fight} alt="Fight" style={{ alignSelf: 'center', width: '75%', borderRadius: '10px' }} />
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
