@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import {useNavigate} from "react-router-dom";
 import '../../static/css/match/Match.css';
 import getIdFromUrl from '../../util/getIdFromUrl'
@@ -800,6 +800,7 @@ return (
             isOpen={isFightModalOpen}
             onClose={() => { setIsFightModalOpen(false); setFightOpponent(null); }}
             opponent={fightOpponent}
+            attacker={currentPlayerTurn}
             onResolve={async (currentUserWon) => {
                 try {
                     console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightOpponent=', fightOpponent);
