@@ -11,17 +11,22 @@ import lombok.Setter;
 @Setter
 public class MiniUserDTO extends BaseEntity {
     
-    @NotNull
-    @Column(unique = true)
-    String username;
 
-    @Column(name = "avatar")
-    private String avatar;
+        @NotNull
+        @Column(unique = true)
+        String username;
+
+        @Column(name = "avatar")
+        private String avatar;
+
+        // Nuevo: estado del usuario (ONLINE, OFFLINE, PLAYING)
+        private String status;
 
     public MiniUserDTO(User user){
         this.setId(user.getId());
         this.setAvatar(user.getAvatar());
         this.setUsername(user.getUsername());
+        this.setStatus(user.getStatus() != null ? user.getStatus().name() : "OFFLINE");
     }
 
     public MiniUserDTO(){
