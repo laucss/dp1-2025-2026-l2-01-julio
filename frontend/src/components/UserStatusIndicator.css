@@ -1,0 +1,14 @@
+.user-status-indicator {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 2px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.15);
+}

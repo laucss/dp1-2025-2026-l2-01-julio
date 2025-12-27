@@ -1,4 +1,4 @@
-import React, { Profiler } from "react";
+import React, { Profiler, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
@@ -10,6 +10,7 @@ import Login from "./auth/login";
 import Logout from "./auth/logout";
 import PlanList from "./public/plan";
 import tokenService from "./services/token.service";
+import userStatusService from "./services/userStatus.service";
 import UserListAdmin from "./screens/admin/UserListAdmin";
 import UserEditAdmin from "./screens/admin/UserEditAdmin";
 import Profile from "./screens/player/Profile";
@@ -47,6 +48,20 @@ function App() {
   //const [chatIsShown, setChatIsShown] = useState(false);
 
   const jwt = tokenService.getLocalAccessToken();
+
+  // Marcar usuario como ONLINE al cargar la app y OFFLINE al cerrar
+  useEffect(() => {
+    if (jwt) {
+      userStatusService.setOnline(jwt);
+      const handleBeforeUnload = () => {
+        userStatusService.setOffline(jwt);
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [jwt]);
 
   //let userId = null;
 

@@ -47,7 +47,12 @@ public class User extends BaseEntity {
     @Max(100)
     Integer age;
     
+
     String avatar="/Avatar_default.png";
+
+    // Estado del usuario (ONLINE, OFFLINE, PLAYING)
+    @Column(name = "status")
+    private UserStatus status = UserStatus.OFFLINE;
 
     @NotNull
     @ManyToOne(optional = false)

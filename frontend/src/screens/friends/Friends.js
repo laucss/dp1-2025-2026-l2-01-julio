@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './friends.css';
-import { FaSearch, FaUser } from 'react-icons/fa';
+import { FaSearch, FaUser, FaEye, FaGamepad, FaTrash } from 'react-icons/fa';
+import UserStatusIndicator from '../../components/UserStatusIndicator';
 import tokenService from '../../services/token.service';
 import useRequestStates from '../../hooks/useRequestStates';
 
@@ -291,19 +292,29 @@ export default function Friends() {
             return filtered.map(friend => (
               <div key={friend.id} className="friend-card">
                 <FaUser className="friend-avatar" />
-
+                {/* Mostrar el status del amigo, no del objeto friendRequest */}
+                <UserStatusIndicator status={
+                  (friend.sender?.username === friend.displayName ? friend.sender?.status : friend.receiver?.status) || friend.status
+                } />
                 <span className="friend-name">
                   {friend.displayName}
                 </span>
-
                 <div className="friend-actions">
-                  <button className="play-btn">Jugar</button>
-
+                  {friend.status === 'PLAYING' ? (
+                    <button className="play-btn" title="Visualizar partida">
+                      <FaEye style={{ marginRight: 4 }} /> Visualizar
+                    </button>
+                  ) : friend.status === 'ONLINE' ? (
+                    <button className="play-btn" title="Jugar">
+                      <FaGamepad style={{ marginRight: 4 }} /> Jugar
+                    </button>
+                  ) : null}
                   <button
                     className="remove-btn"
                     onClick={() => openDeleteModal(friend)}
+                    title="Eliminar amigo"
                   >
-                    Eliminar
+                    <FaTrash style={{ marginRight: 4 }} /> Eliminar
                   </button>
                 </div>
               </div>

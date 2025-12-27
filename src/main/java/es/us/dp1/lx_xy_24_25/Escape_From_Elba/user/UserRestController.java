@@ -124,4 +124,23 @@ class UserRestController {
 			throw new AccessDeniedException("You can't delete yourself!");
 	}
 
+
+	// Endpoint para poner usuario ONLINE
+	@PutMapping("/status/online")
+	public ResponseEntity<?> setOnline() {
+		User currentUser = userService.findCurrentUser();
+		currentUser.setStatus(UserStatus.ONLINE);
+		userService.saveUser(currentUser);
+		return ResponseEntity.ok().build();
+	}
+
+	// Endpoint para poner usuario OFFLINE
+	@PutMapping("/status/offline")
+	public ResponseEntity<?> setOffline() {
+		User currentUser = userService.findCurrentUser();
+		currentUser.setStatus(UserStatus.OFFLINE);
+		userService.saveUser(currentUser);
+		return ResponseEntity.ok().build();
+	}
+
 }
