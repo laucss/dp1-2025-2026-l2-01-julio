@@ -3,12 +3,14 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.maven.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 
 
 
@@ -68,16 +70,42 @@ public class PlayerService {
         return playerRepository.findByMatchId(matchId);
     }
 
+    /*
+     * Método que calcula los puntos de acción del jugador, los actualiza y los devuelve
+     */
     @Transactional
     public Integer getPlayerActionPoints(Integer matchId, Integer playerId){
+        Player player = findById(playerId); 
+        if (player == null){
+            throw new ResourceNotFoundException("Player not found"); 
+        } 
         HandInGame playerHand = handService.findPlayerHand(matchId, playerId); 
         Integer totalCards = playerHand.getCards().size(); 
 
         if (totalCards > 7 ){
-            return 0; 
+            player.setActionPoints(0); 
         } else {
-            return 7 - totalCards; 
+            Integer points=  7 - totalCards; 
+            player.setActionPoints(points);
         } 
+        playerRepository.save(player); 
+        return player.getActionPoints();
+    }
+    
+    /*
+     * Método para quitar un punto de acción a un jugador
+     */
+
+    @Transactional
+    public void removePlayerActionPoint(Integer matchId, Integer playerId){
+        Player player = playerRepository.findById(playerId).orElse(null); 
+        if (player != null && player.getMatch().getId().equals(matchId)){
+            Integer current_action_points = player.getActionPoints(); 
+            if (current_action_points > 0){
+                player.setActionPoints(current_action_points - 1); 
+                playerRepository.save(player); 
+            }
+        }
     }
 
 

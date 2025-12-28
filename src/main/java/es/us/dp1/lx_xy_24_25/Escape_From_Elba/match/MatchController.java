@@ -49,16 +49,16 @@ import jakarta.validation.Valid;
 public class MatchController {
     MatchService ms;
     LobbyService ls;
-    PlayerService ps;
+    PlayerService playerService;
     HandService handService; 
     BagService bagService; 
     DeckService deckService; 
 
     @Autowired
-    public MatchController(MatchService ms, LobbyService ls, PlayerService ps, HandService handService, BagService bagService, DeckService deckService){
+    public MatchController(MatchService ms, LobbyService ls, PlayerService playerService, HandService handService, BagService bagService, DeckService deckService){
         this.ms=ms;
         this.ls=ls;
-        this.ps=ps;
+        this.playerService=playerService;
         this.handService=handService; 
         this.bagService=bagService; 
         this.deckService=deckService; 
@@ -98,7 +98,7 @@ public class MatchController {
 
     @GetMapping("/{matchId}/players")
     public List<Player> getPlayersByMatchId(@PathVariable("matchId") Integer matchId) {
-        return ps.getPlayersByMatchId(matchId);
+        return playerService.getPlayersByMatchId(matchId);
     }
 
     @GetMapping("/{matchId}/winner")
@@ -180,7 +180,7 @@ public class MatchController {
 
     @PutMapping("/{matchId}/end")
     public ResponseEntity<MatchDTO> endMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer winnerId) {
-        Player winner = ps.findById(winnerId);
+        Player winner = playerService.findById(winnerId);
         Match ended = ms.endMatch(matchId,winner);
         return ResponseEntity.ok(new MatchDTO(ended));
     }
@@ -239,7 +239,7 @@ public class MatchController {
 
     @PutMapping("/{matchId}/move")
     public ResponseEntity<MatchDTO> moveToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
-        ms.movePlayer(matchId, data.getUserId(), data.getRoomName()); 
+        ms.movePlayerToAdyacentRoom(matchId, data.getUserId(), data.getRoomName()); 
         Match match = ms.getMatchById(matchId);
         return ResponseEntity.ok(new MatchDTO(match)); 
     }
@@ -249,6 +249,12 @@ public class MatchController {
         ms.moveLoserPlayer(matchId, data.getUserId(), data.getRoomName()); 
         Match match = ms.getMatchById(matchId);
         return ResponseEntity.ok(new MatchDTO(match)); 
+    }
+
+    @GetMapping("/{matchId}/{playerId}/actionPoints")
+    public ResponseEntity<Integer> getActionPoints(@PathVariable Integer matchId, @PathVariable Integer playerId) {
+        Integer actionPoints = playerService.getPlayerActionPoints(matchId, playerId); 
+        return ResponseEntity.ok(actionPoints);
     }
 }
 
