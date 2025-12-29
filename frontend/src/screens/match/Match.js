@@ -21,11 +21,11 @@ const currentUser = tokenService.getUser();
 export default function Match(){
     const matchId = getIdFromUrl(2);
     const navigate = useNavigate();
-    const [currentPlayer, setCurrentPlayer] = useState({})
+    const [currentPlayer, setCurrentPlayer] = useState({}) // el jugador asociado al usuario que está "viendo" la pantalla
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
     const [match, setMatch] = useState(null)
-    const [currentTurnUserId, setCurrentTurnUserId] = useState(null)
+    const [currentTurnUserId, setCurrentTurnUserId] = useState(null) // id del usuario al que le toca jugar
 
     // CARTAS
     const [deck, setDeck] = useState([])
@@ -58,7 +58,7 @@ export default function Match(){
     
     // Función para obtener un color único para cada jugador
     const getPlayerColor = (playerId) => {
-        const colors = ['#FF6B6B', '#4ECDC4', '#e838caff', '#e5541aff', '#6c034cff', '#2a15ceff'];
+        const colors = ['#FF6B6B', '#4ECDC4', '#edf463ff', '#e5541aff', '#52a852ff', '#2a15ceff'];
         const allPlayers = match?.players || [];
         const playerIndex = allPlayers.findIndex(p => p.id === playerId);
         return colors[playerIndex % colors.length];
@@ -129,8 +129,39 @@ export default function Match(){
 
     useEffect(() => {
         calculateActionPoints()
-          
     }, [handCards])
+
+
+
+    useEffect(() => {
+        if (currentTurnUserId && currentPlayer[0].user.id === currentTurnUserId){
+            fetchActionPoints()
+        }
+    }, [currentTurnUserId])
+
+
+    
+
+    // console.log('currentPlayer', currentPlayer)
+    const fetchActionPoints = async () => {
+        try {
+            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/actionPoints`, {
+            method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+            })
+
+            if (response.ok){
+                const data = await response.json()
+                setActionPoints(data)
+            }
+        } catch (error) {
+            console.error('error trayendo los puntos de acción del jugador', error)
+        }
+    }
 
 
     const fetchMatchAndPlayers = async () => {
@@ -141,13 +172,14 @@ export default function Match(){
                         Authorization: `Bearer ${jwt}`,
                         Accept: 'application/json',
                         'Content-Type': 'application/json',
-                    },
+                    }
                     })
                 const data = await response.json()
 
                 setMatch(data)
                 setPlayer(data.players)
                 
+
             } catch (error) {
                 
             }
@@ -248,14 +280,11 @@ export default function Match(){
             setDeck(data.deck)
             setHandCards(prev => [...prev, data.card])
             setNumCardsDrawn(prev => prev + 1)
-
             
         } catch (error) {
             console.log('error', error)
             
         }    
-        
-            
 
     }
 
@@ -423,12 +452,13 @@ export default function Match(){
         .catch(err => console.error(err))
     }
 
+    
+
     const currentPlayerTurn = match?.players.find(p => p.user.id === match.currentTurnUserId);
 
     const canDraw = match?.currentTurnUserId === currentUser?.id &&
                 match?.currentTurnPhase === "DRAW" &&
                 numCardsDrawn < 7;
-
 
 
 

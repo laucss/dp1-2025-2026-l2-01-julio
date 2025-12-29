@@ -82,7 +82,7 @@ function App() {
   let adminRoutes = <></>;
   let ownerRoutes = <></>;
   let userRoutes = <></>;
-  let vetRoutes = <></>;
+  //let vetRoutes = <></>; //TODO: BORRAR
   let publicRoutes = <></>;
 
   roles.forEach((role) => {
@@ -142,7 +142,7 @@ function App() {
               {userRoutes}
               {adminRoutes}
               {ownerRoutes}
-              {vetRoutes}
+              {/* {vetRoutes} //TODO: BORRAR */}
             </Routes>         
       </ErrorBoundary>
     </div>
