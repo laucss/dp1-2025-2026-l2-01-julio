@@ -40,7 +40,12 @@ public class PlayerService {
 
     @Transactional(readOnly = true)
     public Player findById(Integer id) {
-        return playerRepository.findById(id).orElse(null);
+        Optional<Player> p = playerRepository.findById(id); 
+        if (p.isPresent()) {
+            return p.get();
+        } else {
+            throw new ResourceNotFoundException("Player not found with id: " + id);
+        }
     }
 
     @Transactional(readOnly = true)

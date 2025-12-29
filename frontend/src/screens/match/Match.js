@@ -132,6 +132,7 @@ export default function Match(){
     }, [handCards])
 
 
+
     useEffect(() => {
         if (currentTurnUserId && currentPlayer[0].user.id === currentTurnUserId){
             fetchActionPoints()
@@ -139,12 +140,7 @@ export default function Match(){
     }, [currentTurnUserId])
 
 
-    const currentPlayerTurn = match?.players.find(p => p.user.id === match.currentTurnUserId);
-
-    const canDraw = match?.currentTurnUserId === currentUser?.id &&
-                match?.currentTurnPhase === "DRAW" &&
-                numCardsDrawn < 7;
-
+    
 
     // console.log('currentPlayer', currentPlayer)
     const fetchActionPoints = async () => {
@@ -457,6 +453,12 @@ export default function Match(){
     }
 
     
+
+    const currentPlayerTurn = match?.players.find(p => p.user.id === match.currentTurnUserId);
+
+    const canDraw = match?.currentTurnUserId === currentUser?.id &&
+                match?.currentTurnPhase === "DRAW" &&
+                numCardsDrawn < 7;
 
 
 

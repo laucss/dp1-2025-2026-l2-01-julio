@@ -29,6 +29,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
+import jakarta.persistence.criteria.CriteriaBuilder.In;
 
 @Service
 public class MatchService {
@@ -269,9 +270,9 @@ public class MatchService {
 
 
 
-    /*
-     * METODOS RELACIONADOS CON LAS CARTAS 
-     */
+    
+    // -------------------------------------------- METODOS RELACIONADOS CON LAS CARTAS ----------------------------------------------------------------------
+
 
 
     /*
@@ -290,38 +291,8 @@ public class MatchService {
     }
 
     /*
-     * Jugador roba una carta de la mano o bolsa de otro jugador
+     * Método que devuelve el estado de todas las cartas relacionadas con un jugador en una partida
      */
-
-    @Transactional
-    public void playerDrawsCardFromAnotherPlayer(Card card, Integer matchId, Integer playerIdWinner, Integer PlayerIdLoser){
-        //actualizar puntos de acción del jugador
-    
-
-    }
-
-    /*
-     * Jugador descarta una carta de su bolsa o mano
-     * Jugador pierde contra no jugador
-     */
-
-    @Transactional
-    public void playerLosesAgaintsNonPlayer(Card card, Integer matchId, Integer playerId){
-        //actualizar puntos de acción del jugador
-    
-    }
-
-    /*
-     * Jugador recibe la primera carta del mazo de descartes (si hay) tras vencer a niall
-     */
-
-    @Transactional
-    public void playerWinsNiallCampbell(Integer matchId, Integer playerId){
-        Card discardedCard = deckService.getAndRemoveLastDiscardedCard(matchId); 
-
-        handService.addCardToPlayerHand(discardedCard, matchId, playerId);
-        //actualizar puntos de acción del jugador
-    }
 
     @Transactional(readOnly = true)
     public AllCardsStatusDTO getAllCards (Integer matchId, Integer playerId){
@@ -334,18 +305,6 @@ public class MatchService {
         return new AllCardsStatusDTO(hand, bag, deck, playerId); 
     }
 
-    @Transactional
-    public Player getMatchWinner(Integer matchId) {
-        Match match = matchRepo.findById(matchId)
-                .orElseThrow(() -> new IllegalArgumentException("Match not found"));
-
-        if (match.getStatus() != MatchStatus.FINISHED) {
-            throw new IllegalStateException("Match is not finished yet");
-        }
-
-        return match.getWinner();
-    }
-    
     /*
      * Inicializa las manos de los jugadores y el mazo de cartas para una partida
      * También actualiza / inicializa el valor de los puntos de acción de cada jugador
@@ -368,6 +327,142 @@ public class MatchService {
         return deck;     
 
     }
+
+
+    // ------------------------------------------- FUNCIONES LLEVADAS A CABO EN LAS PELEAS -------------------------------------------------------------------
+
+    /*
+     * JUGADOR GANA A JUGADOR 
+     * Contexto: es una pelea entre dos jugadores activos, quien gana roba una carta del perdedor
+     * La carta que puede robar el ganador puede ser de la mano o de la bolsa del perdedor, si es de la bolsa la elige deliberadamente, 
+     * si es de la mano es aleatoriamente  
+     * 
+     * la carta robada siempre va a la mano del ganador y si el perdedor es el jugador con el turno actual, pierde todos sus puntos de acción
+     * 
+     * fromWhere indica si la carta robada es de la mano ("hand") o de la bolsa ("bag")
+     * 
+     * el winnerId y el loserId son los ids de los players no de los users
+     */
+
+    @Transactional
+    public void playerDrawsCardFromAnotherPlayerBag(Card card, Integer matchId, Integer winnerId, Integer loserId, String fromWhere, Integer currentTurnUserId){
+        // checkeamos que ambos jugadores existen en la partida
+        Player loser = playerService.findById(loserId); 
+        playerService.findById(winnerId);
+
+        // quitamos la carta de la mano o bolsa del perdedor y se la añadimos a la mano del ganador
+
+        if (fromWhere.equals("hand")){ 
+            handService.removeCardFromPlayerHand(card, matchId, loserId);
+            handService.addCardToPlayerHand(card, matchId, winnerId);
+
+        } else if (fromWhere.equals("bag")){
+            bagService.removeCardFromPlayerBag(card, matchId, loserId);
+            handService.addCardToPlayerHand(card, matchId, winnerId); 
+        
+        } else {
+            throw new IllegalArgumentException("fromWhere must be 'hand' or 'bag'");
+        }
+
+        // le quitamos todos los puntos de acción al perdedor si es su turno actual
+        if (loserId.equals(currentTurnUserId)){
+            loser.setActionPoints(0);
+            playerService.save(loser);
+        }
+        
+    }
+
+
+
+    /*
+     * JUGADOR GANA A NO-JUGADOR 
+     * Contexto: un jugador activo vence a un npc (no jugador) en una pelea
+     * Resultado: el jugador roba una carta del mazo, el npc suma un punto a su fuerza
+     */
+
+    @Transactional
+    public Card playerBeatsNonPlayer(Integer matchId, Integer playerId, Integer npcId){
+        // TODO: hay que hacer la gestión de los npcs, services, repositorios, etc
+
+        Card stolenCard =deckService.drawCard(matchId);
+        handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+
+        // A LO MEJOR HAY QUE PASAR EL NPC NO SOLO SU ID
+        // actualizar fuerza del npc
+        // npc.setStrength(npc.getStrength() + 1);
+        return stolenCard;
+    
+    }
+
+    /*
+     * JUGADOR GANA NIALL CAMPBELL
+     * Contexto: un jugador activo vence a Niall Campbell en una pelea
+     * Resultado: el jugador recibe la última carta descartada del mazo, si la hay 
+     */
+
+    @Transactional
+    public Card playerWinsNiallCampbell(Integer matchId, Integer playerId){
+        Card discardedCard = deckService.getAndRemoveLastDiscardedCard(matchId); 
+
+        if (discardedCard != null){
+             // no hay carta descartada que dar al jugador
+             handService.addCardToPlayerHand(discardedCard, matchId, playerId);
+             return discardedCard;
+        } else {
+            return null; 
+        }
+        
+    }
+
+
+    /*
+     * NO-JUGADOR GANA A JUGADOR
+     * Contexto: un jugador activo pierde contra un npc (no jugador) en una pelea
+     * Resultado: el jugador pierde la carta que el quiera de su mano o bolsa, y pierde todos sus puntos de acción
+     * 
+     * fromWhere indica si la carta perdida es de la mano ("hand") o de la bolsa ("bag")
+     */
+
+    @Transactional
+    public void playerLosesAgaintsNonPlayer(Card card, Integer matchId, Integer playerId, Integer currentTurnUserId, String fromWhere){
+        //actualizar puntos de acción del jugador, pierde todos sus puntos de acción
+        /*
+        Player player = playerService.findById(playerId);
+        if (player.getUser().getId() == currentTurnUserId){
+            player.setActionPoints(0);  
+            playerService.save(player);
+        }
+         */
+
+        if (fromWhere.equals("hand")){
+            handService.removeCardFromPlayerHand(card, matchId, playerId);
+        } else if (fromWhere.equals("bag")){
+            bagService.removeCardFromPlayerBag(card, matchId, playerId); 
+        } else {
+            throw new IllegalArgumentException("fromWhere must be 'hand' or 'bag'");
+        }
+
+        // añadimos la carta seleccionada al mazo de descartes
+        deckService.addCardToDiscardedPile(matchId, card);
+            
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+
+    @Transactional
+    public Player getMatchWinner(Integer matchId) {
+        Match match = matchRepo.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match not found"));
+
+        if (match.getStatus() != MatchStatus.FINISHED) {
+            throw new IllegalStateException("Match is not finished yet");
+        }
+
+        return match.getWinner();
+    }
+    
+    
 
 
     //Función para mover un jugador de una sala a otra adyacente

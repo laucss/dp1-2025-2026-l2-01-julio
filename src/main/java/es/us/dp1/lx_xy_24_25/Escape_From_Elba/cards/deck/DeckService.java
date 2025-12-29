@@ -180,8 +180,12 @@ public class DeckService {
         DeckInGame deck = findDeckById(macthId);
 
         List<Card> discardedCards = deck.getDiscardedCards();
-
-        return discardedCards.removeLast(); 
+        if (discardedCards.isEmpty()){
+            return null; 
+        } else {
+            return discardedCards.removeLast(); 
+        }
+        
     }
      
     
