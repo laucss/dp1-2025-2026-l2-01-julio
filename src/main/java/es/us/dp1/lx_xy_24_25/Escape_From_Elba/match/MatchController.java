@@ -23,8 +23,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DTOs.AllCardsStatusDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DTOs.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
