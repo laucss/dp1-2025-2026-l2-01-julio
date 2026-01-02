@@ -45,6 +45,7 @@ public class MatchService {
     PlayerService playerService; 
     Random ran = new Random();
     LobbyWebsocketController lobbyWebsocketController;
+    MatchWebsocketController matchWebsocketController;
 
     MatchRepository matchRepo;
     PlayerRepository playerRepo;
@@ -54,7 +55,8 @@ public class MatchService {
     @Autowired
     public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, 
             RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
-            PlayerService playerService, LobbyWebsocketController lobbyWebsocketController) {
+            PlayerService playerService, LobbyWebsocketController lobbyWebsocketController,
+            MatchWebsocketController matchWebsocketController) {
         this.matchRepo = mrepo;
         this.playerRepo = playerRepo;
         this.roomRepository = roomRepository;
@@ -64,6 +66,7 @@ public class MatchService {
         this.bagService = bagService; 
         this.playerService = playerService;
         this.lobbyWebsocketController = lobbyWebsocketController;
+        this.matchWebsocketController = matchWebsocketController;
     }
 
     @Transactional(readOnly = true)
@@ -218,6 +221,16 @@ public class MatchService {
             match.setTurnNumber(1);
             match.setCurrentTurnPhase(TurnPhase.DRAW);
             matchRepo.save(match);
+            
+            // Notificar a todos los jugadores que el turno ha comenzado
+            TurnUpdateDTO turnUpdate = new TurnUpdateDTO(
+                matchId,
+                ordered.get(0).getUser().getId(),
+                ordered.get(0).getUser().getUsername(),
+                1,
+                TurnPhase.DRAW.toString()
+            );
+            matchWebsocketController.notifyTurnUpdate(matchId, turnUpdate);
         }
 
         return match;
@@ -249,6 +262,17 @@ public class MatchService {
         m.setCurrentTurnPhase(TurnPhase.DRAW);
 
         matchRepo.save(m);
+        
+        // Notificar a todos los jugadores el cambio de turno
+        TurnUpdateDTO turnUpdate = new TurnUpdateDTO(
+            matchId,
+            nextPlayerTurn.getUser().getId(),
+            nextPlayerTurn.getUser().getUsername(),
+            m.getTurnNumber(),
+            TurnPhase.DRAW.toString()
+        );
+        matchWebsocketController.notifyTurnUpdate(matchId, turnUpdate);
+        
         return m;
  
     }

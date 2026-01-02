@@ -2,9 +2,12 @@ import React, {useState, useEffect} from 'react';
 import '../../static/css/match/fightModal.css';
 import Fight from '../../static/images/Fight.png';
 import tokenService from '../../services/token.service';
+import getIdFromUrl from '../../util/getIdFromUrl';
 
-export default function FightModal({ isOpen, onClose, opponent, attacker, onResolve }) {
+export default function FightModal({ isOpen, onClose, opponent, attacker, onResolve, stompClient }) {
     const currentUser = tokenService.getUser();
+    const jwt = tokenService.getLocalAccessToken();
+    const matchId = getIdFromUrl(2);
     const isAttacker = currentUser?.id === attacker?.user?.id;
     const isOpponent = currentUser?.id === opponent?.user?.id;
 
@@ -12,6 +15,35 @@ export default function FightModal({ isOpen, onClose, opponent, attacker, onReso
     const [blackDice, setBlackDice] = useState('1');
     const [whiteRolled, setWhiteRolled] = useState(false);
     const [blackRolled, setBlackRolled] = useState(false);
+
+    // Suscribirse a las actualizaciones de dados en combate
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !isOpen) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight.dice`, (msg) => {
+            const diceUpdate = JSON.parse(msg.body);
+            
+            if (diceUpdate.diceType === 'WHITE') {
+                setWhiteDice(diceUpdate.diceValue.toString());
+                setWhiteRolled(true);
+            } else if (diceUpdate.diceType === 'BLACK') {
+                setBlackDice(diceUpdate.diceValue.toString());
+                setBlackRolled(true);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, isOpen]);
+
+    // Resetear dados cuando se abre el modal
+    useEffect(() => {
+        if (isOpen) {
+            setWhiteDice('1');
+            setBlackDice('1');
+            setWhiteRolled(false);
+            setBlackRolled(false);
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (whiteRolled && blackRolled) {
@@ -26,8 +58,27 @@ export default function FightModal({ isOpen, onClose, opponent, attacker, onReso
         }
     }, [whiteRolled, blackRolled]);
 
-    const rollDice = (diceType) => {
+    const rollDice = async (diceType) => {
         const roll = Math.floor(Math.random() * 6) + 1;
+        const diceTypeUpper = diceType === 'Negro' ? 'BLACK' : 'WHITE';
+        
+        // Notificar a todos los jugadores sobre la tirada
+        await fetch(`/api/v1/matches/${matchId}/notify-fight-dice`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${jwt}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                matchId: matchId,
+                playerId: currentUser.id,
+                playerUsername: currentUser.username,
+                diceType: diceTypeUpper,
+                diceValue: roll
+            })
+        });
+
+        // Actualizar localmente también
         if (diceType === 'Negro') {
             setBlackDice(roll.toString());
             setBlackRolled(true);

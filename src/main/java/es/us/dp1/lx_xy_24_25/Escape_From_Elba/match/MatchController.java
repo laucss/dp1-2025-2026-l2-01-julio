@@ -52,16 +52,19 @@ public class MatchController {
     PlayerService playerService;
     HandService handService; 
     BagService bagService; 
-    DeckService deckService; 
+    DeckService deckService;
+    MatchWebsocketController matchWebsocketController;
 
     @Autowired
-    public MatchController(MatchService ms, LobbyService ls, PlayerService playerService, HandService handService, BagService bagService, DeckService deckService){
+    public MatchController(MatchService ms, LobbyService ls, PlayerService playerService, HandService handService, 
+                          BagService bagService, DeckService deckService, MatchWebsocketController matchWebsocketController){
         this.ms=ms;
         this.ls=ls;
         this.playerService=playerService;
         this.handService=handService; 
         this.bagService=bagService; 
-        this.deckService=deckService; 
+        this.deckService=deckService;
+        this.matchWebsocketController=matchWebsocketController;
     }
 
     @GetMapping
@@ -256,5 +259,18 @@ public class MatchController {
         Integer actionPoints = playerService.getPlayerActionPoints(matchId, playerId); 
         return ResponseEntity.ok(actionPoints);
     }
-}
 
+    @PostMapping("/{matchId}/notify-fight")
+    @Operation(summary = "Notify fight", description = "Notifies all players when a fight is initiated.")
+    public ResponseEntity<Void> notifyFight(@PathVariable Integer matchId, @RequestBody FightUpdateDTO fightUpdate) {
+        matchWebsocketController.notifyFightUpdate(matchId, fightUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/notify-fight-dice")
+    @Operation(summary = "Notify fight dice", description = "Notifies all players when a dice is rolled during a fight.")
+    public ResponseEntity<Void> notifyFightDice(@PathVariable Integer matchId, @RequestBody FightDiceUpdateDTO diceUpdate) {
+        matchWebsocketController.notifyFightDiceUpdate(matchId, diceUpdate);
+        return ResponseEntity.ok().build();
+    }
+}
