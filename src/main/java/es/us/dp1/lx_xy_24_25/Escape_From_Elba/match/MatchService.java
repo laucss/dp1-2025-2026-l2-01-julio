@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -22,6 +23,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
@@ -41,6 +44,7 @@ public class MatchService {
     BagService bagService;
     PlayerService playerService; 
     Random ran = new Random();
+    LobbyWebsocketController lobbyWebsocketController;
 
     MatchRepository matchRepo;
     PlayerRepository playerRepo;
@@ -50,7 +54,7 @@ public class MatchService {
     @Autowired
     public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, 
             RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
-            PlayerService playerService) {
+            PlayerService playerService, LobbyWebsocketController lobbyWebsocketController) {
         this.matchRepo = mrepo;
         this.playerRepo = playerRepo;
         this.roomRepository = roomRepository;
@@ -59,6 +63,7 @@ public class MatchService {
         this.handService = handService;
         this.bagService = bagService; 
         this.playerService = playerService;
+        this.lobbyWebsocketController = lobbyWebsocketController;
     }
 
     @Transactional(readOnly = true)
@@ -149,7 +154,23 @@ public class MatchService {
         m.setCurrentTurnUserId(null);
         m.setTurnNumber(0);
         matchRepo.save(m);
+        
+        LobbyUpdateDTO update = createLobbyUpdate(m, "START", "");
+        lobbyWebsocketController.notifyGameStarted(matchId, update);
+        
         return m;
+    }
+    
+    private LobbyUpdateDTO createLobbyUpdate(Match match, String action, String username) {
+        List<LobbyUpdateDTO.PlayerLobbyDTO> players = new ArrayList<>();
+        for (Player p : match.getPlayers()) {
+            players.add(new LobbyUpdateDTO.PlayerLobbyDTO(
+                p.getUser().getId(),
+                p.getUser().getUsername(),
+                p.getUser().getAvatar()
+            ));
+        }
+        return new LobbyUpdateDTO(match.getId(), players, action, username);
     }
 
     //Función para decidir el orden de los jugadores en la partida según la tirada de dados.

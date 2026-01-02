@@ -1,5 +1,7 @@
 import React, {useState, useEffect, useRef} from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 import useFetchState from "../../util/useFetchState";
 import '../../static/css/home/waitingRoom.css';
 import { Button, Table } from "reactstrap";
@@ -15,6 +17,7 @@ export default function WaitingRoom() {
   const [visible, setVisible] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const countdownRef = useRef(null);
+  const [stompClient, setStompClient] = useState(null);
   const userId = tokenService.getUser().id;
 
   const [lobby, setLobby] = useFetchState(
@@ -24,6 +27,54 @@ export default function WaitingRoom() {
       setMessage,
       setVisible
     );
+
+  // Inicializar conexión WebSocket para el lobby
+  useEffect(() => {
+    const client = new Client({
+      brokerURL: 'ws://localhost:8080/ws',
+      connectHeaders: { 'Authorization': `Bearer ${jwt}` },
+      onConnect: () => setStompClient(client)
+    });
+
+    client.activate();
+    return () => client.active && client.deactivate();
+  }, [jwt]);
+
+  // Suscribirse a las actualizaciones del lobby
+  useEffect(() => {
+    if (!stompClient || !stompClient.active) return;
+
+    const subscription = stompClient.subscribe(`/topic/lobby.${matchId}.updates`, (msg) => {
+      const update = JSON.parse(msg.body);
+      
+      setLobby(prevLobby => ({
+        ...prevLobby,
+        players: update.players.map(p => ({
+          user: {
+            id: p.userId,
+            username: p.username,
+            avatar: p.avatar
+          }
+        }))
+      }));
+
+      if (update.action === 'JOIN') {
+        setMessage(`${update.username} joinned the lobby`);
+        setVisible(true);
+      } else if (update.action === 'LEAVE') {
+        setMessage(`${update.username} left the lobby`);
+        setVisible(true);
+      } else if (update.action === 'START') {
+        navigate(`/match/${matchId}`);
+      } else if (update.action === 'DELETED') {
+        setMessage(`The lobby was closed by the creator`);
+        setVisible(true);
+        setTimeout(() => navigate('/lobbies'), 2000);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [stompClient, matchId]);
 
 
 
