@@ -374,6 +374,6 @@
   text-align: center;
   font-size: 1.16rem; /* increased font size to reduce perceived empty space */
   margin: 0.6rem 0; /* smaller margins */
-  color: white;
+  color: #555; /* gris igual que otros modales */
   line-height: 1.3;
 }
