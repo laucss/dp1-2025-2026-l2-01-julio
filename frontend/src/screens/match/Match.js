@@ -44,7 +44,8 @@ export default function Match(){
     const [diceRolled, setDiceRolled] = useState(false)
 
     const [chatOpen, setChatOpen] = useState(false)
-    const [actionPoints, setActionPoints] = useState(null)
+    const [actionPoints, setActionPoints] = useState(0)
+    const [strength, setStrength] = useState(1)
     const [moveToAdyacentRoom, setMoveToAdyacentRoom] = useState(false)
 
     
@@ -200,12 +201,14 @@ export default function Match(){
             if (player && Array.isArray(player)){
                 setPlayersList(player.filter(p => p.user.id !== currentUser?.id))
                 setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
+                
             }
     }, [match])
 
     useEffect(() => {
         if (Array.isArray(currentPlayer) && currentPlayer[0]?.id){
             fetchCards()
+            setStrength(currentPlayer[0].strength)
         }     
     }, [currentPlayer])
 
@@ -592,7 +595,7 @@ if (!match) {
     return <div>Cargando partida...</div>;
 }
 
-
+console.log('currentplayer', currentPlayer)
 
 return (
         <div className="match-container">
@@ -808,10 +811,18 @@ return (
                     </button>
                 </div>
             </div>
-            <div className="action-points-section">
-                <h1>{actionPoints}</h1>
-                <p>Action points </p>
+            <div className="points-section">
+                <div className="action-points">
+                    <h1>{actionPoints}</h1>
+                    <p>Action points </p>
+                </div>
+
+                <div className="action-points">
+                    <h1>{strength}</h1>
+                    <p>strength </p>
+                </div>
             </div>
+            
 
             {/* TABLA DE JUGADORES Y NPCS */}
             <div
@@ -1019,7 +1030,7 @@ return (
                         alert('No se pudo mover al perdedor. Revisa la consola para más detalles.');
                     } else {
                         console.log('Loser moved to', randomRoom, moveResult);
-                    }
+                        }
 
                     // Si ganó el atacante, muévelo a la antigua sala del defensor
                     if (attackerWins && defenderRoomName) {
@@ -1028,6 +1039,7 @@ return (
                             console.error('Failed to move attacker (winner) to defender room', defenderRoomName);
                         } else {
                             console.log('Attacker moved to defender room', defenderRoomName, moveWinner);
+
                         }
                     }
 

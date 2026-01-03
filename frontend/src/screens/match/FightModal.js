@@ -8,9 +8,20 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     const currentUser = tokenService.getUser();
     const jwt = tokenService.getLocalAccessToken();
     const matchId = getIdFromUrl(2);
-    
     const isAttacker = currentUser?.id === attacker?.user?.id;
     const isDefender = currentUser?.id === defender?.user?.id;
+
+    // fuerza de cada jugador 
+    const [attackerStrength, setAttackerStrength] = useState(attacker?.strength || 1);
+    const [defenderStrength, setDefenderStrength] = useState(defender?.strength || 1);
+
+    //total de puntos
+    const [totalAttacker, setTotalAttacker] = useState(0)
+    const [totalDefender, setTotalDefender] = useState(0)
+
+    // puntos de los bonus de armas
+    const [weaponsAttacker, setWeaponsAttacker] = useState(0);
+    const [weaponsDefender, setWeaponsDefender] = useState(0);
 
     const [whiteDice, setWhiteDice] = useState('1');
     const [blackDice, setBlackDice] = useState('1');
@@ -43,6 +54,13 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
             setBlackDice('1');
             setWhiteRolled(false);
             setBlackRolled(false);
+
+            setTotalAttacker(attackerStrength)
+            setTotalDefender(defenderStrength)
+
+            setWeaponsAttacker(0);
+            setWeaponsDefender(0);
+
         }
     }, [isOpen]);
 
@@ -81,10 +99,12 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
 
         // Actualizar localmente también
         if (diceType === 'Negro') {
+            setTotalDefender(totalDefender+roll + weaponsDefender)
             setBlackDice(roll.toString());
             setBlackRolled(true);
         }
         if (diceType === 'Blanco') {
+            setTotalAttacker(totalDefender+roll + weaponsAttacker)
             setWhiteDice(roll.toString());
             setWhiteRolled(true);
         }
@@ -96,47 +116,102 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     return (
         <div className="modal-fight-overlay" onClick={onClose}>
             <div className="modal-fight-content-wrapper" onClick={(e) => e.stopPropagation()}>
-                <img src={Fight} alt="Fight" style={{ alignSelf: 'center', width: '75%', borderRadius: '10px' }} />
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <img 
-                            src={attacker.user.avatar}
-                            alt={`${attacker.user.username}'s avatar`}
-                            style={{ width: '40px', height: '40px', borderRadius: '50%' }}
-                        />
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ marginBottom: 6 }}>{attacker?.user?.username || 'Atacante'}</div>
-                            <button
-                                onClick={() => rollDice('Blanco')}
-                                style={{ border: "none", background: "transparent", padding: 0, cursor: whiteRolled ? 'not-allowed' : 'pointer' }}
-                                title="Dado Blanco"
-                                disabled={!isAttacker || whiteRolled}
-                            >
-                                <img src={`/Dice/B${whiteDice}.png`} alt="Dado Blanco" style={{ width: "80px", height: "auto", borderRadius: '18px' }} />
-                            </button>
+                
+                <div className='combat-container'>
+                    
+                    <div className='combat-top'> 
+
+                        <div className='combat-panel'> {/*zona del atacante */}
+                            <div className='combat-header'> 
+                                <span>{attacker?.user?.username || 'Attacker'}</span>
+                                <img 
+                                    src={attacker.user.avatar}
+                                    alt={`${attacker.user.username}'s avatar`}
+                                    style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                                />
+                            </div>
+
+                            <div className="total-box">{totalAttacker}</div>
+
+                            {/*FUERZA */}
+                            <div className="calc-row">
+                                <div className="calc-box"> Strength: {attackerStrength}</div>
+
+                                <span className="calc-operator">+</span>
+                                        
+                                <button
+                                    onClick={() => rollDice('Blanco')}
+                                    className='dice-button'
+                                    title="Dado Blanco"
+                                    disabled={!isAttacker || whiteRolled}
+                                >
+                                    <img src={`/Dice/B${whiteDice}.png`} alt="Dado Blanco" className='dice' />
+                                </button>
+
+                                <span className="calc-operator">+</span>
+
+                                <div className="calc-box">Weapons: {weaponsAttacker}</div>
+                            </div>
+        
                         </div>
+
+                        <div className='vs-container'>
+                            <img src={Fight} alt="Fight" className="fight-logo-central" />
+                        </div>
+
+                        <div className='combat-panel'> {/*zona del oponente */}
+                            <div className='combat-header'> 
+                                <span>{defender?.user?.username || "Defender"}</span>
+                                <img 
+                                    src={defender.user.avatar}
+                                    alt={`${defender.user.username}'s avatar`}
+                                    style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                                />
+                            </div>
+
+                            <div className="total-box">{totalDefender}</div>
+
+                            {/*FUERZA */}
+                            <div className="calc-row">
+                                <div className="calc-box">Strength: {defenderStrength}</div>
+
+                                <span className="calc-operator">+</span>
+                                        
+                                <button
+                                    onClick={() => rollDice("Negro")}
+                                    disabled={!isDefender || blackRolled}
+                                    className='dice-button'
+                                    title="Dado Negro"
+
+                                >
+                                    <img src={`/Dice/N${blackDice}.png`} alt="Dado Negro" className='dice' />
+                                </button>
+
+                                <span className="calc-operator">+</span>
+
+                                <div className="calc-box">Weapons: {weaponsDefender}</div>
+                            </div>
+                            
+                        </div>
+
+
                     </div>
 
-                    <div style={{ width: 30, textAlign: 'center' }}>VS</div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ marginBottom: 6 }}>{defender?.user?.username || 'Defensor'}</div>
-                            <button
-                                onClick={() => rollDice('Negro')}
-                                style={{ border: "none", background: "transparent", padding: 0, cursor: blackRolled ? 'not-allowed' : 'pointer' }}
-                                title="Dado Negro"
-                                disabled={!isDefender || blackRolled}
-                            >
-                                <img src={`/Dice/N${blackDice}.png`} alt="Dado Negro" style={{ width: "80px", height: "auto", borderRadius: '18px' }} />
-                            </button>
+                    {/* ZONA INFERIOR */}
+                    <div className="combat-bottom"> 
+
+                        <div className='actions'>
+                            <button className="action-button">Formar arma</button>
                         </div>
-                        <img 
-                            src={defender.user.avatar}
-                            alt={`${defender.user.username}'s avatar`}
-                            style={{ width: '40px', height: '40px', borderRadius: '50%' }}
-                        />
+
+                        <div className='actions'>
+                            <button className="action-button">Formar arma</button>
+                        </div>
+
                     </div>
+
+
                 </div>
             </div>
         </div>

@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
@@ -164,6 +164,7 @@ public class MatchService {
         return m;
     }
     
+    @Transactional
     private LobbyUpdateDTO createLobbyUpdate(Match match, String action, String username) {
         List<LobbyUpdateDTO.PlayerLobbyDTO> players = new ArrayList<>();
         for (Player p : match.getPlayers()) {
@@ -345,7 +346,7 @@ public class MatchService {
 
         HandInGameDTO hand = new HandInGameDTO(handService.findPlayerHand(matchId, playerId)); 
 
-        BagInGameDTO bag = new BagInGameDTO(bagService.findPlayerBag(matchId, playerId));
+        ListCardsDTO bag = new ListCardsDTO(bagService.findPlayerBag(matchId, playerId));
 
         return new AllCardsStatusDTO(hand, bag, deck, playerId); 
     }
@@ -565,11 +566,13 @@ public class MatchService {
         //Recuperar la sala destino
         Room targetRoom = roomRepository.findByName(targetRoomName)
             .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
-        //Actualizar la sala del jugador
+        //Actualizar la sala y fuerza del jugador
         player.setRoom(targetRoom);
+        player.setStrength(player.getStrength() + 1);
         //Guardar cambios
 
         return playerRepo.save(player);
     }
+
 
 }
