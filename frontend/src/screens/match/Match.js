@@ -55,12 +55,13 @@ export default function Match(){
 
     const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
     const [isFightModalOpen, setIsFightModalOpen] = useState(false);
-    const [fightOpponent, setFightOpponent] = useState(null);
+    const [fightDefender, setFightDefender] = useState(null);
+    const [fightAttacker, setFightAttacker] = useState(null);
     const [pendingTargetRoom, setPendingTargetRoom] = useState(null);
     
     // Función para obtener un color único para cada jugador
     const getPlayerColor = (playerId) => {
-        const colors = ['#FF6B6B', '#4ECDC4', '#edf463ff', '#e5541aff', '#52a852ff', '#2a15ceff'];
+        const colors = ['#FF6B6B', '#4ECDC4', '#f833e4ff', '#e5541aff', '#52a852ff', '#2a15ceff'];
         const allPlayers = match?.players || [];
         const playerIndex = allPlayers.findIndex(p => p.id === playerId);
         return colors[playerIndex % colors.length];
@@ -149,13 +150,15 @@ export default function Match(){
             const fightUpdate = JSON.parse(msg.body);
             
             if (fightUpdate.action === 'START') {
-                // Encontrar el oponente en la lista de jugadores
-                const opponent = match?.players?.find(p => 
-                    p.user.id === fightUpdate.defenderId || p.user.id === fightUpdate.attackerId && p.user.id !== currentUser.id
-                );
+                // Identificar al atacante (quien inicia la batalla)
+                const attacker = match?.players?.find(p => p.user.id === fightUpdate.attackerId);
                 
-                if (opponent) {
-                    setFightOpponent(opponent);
+                // Identificar al defensor (quien está en la habitación)
+                const defender = match?.players?.find(p => p.user.id === fightUpdate.defenderId);
+                
+                if (attacker && defender) {
+                    setFightAttacker(attacker);
+                    setFightDefender(defender);
                     setPendingTargetRoom(fightUpdate.roomName);
                     setIsFightModalOpen(true);
                 }
@@ -164,6 +167,34 @@ export default function Match(){
 
         return () => subscription.unsubscribe();
     }, [stompClient, matchId, match, currentUser]);
+
+
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.location`, (msg) => {
+            const locationUpdate = JSON.parse(msg.body);
+            
+            setMatch(prevMatch => {
+                if (!prevMatch || !prevMatch.players) return prevMatch;
+                
+                return {
+                    ...prevMatch,
+                    players: prevMatch.players.map(p => {
+                        if (p.id === locationUpdate.playerId) {
+                            return {
+                                ...p,
+                                currentRoom: locationUpdate.newRoom
+                            };
+                        }
+                        return p;
+                    })
+                };
+            });
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
 
     useEffect(() => {
             if (player && Array.isArray(player)){
@@ -387,11 +418,11 @@ export default function Match(){
     };
 
     const throwDice = () => {
-    if (diceRolled) return; // Evitamos tirar más de una vez
+    if (diceRolled) return;
 
         const [white,black] = rollDice();
         submitDiceToBackend(white+black);
-        setDiceRolled(true); // Marcamos que ya tiró
+        setDiceRolled(true); 
     };
 
     const move = async (roomName) => {
@@ -407,14 +438,11 @@ export default function Match(){
                 ));
 
                 if (otherPlayer) {
-                    // Abrir modal de pelea en lugar de intentar mover si hay otro player
-                    // Guardamos la habitación que intentaba ocupar para mover al ganador después
                     setPendingTargetRoom(roomName);
-                    setFightOpponent(otherPlayer);
+                    setFightDefender(otherPlayer);
                     setIsFightModalOpen(true);
                     setMoveToAdyacentRoom(false);
                     
-                    // Notificar a todos los jugadores sobre el combate
                     await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
                         method: 'POST',
                         headers: {
@@ -898,19 +926,38 @@ return (
 
     <FightModal
             isOpen={isFightModalOpen}
-            onClose={() => { setIsFightModalOpen(false); setFightOpponent(null); }}
-            opponent={fightOpponent}
-            attacker={currentPlayerTurn}
+            onClose={() => { setIsFightModalOpen(false); setFightDefender(null); setFightAttacker(null); }}
+            defender={fightDefender}
+            attacker={fightAttacker}
             stompClient={stompClient}
             onResolve={async (currentUserWon) => {
                 try {
-                    console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightOpponent=', fightOpponent);
-                    const winner = currentUserWon ? currentUser : fightOpponent?.user;
-                    const loser = currentUserWon ? fightOpponent?.user : currentUser;
+                    console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightDefender=', fightDefender, 'fightAttacker=', fightAttacker);
+                    const isCurrentAttacker = currentUser.id === fightAttacker?.user?.id;
+                    const isCurrentDefender = currentUser.id === fightDefender?.user?.id;
 
-                    if (!loser) {
+                    // Solo el atacante orquesta los movimientos para evitar duplicados
+                    if (!isCurrentAttacker) {
                         setIsFightModalOpen(false);
-                        setFightOpponent(null);
+                        setFightDefender(null);
+                        setFightAttacker(null);
+                        setPendingTargetRoom(null);
+                        return;
+                    }
+
+                    const defenderRoomName = fightDefender?.currentRoom?.name || fightDefender?.roomName || fightDefender?.room?.name || pendingTargetRoom;
+
+                    // currentUserWon aquí representa si el atacante ganó (porque solo el atacante ejecuta esto)
+                    const attackerWins = currentUserWon;
+                    const loserUser = attackerWins ? fightDefender?.user : fightAttacker?.user;
+                    const winnerUser = attackerWins ? fightAttacker?.user : fightDefender?.user;
+
+                    // Si no hay perdedor identificado, no mover
+                    if (!loserUser) {
+                        setIsFightModalOpen(false);
+                        setFightDefender(null);
+                        setFightAttacker(null);
+                        setPendingTargetRoom(null);
                         return;
                     }
                     const allRooms = [
@@ -920,7 +967,7 @@ return (
                         "Cellar","Apple Room","Parole Room","Map Room","Corridor 1","Corridor 2","Corridor 3",
                         "Corridor 4","Corridor 5","Corridor 6","Corridor 7","Corridor 8","Corridor 9","Corridor 10"
                     ];
-                    const winnerPlayer = match?.players?.find(p => p.user?.id === (winner?.id || winner?.user?.id));
+                    const winnerPlayer = match?.players?.find(p => p.user?.id === (winnerUser?.id || winnerUser?.user?.id));
                     const winnerRoomName = winnerPlayer?.currentRoom?.name || winnerPlayer?.roomName || null;
 
                     const occupiedRooms = new Set();
@@ -937,7 +984,8 @@ return (
                     if (candidates.length === 0) {
                         console.warn('No candidate rooms to move loser');
                         setIsFightModalOpen(false);
-                        setFightOpponent(null);
+                        setFightDefender(null);
+                        setFightAttacker(null);
                         return;
                     }
                     let randomRoom = null;
@@ -965,38 +1013,28 @@ return (
                     //} catch (e) {
                     //    console.debug('Could not record fight event', e);
                     //}
-                    const moveResult = await moveLoserToRandomRoom(loser.id || loser.user?.id || loser, randomRoom);
+                    const moveResult = await moveLoserToRandomRoom(loserUser.id, randomRoom);
                     if (!moveResult) {
                         console.error('Failed to move loser to', randomRoom);
                         alert('No se pudo mover al perdedor. Revisa la consola para más detalles.');
                     } else {
                         console.log('Loser moved to', randomRoom, moveResult);
-                        // Si el usuario actual ganó, movemos al ganador a la habitación que intentaba ocupar
-                        if (currentUserWon) {
-                            try {
-                                const winnerId = currentUser.id;
-                                const targetRoom = pendingTargetRoom;
-                                if (targetRoom) {
-                                    console.log('Moving winner to pending target room', { winnerId, targetRoom });
-                                    const winnerMove = await movePlayerToRoom(winnerId, targetRoom);
-                                    if (!winnerMove) {
-                                        console.error('Failed to move winner to', targetRoom);
-                                    } else {
-                                        console.log('Winner moved to', targetRoom, winnerMove);
-                                    }
-                                } else {
-                                    console.warn('No pending target room to move winner into');
-                                }
-                            } catch (e) {
-                                console.error('Error moving winner to pending room', e);
-                            }
-                            setPendingTargetRoom(null);
+                    }
+
+                    // Si ganó el atacante, muévelo a la antigua sala del defensor
+                    if (attackerWins && defenderRoomName) {
+                        const moveWinner = await movePlayerToRoom(fightAttacker?.user?.id, defenderRoomName);
+                        if (!moveWinner) {
+                            console.error('Failed to move attacker (winner) to defender room', defenderRoomName);
+                        } else {
+                            console.log('Attacker moved to defender room', defenderRoomName, moveWinner);
                         }
                     }
 
                 } finally {
                     setIsFightModalOpen(false);
-                    setFightOpponent(null);
+                    setFightDefender(null);
+                    setFightAttacker(null);
                     setPendingTargetRoom(null);
                 }
             }}
