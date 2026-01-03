@@ -244,6 +244,17 @@ public class MatchController {
     public ResponseEntity<MatchDTO> moveToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
         ms.movePlayerToAdyacentRoom(matchId, data.getUserId(), data.getRoomName()); 
         Match match = ms.getMatchById(matchId);
+        
+        Player movedPlayer = match.getPlayers().stream()
+            .filter(p -> p.getUser().getId().equals(data.getUserId()))
+            .findFirst()
+            .orElse(null);
+        
+        if (movedPlayer != null) {
+            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);
+            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
+        }
+        
         return ResponseEntity.ok(new MatchDTO(match)); 
     }
 
@@ -251,6 +262,18 @@ public class MatchController {
     public ResponseEntity<MatchDTO> moveLoserToRandomRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
         ms.moveLoserPlayer(matchId, data.getUserId(), data.getRoomName()); 
         Match match = ms.getMatchById(matchId);
+        
+        
+        Player movedPlayer = match.getPlayers().stream()
+            .filter(p -> p.getUser().getId().equals(data.getUserId()))
+            .findFirst()
+            .orElse(null);
+        
+        if (movedPlayer != null) {
+            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);
+            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
+        }
+        
         return ResponseEntity.ok(new MatchDTO(match)); 
     }
 
