@@ -27,10 +27,8 @@ public class BagController {
 
 
     @PostMapping("/validate")
-    public ResponseEntity<Boolean> validateWord(@RequestBody BagInGameDTO cardsDTO) {
-        System.out.println(cardsDTO);
+    public ResponseEntity<Boolean> validateWord(@RequestBody ListCardsDTO cardsDTO) {
         Boolean isValid = bagService.checkBagIsValid(cardsDTO.getCards());
-        System.out.println(isValid);
         return ResponseEntity.ok(isValid);
     }
      

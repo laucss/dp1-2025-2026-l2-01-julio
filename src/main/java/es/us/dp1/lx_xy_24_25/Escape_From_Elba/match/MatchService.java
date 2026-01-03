@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
@@ -346,7 +346,7 @@ public class MatchService {
 
         HandInGameDTO hand = new HandInGameDTO(handService.findPlayerHand(matchId, playerId)); 
 
-        BagInGameDTO bag = new BagInGameDTO(bagService.findPlayerBag(matchId, playerId));
+        ListCardsDTO bag = new ListCardsDTO(bagService.findPlayerBag(matchId, playerId));
 
         return new AllCardsStatusDTO(hand, bag, deck, playerId); 
     }
@@ -573,5 +573,6 @@ public class MatchService {
 
         return playerRepo.save(player);
     }
+
 
 }
