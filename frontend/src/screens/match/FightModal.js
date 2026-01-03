@@ -4,12 +4,13 @@ import Fight from '../../static/images/Fight.png';
 import tokenService from '../../services/token.service';
 import getIdFromUrl from '../../util/getIdFromUrl';
 
-export default function FightModal({ isOpen, onClose, opponent, attacker, onResolve, stompClient }) {
+export default function FightModal({ isOpen, onClose, defender, attacker, onResolve, stompClient }) {
     const currentUser = tokenService.getUser();
     const jwt = tokenService.getLocalAccessToken();
     const matchId = getIdFromUrl(2);
+    
     const isAttacker = currentUser?.id === attacker?.user?.id;
-    const isOpponent = currentUser?.id === opponent?.user?.id;
+    const isDefender = currentUser?.id === defender?.user?.id;
 
     const [whiteDice, setWhiteDice] = useState('1');
     const [blackDice, setBlackDice] = useState('1');
@@ -50,7 +51,7 @@ export default function FightModal({ isOpen, onClose, opponent, attacker, onReso
             const w = parseInt(whiteDice, 10);
             const b = parseInt(blackDice, 10);
             const attackerWins = w >= b;  // En caso de empate "attacker" gana
-            const currentUserWon = attackerWins ? isAttacker : isOpponent;
+            const currentUserWon = attackerWins ? isAttacker : isDefender;
             // pequeña pausa para mostrar el resultado visualmente
             setTimeout(() => {
                 onResolve(currentUserWon);
@@ -90,7 +91,7 @@ export default function FightModal({ isOpen, onClose, opponent, attacker, onReso
         return roll;
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || !attacker || !defender) return null;
 
     return (
         <div className="modal-fight-overlay" onClick={onClose}>
@@ -104,7 +105,7 @@ export default function FightModal({ isOpen, onClose, opponent, attacker, onReso
                             style={{ width: '40px', height: '40px', borderRadius: '50%' }}
                         />
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ marginBottom: 6 }}>{attacker?.user?.username || 'Agresor'}</div>
+                            <div style={{ marginBottom: 6 }}>{attacker?.user?.username || 'Atacante'}</div>
                             <button
                                 onClick={() => rollDice('Blanco')}
                                 style={{ border: "none", background: "transparent", padding: 0, cursor: whiteRolled ? 'not-allowed' : 'pointer' }}
@@ -120,19 +121,19 @@ export default function FightModal({ isOpen, onClose, opponent, attacker, onReso
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ marginBottom: 6 }}>{opponent?.user?.username || 'Oponente'}</div>
+                            <div style={{ marginBottom: 6 }}>{defender?.user?.username || 'Defensor'}</div>
                             <button
                                 onClick={() => rollDice('Negro')}
                                 style={{ border: "none", background: "transparent", padding: 0, cursor: blackRolled ? 'not-allowed' : 'pointer' }}
                                 title="Dado Negro"
-                                disabled={!isOpponent || blackRolled}
+                                disabled={!isDefender || blackRolled}
                             >
                                 <img src={`/Dice/N${blackDice}.png`} alt="Dado Negro" style={{ width: "80px", height: "auto", borderRadius: '18px' }} />
                             </button>
                         </div>
                         <img 
-                            src={opponent.user.avatar}
-                            alt={`${opponent.user.username}'s avatar`}
+                            src={defender.user.avatar}
+                            alt={`${defender.user.username}'s avatar`}
                             style={{ width: '40px', height: '40px', borderRadius: '50%' }}
                         />
                     </div>
