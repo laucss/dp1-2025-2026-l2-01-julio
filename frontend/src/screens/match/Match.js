@@ -12,6 +12,7 @@ import ActionsModal from "./ActionsModal";
 import ChatBox from "./chatBox";
 import { FaComments } from "react-icons/fa";
 import FightModal from "./FightModal";
+import StartDiceModal from "./StartDiceModal";
 
 
 
@@ -41,7 +42,6 @@ export default function Match(){
     // DADOS 
     const [whiteDice, setWhiteDice] = useState("1")
     const [blackDice, setBlackDice] = useState("1")
-    const [diceRolled, setDiceRolled] = useState(false)
 
     const [chatOpen, setChatOpen] = useState(false)
     const [actionPoints, setActionPoints] = useState(0)
@@ -54,6 +54,7 @@ export default function Match(){
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
 
+    const [isDiceModalOpen, setIsDiceModalOpen] = useState(true);
     const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
     const [isFightModalOpen, setIsFightModalOpen] = useState(false);
     const [fightDefender, setFightDefender] = useState(null);
@@ -254,6 +255,31 @@ export default function Match(){
         }
     }, [currentTurnUserId])
 
+    // Polling para actualizar el match mientras el modal de dados está abierto
+    useEffect(() => {
+        if (!isDiceModalOpen || match?.currentTurnPhase !== null) return;
+
+        const fetchMatchUpdate = async () => {
+            try {
+                const response = await fetch(`/api/v1/matches/${matchId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${jwt}`,
+                    }
+                });
+                if (response.ok) {
+                    const updatedMatch = await response.json();
+                    setMatch(updatedMatch);
+                }
+            } catch (error) {
+                console.error("Error al actualizar match:", error);
+            }
+        };
+
+        // Actualizar cada 2 segundos mientras el modal esté abierto
+        const intervalId = setInterval(fetchMatchUpdate, 2000);
+
+        return () => clearInterval(intervalId);
+    }, [isDiceModalOpen, match?.currentTurnPhase, matchId]);
 
     
 
@@ -405,59 +431,6 @@ export default function Match(){
 
 
 
-    // Función que genera el número del dado y actualiza la UI
-    const rollDice = (diceType) => {
-        const rollWhite = Math.floor(Math.random() * 6) + 1;
-        setWhiteDice(rollWhite.toString());
-        const rollBlack = Math.floor(Math.random() * 6) + 1;
-        setBlackDice(rollBlack.toString());
-
-        return [rollWhite, rollBlack]; // Devuelve el número generado
-    };
-
-    // Función que envía la tirada al backend y actualiza el match
-    const submitDiceToBackend = (roll) => {
-        fetch(`/api/v1/matches/${matchId}/submit-dice?userId=${currentUser.id}&diceRoll=${roll}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${jwt}`,
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(async res => {
-            if (!res.ok) {
-                let errorBody;
-                try {
-                    errorBody = await res.json();
-                } catch {
-                    errorBody = await res.text();
-                }
-                throw new Error(`Error al enviar tirada de dado: ${res.status} ${res.statusText} - ${JSON.stringify(errorBody)}`);
-            }
-            return res.json();
-        })
-        .then(updatedMatch => {
-            console.log("Match actualizado tras tirar dado:", updatedMatch);
-            setMatch(updatedMatch)
-            
-            setCurrentTurnUserId(updatedMatch.currentTurnUserId)
-
-            if (updatedMatch.players) {
-                setPlayer(updatedMatch.players)
-            }
-
-        })
-        .catch(err => console.error(err));
-    };
-
-    const throwDice = () => {
-    if (diceRolled) return;
-
-        const [white,black] = rollDice();
-        submitDiceToBackend(white+black);
-        setDiceRolled(true); 
-    };
-
     const move = async (roomName) => {
         console.log('roomNAme', roomName)
         if (moveToAdyacentRoom===false) return ;
@@ -604,6 +577,14 @@ export default function Match(){
         }
         }
 
+    const handleDiceRolled = (updatedMatch) => {
+        setMatch(updatedMatch);
+        setCurrentTurnUserId(updatedMatch.currentTurnUserId);
+        if (updatedMatch.players) {
+            setPlayer(updatedMatch.players);
+        }
+    };
+
     console.log('match', match)
 
 
@@ -647,7 +628,14 @@ return (
                 ))}
             </div>
 
-            {match?.currentTurnPhase === null  && !diceRolled && (
+            <StartDiceModal 
+                isOpen={match?.currentTurnPhase === null && isDiceModalOpen}
+                onClose={() => setIsDiceModalOpen(false)}
+                onDiceRolled={handleDiceRolled}
+                matchData={match}
+            />
+
+            {match?.currentTurnPhase === null && (
                 <div style={{
                     position: "absolute",
                     top: '47%',
@@ -820,25 +808,6 @@ return (
                             </div>
                         );
                     })}
-                </div>
-                <div className="Dice-pack">
-                    <button
-                        onClick={() => throwDice('Blanco')}
-                        style={{ border: "none", background: "transparent",padding: 0,cursor: diceRolled ? "not-allowed" : "pointer",marginRight: "15px"}}
-                        title="Dado Blanco"
-                        disabled={diceRolled} // Deshabilitado si ya tiró
-                    >
-                        <img src={`/Dice/B${whiteDice}.png`} alt="Dado Blanco" style={{ width: "80px", height: "auto" }} />
-                    </button>
-                    <button
-                        onClick={() => throwDice('Negro')}
-                        style={{ border: "none", background: "transparent", padding: 0, cursor: diceRolled ? "not-allowed" : "pointer" }}
-                        title="Dado Negro"
-                        disabled={diceRolled}
-                        
-                    >
-                        <img src={`/Dice/N${blackDice}.png`} alt="Dado Negro" style={{ width: "80px", height: "auto" }} />
-                    </button>
                 </div>
             </div>
             <div className="points-section">

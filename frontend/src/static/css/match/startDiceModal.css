@@ -1,0 +1,165 @@
+.start-dice-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.start-dice-modal-content {
+    background: #26095c;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    min-width: 400px;
+    max-width: 500px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.start-dice-title {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.start-dice-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin: 30px 0;
+    padding: 20px;
+    background: rgba(20, 159, 181, 0.1);
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
+}
+
+.dice-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.start-dice {
+    width: 120px;
+    height: 120px;
+    border-radius: 30px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.start-dice.white-dice {
+    background: white;
+    border: 3px solid #333;
+}
+
+.start-dice.black-dice {
+    background: #1a1a1a;
+    border: 3px solid #666;
+}
+
+.start-dice.rolling {
+    animation: spin 0.1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.throw-dice-button {
+    background: #ff236c;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 18px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 20px;
+}
+
+.throw-dice-button:hover:not(.disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 157, 0.6);
+    background: linear-gradient(135deg, #ff8bb3 0%, #d087a0 100%);
+}
+
+.throw-dice-button:active:not(.disabled) {
+    transform: translateY(0);
+}
+
+.throw-dice-button.disabled {
+    background: linear-gradient(135deg, #999 0%, #777 100%);
+    cursor: not-allowed;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dice-result-text {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 20px;
+    animation: fadeIn 0.5s ease-in;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .start-dice-modal-content {
+        min-width: 90%;
+        padding: 30px 20px;
+    }
+
+    .start-dice-container {
+        gap: 20px;
+    }
+
+    .start-dice {
+        width: 90px;
+        height: 90px;
+    }
+
+    .start-dice-title {
+        font-size: 22px;
+    }
+
+    .throw-dice-button {
+        font-size: 16px;
+        padding: 15px 30px;
+    }
+}
