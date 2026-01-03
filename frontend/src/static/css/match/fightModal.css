@@ -4,22 +4,232 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(26, 26, 26, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
+/*background: rgba(26, 26, 26, 0.9);*/
 .modal-fight-content-wrapper{
-    background: rgba(26, 26, 26, 0.9);
+    background: rgb(255, 255, 255);
     border-radius: 10px;
-    padding: 20px;
-    width: 60%;
-    height: 75%;
-    max-width: 800px;
+    padding: 10px;
+    width: 70%;
+    height: 85%;
+    max-width: 1400px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    color: #fff;
+    color: #000000;
+    position: relative;
+}
+
+/* LA IMAGEN DE FIGHT EN EL CENTRO SUPERIOR */
+.fight-logo-central {
+    position: absolute;
+    /*top: 100px; /* Ajusta según prefieras que sobresalga */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px; /* Tamaño del logo */
+    z-index: 100;
+    pointer-events: none;
+    justify-content: center;
+}
+
+
+/* CONTENEDOR GENERAL */
+.combat-container {
+  width: 100%;
+  height: 100%; 
+  margin: 0 auto;
+  /*border: 3px solid #1d0a89;*/
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+}
+
+/* LA LÍNEA VERTICAL CONTINUA */
+.combat-container::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 3px; /* Grosor de la línea */
+    background-color: #000;
+    transform: translateX(-50%);
+    z-index: 1; /* Para que quede detrás del VS si es necesario */
+}
+
+/* ZONA SUPERIOR (ATAQUE VS DEFENSA), lo que hay antes de la línea que separa la zona de las armas */
+.combat-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  border-bottom: 3px solid #000000;
+  height: 65%;
+  z-index: 2;
+  flex:2
+}
+
+/* PANEL IZQ / DER */
+.combat-panel {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* HEADER DEL PANEL */
+.combat-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: xx-large;
+  gap:10px
+}
+
+.player-icon {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #000;
+  border-radius: 50%;
+}
+
+/* BLOQUE TOTAL */
+.total-box {
+  width: 40%;
+  height: 40%;
+  border: 3px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px auto 40px auto; 
+  position: relative;
+  border-radius: 15%;
+  font-size: xx-large;
+}
+
+.total-box::before {
+    content: "↑";
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 30px;
+    font-weight: bold;
+    color: #000;
+}
+
+/* FILA DE CÁLCULO */
+.calc-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.calc-box {
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  font-size: x-large;
+  flex-direction: column;
+  text-align: center;
+}
+
+.calc-operator {
+    font-size: 24px;       /* Tamaño grande para el símbolo */
+    font-weight: bold;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;           /* Ancho fijo para que no desplace las cajas */
+    user-select: none;     /* Evita que se seleccione el texto al hacer click cerca */
+}
+
+/* BOTÓN Y IMAGEN DEL DADO */
+.dice-button {
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    width: 90px;  /* Igual que calc-box */
+    height: 90px; /* Igual que calc-box */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dice {
+    width: 100%;  
+    height: 100%;
+    object-fit: contain;
+    background: #fff;
+    box-sizing: border-box;
+    transition: transform 0.1s;
+}
+
+.dice:hover {
+    transform: scale(1.1);
+}
+
+/* VS CENTRAL */
+.vs-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  font-size: 32px;
+  font-weight: bold;
+  z-index: 5;
+  /*background: #fff; /*cambiar esto si se quiere que se vea la línea en la parte de arriba de las armas y tal*/
+}
+
+/* ZONA INFERIOR */
+.combat-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 35%;
+  position: relative;
+  z-index: 2;
+  flex:1; 
+}
+
+/* ACCIONES */
+.actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+}
+
+.actions:last-child {
+  border-right: none;
+}
+
+.action-box {
+  width: 60px;
+  height: 50px;
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-button {
+  padding: 6px 12px;
+  border: 2px solid #ffffff;
+  background: #fa3838;
+  cursor: pointer;
+  border-radius: 20px;
+  
 }
