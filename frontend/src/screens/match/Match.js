@@ -1,8 +1,9 @@
-import React, { useState } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import {useNavigate} from "react-router-dom";
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 import '../../static/css/match/Match.css';
 import getIdFromUrl from '../../util/getIdFromUrl'
-import { useEffect } from "react";
 import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
 import BagModal from "./BagModal";
@@ -26,6 +27,7 @@ export default function Match(){
     const [playersList, setPlayersList] = useState([])
     const [match, setMatch] = useState(null)
     const [currentTurnUserId, setCurrentTurnUserId] = useState(null) // id del usuario al que le toca jugar
+    const [stompClient, setStompClient] = useState(null)
 
     // CARTAS
     const [deck, setDeck] = useState([])
@@ -101,7 +103,7 @@ export default function Match(){
         33: { left: '44.5%', top: '92%' },  // Apple Room v
         34: { left: '56%', top: '92%' },  // Map Room v 
         35: { left: '64.5%', top: '85%' },  // Parole Room v
-        36: { left: '86%', top: '87%' },  // South Tower v
+        36: { left: '74%', top: '87%' },  // South Tower v
         37: { left: '50%', top: '50%' },  // Safe Area v
     };
     // CARGAR DATOS PARTIDA 
@@ -113,6 +115,55 @@ export default function Match(){
     useEffect(() => {
         fetchMatchAndPlayers()
     }, [matchId])
+    
+    // Inicializar conexión WebSocket para actualizaciones de turno
+    useEffect(() => {
+        const client = new Client({
+            brokerURL: 'ws://localhost:8080/ws',
+            connectHeaders: { 'Authorization': `Bearer ${jwt}` },
+            onConnect: () => setStompClient(client)
+        });
+
+        client.activate();
+        return () => client.active && client.deactivate();
+    }, [jwt]);
+
+    // Suscribirse a las actualizaciones de turno
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.turn`, (msg) => {
+            const turnUpdate = JSON.parse(msg.body);
+            setCurrentTurnUserId(turnUpdate.currentTurnUserId);
+            fetchMatchAndPlayers();
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
+
+    // Suscribirse a las actualizaciones de combate
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, (msg) => {
+            const fightUpdate = JSON.parse(msg.body);
+            
+            if (fightUpdate.action === 'START') {
+                // Encontrar el oponente en la lista de jugadores
+                const opponent = match?.players?.find(p => 
+                    p.user.id === fightUpdate.defenderId || p.user.id === fightUpdate.attackerId && p.user.id !== currentUser.id
+                );
+                
+                if (opponent) {
+                    setFightOpponent(opponent);
+                    setPendingTargetRoom(fightUpdate.roomName);
+                    setIsFightModalOpen(true);
+                }
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, match, currentUser]);
 
     useEffect(() => {
             if (player && Array.isArray(player)){
@@ -362,6 +413,25 @@ export default function Match(){
                     setFightOpponent(otherPlayer);
                     setIsFightModalOpen(true);
                     setMoveToAdyacentRoom(false);
+                    
+                    // Notificar a todos los jugadores sobre el combate
+                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${jwt}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            matchId: matchId,
+                            attackerId: currentUser.id,
+                            attackerUsername: currentUser.username,
+                            defenderId: otherPlayer.user.id,
+                            defenderUsername: otherPlayer.user.username,
+                            roomName: roomName,
+                            action: 'START'
+                        })
+                    });
+                    
                     return;
                 }
 
@@ -830,6 +900,8 @@ return (
             isOpen={isFightModalOpen}
             onClose={() => { setIsFightModalOpen(false); setFightOpponent(null); }}
             opponent={fightOpponent}
+            attacker={currentPlayerTurn}
+            stompClient={stompClient}
             onResolve={async (currentUserWon) => {
                 try {
                     console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightOpponent=', fightOpponent);

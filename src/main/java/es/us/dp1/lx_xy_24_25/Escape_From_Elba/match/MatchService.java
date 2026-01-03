@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -22,6 +23,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
@@ -41,6 +44,8 @@ public class MatchService {
     BagService bagService;
     PlayerService playerService; 
     Random ran = new Random();
+    LobbyWebsocketController lobbyWebsocketController;
+    MatchWebsocketController matchWebsocketController;
 
     MatchRepository matchRepo;
     PlayerRepository playerRepo;
@@ -50,7 +55,8 @@ public class MatchService {
     @Autowired
     public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, 
             RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
-            PlayerService playerService) {
+            PlayerService playerService, LobbyWebsocketController lobbyWebsocketController,
+            MatchWebsocketController matchWebsocketController) {
         this.matchRepo = mrepo;
         this.playerRepo = playerRepo;
         this.roomRepository = roomRepository;
@@ -59,6 +65,8 @@ public class MatchService {
         this.handService = handService;
         this.bagService = bagService; 
         this.playerService = playerService;
+        this.lobbyWebsocketController = lobbyWebsocketController;
+        this.matchWebsocketController = matchWebsocketController;
     }
 
     @Transactional(readOnly = true)
@@ -149,7 +157,23 @@ public class MatchService {
         m.setCurrentTurnUserId(null);
         m.setTurnNumber(0);
         matchRepo.save(m);
+        
+        LobbyUpdateDTO update = createLobbyUpdate(m, "START", "");
+        lobbyWebsocketController.notifyGameStarted(matchId, update);
+        
         return m;
+    }
+    
+    private LobbyUpdateDTO createLobbyUpdate(Match match, String action, String username) {
+        List<LobbyUpdateDTO.PlayerLobbyDTO> players = new ArrayList<>();
+        for (Player p : match.getPlayers()) {
+            players.add(new LobbyUpdateDTO.PlayerLobbyDTO(
+                p.getUser().getId(),
+                p.getUser().getUsername(),
+                p.getUser().getAvatar()
+            ));
+        }
+        return new LobbyUpdateDTO(match.getId(), players, action, username);
     }
 
     //Función para decidir el orden de los jugadores en la partida según la tirada de dados.
@@ -197,6 +221,16 @@ public class MatchService {
             match.setTurnNumber(1);
             match.setCurrentTurnPhase(TurnPhase.DRAW);
             matchRepo.save(match);
+            
+            // Notificar a todos los jugadores que el turno ha comenzado
+            TurnUpdateDTO turnUpdate = new TurnUpdateDTO(
+                matchId,
+                ordered.get(0).getUser().getId(),
+                ordered.get(0).getUser().getUsername(),
+                1,
+                TurnPhase.DRAW.toString()
+            );
+            matchWebsocketController.notifyTurnUpdate(matchId, turnUpdate);
         }
 
         return match;
@@ -228,6 +262,17 @@ public class MatchService {
         m.setCurrentTurnPhase(TurnPhase.DRAW);
 
         matchRepo.save(m);
+        
+        // Notificar a todos los jugadores el cambio de turno
+        TurnUpdateDTO turnUpdate = new TurnUpdateDTO(
+            matchId,
+            nextPlayerTurn.getUser().getId(),
+            nextPlayerTurn.getUser().getUsername(),
+            m.getTurnNumber(),
+            TurnPhase.DRAW.toString()
+        );
+        matchWebsocketController.notifyTurnUpdate(matchId, turnUpdate);
+        
         return m;
  
     }

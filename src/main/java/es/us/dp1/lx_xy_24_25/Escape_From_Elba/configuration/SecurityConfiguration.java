@@ -80,6 +80,9 @@ public class SecurityConfiguration {
                     "/swagger-resources/**"
                 ).permitAll()
 
+                // Permitir el handshake SockJS (info/xhr) sin autenticación
+                .requestMatchers("/ws/**").permitAll()
+
                  .requestMatchers("/resources/images/**").permitAll()
 
                 // API pública
