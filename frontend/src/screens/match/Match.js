@@ -564,7 +564,7 @@ if (!match) {
     return <div>Cargando partida...</div>;
 }
 
-
+console.log('player', player)
 
 return (
         <div className="match-container">
@@ -976,6 +976,7 @@ return (
                             try {
                                 const winnerId = currentUser.id;
                                 const targetRoom = pendingTargetRoom;
+                                console.log('habi que quiere ocupar', pendingTargetRoom)
                                 if (targetRoom) {
                                     console.log('Moving winner to pending target room', { winnerId, targetRoom });
                                     const winnerMove = await movePlayerToRoom(winnerId, targetRoom);

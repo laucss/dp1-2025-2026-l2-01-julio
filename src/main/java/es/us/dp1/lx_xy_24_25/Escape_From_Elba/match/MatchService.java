@@ -164,6 +164,7 @@ public class MatchService {
         return m;
     }
     
+    @Transactional
     private LobbyUpdateDTO createLobbyUpdate(Match match, String action, String username) {
         List<LobbyUpdateDTO.PlayerLobbyDTO> players = new ArrayList<>();
         for (Player p : match.getPlayers()) {
@@ -565,8 +566,9 @@ public class MatchService {
         //Recuperar la sala destino
         Room targetRoom = roomRepository.findByName(targetRoomName)
             .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
-        //Actualizar la sala del jugador
+        //Actualizar la sala y fuerza del jugador
         player.setRoom(targetRoom);
+        player.setStrength(player.getStrength() + 1);
         //Guardar cambios
 
         return playerRepo.save(player);
