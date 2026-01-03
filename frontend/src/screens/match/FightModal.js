@@ -47,6 +47,20 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         return () => subscription.unsubscribe();
     }, [stompClient, matchId, isOpen]);
 
+    // Suscribirse a las actualizaciones de totales en combate
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !isOpen) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight.totals`, (msg) => {
+            const totalsUpdate = JSON.parse(msg.body);
+            
+            setTotalAttacker(totalsUpdate.attackerTotal);
+            setTotalDefender(totalsUpdate.defenderTotal);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, isOpen]);
+
     // Resetear dados cuando se abre el modal
     useEffect(() => {
         if (isOpen) {
@@ -81,6 +95,23 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         const roll = Math.floor(Math.random() * 6) + 1;
         const diceTypeUpper = diceType === 'Negro' ? 'BLACK' : 'WHITE';
         
+        // Calcular los nuevos totales
+        let newTotalAttacker = totalAttacker;
+        let newTotalDefender = totalDefender;
+        
+        if (diceType === 'Negro') {
+            newTotalDefender = defenderStrength + roll + weaponsDefender;
+            setTotalDefender(newTotalDefender);
+            setBlackDice(roll.toString());
+            setBlackRolled(true);
+        }
+        if (diceType === 'Blanco') {
+            newTotalAttacker = attackerStrength + roll + weaponsAttacker;
+            setTotalAttacker(newTotalAttacker);
+            setWhiteDice(roll.toString());
+            setWhiteRolled(true);
+        }
+        
         // Notificar a todos los jugadores sobre la tirada
         await fetch(`/api/v1/matches/${matchId}/notify-fight-dice`, {
             method: 'POST',
@@ -97,17 +128,22 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
             })
         });
 
-        // Actualizar localmente también
-        if (diceType === 'Negro') {
-            setTotalDefender(totalDefender+roll + weaponsDefender)
-            setBlackDice(roll.toString());
-            setBlackRolled(true);
-        }
-        if (diceType === 'Blanco') {
-            setTotalAttacker(totalDefender+roll + weaponsAttacker)
-            setWhiteDice(roll.toString());
-            setWhiteRolled(true);
-        }
+        // Notificar los nuevos totales a todos los jugadores
+        await fetch(`/api/v1/matches/${matchId}/notify-dice-totals`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${jwt}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                matchId: matchId,
+                attackerId: attacker.id,
+                attackerTotal: diceType === 'Blanco' ? newTotalAttacker : totalAttacker,
+                defenderId: defender.id,
+                defenderTotal: diceType === 'Negro' ? newTotalDefender : totalDefender
+            })
+        });
+
         return roll;
     };
 

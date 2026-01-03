@@ -198,6 +198,36 @@ export default function Match(){
     }, [stompClient, matchId]);
 
     useEffect(() => {
+        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.actionPoints`, (msg) => {
+            const actionPointsUpdate = JSON.parse(msg.body);
+            
+            // Only update action points if the update is for the current player
+            if (actionPointsUpdate.userId === currentPlayer[0].user.id) {
+                setActionPoints(actionPointsUpdate.actionPoints);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, currentPlayer]);
+
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.strength`, (msg) => {
+            const strengthUpdate = JSON.parse(msg.body);
+            
+            // Only update strength if the update is for the current player
+            if (strengthUpdate.userId === currentPlayer[0].user.id) {
+                setStrength(strengthUpdate.strength);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, currentPlayer]);
+
+    useEffect(() => {
             if (player && Array.isArray(player)){
                 setPlayersList(player.filter(p => p.user.id !== currentUser?.id))
                 setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
@@ -484,7 +514,7 @@ export default function Match(){
                 if (response.ok){
                     const data = await response.json()
                     setMatch(data)
-                    setActionPoints(prev => Math.max(prev - 1, 0));
+                    // Action points will be updated in real-time via WebSocket subscription
                     setMoveToAdyacentRoom(false)
                 }
 
