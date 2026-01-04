@@ -3,8 +3,9 @@ import '../../static/css/match/fightModal.css';
 import Fight from '../../static/images/Fight.png';
 import tokenService from '../../services/token.service';
 import getIdFromUrl from '../../util/getIdFromUrl';
+import WeaponModal from './WeaponModal';
 
-export default function FightModal({ isOpen, onClose, defender, attacker, onResolve, stompClient }) {
+export default function FightModal({ isOpen, onClose, defender, attacker, onResolve, stompClient, bagCards = [] }) {
     const currentUser = tokenService.getUser();
     const jwt = tokenService.getLocalAccessToken();
     const matchId = getIdFromUrl(2);
@@ -29,6 +30,10 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     const [blackDice, setBlackDice] = useState('1');
     const [whiteRolled, setWhiteRolled] = useState(false);
     const [blackRolled, setBlackRolled] = useState(false);
+
+    // Estado del modal de armas
+    const [isWeaponModalOpen, setIsWeaponModalOpen] = useState(false);
+    const [currentWeaponUser, setCurrentWeaponUser] = useState(null);
 
     // Suscribirse a las actualizaciones de dados en combate
     useEffect(() => {
@@ -195,6 +200,23 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         });
     };
 
+    const openWeaponModal = (role) => {
+        setCurrentWeaponUser(role);
+        setIsWeaponModalOpen(true);
+    };
+
+    const handleWeaponSelected = (weaponData) => {
+        if (currentWeaponUser === 'ATTACKER') {
+            setWeaponsAttacker(weaponData.bonus);
+            setTotalAttacker(attackerStrength + parseInt(whiteDice, 10) + weaponData.bonus);
+        } else {
+            setWeaponsDefender(weaponData.bonus);
+            setTotalDefender(defenderStrength + parseInt(blackDice, 10) + weaponData.bonus);
+        }
+        setIsWeaponModalOpen(false);
+        setCurrentWeaponUser(null);
+    };
+
     if (!isOpen || !attacker || !defender) return null;
 
     return (
@@ -289,6 +311,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                             <div className='actions'>
                                 <button 
                                     className="action-button"
+                                    onClick={() => openWeaponModal('ATTACKER')}
                                     disabled={!isAttacker}
                                     title={isAttacker ? "Weapon" : "Solo el atacante puede formar arma"}
                                 >
@@ -309,6 +332,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                             <div className='actions'>
                                 <button 
                                     className="action-button"
+                                    onClick={() => openWeaponModal('DEFENDER')}
                                     disabled={!isDefender}
                                     title={isDefender ? "Weapon" : "Solo el defensor puede formar arma"}
                                 >
@@ -330,6 +354,17 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
 
                 </div>
             </div>
+
+            <WeaponModal
+                isVisible={isWeaponModalOpen}
+                bagCards={bagCards}
+                onClose={() => {
+                    setIsWeaponModalOpen(false);
+                    setCurrentWeaponUser(null);
+                }}
+                player={currentWeaponUser === 'ATTACKER' ? attacker : defender}
+                onWeaponSelected={handleWeaponSelected}
+            />
         </div>
     );
 }

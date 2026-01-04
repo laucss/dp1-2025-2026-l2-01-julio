@@ -956,6 +956,7 @@ return (
             defender={fightDefender}
             attacker={fightAttacker}
             stompClient={stompClient}
+            bagCards={bagCards}
             onResolve={async (currentUserWon) => {
                 try {
                     console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightDefender=', fightDefender, 'fightAttacker=', fightAttacker);
