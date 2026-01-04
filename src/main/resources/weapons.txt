@@ -21,6 +21,7 @@ lamp
 laser 
 lasso 
 mace 
+mape
 melee 
 mop 
 oar 
