@@ -37,4 +37,32 @@ public class MatchWebsocketController {
             update
         );
     }
+
+    public void notifyDiceTotalsUpdate(Integer matchId, DiceTotalsUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".fight.totals",
+            update
+        );
+    }
+
+    public void notifyActionPointsUpdate(Integer matchId, ActionPointsUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".actionPoints",
+            update
+        );
+    }
+
+    public void notifyStrengthUpdate(Integer matchId, StrengthUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".strength",
+            update
+        );
+    }
+
+    public void notifyReadyStateUpdate(Integer matchId, ReadyStateUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".fight.ready",
+            update
+        );
+    }
 }

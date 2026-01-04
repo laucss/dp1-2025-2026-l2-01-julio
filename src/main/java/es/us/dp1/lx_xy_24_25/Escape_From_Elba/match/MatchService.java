@@ -513,7 +513,7 @@ public class MatchService {
 
     //Función para mover un jugador de una sala a otra adyacente
     @Transactional
-    public Player movePlayerToAdyacentRoom(Integer matchId, Integer userId, String targetRoomName) {
+    public Player movePlayerToAdyacentRoom(Integer matchId, Integer userId, Integer targetRoomId) {
         Match match = matchRepo.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
         if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
@@ -533,7 +533,7 @@ public class MatchService {
             throw new NoActionPointsException("Move not allowed: player has no action points left");
         }
         //Recuperar la sala destino
-        Room targetRoom = roomRepository.findByName(targetRoomName)
+        Room targetRoom = roomRepository.findById(targetRoomId)
             .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
         //Validar si la sala destino es adyacente
         List<Room> adjacent = currentRoom.getAdjacencyList();
@@ -554,7 +554,7 @@ public class MatchService {
 
 
     @Transactional
-    public Player moveLoserPlayer(Integer matchId, Integer userId, String targetRoomName) {
+    public Player moveLoserPlayer(Integer matchId, Integer userId, Integer targetRoomId) {
         Match match = matchRepo.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
         if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
@@ -564,7 +564,7 @@ public class MatchService {
         Player player = playerRepo.findByMatchAndUser(matchId, userId)
                 .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
         //Recuperar la sala destino
-        Room targetRoom = roomRepository.findByName(targetRoomName)
+        Room targetRoom = roomRepository.findById(targetRoomId)
             .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
         //Actualizar la sala y fuerza del jugador
         player.setRoom(targetRoom);

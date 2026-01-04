@@ -12,6 +12,7 @@ import ActionsModal from "./ActionsModal";
 import ChatBox from "./chatBox";
 import { FaComments } from "react-icons/fa";
 import FightModal from "./FightModal";
+import StartDiceModal from "./StartDiceModal";
 
 
 
@@ -41,7 +42,6 @@ export default function Match(){
     // DADOS 
     const [whiteDice, setWhiteDice] = useState("1")
     const [blackDice, setBlackDice] = useState("1")
-    const [diceRolled, setDiceRolled] = useState(false)
 
     const [chatOpen, setChatOpen] = useState(false)
     const [actionPoints, setActionPoints] = useState(0)
@@ -54,6 +54,7 @@ export default function Match(){
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
 
+    const [isDiceModalOpen, setIsDiceModalOpen] = useState(true);
     const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
     const [isFightModalOpen, setIsFightModalOpen] = useState(false);
     const [fightDefender, setFightDefender] = useState(null);
@@ -198,6 +199,36 @@ export default function Match(){
     }, [stompClient, matchId]);
 
     useEffect(() => {
+        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.actionPoints`, (msg) => {
+            const actionPointsUpdate = JSON.parse(msg.body);
+            
+            // Only update action points if the update is for the current player
+            if (actionPointsUpdate.userId === currentPlayer[0].user.id) {
+                setActionPoints(actionPointsUpdate.actionPoints);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, currentPlayer]);
+
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.strength`, (msg) => {
+            const strengthUpdate = JSON.parse(msg.body);
+            
+            // Only update strength if the update is for the current player
+            if (strengthUpdate.userId === currentPlayer[0].user.id) {
+                setStrength(strengthUpdate.strength);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, currentPlayer]);
+
+    useEffect(() => {
             if (player && Array.isArray(player)){
                 setPlayersList(player.filter(p => p.user.id !== currentUser?.id))
                 setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
@@ -224,6 +255,31 @@ export default function Match(){
         }
     }, [currentTurnUserId])
 
+    // Polling para actualizar el match mientras el modal de dados está abierto
+    useEffect(() => {
+        if (!isDiceModalOpen || match?.currentTurnPhase !== null) return;
+
+        const fetchMatchUpdate = async () => {
+            try {
+                const response = await fetch(`/api/v1/matches/${matchId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${jwt}`,
+                    }
+                });
+                if (response.ok) {
+                    const updatedMatch = await response.json();
+                    setMatch(updatedMatch);
+                }
+            } catch (error) {
+                console.error("Error al actualizar match:", error);
+            }
+        };
+
+        // Actualizar cada 2 segundos mientras el modal esté abierto
+        const intervalId = setInterval(fetchMatchUpdate, 2000);
+
+        return () => clearInterval(intervalId);
+    }, [isDiceModalOpen, match?.currentTurnPhase, matchId]);
 
     
 
@@ -272,9 +328,9 @@ export default function Match(){
 
 
     // Mover el ganador a la habitación objetivo
-    const movePlayerToRoom = async (userId, roomName) => {
+    const movePlayerToRoom = async (userId, roomId) => {
         try {
-            console.log('movePlayerToRoom (normal move)', { userId, roomName });
+            console.log('movePlayerToRoom (normal move)', { userId, roomId });
             const response = await fetch(`/api/v1/matches/${matchId}/move`, {
                 method: "PUT",
                 headers: {
@@ -282,7 +338,7 @@ export default function Match(){
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userId, roomName })
+                body: JSON.stringify({ userId, roomId })
             });
 
             if (!response.ok) {
@@ -375,73 +431,21 @@ export default function Match(){
 
 
 
-    // Función que genera el número del dado y actualiza la UI
-    const rollDice = (diceType) => {
-        const rollWhite = Math.floor(Math.random() * 6) + 1;
-        setWhiteDice(rollWhite.toString());
-        const rollBlack = Math.floor(Math.random() * 6) + 1;
-        setBlackDice(rollBlack.toString());
-
-        return [rollWhite, rollBlack]; // Devuelve el número generado
-    };
-
-    // Función que envía la tirada al backend y actualiza el match
-    const submitDiceToBackend = (roll) => {
-        fetch(`/api/v1/matches/${matchId}/submit-dice?userId=${currentUser.id}&diceRoll=${roll}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${jwt}`,
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(async res => {
-            if (!res.ok) {
-                let errorBody;
-                try {
-                    errorBody = await res.json();
-                } catch {
-                    errorBody = await res.text();
-                }
-                throw new Error(`Error al enviar tirada de dado: ${res.status} ${res.statusText} - ${JSON.stringify(errorBody)}`);
-            }
-            return res.json();
-        })
-        .then(updatedMatch => {
-            console.log("Match actualizado tras tirar dado:", updatedMatch);
-            setMatch(updatedMatch)
-            
-            setCurrentTurnUserId(updatedMatch.currentTurnUserId)
-
-            if (updatedMatch.players) {
-                setPlayer(updatedMatch.players)
-            }
-
-        })
-        .catch(err => console.error(err));
-    };
-
-    const throwDice = () => {
-    if (diceRolled) return;
-
-        const [white,black] = rollDice();
-        submitDiceToBackend(white+black);
-        setDiceRolled(true); 
-    };
-
-    const move = async (roomName) => {
-        console.log('roomNAme', roomName)
+    const move = async (roomId) => {
+        console.log('roomId', roomId)
         if (moveToAdyacentRoom===false) return ;
         if (moveToAdyacentRoom === true){ //TODO: Comprobar antes de todo si son adyacentes 
-            // Antes de llamar al backend, comprobamos si la habitación destino ya está ocupada
             try {
+                const isSafeArea = roomId === 37;
+                
                 const otherPlayer = match?.players?.find(p => p.user?.id !== currentUser?.id && (
-                    (p.currentRoom && p.currentRoom.name === roomName) ||
-                    (p.roomName && p.roomName === roomName) ||
-                    (p.room && p.room.name === roomName)
+                    (p.currentRoom && p.currentRoom.id === roomId) ||
+                    (p.roomId && p.roomId === roomId) ||
+                    (p.room && p.room.id === roomId)
                 ));
 
-                if (otherPlayer) {
-                    setPendingTargetRoom(roomName);
+                if (otherPlayer && !isSafeArea) {
+                    setPendingTargetRoom(roomId);
                     setFightDefender(otherPlayer);
                     setIsFightModalOpen(true);
                     setMoveToAdyacentRoom(false);
@@ -458,7 +462,7 @@ export default function Match(){
                             attackerUsername: currentUser.username,
                             defenderId: otherPlayer.user.id,
                             defenderUsername: otherPlayer.user.username,
-                            roomName: roomName,
+                            roomId: roomId,
                             action: 'START'
                         })
                     });
@@ -466,8 +470,7 @@ export default function Match(){
                     return;
                 }
 
-                {console.log(roomName)}
-                // Si no hay nadie, proceder con normalidad
+                {console.log(roomId)}
                 const response = await fetch (`/api/v1/matches/${matchId}/move`, {
                 method: "PUT",
                 headers: {
@@ -476,7 +479,7 @@ export default function Match(){
                 'Content-Type': 'application/json',
                 }, body: JSON.stringify({
                     userId: currentUser.id,
-                    roomName: roomName
+                    roomId: roomId
                 }) 
 
                 })
@@ -484,7 +487,25 @@ export default function Match(){
                 if (response.ok){
                     const data = await response.json()
                     setMatch(data)
-                    setActionPoints(prev => Math.max(prev - 1, 0));
+                    
+                    const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
+                    if (movedPlayer) {
+                        await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${jwt}`,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                matchId: matchId,
+                                userId: currentUser.id,
+                                actionPoints: movedPlayer.actionPoints
+                            })
+                        }).catch(err => console.error('Error notifying action points:', err));
+                        
+                        setActionPoints(movedPlayer.actionPoints);
+                    }
+                    
                     setMoveToAdyacentRoom(false)
                 }
 
@@ -498,10 +519,9 @@ export default function Match(){
         }
     }
 
-    // Mover el perdedor a una habitación específica
-    const moveLoserToRandomRoom = async (userId, roomName) => {
+    const moveLoserToRandomRoom = async (userId, roomId) => {
         try {
-            console.log('movePlayerToRoom', { userId, roomName });
+            console.log('movePlayerToRoom', { userId, roomId });
             const response = await fetch(`/api/v1/matches/${matchId}/moveLoser`, {
                 method: "PUT",
                 headers: {
@@ -509,7 +529,7 @@ export default function Match(){
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userId, roomName })
+                body: JSON.stringify({ userId, roomId })
             });
 
             if (!response.ok) {
@@ -521,7 +541,25 @@ export default function Match(){
             const data = await response.json();
             console.log('movePlayerToRoom success', data);
             setMatch(data);
-            if (data.players) setPlayer(data.players);
+            if (data.players) {
+                setPlayer(data.players);
+                
+                const movedPlayer = data.players.find(p => p.user.id === userId);
+                if (movedPlayer) {
+                    await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${jwt}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            matchId: matchId,
+                            userId: userId,
+                            actionPoints: movedPlayer.actionPoints
+                        })
+                    }).catch(err => console.error('Error notifying action points:', err));
+                }
+            }
             return data;
         } catch (err) {
             console.error('Error moving player:', err);
@@ -574,6 +612,14 @@ export default function Match(){
         }
         }
 
+    const handleDiceRolled = (updatedMatch) => {
+        setMatch(updatedMatch);
+        setCurrentTurnUserId(updatedMatch.currentTurnUserId);
+        if (updatedMatch.players) {
+            setPlayer(updatedMatch.players);
+        }
+    };
+
     console.log('match', match)
 
 
@@ -617,24 +663,12 @@ return (
                 ))}
             </div>
 
-            {match?.currentTurnPhase === null  && !diceRolled && (
-                <div style={{
-                    position: "absolute",
-                    top: '47%',
-                    right: '-10%',
-                    transform: "translateX(-50%)",
-                    background: "rgba(214, 28, 28, 0.6)",
-                    padding: "10px 20px",
-                    borderRadius: "10px",
-                    fontSize: "16px",
-                    color: "white",
-                    textAlign: "center"
-                }}>
- 
-                    "Tira los dados para decidir el turno"
-                </div>
-            )}
-
+            <StartDiceModal 
+                isOpen={match?.currentTurnPhase === null && isDiceModalOpen}
+                onClose={() => setIsDiceModalOpen(false)}
+                onDiceRolled={handleDiceRolled}
+                matchData={match}
+            />
             
             <div className="match-board">
                 <div className="deck-column">
@@ -690,41 +724,41 @@ return (
 
                 <div className="map-column" style={{ position: 'relative' }}>
                     <map name="Map">
-                <area className="Area" href="#" target="" alt="Safe Area" title="Safe Area" coords="321,251,84" shape="circle" onClick={(e)=>{e.preventDefault(); move("Safe Area")}}/>
-                <area className="Area" href="#" target="" alt="West Tower" title="West Tower" coords="13,489,98,388" shape="rect" onClick={(e)=>{e.preventDefault(); move("West Tower")}}/>
-                <area className="Area" href="#" target="" alt="South Tower" title="South Tower" coords="541,389,628,488" shape="rect" onClick={(e)=>{e.preventDefault(); move("South Tower")}}/>
-                <area className="Area" href="#" target="" alt="North Tower" title="North Tower" coords="13,12,99,113" shape="rect" onClick={(e)=>{e.preventDefault(); move("North Tower")}}/>
-                <area className="Area" href="#" target="" alt="East Tower" title="East Tower" coords="542,11,626,111" shape="rect" onClick={(e)=>{e.preventDefault(); move("East Tower")}}/>
-                <area className="Area" href="#" target="" alt="Caesar Room" title="Caesar Room" coords="110,40,210,114" shape="rect" onClick={(e)=>{e.preventDefault();move("Caesar Room")}}/>
-                <area className="Area" href="#" target="" alt="Opal Room" title="Opal Room" coords="220,10,292,69" shape="rect" onClick={(e)=>{e.preventDefault(); move("Opal Room")}}/>
-                <area className="Area" href="#" target="" alt="Coral Room" title="Coral Room" coords="345,11,418,69" shape="rect" onClick={(e)=>{e.preventDefault(); move("Coral Room")}}/>
-                <area className="Area" href="#" target="" alt="Roof" title="Roof" coords="429,38,530,112" shape="rect" onClick={(e)=>{e.preventDefault(); move("Roof")}}/>
-                <area className="Area" href="#" target="" alt="Cafe" title="Cafe" coords="293,154,221,80" shape="rect" onClick={(e)=>{e.preventDefault(); move("Cafe")}}/>
-                <area className="Area" href="#" target="" alt="Parlor" title="Parlor" coords="345,81,417,152" shape="rect" onClick={(e)=>{e.preventDefault(); move("Parlor")}}/>
-                <area className="Area" href="#" target="" alt="Pool" title="Pool" coords="369,165,488,166,488,251,419,251,407,206" shape="poly" onClick={(e)=>{e.preventDefault(); move("Pool")}}/>
-                <area className="Area" href="#" target="" alt="SPA" title="SPA" coords="271,166,237,197,221,236,153,237,152,165" shape="poly" onClick={(e)=>{e.preventDefault(); move("SPA")}}/>
-                <area className="Area" href="#" target="" alt="Arbor" title="Arbor" coords="151,248,151,334,266,334,236,299,221,250" shape="poly" onClick={(e)=>{e.preventDefault(); move("Arbor")}}/>
-                <area className="Area" href="#" target="" alt="Farm" title="Farm" coords="488,264,488,334,371,334,403,296,416,265" shape="poly" onClick={(e)=>{e.preventDefault(); move("Farm")}}/>
-                <area className="Area" href="" target="" alt="Ball Room" title="Ball Room" coords="25,166,98,251" shape="rect" onClick={(e)=>{e.preventDefault(); move("Ball Room")}}/>
-                <area className="Area" href="" target="" alt="Sleep Room" title="Sleep Room" coords="540,165,614,238" shape="rect" onClick={(e)=>{e.preventDefault(); move("Sleep Room")}} />
-                <area className="Area" href="" target="" alt="Class Room" title="Class Room" coords="25,263,97,334" shape="rect" onClick={(e)=>{e.preventDefault(); move("Class Room")}}/>
-                <area className="Area" href="" target="" alt="Meal Room" title="Meal Room" coords="541,249,613,335" shape="rect" onClick={(e)=>{e.preventDefault(); move("Meal Room")}}/>
-                <area className="Area" href="" target="" alt="Bar" title="Bar" coords="221,346,292,417" shape="rect" onClick={(e)=>{e.preventDefault(); move("Bar")}}/>
-                <area className="Area" href="" target="" alt="Lab" title="Lab" coords="346,346,418,418" shape="rect" onClick={(e)=>{e.preventDefault(); move("Lab")}}/>
-                <area className="Area" href="" target="" alt="Cellar" title="Cellar" coords="109,387,209,460" shape="rect" onClick={(e)=>{e.preventDefault(); move("Cellar")}}/>
-                <area className="Area" href="" target="" alt="Apple Room" title="Apple Room" coords="221,430,293,488" shape="rect" onClick={(e)=>{e.preventDefault(); move("Apple Room")}}/>
-                <area className="Area" href="" target="" alt="Parole Room" title="Parole Room" coords="429,387,529,459" shape="rect" onClick={(e)=>{e.preventDefault(); move("Parole Room")}}/>
-                <area className="Area" href="" target="" alt="Map Room" title="Map Room" coords="345,430,419,490" shape="rect" onClick={(e)=>{e.preventDefault(); move("Map Room")}}/>
-                <area className="Area" href="" target="" alt="Corridor 1" title="Corridor 1" coords="25,123,209,153" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 1")}}/>
-                <area className="Area" href="" target="" alt="Corridor 2" title="Corridor 2" coords="304,57,335,155" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 2")}}/>
-                <area className="Area" href="" target="" alt="Corridor 3" title="Corridor 3" coords="430,122,613,154" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 3")}}/>
-                <area className="Area" href="" target="" alt="Corridor 4" title="Corridor 4" coords="109,164,141,250" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 4")}}/>
-                <area className="Area" href="" target="" alt="Corridor 5" title="Corridor 5" coords="500,164,529,238" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 5")}}/>
-                <area className="Area" href="" target="" alt="Corridor 6" title="Corridor 6" coords="109,262,141,334" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 6")}}/>
-                <area className="Area" href="" target="" alt="Corridor 7" title="Corridor 7" coords="500,248,529,333" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 7")}}/>
-                <area className="Area" href="" target="" alt="Corridor 8" title="Corridor 8" coords="25,345,209,376" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 8")}}/>
-                <area className="Area" href="" target="" alt="Corridor 9" title="Corridor 9" coords="304,345,335,441" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 9")}}/>
-                <area className="Area" href="" target="" alt="Corridor 10" title="Corridor 10" coords="429,346,613,376" shape="rect" onClick={(e)=>{e.preventDefault(); move("Corridor 10")}}/>
+                <area className="Area" href="#" target="" alt="Safe Area" title="Safe Area" coords="321,251,84" shape="circle" onClick={(e)=>{e.preventDefault(); move(37)}}/>
+                <area className="Area" href="#" target="" alt="West Tower" title="West Tower" coords="13,489,98,388" shape="rect" onClick={(e)=>{e.preventDefault(); move(31)}}/>
+                <area className="Area" href="#" target="" alt="South Tower" title="South Tower" coords="541,389,628,488" shape="rect" onClick={(e)=>{e.preventDefault(); move(36)}}/>
+                <area className="Area" href="#" target="" alt="North Tower" title="North Tower" coords="13,12,99,113" shape="rect" onClick={(e)=>{e.preventDefault(); move(1)}}/>
+                <area className="Area" href="#" target="" alt="East Tower" title="East Tower" coords="542,11,626,111" shape="rect" onClick={(e)=>{e.preventDefault(); move(6)}}/>
+                <area className="Area" href="#" target="" alt="Caesar Room" title="Caesar Room" coords="110,40,210,114" shape="rect" onClick={(e)=>{e.preventDefault();move(2)}}/>
+                <area className="Area" href="#" target="" alt="Opal Room" title="Opal Room" coords="220,10,292,69" shape="rect" onClick={(e)=>{e.preventDefault(); move(3)}}/>
+                <area className="Area" href="#" target="" alt="Coral Room" title="Coral Room" coords="345,11,418,69" shape="rect" onClick={(e)=>{e.preventDefault(); move(4)}}/>
+                <area className="Area" href="#" target="" alt="Roof" title="Roof" coords="429,38,530,112" shape="rect" onClick={(e)=>{e.preventDefault(); move(5)}}/>
+                <area className="Area" href="#" target="" alt="Cafe" title="Cafe" coords="293,154,221,80" shape="rect" onClick={(e)=>{e.preventDefault(); move(8)}}/>
+                <area className="Area" href="#" target="" alt="Parlor" title="Parlor" coords="345,81,417,152" shape="rect" onClick={(e)=>{e.preventDefault(); move(11)}}/>
+                <area className="Area" href="#" target="" alt="Pool" title="Pool" coords="369,165,488,166,488,251,419,251,407,206" shape="poly" onClick={(e)=>{e.preventDefault(); move(16)}}/>
+                <area className="Area" href="#" target="" alt="SPA" title="SPA" coords="271,166,237,197,221,236,153,237,152,165" shape="poly" onClick={(e)=>{e.preventDefault(); move(15)}}/>
+                <area className="Area" href="#" target="" alt="Arbor" title="Arbor" coords="151,248,151,334,266,334,236,299,221,250" shape="poly" onClick={(e)=>{e.preventDefault(); move(21)}}/>
+                <area className="Area" href="#" target="" alt="Farm" title="Farm" coords="488,264,488,334,371,334,403,296,416,265" shape="poly" onClick={(e)=>{e.preventDefault(); move(22)}}/>
+                <area className="Area" href="" target="" alt="Ball Room" title="Ball Room" coords="25,166,98,251" shape="rect" onClick={(e)=>{e.preventDefault(); move(13)}}/>
+                <area className="Area" href="" target="" alt="Sleep Room" title="Sleep Room" coords="540,165,614,238" shape="rect" onClick={(e)=>{e.preventDefault(); move(18)}} />
+                <area className="Area" href="" target="" alt="Class Room" title="Class Room" coords="25,263,97,334" shape="rect" onClick={(e)=>{e.preventDefault(); move(19)}}/>
+                <area className="Area" href="" target="" alt="Meal Room" title="Meal Room" coords="541,249,613,335" shape="rect" onClick={(e)=>{e.preventDefault(); move(24)}}/>
+                <area className="Area" href="" target="" alt="Bar" title="Bar" coords="221,346,292,417" shape="rect" onClick={(e)=>{e.preventDefault(); move(26)}}/>
+                <area className="Area" href="" target="" alt="Lab" title="Lab" coords="346,346,418,418" shape="rect" onClick={(e)=>{e.preventDefault(); move(29)}}/>
+                <area className="Area" href="" target="" alt="Cellar" title="Cellar" coords="109,387,209,460" shape="rect" onClick={(e)=>{e.preventDefault(); move(32)}}/>
+                <area className="Area" href="" target="" alt="Apple Room" title="Apple Room" coords="221,430,293,488" shape="rect" onClick={(e)=>{e.preventDefault(); move(33)}}/>
+                <area className="Area" href="" target="" alt="Parole Room" title="Parole Room" coords="429,387,529,459" shape="rect" onClick={(e)=>{e.preventDefault(); move(35)}}/>
+                <area className="Area" href="" target="" alt="Map Room" title="Map Room" coords="345,430,419,490" shape="rect" onClick={(e)=>{e.preventDefault(); move(34)}}/>
+                <area className="Area" href="" target="" alt="Corridor 1" title="Corridor 1" coords="25,123,209,153" shape="rect" onClick={(e)=>{e.preventDefault(); move(7)}}/>
+                <area className="Area" href="" target="" alt="Corridor 2" title="Corridor 2" coords="304,57,335,155" shape="rect" onClick={(e)=>{e.preventDefault(); move(9)}}/>
+                <area className="Area" href="" target="" alt="Corridor 3" title="Corridor 3" coords="430,122,613,154" shape="rect" onClick={(e)=>{e.preventDefault(); move(12)}}/>
+                <area className="Area" href="" target="" alt="Corridor 4" title="Corridor 4" coords="109,164,141,250" shape="rect" onClick={(e)=>{e.preventDefault(); move(14)}}/>
+                <area className="Area" href="" target="" alt="Corridor 5" title="Corridor 5" coords="500,164,529,238" shape="rect" onClick={(e)=>{e.preventDefault(); move(17)}}/>
+                <area className="Area" href="" target="" alt="Corridor 6" title="Corridor 6" coords="109,262,141,334" shape="rect" onClick={(e)=>{e.preventDefault(); move(20)}}/>
+                <area className="Area" href="" target="" alt="Corridor 7" title="Corridor 7" coords="500,248,529,333" shape="rect" onClick={(e)=>{e.preventDefault(); move(23)}}/>
+                <area className="Area" href="" target="" alt="Corridor 8" title="Corridor 8" coords="25,345,209,376" shape="rect" onClick={(e)=>{e.preventDefault(); move(25)}}/>
+                <area className="Area" href="" target="" alt="Corridor 9" title="Corridor 9" coords="304,345,335,441" shape="rect" onClick={(e)=>{e.preventDefault(); move(27)}}/>
+                <area className="Area" href="" target="" alt="Corridor 10" title="Corridor 10" coords="429,346,613,376" shape="rect" onClick={(e)=>{e.preventDefault(); move(30)}}/>
                     </map>
                     <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
                     
@@ -790,25 +824,6 @@ return (
                             </div>
                         );
                     })}
-                </div>
-                <div className="Dice-pack">
-                    <button
-                        onClick={() => throwDice('Blanco')}
-                        style={{ border: "none", background: "transparent",padding: 0,cursor: diceRolled ? "not-allowed" : "pointer",marginRight: "15px"}}
-                        title="Dado Blanco"
-                        disabled={diceRolled} // Deshabilitado si ya tiró
-                    >
-                        <img src={`/Dice/B${whiteDice}.png`} alt="Dado Blanco" style={{ width: "80px", height: "auto" }} />
-                    </button>
-                    <button
-                        onClick={() => throwDice('Negro')}
-                        style={{ border: "none", background: "transparent", padding: 0, cursor: diceRolled ? "not-allowed" : "pointer" }}
-                        title="Dado Negro"
-                        disabled={diceRolled}
-                        
-                    >
-                        <img src={`/Dice/N${blackDice}.png`} alt="Dado Negro" style={{ width: "80px", height: "auto" }} />
-                    </button>
                 </div>
             </div>
             <div className="points-section">
@@ -941,6 +956,7 @@ return (
             defender={fightDefender}
             attacker={fightAttacker}
             stompClient={stompClient}
+            bagCards={bagCards}
             onResolve={async (currentUserWon) => {
                 try {
                     console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightDefender=', fightDefender, 'fightAttacker=', fightAttacker);
@@ -956,7 +972,7 @@ return (
                         return;
                     }
 
-                    const defenderRoomName = fightDefender?.currentRoom?.name || fightDefender?.roomName || fightDefender?.room?.name || pendingTargetRoom;
+                    const defenderRoomId = fightDefender?.currentRoom?.id || fightDefender?.roomId || fightDefender?.room?.id || pendingTargetRoom;
 
                     // currentUserWon aquí representa si el atacante ganó (porque solo el atacante ejecuta esto)
                     const attackerWins = currentUserWon;
@@ -971,27 +987,24 @@ return (
                         setPendingTargetRoom(null);
                         return;
                     }
-                    const allRooms = [
-                        "Safe Area","West Tower","South Tower","North Tower","East Tower",
-                        "Caesar Room","Opal Room","Coral Room","Roof","Cafe","Parlor","Pool","SPA",
-                        "Arbor","Farm","Ball Room","Sleep Room","Class Room","Meal Room","Bar","Lab",
-                        "Cellar","Apple Room","Parole Room","Map Room","Corridor 1","Corridor 2","Corridor 3",
-                        "Corridor 4","Corridor 5","Corridor 6","Corridor 7","Corridor 8","Corridor 9","Corridor 10"
+                    const allRoomIds = [
+                        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                        21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
                     ];
                     const winnerPlayer = match?.players?.find(p => p.user?.id === (winnerUser?.id || winnerUser?.user?.id));
-                    const winnerRoomName = winnerPlayer?.currentRoom?.name || winnerPlayer?.roomName || null;
+                    const winnerRoomId = winnerPlayer?.currentRoom?.id || winnerPlayer?.roomId || null;
 
-                    const occupiedRooms = new Set();
+                    const occupiedRoomIds = new Set();
                     (match?.players || []).forEach(p => {
-                        const rn = p.currentRoom?.name || p.roomName || p.room?.name;
-                        if (rn) occupiedRooms.add(rn);
+                        const rid = p.currentRoom?.id || p.roomId || p.room?.id;
+                        if (rid) occupiedRoomIds.add(rid);
                     });
                     (match?.npcs || []).forEach(npc => {
-                        const rn = npc.room?.name;
-                        if (rn) occupiedRooms.add(rn);
+                        const rid = npc.room?.id;
+                        if (rid) occupiedRoomIds.add(rid);
                     });
 
-                    const candidates = allRooms.filter(r => r !== winnerRoomName && !occupiedRooms.has(r));
+                    const candidates = allRoomIds.filter(r => r !== winnerRoomId && !occupiedRoomIds.has(r));
                     if (candidates.length === 0) {
                         console.warn('No candidate rooms to move loser');
                         setIsFightModalOpen(false);
@@ -999,12 +1012,12 @@ return (
                         setFightAttacker(null);
                         return;
                     }
-                    let randomRoom = null;
+                    let randomRoomId = null;
                     if (candidates.length > 0) {
-                        randomRoom = candidates[Math.floor(Math.random() * candidates.length)];
+                        randomRoomId = candidates[Math.floor(Math.random() * candidates.length)];
                     } else {
-                        const fallback = allRooms.filter(r => r !== winnerRoomName);
-                        randomRoom = fallback[Math.floor(Math.random() * fallback.length)];
+                        const fallback = allRoomIds.filter(r => r !== winnerRoomId);
+                        randomRoomId = fallback[Math.floor(Math.random() * fallback.length)];
                     }
 
                     // TODO: Guardar información de la batalla para usar en estadisticas 
@@ -1024,21 +1037,21 @@ return (
                     //} catch (e) {
                     //    console.debug('Could not record fight event', e);
                     //}
-                    const moveResult = await moveLoserToRandomRoom(loserUser.id, randomRoom);
+                    const moveResult = await moveLoserToRandomRoom(loserUser.id, randomRoomId);
                     if (!moveResult) {
-                        console.error('Failed to move loser to', randomRoom);
+                        console.error('Failed to move loser to', randomRoomId);
                         alert('No se pudo mover al perdedor. Revisa la consola para más detalles.');
                     } else {
-                        console.log('Loser moved to', randomRoom, moveResult);
+                        console.log('Loser moved to', randomRoomId, moveResult);
                         }
 
                     // Si ganó el atacante, muévelo a la antigua sala del defensor
-                    if (attackerWins && defenderRoomName) {
-                        const moveWinner = await movePlayerToRoom(fightAttacker?.user?.id, defenderRoomName);
+                    if (attackerWins && defenderRoomId) {
+                        const moveWinner = await movePlayerToRoom(fightAttacker?.user?.id, defenderRoomId);
                         if (!moveWinner) {
-                            console.error('Failed to move attacker (winner) to defender room', defenderRoomName);
+                            console.error('Failed to move attacker (winner) to defender room', defenderRoomId);
                         } else {
-                            console.log('Attacker moved to defender room', defenderRoomName, moveWinner);
+                            console.log('Attacker moved to defender room', defenderRoomId, moveWinner);
 
                         }
                     }

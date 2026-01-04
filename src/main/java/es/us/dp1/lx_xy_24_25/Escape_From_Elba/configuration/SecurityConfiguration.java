@@ -102,7 +102,7 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.PUT, "/api/v1/matches/{id}/discardConfirmed").hasAnyAuthority(PLAYER)
                 .requestMatchers(HttpMethod.GET,"/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck").hasAnyAuthority(PLAYER, ADMIN)
                 .requestMatchers(HttpMethod.PUT,"/api/v1/matches/{matchId}/move").hasAnyAuthority(PLAYER, ADMIN)
-
+                .requestMatchers(HttpMethod.POST, "/api/v1/bag/validate-weapon").hasAnyAuthority(PLAYER)
                 .requestMatchers(HttpMethod.GET, "/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
 
 

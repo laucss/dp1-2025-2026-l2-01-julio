@@ -243,7 +243,7 @@ public class MatchController {
 
     @PutMapping("/{matchId}/move")
     public ResponseEntity<MatchDTO> moveToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
-        ms.movePlayerToAdyacentRoom(matchId, data.getUserId(), data.getRoomName()); 
+        ms.movePlayerToAdyacentRoom(matchId, data.getUserId(), data.getRoomId()); 
         Match match = ms.getMatchById(matchId);
         
         Player movedPlayer = match.getPlayers().stream()
@@ -254,6 +254,15 @@ public class MatchController {
         if (movedPlayer != null) {
             PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);
             matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
+            
+            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
+                movedPlayer.getId(),
+                movedPlayer.getUser().getId(),
+                movedPlayer.getUser().getUsername(),
+                movedPlayer.getActionPoints(),
+                System.currentTimeMillis()
+            );
+            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
         }
         
         return ResponseEntity.ok(new MatchDTO(match)); 
@@ -261,9 +270,8 @@ public class MatchController {
 
     @PutMapping("/{matchId}/moveLoser")
     public ResponseEntity<MatchDTO> moveLoserToRandomRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
-        ms.moveLoserPlayer(matchId, data.getUserId(), data.getRoomName()); 
+        ms.moveLoserPlayer(matchId, data.getUserId(), data.getRoomId()); 
         Match match = ms.getMatchById(matchId);
-        
         
         Player movedPlayer = match.getPlayers().stream()
             .filter(p -> p.getUser().getId().equals(data.getUserId()))
@@ -273,6 +281,24 @@ public class MatchController {
         if (movedPlayer != null) {
             PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);
             matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
+            
+            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
+                movedPlayer.getId(),
+                movedPlayer.getUser().getId(),
+                movedPlayer.getUser().getUsername(),
+                movedPlayer.getActionPoints(),
+                System.currentTimeMillis()
+            );
+            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+            
+            StrengthUpdateDTO strengthUpdate = new StrengthUpdateDTO(
+                movedPlayer.getId(),
+                movedPlayer.getUser().getId(),
+                movedPlayer.getUser().getUsername(),
+                movedPlayer.getStrength(),
+                System.currentTimeMillis()
+            );
+            matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);
         }
         
         return ResponseEntity.ok(new MatchDTO(match)); 
@@ -295,6 +321,34 @@ public class MatchController {
     @Operation(summary = "Notify fight dice", description = "Notifies all players when a dice is rolled during a fight.")
     public ResponseEntity<Void> notifyFightDice(@PathVariable Integer matchId, @RequestBody FightDiceUpdateDTO diceUpdate) {
         matchWebsocketController.notifyFightDiceUpdate(matchId, diceUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/notify-dice-totals")
+    @Operation(summary = "Notify dice totals", description = "Notifies all players when dice totals are updated during a fight.")
+    public ResponseEntity<Void> notifyDiceTotals(@PathVariable Integer matchId, @RequestBody DiceTotalsUpdateDTO totalsUpdate) {
+        matchWebsocketController.notifyDiceTotalsUpdate(matchId, totalsUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/notify-action-points")
+    @Operation(summary = "Notify action points", description = "Notifies all players when action points are updated.")
+    public ResponseEntity<Void> notifyActionPoints(@PathVariable Integer matchId, @RequestBody ActionPointsUpdateDTO actionPointsUpdate) {
+        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/notify-strength")
+    @Operation(summary = "Notify strength", description = "Notifies all players when strength is updated.")
+    public ResponseEntity<Void> notifyStrength(@PathVariable Integer matchId, @RequestBody StrengthUpdateDTO strengthUpdate) {
+        matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/notify-ready-state")
+    @Operation(summary = "Notify ready state", description = "Notifies all players when a player changes their ready state during a fight.")
+    public ResponseEntity<Void> notifyReadyState(@PathVariable Integer matchId, @RequestBody ReadyStateUpdateDTO readyStateUpdate) {
+        matchWebsocketController.notifyReadyStateUpdate(matchId, readyStateUpdate);
         return ResponseEntity.ok().build();
     }
 

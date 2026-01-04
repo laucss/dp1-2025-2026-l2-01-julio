@@ -31,7 +31,12 @@ public class BagController {
         Boolean isValid = bagService.checkBagIsValid(cardsDTO.getCards());
         return ResponseEntity.ok(isValid);
     }
-     
-
     
-}
+    @PostMapping("/validate-weapon")
+    public ResponseEntity<WeaponValidationDTO> validateWeapon(@RequestBody ListCardsDTO cardsDTO) {
+        Boolean isValidWeapon = bagService.isValidWeapon(cardsDTO.getCards());
+        // Aquí puedes definir el valor de bonus para las armas
+        Integer bonusValue = isValidWeapon ? 2 : 0;
+        WeaponValidationDTO response = new WeaponValidationDTO(isValidWeapon, bonusValue);
+        return ResponseEntity.ok(response);
+    }}
