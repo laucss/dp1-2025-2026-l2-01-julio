@@ -19,7 +19,9 @@ area
 arm 
 arms
 armor 
+
 bar
+bare
 barb 
 beam 
 bola 
@@ -40,6 +42,7 @@ boar
 boa
 boas
 broom
+
 cabs
 crabs 
 clap 
@@ -84,6 +87,7 @@ common
 compare
 complete
 cross
+
 ebola
 elba 
 elf
@@ -91,6 +95,7 @@ elms
 elf
 else
 epee 
+
 fracas 
 face
 falls
@@ -120,6 +125,7 @@ frames
 former
 free
 from 
+
 lamp 
 laser 
 lasso 
@@ -143,17 +149,22 @@ loams
 lobe
 lobes
 lob
+
 mace 
+map
+maps
 melee 
 male
 member
 members
 more 
 mop
+
 oar 
 off 
 offer 
 offers 
+
 paper
 pass 
 passes
@@ -180,6 +191,7 @@ process
 proposal 
 propose 
 probe 
+
 ram 
 rams 
 roller 
@@ -198,7 +210,9 @@ roles
 room 
 rooms
 rope
+
 saber 
+sober
 sap 
 scape 
 scapes

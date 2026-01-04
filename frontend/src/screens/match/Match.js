@@ -641,7 +641,7 @@ if (!match) {
     return <div>Cargando partida...</div>;
 }
 
-console.log('currentplayer', currentPlayer)
+console.log('cards', handCards)
 
 return (
         <div className="match-container">
