@@ -97,13 +97,13 @@ export default function StartDiceModal({ isOpen, onClose, onDiceRolled, matchDat
     return (
         <div className="start-dice-modal-overlay">
             <div className="start-dice-modal-content">
-                <h2 className="start-dice-title">Determinar orden de turnos</h2>
+                <h2 className="start-dice-title">Determine Turn Order</h2>
 
                 <div className="start-dice-container">
                     <div className="dice-wrapper">
                         <img 
                             src={`/Dice/B${whiteDice}.png`} 
-                            alt="Dado Blanco" 
+                            alt="White Die" 
                             className={`start-dice white-dice ${isRolling ? 'rolling' : ''}`}
                         />
                     </div>
@@ -111,7 +111,7 @@ export default function StartDiceModal({ isOpen, onClose, onDiceRolled, matchDat
                     <div className="dice-wrapper">
                         <img 
                             src={`/Dice/N${blackDice}.png`} 
-                            alt="Dado Negro" 
+                            alt="Black Die" 
                             className={`start-dice black-dice ${isRolling ? 'rolling' : ''}`}
                         />
                     </div>
@@ -122,7 +122,7 @@ export default function StartDiceModal({ isOpen, onClose, onDiceRolled, matchDat
                     className={`throw-dice-button ${diceRolled || isRolling ? 'disabled' : ''}`}
                     disabled={diceRolled || isRolling}
                 >
-                    {isRolling ? 'Tirando...' : diceRolled ? 'thrown dice' : 'Roll the dice'}
+                    {isRolling ? 'Throwing...' : diceRolled ? 'thrown dice' : 'Roll the dice'}
                 </button>
 
                 {diceRolled && (
