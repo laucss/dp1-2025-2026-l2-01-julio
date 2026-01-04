@@ -12,7 +12,7 @@
 }
 /*background: rgba(26, 26, 26, 0.9);*/
 .modal-fight-content-wrapper{
-    background: rgb(255, 255, 255);
+    background: rgb(40, 16, 176);
     border-radius: 10px;
     padding: 10px;
     width: 70%;
@@ -111,6 +111,7 @@
   position: relative;
   border-radius: 15%;
   font-size: xx-large;
+  background-color: #ffffff;
 }
 
 .total-box::before {
@@ -176,6 +177,7 @@
     background: #fff;
     box-sizing: border-box;
     transition: transform 0.1s;
+    border-radius: 20px;
 }
 
 .dice:hover {
@@ -216,6 +218,14 @@
   border-right: none;
 }
 
+.action-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
 .action-box {
   width: 60px;
   height: 50px;
@@ -227,9 +237,44 @@
 
 .action-button {
   padding: 6px 12px;
-  border: 2px solid #ffffff;
+  border: 2px solid #000000;
   background: #fa3838;
   cursor: pointer;
   border-radius: 20px;
-  
+  transition:  0.2s;
+}
+
+.action-button:hover {
+  background: #ff4d4d;
+  transform: scale(1.1);
+}
+
+.action-button:disabled {
+  background: #999999;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.ready-button {
+  padding: 8px 16px;
+  border: 2px solid #000000;
+  background: #ff0000;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  font-weight: bold;
+}
+
+.ready-button:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.ready-button.green {
+  background: #2ecc71;
+}
+
+.ready-button:disabled {
+  background: #999999;
+  cursor: not-allowed;
+  opacity: 0.6;
 }

@@ -58,4 +58,11 @@ public class MatchWebsocketController {
             update
         );
     }
+
+    public void notifyReadyStateUpdate(Integer matchId, ReadyStateUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".fight.ready",
+            update
+        );
+    }
 }
