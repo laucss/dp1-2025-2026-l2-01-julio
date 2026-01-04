@@ -435,15 +435,16 @@ export default function Match(){
         console.log('roomId', roomId)
         if (moveToAdyacentRoom===false) return ;
         if (moveToAdyacentRoom === true){ //TODO: Comprobar antes de todo si son adyacentes 
-            // Antes de llamar al backend, comprobamos si la habitación destino ya está ocupada
             try {
+                const isSafeArea = roomId === 37;
+                
                 const otherPlayer = match?.players?.find(p => p.user?.id !== currentUser?.id && (
                     (p.currentRoom && p.currentRoom.id === roomId) ||
                     (p.roomId && p.roomId === roomId) ||
                     (p.room && p.room.id === roomId)
                 ));
 
-                if (otherPlayer) {
+                if (otherPlayer && !isSafeArea) {
                     setPendingTargetRoom(roomId);
                     setFightDefender(otherPlayer);
                     setIsFightModalOpen(true);
@@ -470,7 +471,6 @@ export default function Match(){
                 }
 
                 {console.log(roomId)}
-                // Si no hay nadie, proceder con normalidad
                 const response = await fetch (`/api/v1/matches/${matchId}/move`, {
                 method: "PUT",
                 headers: {
@@ -488,7 +488,6 @@ export default function Match(){
                     const data = await response.json()
                     setMatch(data)
                     
-                    // Notificar cambio en puntos de acción
                     const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
                     if (movedPlayer) {
                         await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
@@ -507,7 +506,6 @@ export default function Match(){
                         setActionPoints(movedPlayer.actionPoints);
                     }
                     
-                    // Action points will be updated in real-time via WebSocket subscription
                     setMoveToAdyacentRoom(false)
                 }
 
@@ -521,7 +519,6 @@ export default function Match(){
         }
     }
 
-    // Mover el perdedor a una habitación específica
     const moveLoserToRandomRoom = async (userId, roomId) => {
         try {
             console.log('movePlayerToRoom', { userId, roomId });
@@ -547,7 +544,6 @@ export default function Match(){
             if (data.players) {
                 setPlayer(data.players);
                 
-                // Notificar cambio en puntos de acción del jugador movido
                 const movedPlayer = data.players.find(p => p.user.id === userId);
                 if (movedPlayer) {
                     await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
