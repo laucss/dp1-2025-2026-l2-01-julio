@@ -487,6 +487,26 @@ export default function Match(){
                 if (response.ok){
                     const data = await response.json()
                     setMatch(data)
+                    
+                    // Notificar cambio en puntos de acción
+                    const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
+                    if (movedPlayer) {
+                        await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${jwt}`,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                matchId: matchId,
+                                userId: currentUser.id,
+                                actionPoints: movedPlayer.actionPoints
+                            })
+                        }).catch(err => console.error('Error notifying action points:', err));
+                        
+                        setActionPoints(movedPlayer.actionPoints);
+                    }
+                    
                     // Action points will be updated in real-time via WebSocket subscription
                     setMoveToAdyacentRoom(false)
                 }
@@ -524,7 +544,26 @@ export default function Match(){
             const data = await response.json();
             console.log('movePlayerToRoom success', data);
             setMatch(data);
-            if (data.players) setPlayer(data.players);
+            if (data.players) {
+                setPlayer(data.players);
+                
+                // Notificar cambio en puntos de acción del jugador movido
+                const movedPlayer = data.players.find(p => p.user.id === userId);
+                if (movedPlayer) {
+                    await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${jwt}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            matchId: matchId,
+                            userId: userId,
+                            actionPoints: movedPlayer.actionPoints
+                        })
+                    }).catch(err => console.error('Error notifying action points:', err));
+                }
+            }
             return data;
         } catch (err) {
             console.error('Error moving player:', err);
