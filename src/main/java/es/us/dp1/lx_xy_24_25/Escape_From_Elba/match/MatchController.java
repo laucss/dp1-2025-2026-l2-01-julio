@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 import org.springdoc.core.annotations.ParameterObject;
@@ -37,6 +38,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -55,10 +57,12 @@ public class MatchController {
     BagService bagService; 
     DeckService deckService;
     MatchWebsocketController matchWebsocketController;
+    RoomService roomService;
 
     @Autowired
     public MatchController(MatchService ms, LobbyService ls, PlayerService playerService, HandService handService, 
-                          BagService bagService, DeckService deckService, MatchWebsocketController matchWebsocketController){
+                          BagService bagService, DeckService deckService, MatchWebsocketController matchWebsocketController,
+                          RoomService roomService){
         this.ms=ms;
         this.ls=ls;
         this.playerService=playerService;
@@ -66,6 +70,19 @@ public class MatchController {
         this.bagService=bagService; 
         this.deckService=deckService;
         this.matchWebsocketController=matchWebsocketController;
+        this.roomService=roomService;
+    }
+
+    @GetMapping("/adjacencies")
+    @Operation(summary = "Get all adjacencies", description = "Returns a map where each room id maps to a list of adjacent room ids")
+    public Map<Integer, List<Integer>> getAdjacencyMap() {
+        return roomService.findAllRooms().stream()
+            .collect(Collectors.toMap(
+                r -> r.getId(),
+                r -> r.getAdjacencyList().stream()
+                    .map(adj -> adj.getId())
+                    .collect(Collectors.toList())
+            ));
     }
 
     @GetMapping

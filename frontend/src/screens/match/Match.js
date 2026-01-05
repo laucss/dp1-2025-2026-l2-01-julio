@@ -110,16 +110,20 @@ export default function Match(){
         37: { left: '50%', top: '50%' },  // Safe Area v
     };
     // CARGAR DATOS PARTIDA 
+      const [adjacencies, setAdjacencies] = useFetchState(
+        [],
+        `/api/v1/matches/adjacencies`,
+        jwt,
+        setMessage,
+        setVisible
+      );
 
     // CARGAR DATOS JUGADORES 
-   
-    
-
     useEffect(() => {
         fetchMatchAndPlayers()
     }, [matchId])
     
-    // Inicializar conexión WebSocket para actualizaciones de turno
+    
     useEffect(() => {
         const client = new Client({
             brokerURL: 'ws://localhost:8080/ws',
@@ -131,7 +135,7 @@ export default function Match(){
         return () => client.active && client.deactivate();
     }, [jwt]);
 
-    // Suscribirse a las actualizaciones de turno
+    
     useEffect(() => {
         if (!stompClient || !stompClient.active) return;
 
@@ -144,7 +148,7 @@ export default function Match(){
         return () => subscription.unsubscribe();
     }, [stompClient, matchId]);
 
-    // Suscribirse a las actualizaciones de combate
+    
     useEffect(() => {
         if (!stompClient || !stompClient.active) return;
 
@@ -361,7 +365,7 @@ export default function Match(){
     // iNICIALIZAR BARAJA
     const fetchCards = async () => {
         try {
-            console.log('ENTRA EN EL FETCHCARDS')
+            //console.log('ENTRA EN EL FETCHCARDS')
             const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/getAllCards`, {
             method: "GET",
             headers: {
@@ -373,7 +377,7 @@ export default function Match(){
 
             if (response.ok){
                 const data = await response.json()
-                console.log('datos fetch cards' , data)
+                //console.log('datos fetch cards' , data)
                 setHandCards(Array.isArray(data.hand.cards) ? data.hand.cards : [])
                 setBagCards(Array.isArray(data.bag.cards) ? data.bag.cards : [])
                 setDeck(data.deck || [])
@@ -462,10 +466,18 @@ export default function Match(){
 
 
     const move = async (roomId) => {
-        console.log('roomId', roomId)
+        //console.log('roomId destino', roomId)
+        //console.log('actual roomID', currentPlayer?.[0]?.currentRoom?.id || currentPlayer?.[0]?.roomId || currentPlayer?.[0]?.room?.id)
         if (moveToAdyacentRoom===false) return ;
-        if (moveToAdyacentRoom === true){ //TODO: Comprobar antes de todo si son adyacentes 
+        if (moveToAdyacentRoom === true){
             try {
+                const currentRoomId = currentPlayer?.[0]?.currentRoom?.id || currentPlayer?.[0]?.roomId || currentPlayer?.[0]?.room?.id;
+                if (!areRoomsAdjacent(currentRoomId, roomId)) {
+                    alert('No puedes moverte a una habitación no adyacente');
+                    setMoveToAdyacentRoom(false);
+                    return;
+                }
+
                 const isSafeArea = roomId === 37;
                 
                 const otherPlayer = match?.players?.find(p => p.user?.id !== currentUser?.id && (
@@ -517,6 +529,14 @@ export default function Match(){
                 if (response.ok){
                     const data = await response.json()
                     setMatch(data)
+                    if (data.players) {
+                        setPlayer(data.players)
+                        const me = data.players.find(p => p.user.id === currentUser.id)
+                        if (me) {
+                            setCurrentPlayer([me])
+                            setPlayersList(data.players.filter(p => p.user.id !== currentUser.id))
+                        }
+                    }
                     
                     const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
                     if (movedPlayer) {
@@ -650,7 +670,7 @@ export default function Match(){
         }
     };
 
-    console.log('match', match)
+    //console.log('match', match)
 
 
     if (match?.status === "FINISHED") {
@@ -671,7 +691,16 @@ if (!match) {
     return <div>Cargando partida...</div>;
 }
 
-console.log('cards', handCards)
+
+    const areRoomsAdjacent = (fromId, toId) => {
+        if (!fromId || !toId) return false;
+        if (!adjacencies || typeof adjacencies !== 'object' || Array.isArray(adjacencies)) return false;
+
+        const neighbors = adjacencies[fromId] || adjacencies[fromId.toString()] || [];
+        return Array.isArray(neighbors) && neighbors.includes(toId);
+    };
+
+//console.log('cards', handCards)
 
 return (
         <div className="match-container">
