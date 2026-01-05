@@ -429,6 +429,36 @@ export default function Match(){
 
     }
 
+    
+    const drawCardForWinner = async (winnerId) => {
+        try {
+            const response = await fetch(`/api/v1/matches/${matchId}/${winnerId}/drawCardFromDeck`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            })
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${response.statusText}`)
+            }
+
+            const data = await response.json()
+            
+            if (winnerId === currentPlayer[0]?.id) {
+                setDeck(data.deck)
+                setHandCards(prev => [...prev, data.card])
+            }
+            
+            return true
+        } catch (error) {
+            console.log('Error al robar carta para el ganador:', error)
+            return false
+        }
+    }
+
 
 
     const move = async (roomId) => {
@@ -839,7 +869,7 @@ return (
             </div>
             
 
-            {/* TABLA DE JUGADORES Y NPCS */}
+            {/* TABLA DE JUGADORES Y NPCS 
             <div
             className="entities-panel"
             style={{
@@ -897,6 +927,7 @@ return (
                     </tbody>
                 </table>
             </div>
+            */}
             <div className="player-section">
                 <div className="player-hand">
                     {Array.isArray(handCards) && handCards.map((carta, index) => (
@@ -1053,6 +1084,16 @@ return (
                         } else {
                             console.log('Attacker moved to defender room', defenderRoomId, moveWinner);
 
+                        }
+                    }
+
+                    const winnerPlayerId = attackerWins ? fightAttacker?.id : fightDefender?.id;
+                    if (winnerPlayerId) {
+                        const drawSuccess = await drawCardForWinner(winnerPlayerId);
+                        if (drawSuccess) {
+                            console.log('Ganador robó una carta');
+                        } else {
+                            console.log('No se pudo robar una carta para el ganador');
                         }
                     }
 
