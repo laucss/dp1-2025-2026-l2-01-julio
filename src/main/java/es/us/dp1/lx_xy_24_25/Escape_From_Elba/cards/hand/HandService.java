@@ -151,6 +151,8 @@ public class HandService {
         
         HandInGame newHand = new HandInGame(); 
 
+        // tengo que hacer lo de newArrayList<>(hand...) dentro del set porque si no se hace así ç
+        // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
         newHand.setCards(new ArrayList<>(hand.getCards().stream()
             .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
 

@@ -71,7 +71,11 @@ come
 comes
 coma
 comes
-comas
+comas 
+compare 
+cop 
+cops 
+cope 
 crape
 crapes
 crops
@@ -80,6 +84,8 @@ classes
 clear
 close
 clamp
+clap
+claps
 corbel 
 color
 colors

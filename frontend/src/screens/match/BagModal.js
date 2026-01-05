@@ -3,12 +3,24 @@ import '../../static/css/match/discardModal.css';
 import tokenService from "../../services/token.service";
 import getIdFromUrl from "../../util/getIdFromUrl";
 
+// imports del dnd-kit (librería para el arrastre de cartas)
+import {DndContext, DragOverlay } from '@dnd-kit/core';
+import Card from "./dnd-kit/Card";
+import BagZone from "./dnd-kit/BagZone";
+import { arrayMove } from '@dnd-kit/sortable';
+import {restrictToWindowEdges} from '@dnd-kit/modifiers';
+import { SortableContext } from '@dnd-kit/sortable';
+import SortableCard from './dnd-kit/SortableCard';
+
+
 const jwt = tokenService.getLocalAccessToken();
 
 export default function BagModal({isVisible, hand, bag, deck, onClose, player, onSave}){
     const matchId = getIdFromUrl(2);
     const[handCards, setHandCards] = useState([])
     const[bagCards, setBagCards] = useState([])
+    const [activeCard, setActiveCard] = useState(null);
+
 
     const[deckCards, setDeckCards] = useState([])
 
@@ -25,6 +37,8 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
     }, [isVisible])
 
     if (!isVisible) return null
+
+
 
     const confirm = async () => {
         try {
@@ -127,6 +141,43 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
 
     } 
 
+    const handleDragStart = (event) => {
+        const card =
+            handCards.find(c => c.id === event.active.id) ||
+            bagCards.find(c => c.id === event.active.id);
+
+        setActiveCard(card);
+    };
+
+
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+
+        setActiveCard(null);
+
+        if (!over) return;
+
+        // active.id -> carta arrastrada
+        // over.id   -> zona o carta destino
+
+        // caso 1: de la mano a la bolsa 
+        if (over.id === 'bag') {
+            const card = handCards.find(c => c.id === active.id);
+
+            setHandCards(prev => prev.filter(c => c.id !== active.id));
+            setBagCards(prev => [...prev, card]);
+        }
+
+        // caso 2: reordenar dentro de la bolsa 
+        if (over.id !== 'bag') {
+            const oldIndex = bagCards.findIndex(c => c.id === active.id);
+            const newIndex = bagCards.findIndex(c => c.id === over.id);
+
+            setBagCards(arrayMove(bagCards, oldIndex, newIndex));
+        }
+
+    };
+
     
 
     return (
@@ -134,44 +185,45 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
             <div className="window">
                 <div className="modal-content-wrapper">
                     <div className="sections-container">
+                        <DndContext 
+                            onDragStart={handleDragStart} 
+                            onDragEnd={handleDragEnd}>
+
                         <div className="hand-section">
                             <h3 className="section-title">Hand</h3>
                             <div className="cards-grid">
-                                {handCards.map((card, index) => (
-                                    <div key={index}>
-                                        <img 
-                                            src={`/resources${card.frontImage}`} 
-                                            alt={`Carta ${card.letter}`}  
-                                            className="card"
-                                            onClick={() => {
-                                                setBagCards(prev => [...prev, card]);
-                                                setHandCards(prev => prev.filter((_, i) => i !== index));
-                                            }}
-                                        />
-                                    </div>
+                                {handCards.map((card) => (
+                                    <Card key={card.id} card={card} />
                                 ))}
                             </div>
                         </div>
 
                         <div className="bag-section">
                             <h3 className="section-title">Bag</h3>
-                            <div className="cards-grid">
-                                {bagCards.map((card, index) => (
-                                    <div key={index}>
-                                        <img 
-                                            src={`/resources${card.frontImage}`} 
-                                            alt={`Carta ${card.letter}`}  
-                                            className="card"
-                                            onClick={() => {
-                                                setHandCards(prev => [...prev, card]);
-                                                setBagCards(prev => prev.filter((_, i) => i !== index));
-                                            }}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
+                            {/*<div className="cards-grid">*/}
+                            <BagZone>
+                                <SortableContext items={bagCards.map(c => c.id)}>
+                                    {bagCards.map(card => (
+                                    <SortableCard key={card.id} card={card} />
+                                    ))}
+                                </SortableContext>
+                            </BagZone>
                         </div>
+
+                        <DragOverlay modifiers={[restrictToWindowEdges]}> {/*"Restringe el movimiento a los bordes de la ventana.*/}
+                            {activeCard ? (
+                                // eslint-disable-next-line jsx-a11y/alt-text
+                                <img
+                                    src={`/resources${activeCard.frontImage}`}
+                                    className="card"
+                                    style={{ cursor: 'grabbing', opacity: 1 }}
+                                />
+                            ) : null}
+                        </DragOverlay>
+
+                        </DndContext>
                     </div>
+                    
 
                     <div className="buttons"> 
                         <button onClick={confirm} className="confirm-button">
