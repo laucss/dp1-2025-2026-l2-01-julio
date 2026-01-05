@@ -221,7 +221,7 @@ export default function Match(){
             
             // Only update strength if the update is for the current player
             if (strengthUpdate.userId === currentPlayer[0].user.id) {
-                setStrength(strengthUpdate.strength);
+                setStrength(Math.min(6, strengthUpdate.strength));
             }
         });
 
@@ -239,7 +239,7 @@ export default function Match(){
     useEffect(() => {
         if (Array.isArray(currentPlayer) && currentPlayer[0]?.id){
             fetchCards()
-            setStrength(currentPlayer[0].strength)
+            setStrength(Math.min(6, currentPlayer[0].strength))
         }     
     }, [currentPlayer])
 

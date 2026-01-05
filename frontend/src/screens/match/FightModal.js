@@ -35,13 +35,11 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     const [isWeaponModalOpen, setIsWeaponModalOpen] = useState(false);
     const [currentWeaponUser, setCurrentWeaponUser] = useState(null);
 
-    // Actualizar la fuerza cuando cambia el atacante o defensor
     useEffect(() => {
-        setAttackerStrength(attacker?.strength || 1);
-        setDefenderStrength(defender?.strength || 1);
+        setAttackerStrength(Math.min(6, attacker?.strength || 1));
+        setDefenderStrength(Math.min(6, defender?.strength || 1));
     }, [attacker?.strength, defender?.strength]);
 
-    // Suscribirse a las actualizaciones de dados en combate
     useEffect(() => {
         if (!stompClient || !stompClient.active || !isOpen) return;
 
