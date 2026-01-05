@@ -30,6 +30,8 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     const [blackDice, setBlackDice] = useState('1');
     const [whiteRolled, setWhiteRolled] = useState(false);
     const [blackRolled, setBlackRolled] = useState(false);
+    const [whiteRolling, setWhiteRolling] = useState(false);
+    const [blackRolling, setBlackRolling] = useState(false);
 
     // Estado del modal de armas
     const [isWeaponModalOpen, setIsWeaponModalOpen] = useState(false);
@@ -125,57 +127,59 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     const rollDice = async (diceType) => {
         const roll = Math.floor(Math.random() * 6) + 1;
         const diceTypeUpper = diceType === 'Negro' ? 'BLACK' : 'WHITE';
-        
-        // Calcular los nuevos totales
-        let newTotalAttacker = totalAttacker;
-        let newTotalDefender = totalDefender;
-        
-        if (diceType === 'Negro') {
-            newTotalDefender = defenderStrength + roll + weaponsDefender;
-            setTotalDefender(newTotalDefender);
-            setBlackDice(roll.toString());
-            setBlackRolled(true);
-        }
-        if (diceType === 'Blanco') {
-            newTotalAttacker = attackerStrength + roll + weaponsAttacker;
-            setTotalAttacker(newTotalAttacker);
-            setWhiteDice(roll.toString());
-            setWhiteRolled(true);
-        }
-        
-        // Notificar a todos los jugadores sobre la tirada
-        await fetch(`/api/v1/matches/${matchId}/notify-fight-dice`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${jwt}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                matchId: matchId,
-                playerId: currentUser.id,
-                playerUsername: currentUser.username,
-                diceType: diceTypeUpper,
-                diceValue: roll
-            })
-        });
+        const setRolling = diceType === 'Negro' ? setBlackRolling : setWhiteRolling;
+        setRolling(true);
+        try {
+            let newTotalAttacker = totalAttacker;
+            let newTotalDefender = totalDefender;
+            
+            if (diceType === 'Negro') {
+                newTotalDefender = defenderStrength + roll + weaponsDefender;
+                setTotalDefender(newTotalDefender);
+                setBlackDice(roll.toString());
+                setBlackRolled(true);
+            }
+            if (diceType === 'Blanco') {
+                newTotalAttacker = attackerStrength + roll + weaponsAttacker;
+                setTotalAttacker(newTotalAttacker);
+                setWhiteDice(roll.toString());
+                setWhiteRolled(true);
+            }
+            
+            await fetch(`/api/v1/matches/${matchId}/notify-fight-dice`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    matchId: matchId,
+                    playerId: currentUser.id,
+                    playerUsername: currentUser.username,
+                    diceType: diceTypeUpper,
+                    diceValue: roll
+                })
+            });
 
-        // Notificar los nuevos totales a todos los jugadores
-        await fetch(`/api/v1/matches/${matchId}/notify-dice-totals`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${jwt}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                matchId: matchId,
-                attackerId: attacker.id,
-                attackerTotal: diceType === 'Blanco' ? newTotalAttacker : totalAttacker,
-                defenderId: defender.id,
-                defenderTotal: diceType === 'Negro' ? newTotalDefender : totalDefender
-            })
-        });
+            await fetch(`/api/v1/matches/${matchId}/notify-dice-totals`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    matchId: matchId,
+                    attackerId: attacker.id,
+                    attackerTotal: diceType === 'Blanco' ? newTotalAttacker : totalAttacker,
+                    defenderId: defender.id,
+                    defenderTotal: diceType === 'Negro' ? newTotalDefender : totalDefender
+                })
+            });
 
-        return roll;
+            return roll;
+        } finally {
+            setTimeout(() => setRolling(false), 200);
+        }
     };
 
     const toggleReadyState = async (playerRole, currentState) => {
@@ -255,7 +259,11 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                                     title="Dado Blanco"
                                     disabled={!isAttacker || whiteRolled}
                                 >
-                                    <img src={`/Dice/B${whiteDice}.png`} alt="Dado Blanco" className='dice' />
+                                    <img
+                                        src={`/Dice/B${whiteDice}.png`}
+                                        alt="Dado Blanco"
+                                        className={`dice ${whiteRolling ? 'rolling' : ''}`}
+                                    />
                                 </button>
 
                                 <span className="calc-operator">+</span>
@@ -294,7 +302,11 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                                     title="Dado Negro"
 
                                 >
-                                    <img src={`/Dice/N${blackDice}.png`} alt="Dado Negro" className='dice' />
+                                    <img
+                                        src={`/Dice/N${blackDice}.png`}
+                                        alt="Dado Negro"
+                                        className={`dice ${blackRolling ? 'rolling' : ''}`}
+                                    />
                                 </button>
 
                                 <span className="calc-operator">+</span>
