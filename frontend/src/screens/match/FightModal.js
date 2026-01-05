@@ -35,6 +35,12 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     const [isWeaponModalOpen, setIsWeaponModalOpen] = useState(false);
     const [currentWeaponUser, setCurrentWeaponUser] = useState(null);
 
+    // Actualizar la fuerza cuando cambia el atacante o defensor
+    useEffect(() => {
+        setAttackerStrength(attacker?.strength || 1);
+        setDefenderStrength(defender?.strength || 1);
+    }, [attacker?.strength, defender?.strength]);
+
     // Suscribirse a las actualizaciones de dados en combate
     useEffect(() => {
         if (!stompClient || !stompClient.active || !isOpen) return;
@@ -237,7 +243,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                                 />
                             </div>
 
-                            <div className="total-box">{totalAttacker}</div>
+                            <div className="total-box">{whiteRolled ? totalAttacker : '?'}</div>
 
                             {/*FUERZA */}
                             <div className="calc-row">
@@ -275,7 +281,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                                 />
                             </div>
 
-                            <div className="total-box">{totalDefender}</div>
+                            <div className="total-box">{blackRolled ? totalDefender : '?'}</div>
 
                             {/*FUERZA */}
                             <div className="calc-row">
