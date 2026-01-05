@@ -65,4 +65,11 @@ public class MatchWebsocketController {
             update
         );
     }
+
+    public void notifyWeaponsUpdate(Integer matchId, WeaponsUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".fight.weapons",
+            update
+        );
+    }
 }

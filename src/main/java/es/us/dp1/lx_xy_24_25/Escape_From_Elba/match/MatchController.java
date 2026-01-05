@@ -369,4 +369,11 @@ public class MatchController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{matchId}/notify-fight-weapons")
+    @Operation(summary = "Notify weapons update", description = "Notifies all players when a player adds or removes weapons during a fight.")
+    public ResponseEntity<Void> notifyFightWeapons(@PathVariable Integer matchId, @RequestBody WeaponsUpdateDTO weaponsUpdate) {
+        matchWebsocketController.notifyWeaponsUpdate(matchId, weaponsUpdate);
+        return ResponseEntity.ok().build();
+    }
+
 }

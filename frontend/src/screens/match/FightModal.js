@@ -22,9 +22,9 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     const [totalAttacker, setTotalAttacker] = useState(0)
     const [totalDefender, setTotalDefender] = useState(0)
 
-    // puntos de los bonus de armas
-    const [weaponsAttacker, setWeaponsAttacker] = useState(0);
-    const [weaponsDefender, setWeaponsDefender] = useState(0);
+    // armas seleccionadas 
+    const [weaponsAttacker, setWeaponsAttacker] = useState([]);
+    const [weaponsDefender, setWeaponsDefender] = useState([]);
 
     const [whiteDice, setWhiteDice] = useState('1');
     const [blackDice, setBlackDice] = useState('1');
@@ -74,6 +74,24 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         return () => subscription.unsubscribe();
     }, [stompClient, matchId, isOpen]);
 
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !isOpen) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight.weapons`, (msg) => {
+            const weaponsUpdate = JSON.parse(msg.body);
+            
+            if (weaponsUpdate.playerRole === 'ATTACKER') {
+                setWeaponsAttacker(weaponsUpdate.weapons || []);
+                setTotalAttacker(weaponsUpdate.totalAttacker);
+            } else if (weaponsUpdate.playerRole === 'DEFENDER') {
+                setWeaponsDefender(weaponsUpdate.weapons || []);
+                setTotalDefender(weaponsUpdate.totalDefender);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, isOpen]);
+
     // Suscribirse a las actualizaciones del estado Ready
     useEffect(() => {
         if (!stompClient || !stompClient.active || !isOpen) return;
@@ -102,27 +120,39 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
             setTotalAttacker(attackerStrength)
             setTotalDefender(defenderStrength)
 
-            setWeaponsAttacker(0);
-            setWeaponsDefender(0);
+            setWeaponsAttacker([]);
+            setWeaponsDefender([]);
 
             setButtonStateAttacker(false);
             setButtonStateDefender(false);
         }
     }, [isOpen]);
 
-    // Resolver el combate cuando ambos jugadores presionan Ready
+    
+    useEffect(() => {
+        if (whiteRolled) {
+            setTotalAttacker(attackerStrength + parseInt(whiteDice, 10) + getTotalWeaponsBonus(weaponsAttacker));
+        }
+    }, [weaponsAttacker, attackerStrength, whiteDice, whiteRolled]);
+
+    
+    useEffect(() => {
+        if (blackRolled) {
+            setTotalDefender(defenderStrength + parseInt(blackDice, 10) + getTotalWeaponsBonus(weaponsDefender));
+        }
+    }, [weaponsDefender, defenderStrength, blackDice, blackRolled]);
+
+    
     useEffect(() => {
         if (buttonStateAttacker && buttonStateDefender && whiteRolled && blackRolled) {
-            const w = parseInt(whiteDice, 10);
-            const b = parseInt(blackDice, 10);
-            const attackerWins = w >= b;  // En caso de empate "attacker" gana
+            
+            const attackerWins = totalAttacker >= totalDefender;  
             const currentUserWon = attackerWins ? isAttacker : isDefender;
-            // pequeña pausa para mostrar el resultado visualmente
             setTimeout(() => {
                 onResolve(currentUserWon);
             }, 700);
         }
-    }, [buttonStateAttacker, buttonStateDefender, whiteRolled, blackRolled]);
+    }, [buttonStateAttacker, buttonStateDefender, whiteRolled, blackRolled, totalAttacker, totalDefender]);
 
     const rollDice = async (diceType) => {
         const roll = Math.floor(Math.random() * 6) + 1;
@@ -185,14 +215,13 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     const toggleReadyState = async (playerRole, currentState) => {
         const newState = !currentState;
         
-        // Actualizar el estado localmente primero para respuesta inmediata
+        
         if (playerRole === 'ATTACKER') {
             setButtonStateAttacker(newState);
         } else {
             setButtonStateDefender(newState);
         }
         
-        // Notificar a todos los jugadores sobre el cambio de estado
         await fetch(`/api/v1/matches/${matchId}/notify-ready-state`, {
             method: 'POST',
             headers: {
@@ -213,16 +242,77 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         setIsWeaponModalOpen(true);
     };
 
-    const handleWeaponSelected = (weaponData) => {
+    const getTotalWeaponsBonus = (weapons) => {
+        return weapons.reduce((sum, w) => sum + (w.bonus || 0), 0);
+    };
+
+    const handleWeaponSelected = async (weaponData) => {
+        let newWeapons, playerRole, newTotal;
+        
         if (currentWeaponUser === 'ATTACKER') {
-            setWeaponsAttacker(weaponData.bonus);
-            setTotalAttacker(attackerStrength + parseInt(whiteDice, 10) + weaponData.bonus);
+            newWeapons = [...weaponsAttacker, weaponData];
+            playerRole = 'ATTACKER';
+            newTotal = attackerStrength + parseInt(whiteDice, 10) + getTotalWeaponsBonus(newWeapons);
+            setWeaponsAttacker(newWeapons);
+            setTotalAttacker(newTotal);
         } else {
-            setWeaponsDefender(weaponData.bonus);
-            setTotalDefender(defenderStrength + parseInt(blackDice, 10) + weaponData.bonus);
+            newWeapons = [...weaponsDefender, weaponData];
+            playerRole = 'DEFENDER';
+            newTotal = defenderStrength + parseInt(blackDice, 10) + getTotalWeaponsBonus(newWeapons);
+            setWeaponsDefender(newWeapons);
+            setTotalDefender(newTotal);
         }
+        
+        await fetch(`/api/v1/matches/${matchId}/notify-fight-weapons`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${jwt}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                matchId: matchId,
+                playerId: currentUser.id,
+                playerRole: playerRole,
+                weapons: newWeapons,
+                totalAttacker: playerRole === 'ATTACKER' ? newTotal : totalAttacker,
+                totalDefender: playerRole === 'DEFENDER' ? newTotal : totalDefender
+            })
+        });
+        
         setIsWeaponModalOpen(false);
         setCurrentWeaponUser(null);
+    };
+
+    const removeWeapon = async (role, weaponIndex) => {
+        let newWeapons, newTotal;
+        
+        if (role === 'ATTACKER') {
+            newWeapons = weaponsAttacker.filter((_, idx) => idx !== weaponIndex);
+            newTotal = attackerStrength + parseInt(whiteDice, 10) + getTotalWeaponsBonus(newWeapons);
+            setWeaponsAttacker(newWeapons);
+            setTotalAttacker(newTotal);
+        } else {
+            newWeapons = weaponsDefender.filter((_, idx) => idx !== weaponIndex);
+            newTotal = defenderStrength + parseInt(blackDice, 10) + getTotalWeaponsBonus(newWeapons);
+            setWeaponsDefender(newWeapons);
+            setTotalDefender(newTotal);
+        }
+        
+        await fetch(`/api/v1/matches/${matchId}/notify-fight-weapons`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${jwt}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                matchId: matchId,
+                playerId: currentUser.id,
+                playerRole: role,
+                weapons: newWeapons,
+                totalAttacker: role === 'ATTACKER' ? newTotal : totalAttacker,
+                totalDefender: role === 'DEFENDER' ? newTotal : totalDefender
+            })
+        });
     };
 
     if (!isOpen || !attacker || !defender) return null;
@@ -268,9 +358,9 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
 
                                 <span className="calc-operator">+</span>
 
-                                <div className="calc-box">Weapons: {weaponsAttacker}</div>
+                                <div className="calc-box">Weapons: {getTotalWeaponsBonus(weaponsAttacker)}</div>
                             </div>
-        
+                            
                         </div>
 
                         <div className='vs-container'>
@@ -311,9 +401,8 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
 
                                 <span className="calc-operator">+</span>
 
-                                <div className="calc-box">Weapons: {weaponsDefender}</div>
+                                <div className="calc-box">Weapons: {getTotalWeaponsBonus(weaponsDefender)}</div>
                             </div>
-                            
                         </div>
 
 
