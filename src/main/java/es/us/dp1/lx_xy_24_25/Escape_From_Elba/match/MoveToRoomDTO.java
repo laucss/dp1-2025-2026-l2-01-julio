@@ -9,15 +9,15 @@ public class MoveToRoomDTO {
 
     private Integer userId; 
 
-    private String roomName; 
+    private Integer roomId; 
 
 
     public MoveToRoomDTO(){
     }
 
-    public MoveToRoomDTO(Integer userId, String roomName){
+    public MoveToRoomDTO(Integer userId, Integer roomId){
         this.userId=userId; 
-        this.roomName=roomName; 
+        this.roomId=roomId; 
     }
     
 }

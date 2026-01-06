@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 import org.springdoc.core.annotations.ParameterObject;
@@ -27,6 +28,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
@@ -36,6 +38,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -52,16 +55,34 @@ public class MatchController {
     PlayerService playerService;
     HandService handService; 
     BagService bagService; 
-    DeckService deckService; 
+    DeckService deckService;
+    MatchWebsocketController matchWebsocketController;
+    RoomService roomService;
 
     @Autowired
-    public MatchController(MatchService ms, LobbyService ls, PlayerService playerService, HandService handService, BagService bagService, DeckService deckService){
+    public MatchController(MatchService ms, LobbyService ls, PlayerService playerService, HandService handService, 
+                          BagService bagService, DeckService deckService, MatchWebsocketController matchWebsocketController,
+                          RoomService roomService){
         this.ms=ms;
         this.ls=ls;
         this.playerService=playerService;
         this.handService=handService; 
         this.bagService=bagService; 
-        this.deckService=deckService; 
+        this.deckService=deckService;
+        this.matchWebsocketController=matchWebsocketController;
+        this.roomService=roomService;
+    }
+
+    @GetMapping("/adjacencies")
+    @Operation(summary = "Get all adjacencies", description = "Returns a map where each room id maps to a list of adjacent room ids")
+    public Map<Integer, List<Integer>> getAdjacencyMap() {
+        return roomService.findAllRooms().stream()
+            .collect(Collectors.toMap(
+                r -> r.getId(),
+                r -> r.getAdjacencyList().stream()
+                    .map(adj -> adj.getId())
+                    .collect(Collectors.toList())
+            ));
     }
 
     @GetMapping
@@ -239,15 +260,64 @@ public class MatchController {
 
     @PutMapping("/{matchId}/move")
     public ResponseEntity<MatchDTO> moveToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
-        ms.movePlayerToAdyacentRoom(matchId, data.getUserId(), data.getRoomName()); 
+        ms.movePlayerToAdyacentRoom(matchId, data.getUserId(), data.getRoomId()); 
         Match match = ms.getMatchById(matchId);
+        
+        Player movedPlayer = match.getPlayers().stream()
+            .filter(p -> p.getUser().getId().equals(data.getUserId()))
+            .findFirst()
+            .orElse(null);
+        
+        if (movedPlayer != null) {
+            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);
+            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
+            
+            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
+                movedPlayer.getId(),
+                movedPlayer.getUser().getId(),
+                movedPlayer.getUser().getUsername(),
+                movedPlayer.getActionPoints(),
+                System.currentTimeMillis()
+            );
+            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+        }
+        
         return ResponseEntity.ok(new MatchDTO(match)); 
     }
 
     @PutMapping("/{matchId}/moveLoser")
     public ResponseEntity<MatchDTO> moveLoserToRandomRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
-        ms.moveLoserPlayer(matchId, data.getUserId(), data.getRoomName()); 
+        ms.moveLoserPlayer(matchId, data.getUserId(), data.getRoomId()); 
         Match match = ms.getMatchById(matchId);
+        
+        Player movedPlayer = match.getPlayers().stream()
+            .filter(p -> p.getUser().getId().equals(data.getUserId()))
+            .findFirst()
+            .orElse(null);
+        
+        if (movedPlayer != null) {
+            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);
+            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
+            
+            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
+                movedPlayer.getId(),
+                movedPlayer.getUser().getId(),
+                movedPlayer.getUser().getUsername(),
+                movedPlayer.getActionPoints(),
+                System.currentTimeMillis()
+            );
+            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+            
+            StrengthUpdateDTO strengthUpdate = new StrengthUpdateDTO(
+                movedPlayer.getId(),
+                movedPlayer.getUser().getId(),
+                movedPlayer.getUser().getUsername(),
+                movedPlayer.getStrength(),
+                System.currentTimeMillis()
+            );
+            matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);
+        }
+        
         return ResponseEntity.ok(new MatchDTO(match)); 
     }
 
@@ -256,5 +326,54 @@ public class MatchController {
         Integer actionPoints = playerService.getPlayerActionPoints(matchId, playerId); 
         return ResponseEntity.ok(actionPoints);
     }
-}
 
+    @PostMapping("/{matchId}/notify-fight")
+    @Operation(summary = "Notify fight", description = "Notifies all players when a fight is initiated.")
+    public ResponseEntity<Void> notifyFight(@PathVariable Integer matchId, @RequestBody FightUpdateDTO fightUpdate) {
+        matchWebsocketController.notifyFightUpdate(matchId, fightUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/notify-fight-dice")
+    @Operation(summary = "Notify fight dice", description = "Notifies all players when a dice is rolled during a fight.")
+    public ResponseEntity<Void> notifyFightDice(@PathVariable Integer matchId, @RequestBody FightDiceUpdateDTO diceUpdate) {
+        matchWebsocketController.notifyFightDiceUpdate(matchId, diceUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/notify-dice-totals")
+    @Operation(summary = "Notify dice totals", description = "Notifies all players when dice totals are updated during a fight.")
+    public ResponseEntity<Void> notifyDiceTotals(@PathVariable Integer matchId, @RequestBody DiceTotalsUpdateDTO totalsUpdate) {
+        matchWebsocketController.notifyDiceTotalsUpdate(matchId, totalsUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/notify-action-points")
+    @Operation(summary = "Notify action points", description = "Notifies all players when action points are updated.")
+    public ResponseEntity<Void> notifyActionPoints(@PathVariable Integer matchId, @RequestBody ActionPointsUpdateDTO actionPointsUpdate) {
+        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/notify-strength")
+    @Operation(summary = "Notify strength", description = "Notifies all players when strength is updated.")
+    public ResponseEntity<Void> notifyStrength(@PathVariable Integer matchId, @RequestBody StrengthUpdateDTO strengthUpdate) {
+        matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/notify-ready-state")
+    @Operation(summary = "Notify ready state", description = "Notifies all players when a player changes their ready state during a fight.")
+    public ResponseEntity<Void> notifyReadyState(@PathVariable Integer matchId, @RequestBody ReadyStateUpdateDTO readyStateUpdate) {
+        matchWebsocketController.notifyReadyStateUpdate(matchId, readyStateUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/notify-fight-weapons")
+    @Operation(summary = "Notify weapons update", description = "Notifies all players when a player adds or removes weapons during a fight.")
+    public ResponseEntity<Void> notifyFightWeapons(@PathVariable Integer matchId, @RequestBody WeaponsUpdateDTO weaponsUpdate) {
+        matchWebsocketController.notifyWeaponsUpdate(matchId, weaponsUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+}

@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/bag")
 public class BagController {
 
+    // lo que se suma al poner un arma váloda (número dado por las reglas)
+    private static final Integer bonusWeapons = 1;
+
     BagService bagService;
     
     @Autowired
@@ -27,13 +30,15 @@ public class BagController {
 
 
     @PostMapping("/validate")
-    public ResponseEntity<Boolean> validateWord(@RequestBody BagInGameDTO cardsDTO) {
-        System.out.println(cardsDTO);
+    public ResponseEntity<Boolean> validateWord(@RequestBody ListCardsDTO cardsDTO) {
         Boolean isValid = bagService.checkBagIsValid(cardsDTO.getCards());
-        System.out.println(isValid);
         return ResponseEntity.ok(isValid);
     }
-     
-
     
-}
+    @PostMapping("/validate-weapon")
+    public ResponseEntity<WeaponValidationDTO> validateWeapon(@RequestBody ListCardsDTO cardsDTO) {
+        Boolean isValidWeapon = bagService.isValidWeapon(cardsDTO.getCards());
+        Integer bonusValue = isValidWeapon ? bonusWeapons : 0;
+        WeaponValidationDTO response = new WeaponValidationDTO(isValidWeapon, bonusValue);
+        return ResponseEntity.ok(response);
+    }}

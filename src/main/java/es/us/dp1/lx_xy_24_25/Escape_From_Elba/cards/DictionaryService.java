@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
+
 @Service
 public class DictionaryService {
 
@@ -30,10 +32,20 @@ public class DictionaryService {
     // lista de armas
     private Set<String> weapons = new HashSet<>(); 
 
+    @PostConstruct
+    public void init() throws IOException {
+        loadDictionary();
+        loadWeapons();
+    }
+
 
     // cargar el diccionario al iniciar el servicio
     public void loadDictionary() throws IOException {
-        InputStream is = getClass().getResourceAsStream("dictionary.txt");
+        InputStream is = getClass().getClassLoader().getResourceAsStream("dictionary.txt");
+
+        if (is == null) {
+            throw new IOException("dictionary.txt not found");
+        }
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
             dictionary = reader.lines()
@@ -44,7 +56,11 @@ public class DictionaryService {
 
     // cargamos la lista de armas al iniciar el servicio
     public void loadWeapons() throws IOException {
-        InputStream is = getClass().getResourceAsStream("weapons.txt");
+        InputStream is = getClass().getClassLoader().getResourceAsStream("weapons.txt");
+
+        if (is == null) {
+            throw new IOException("weapons.txt not found");
+        }
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
             weapons = reader.lines()

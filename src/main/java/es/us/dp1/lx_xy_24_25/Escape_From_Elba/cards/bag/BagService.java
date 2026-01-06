@@ -198,7 +198,7 @@ public class BagService {
 
 
     
-    public void update(BagInGameDTO bag, Integer matchId, Integer playerId){
+    public void update(ListCardsDTO bag, Integer matchId, Integer playerId){
 
         //checkear que exista el player y tal 
 
@@ -219,7 +219,9 @@ public class BagService {
     // función para checkear si la palabra es un arma, dentro de la lista que da el juego de posibles armas 
 
     @Transactional 
-    public Boolean isValidWeapon(String word) {
+    public Boolean isValidWeapon(List<CardDTO> cards){ 
+
+        String word = wordFromCards(cards);
       
         if (dictionaryService.isWeapon(word)){
             return true; 

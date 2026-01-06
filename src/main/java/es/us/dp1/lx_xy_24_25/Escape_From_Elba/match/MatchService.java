@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -12,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
@@ -22,6 +23,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
@@ -41,6 +44,8 @@ public class MatchService {
     BagService bagService;
     PlayerService playerService; 
     Random ran = new Random();
+    LobbyWebsocketController lobbyWebsocketController;
+    MatchWebsocketController matchWebsocketController;
 
     MatchRepository matchRepo;
     PlayerRepository playerRepo;
@@ -50,7 +55,8 @@ public class MatchService {
     @Autowired
     public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, 
             RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
-            PlayerService playerService) {
+            PlayerService playerService, LobbyWebsocketController lobbyWebsocketController,
+            MatchWebsocketController matchWebsocketController) {
         this.matchRepo = mrepo;
         this.playerRepo = playerRepo;
         this.roomRepository = roomRepository;
@@ -59,6 +65,8 @@ public class MatchService {
         this.handService = handService;
         this.bagService = bagService; 
         this.playerService = playerService;
+        this.lobbyWebsocketController = lobbyWebsocketController;
+        this.matchWebsocketController = matchWebsocketController;
     }
 
     @Transactional(readOnly = true)
@@ -149,7 +157,24 @@ public class MatchService {
         m.setCurrentTurnUserId(null);
         m.setTurnNumber(0);
         matchRepo.save(m);
+        
+        LobbyUpdateDTO update = createLobbyUpdate(m, "START", "");
+        lobbyWebsocketController.notifyGameStarted(matchId, update);
+        
         return m;
+    }
+    
+    @Transactional
+    private LobbyUpdateDTO createLobbyUpdate(Match match, String action, String username) {
+        List<LobbyUpdateDTO.PlayerLobbyDTO> players = new ArrayList<>();
+        for (Player p : match.getPlayers()) {
+            players.add(new LobbyUpdateDTO.PlayerLobbyDTO(
+                p.getUser().getId(),
+                p.getUser().getUsername(),
+                p.getUser().getAvatar()
+            ));
+        }
+        return new LobbyUpdateDTO(match.getId(), players, action, username);
     }
 
     //Función para decidir el orden de los jugadores en la partida según la tirada de dados.
@@ -197,6 +222,16 @@ public class MatchService {
             match.setTurnNumber(1);
             match.setCurrentTurnPhase(TurnPhase.DRAW);
             matchRepo.save(match);
+            
+            // Notificar a todos los jugadores que el turno ha comenzado
+            TurnUpdateDTO turnUpdate = new TurnUpdateDTO(
+                matchId,
+                ordered.get(0).getUser().getId(),
+                ordered.get(0).getUser().getUsername(),
+                1,
+                TurnPhase.DRAW.toString()
+            );
+            matchWebsocketController.notifyTurnUpdate(matchId, turnUpdate);
         }
 
         return match;
@@ -228,6 +263,17 @@ public class MatchService {
         m.setCurrentTurnPhase(TurnPhase.DRAW);
 
         matchRepo.save(m);
+        
+        // Notificar a todos los jugadores el cambio de turno
+        TurnUpdateDTO turnUpdate = new TurnUpdateDTO(
+            matchId,
+            nextPlayerTurn.getUser().getId(),
+            nextPlayerTurn.getUser().getUsername(),
+            m.getTurnNumber(),
+            TurnPhase.DRAW.toString()
+        );
+        matchWebsocketController.notifyTurnUpdate(matchId, turnUpdate);
+        
         return m;
  
     }
@@ -300,7 +346,7 @@ public class MatchService {
 
         HandInGameDTO hand = new HandInGameDTO(handService.findPlayerHand(matchId, playerId)); 
 
-        BagInGameDTO bag = new BagInGameDTO(bagService.findPlayerBag(matchId, playerId));
+        ListCardsDTO bag = new ListCardsDTO(bagService.findPlayerBag(matchId, playerId));
 
         return new AllCardsStatusDTO(hand, bag, deck, playerId); 
     }
@@ -467,7 +513,7 @@ public class MatchService {
 
     //Función para mover un jugador de una sala a otra adyacente
     @Transactional
-    public Player movePlayerToAdyacentRoom(Integer matchId, Integer userId, String targetRoomName) {
+    public Player movePlayerToAdyacentRoom(Integer matchId, Integer userId, Integer targetRoomId) {
         Match match = matchRepo.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
         if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
@@ -487,7 +533,7 @@ public class MatchService {
             throw new NoActionPointsException("Move not allowed: player has no action points left");
         }
         //Recuperar la sala destino
-        Room targetRoom = roomRepository.findByName(targetRoomName)
+        Room targetRoom = roomRepository.findById(targetRoomId)
             .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
         //Validar si la sala destino es adyacente
         List<Room> adjacent = currentRoom.getAdjacencyList();
@@ -508,7 +554,7 @@ public class MatchService {
 
 
     @Transactional
-    public Player moveLoserPlayer(Integer matchId, Integer userId, String targetRoomName) {
+    public Player moveLoserPlayer(Integer matchId, Integer userId, Integer targetRoomId) {
         Match match = matchRepo.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
         if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
@@ -518,13 +564,15 @@ public class MatchService {
         Player player = playerRepo.findByMatchAndUser(matchId, userId)
                 .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
         //Recuperar la sala destino
-        Room targetRoom = roomRepository.findByName(targetRoomName)
+        Room targetRoom = roomRepository.findById(targetRoomId)
             .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
-        //Actualizar la sala del jugador
+        //Actualizar la sala y fuerza del jugador
         player.setRoom(targetRoom);
+        player.setStrength(player.getStrength() + 1);
         //Guardar cambios
 
         return playerRepo.save(player);
     }
+
 
 }

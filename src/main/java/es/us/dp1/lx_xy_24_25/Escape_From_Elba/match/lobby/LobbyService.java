@@ -32,16 +32,18 @@ public class LobbyService {
     public UserService userService;
     public Checkers checkers;
     public PlayerService playerService;
+    public LobbyWebsocketController lobbyWebsocketController;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    public LobbyService(MatchRepository mrepo, Checkers checkers, UserService userService, PlayerService playerService) {
+    public LobbyService(MatchRepository mrepo, Checkers checkers, UserService userService, PlayerService playerService, LobbyWebsocketController lobbyWebsocketController) {
         this.mrepo = mrepo;
         this.checkers = checkers;
         this.userService = userService;
         this.playerService = playerService;
+        this.lobbyWebsocketController = lobbyWebsocketController;
     }
 
     
@@ -81,8 +83,13 @@ public class LobbyService {
         player.setUser(currentUser);     
         player.setMatch(m);
         m.getPlayers().add(player);
-        mrepo.save(m); 
-        return m;
+        Match savedMatch = mrepo.save(m);
+        
+        // Notificar a todos en el lobby que alguien se unió
+        LobbyUpdateDTO update = createLobbyUpdate(savedMatch, "JOIN", currentUser.getUsername());
+        lobbyWebsocketController.notifyPlayerJoined(lobbyId, update);
+        
+        return savedMatch;
 }
 
 
@@ -96,8 +103,13 @@ public class LobbyService {
         player.setUser(currentUser);
         player.setMatch(m);
         m.getPlayers().add(player);
-        mrepo.save(m); 
-        return m;
+        Match savedMatch = mrepo.save(m);
+        
+        // Notificar a todos en el lobby que alguien se unió
+        LobbyUpdateDTO update = createLobbyUpdate(savedMatch, "JOIN", currentUser.getUsername());
+        lobbyWebsocketController.notifyPlayerJoined(m.getId(), update);
+        
+        return savedMatch;
 
     }
         
@@ -140,11 +152,41 @@ public class LobbyService {
         User currentUser = userService.findCurrentUser();
         Player player = playerService.findByMatchIdAndUserId(m.getId(), currentUser.getId())
                 .orElseThrow(() -> new PlayerNotInTheGame("El jugador no está en este lobby"));
+        
+       
+        if (m.getCreatorId().equals(currentUser.getId())) {
+            
+            LobbyUpdateDTO update = createLobbyUpdate(m, "DELETED", currentUser.getUsername());
+            lobbyWebsocketController.notifyPlayerLeft(matchId, update);
+            
+            
+            mrepo.delete(m);
+            return null;
+        }
+        
+        
         m.getPlayers().remove(player);
-        return mrepo.save(m);
+        Match savedMatch = mrepo.save(m);
+        
+        // Notificar a todos en el lobby que alguien se fue
+        LobbyUpdateDTO update = createLobbyUpdate(savedMatch, "LEAVE", currentUser.getUsername());
+        lobbyWebsocketController.notifyPlayerLeft(matchId, update);
+        
+        return savedMatch;
 
-    } 
-
+    }
+    
+    private LobbyUpdateDTO createLobbyUpdate(Match match, String action, String username) {
+        List<LobbyUpdateDTO.PlayerLobbyDTO> players = new ArrayList<>();
+        for (Player p : match.getPlayers()) {
+            players.add(new LobbyUpdateDTO.PlayerLobbyDTO(
+                p.getUser().getId(),
+                p.getUser().getUsername(),
+                p.getUser().getAvatar()
+            ));
+        }
+        return new LobbyUpdateDTO(match.getId(), players, action, username);
+    }
 
 
     
