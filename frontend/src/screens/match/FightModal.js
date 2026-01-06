@@ -283,38 +283,6 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         setCurrentWeaponUser(null);
     };
 
-    const removeWeapon = async (role, weaponIndex) => {
-        let newWeapons, newTotal;
-        
-        if (role === 'ATTACKER') {
-            newWeapons = weaponsAttacker.filter((_, idx) => idx !== weaponIndex);
-            newTotal = attackerStrength + parseInt(whiteDice, 10) + getTotalWeaponsBonus(newWeapons);
-            setWeaponsAttacker(newWeapons);
-            setTotalAttacker(newTotal);
-        } else {
-            newWeapons = weaponsDefender.filter((_, idx) => idx !== weaponIndex);
-            newTotal = defenderStrength + parseInt(blackDice, 10) + getTotalWeaponsBonus(newWeapons);
-            setWeaponsDefender(newWeapons);
-            setTotalDefender(newTotal);
-        }
-        
-        await fetch(`/api/v1/matches/${matchId}/notify-fight-weapons`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${jwt}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                matchId: matchId,
-                playerId: currentUser.id,
-                playerRole: role,
-                weapons: newWeapons,
-                totalAttacker: role === 'ATTACKER' ? newTotal : totalAttacker,
-                totalDefender: role === 'DEFENDER' ? newTotal : totalDefender
-            })
-        });
-    };
-
     if (!isOpen || !attacker || !defender) return null;
 
     return (
