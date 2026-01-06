@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { fetchInviteStatuses } from "../../util/fetchInviteStatuses";
 import { FaUserPlus } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 import SockJS from 'sockjs-client';
@@ -8,12 +9,11 @@ import "../../static/css/home/waitingRoom.css";
 import { Button, Table } from "reactstrap";
 import tokenService from "../../services/token.service";
 
-const jwt = tokenService.getLocalAccessToken();
-const currentUser = tokenService.getUser();
-
 export default function WaitingRoom() {
   const { matchId } = useParams();
   const navigate = useNavigate();
+  const jwt = tokenService.getLocalAccessToken();
+  const currentUser = tokenService.getUser();
 
   const [message, setMessage] = useState(null);
   const [visible, setVisible] = useState(false);
@@ -55,19 +55,22 @@ export default function WaitingRoom() {
       });
       const allFriends = friendsArray
         .map(f => {
-          let amigo, amigoStatus;
+          let amigo, amigoStatus, amigoId;
           if (f.sender?.id === currentUserId) {
             amigo = f.receiver;
             amigoStatus = f.receiver?.status;
+            amigoId = f.receiver?.id;
           } else {
             amigo = f.sender;
             amigoStatus = f.sender?.status;
+            amigoId = f.sender?.id;
           }
           return {
             ...f,
             displayName: amigo?.username,
             friendStatus: amigoStatus,
-            avatar: amigo?.avatar
+            avatar: amigo?.avatar,
+            userId: amigoId
           };
         });
       console.log('Todos los amigos:', allFriends);
@@ -164,16 +167,64 @@ export default function WaitingRoom() {
         <OnlineFriendsModal
           friends={onlineFriends}
           onClose={handleCloseFriendsModal}
+          lobby={lobby}
         />
       )}
     </>
   );
-}
 
-function OnlineFriendsModal({ friends, onClose }) {
+function OnlineFriendsModal({ friends, onClose, lobby }) {
+  const [inviteStatus, setInviteStatus] = useState({});
+  const matchId = window.location.pathname.split("/").pop();
+  const currentUser = tokenService.getUser();
+  const jwt = tokenService.getLocalAccessToken();
+  const players = lobby && lobby.players ? lobby.players : [];
+
+  useEffect(() => {
+    let mounted = true;
+    async function syncStatuses() {
+      if (friends.length > 0 && currentUser && jwt) {
+        const statuses = await fetchInviteStatuses(friends, matchId, jwt, currentUser.id);
+        if (mounted) setInviteStatus(statuses);
+      }
+    }
+    syncStatuses();
+    return () => { mounted = false; };
+  }, [friends, matchId, jwt, currentUser]);
+
+  const handleInvite = async (friend) => {
+    setInviteStatus(s => ({ ...s, [friend.id]: "loading" }));
+    try {
+      const res = await fetch("/api/v1/notifications/invite", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwt}`,
+        },
+        body: JSON.stringify({
+          senderId: currentUser.id,
+          receiverId: friend.userId,
+          matchId: matchId,
+        }),
+      });
+      if (res.ok) {
+        setInviteStatus(s => ({ ...s, [friend.id]: "success" }));
+      } else {
+        setInviteStatus(s => ({ ...s, [friend.id]: "error" }));
+      }
+    } catch {
+      setInviteStatus(s => ({ ...s, [friend.id]: "error" }));
+    }
+  };
+
+  
+  const isFriendInLobby = (friend) => {
+    return players.some(p => p.user && p.user.id === friend.userId);
+  };
+
   return (
     <div className="modal-overlay">
-      <div className="modal-card fixed-size-modal">
+      <div className="modal-card enlarged-modal">
         <h2>Amigos Online</h2>
         <div className="friends-list-scroll">
           {friends.length === 0 ? (
@@ -189,7 +240,18 @@ function OnlineFriendsModal({ friends, onClose }) {
                   )}
                   <span className="friend-name">{f.displayName}</span>
                 </div>
-                <button className="invite-btn">Invitar</button>
+                {isFriendInLobby(f) ? (
+                  <span className="waiting-invite-text-small">Unido</span>
+                ) : (
+                  inviteStatus[f.id] === "success" ? (
+                    <span className="waiting-invite-text-small">Esperando...</span>
+                  ) : (
+                    <button className="invite-btn" onClick={() => handleInvite(f)} disabled={inviteStatus[f.id] === "loading"}>
+                      {inviteStatus[f.id] === "loading" ? "Enviando..." : "Invitar"}
+                    </button>
+                  )
+                )}
+                {inviteStatus[f.id] === "error" && <span className="invite-error">Error al invitar</span>}
               </div>
             ))
           )}
@@ -200,4 +262,5 @@ function OnlineFriendsModal({ friends, onClose }) {
       </div>
     </div>
   );
+}
 }
