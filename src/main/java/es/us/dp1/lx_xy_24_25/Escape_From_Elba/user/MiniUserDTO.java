@@ -10,26 +10,40 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MiniUserDTO extends BaseEntity {
-    
+    @NotNull
+    @Column(unique = true)
+    String username;
 
-        @NotNull
-        @Column(unique = true)
-        String username;
+    @Column(name = "avatar")
+    private String avatar;
 
-        @Column(name = "avatar")
-        private String avatar;
+    // Estado del usuario (ONLINE, OFFLINE, PLAYING)
+    private String status;
 
-        // Nuevo: estado del usuario (ONLINE, OFFLINE, PLAYING)
-        private String status;
+    // Nuevo: información de la partida activa (puede ser null)
+    private MiniMatchDTO match;
 
-    public MiniUserDTO(User user){
+    public MiniUserDTO(User user, MiniMatchDTO match) {
         this.setId(user.getId());
         this.setAvatar(user.getAvatar());
         this.setUsername(user.getUsername());
         this.setStatus(user.getStatus() != null ? user.getStatus().name() : "OFFLINE");
+        this.match = match;
     }
 
-    public MiniUserDTO(){
+    // Constructor de compatibilidad para usos antiguos
+    public MiniUserDTO(User user) {
+        this(user, null);
+    }
 
+    public MiniUserDTO() {
+    }
+
+    public MiniMatchDTO getMatch() {
+        return match;
+    }
+
+    public void setMatch(MiniMatchDTO match) {
+        this.match = match;
     }
 }
