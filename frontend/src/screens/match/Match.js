@@ -742,7 +742,7 @@ return (
             </div>
 
             <StartDiceModal 
-                isOpen={match?.currentTurnPhase === null && isDiceModalOpen}
+                isOpen={!isSpectator && match?.currentTurnPhase === null && isDiceModalOpen}
                 onClose={() => setIsDiceModalOpen(false)}
                 onDiceRolled={handleDiceRolled}
                 matchData={match}
@@ -1209,14 +1209,15 @@ return (
             </>
         )}
 
-      
-            <div className="match-chat-icon">
-                <div className="chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
-                    <FaComments size={30} color="white" />
+            {!isSpectator && (
+                <div className="match-chat-icon">
+                    <div className="chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
+                        <FaComments size={30} color="white" />
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {chatOpen && <ChatBox matchId={matchId} />}
+            {!isSpectator && chatOpen && <ChatBox matchId={matchId} />}
 
             {/* Mensaje de turno */}
             <div
@@ -1242,7 +1243,6 @@ return (
                 : match.currentTurnUserId === currentUser?.id
                     ? "Tu turno"
                     : `${match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username} está en su turno`}
-
             </div>
         </div>
     );
