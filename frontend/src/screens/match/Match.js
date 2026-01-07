@@ -35,6 +35,7 @@ export default function Match(){
     const [discardPile, setDiscardPile] = useState([])
     const [handCards, setHandCards] = useState([])
     const [bagCards, setBagCards] = useState([])
+    const [otherPlayersBags, setOtherPlayersBags] = useState({}) 
     const [numCardsDrawn, setNumCardsDrawn] = useState(0)
     const [bagOpen, setBagOpen] = useState(false)
     const [discardHandOpen, setDiscardHandOpen] = useState(false)
@@ -248,6 +249,12 @@ export default function Match(){
     }, [currentPlayer])
 
     useEffect(() => {
+        if (playersList.length > 0) {
+            fetchOtherPlayersBags()
+        }
+    }, [playersList])
+
+    useEffect(() => {
         calculateActionPoints()
     }, [handCards])
 
@@ -396,6 +403,32 @@ export default function Match(){
         
         
 
+    }
+
+    const fetchOtherPlayersBags = async () => {
+        try {
+            const bags = {}
+            
+            for (const player of playersList) {
+                const response = await fetch(`/api/v1/matches/${matchId}/${player.id}/getAllCards`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                })
+                
+                if (response.ok) {
+                    const data = await response.json()
+                    bags[player.id] = Array.isArray(data.bag.cards) ? data.bag.cards : []
+                }
+            }
+            
+            setOtherPlayersBags(bags)
+        } catch (error) {
+            console.log('Error fetching other players bags:', error)
+        }
     }
 
     /*
@@ -707,17 +740,37 @@ return (
             <div className="players-avatars-section">
                 {playersList.map((p) => (
                     <div key={p.user.id} className="player-avatar-card">
-                        <div style={{
-                            borderRadius: '50%',
-                            border: `4px solid ${getPlayerColor(p.id)}`,
-                            display: 'inline-block',
-                            padding: '3px'
-                        }}>
-                            {p.user.avatar ? (
-                                <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" style={{ borderRadius: '50%' }} />
-                            ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" style={{ borderRadius: '50%' }} />}
+                        <div className="player-info-row">
+                            <div style={{
+                                borderRadius: '50%',
+                                border: `4px solid ${getPlayerColor(p.id)}`,
+                                display: 'inline-block',
+                                padding: '3px',
+                                flexShrink: 0
+                            }}>
+                                {p.user.avatar ? (
+                                    <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" style={{ borderRadius: '50%' }} />
+                                ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" style={{ borderRadius: '50%' }} />}
+                            </div>
+                            <p className="player-username">{p.user.username}</p>
                         </div>
-                        <p className="player-username">{p.user.username}</p>
+                        <div className="player-bag-display">
+                            {otherPlayersBags[p.id] && otherPlayersBags[p.id].length > 0 ? (     
+                                    <div className="bag-cards-container">
+                                        {otherPlayersBags[p.id].map((carta, index) => (
+                                            <img 
+                                                key={index} 
+                                                src={`/resources${carta.frontImage}`} 
+                                                alt={`Carta ${carta.letter}`} 
+                                                className="player-bag-card"
+                                                title={carta.letter}
+                                            />
+                                        ))}
+                                    </div>
+                            ) : (
+                                <p className="empty-bag">Empty Bag</p>
+                            )}
+                        </div>
                     </div>
                 ))}
             </div>
@@ -884,16 +937,16 @@ return (
                         );
                     })}
                 </div>
-            </div>
-            <div className="points-section">
-                <div className="action-points">
-                    <h1>{actionPoints}</h1>
-                    <p>Action points </p>
-                </div>
+                <div className="points-section">
+                    <div className="action-points">
+                        <h1>{actionPoints}</h1>
+                        <p>Action points </p>
+                    </div>
 
-                <div className="action-points">
-                    <h1>{strength}</h1>
-                    <p>strength </p>
+                    <div className="action-points">
+                        <h1>{strength}</h1>
+                        <p>strength </p>
+                    </div>
                 </div>
             </div>
             
