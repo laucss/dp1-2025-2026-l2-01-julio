@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useLocation} from "react-router-dom";
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import '../../static/css/match/Match.css';
@@ -23,6 +23,8 @@ const currentUser = tokenService.getUser();
 export default function Match(){
     const matchId = getIdFromUrl(2);
     const navigate = useNavigate();
+    const location = useLocation();
+    const isSpectator = location?.state?.spectator === true;
     const [currentPlayer, setCurrentPlayer] = useState({}) // el jugador asociado al usuario que está "viendo" la pantalla
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
@@ -203,34 +205,38 @@ export default function Match(){
     }, [stompClient, matchId]);
 
     useEffect(() => {
-        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+        if (!stompClient || !stompClient.active) return;
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.actionPoints`, (msg) => {
-            const actionPointsUpdate = JSON.parse(msg.body);
-            
-            // Only update action points if the update is for the current player
-            if (actionPointsUpdate.userId === currentPlayer[0].user.id) {
-                setActionPoints(actionPointsUpdate.actionPoints);
+            const update = JSON.parse(msg.body);
+            const isForCurrentUser = !!currentPlayer[0]?.user?.id && update.userId === currentPlayer[0].user.id;
+            const isForCurrentTurn = !!match?.currentTurnUserId && update.userId === match.currentTurnUserId;
+
+            // Update when it's for me, or when I'm a spectator and it's the current-turn player
+            if (isForCurrentUser || (isSpectator && isForCurrentTurn)) {
+                setActionPoints(update.actionPoints);
             }
         });
 
         return () => subscription.unsubscribe();
-    }, [stompClient, matchId, currentPlayer]);
+    }, [stompClient, matchId, currentPlayer, isSpectator, match]);
 
     useEffect(() => {
-        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+        if (!stompClient || !stompClient.active) return;
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.strength`, (msg) => {
-            const strengthUpdate = JSON.parse(msg.body);
-            
-            // Only update strength if the update is for the current player
-            if (strengthUpdate.userId === currentPlayer[0].user.id) {
-                setStrength(Math.min(6, strengthUpdate.strength));
+            const update = JSON.parse(msg.body);
+            const isForCurrentUser = !!currentPlayer[0]?.user?.id && update.userId === currentPlayer[0].user.id;
+            const isForCurrentTurn = !!match?.currentTurnUserId && update.userId === match.currentTurnUserId;
+
+        // Update when it's for me, or when I'm a spectator and it's the current-turn player
+            if (isForCurrentUser || (isSpectator && isForCurrentTurn)) {
+                setStrength(Math.min(6, update.strength));
             }
         });
 
         return () => subscription.unsubscribe();
-    }, [stompClient, matchId, currentPlayer]);
+    }, [stompClient, matchId, currentPlayer, isSpectator, match]);
 
     useEffect(() => {
             if (player && Array.isArray(player)){
@@ -254,10 +260,13 @@ export default function Match(){
 
 
     useEffect(() => {
-        if (currentTurnUserId && currentPlayer[0].user.id === currentTurnUserId){
+        // Evitar errores cuando el espectador no es parte de la partida
+        if (isSpectator) return;
+        const myUserId = currentPlayer?.[0]?.user?.id;
+        if (currentTurnUserId && myUserId && myUserId === currentTurnUserId){
             fetchActionPoints()
         }
-    }, [currentTurnUserId])
+    }, [currentTurnUserId, isSpectator, currentPlayer])
 
     // Polling para actualizar el match mientras el modal de dados está abierto
     useEffect(() => {
@@ -652,15 +661,25 @@ export default function Match(){
 
 
     const calculateActionPoints = () => {
+        if (isSpectator) return;
         if (!match) return;
-        if (match.currentTurnPhase !== "DRAW")
-            return;
+        if (match.currentTurnPhase !== "DRAW") return;
         if (handCards.length > 7 ){
             setActionPoints(0)
         } else {
             setActionPoints(7-handCards.length)
         }
+    }
+
+    // Keep spectator's points in sync with the player whose turn it is
+    useEffect(() => {
+        if (!isSpectator || !match?.players || !match?.currentTurnUserId) return;
+        const currentTurnPlayer = match.players.find(p => p.user?.id === match.currentTurnUserId);
+        if (currentTurnPlayer) {
+            setActionPoints(currentTurnPlayer.actionPoints ?? 0);
+            setStrength(Math.min(6, currentTurnPlayer.strength ?? 1));
         }
+    }, [isSpectator, match]);
 
     const handleDiceRolled = (updatedMatch) => {
         setMatch(updatedMatch);
@@ -957,58 +976,63 @@ return (
                 </table>
             </div>
             */}
-            <div className="player-section">
-                <div className="player-hand">
-                    {Array.isArray(handCards) && handCards.map((carta, index) => (
-                                    <div key={index} >
-                                        <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                    </div>
-                    ))}
-                </div>
-                <div className="player-bag">
-                    {Array.isArray(bagCards) && bagCards.map((carta, index) => (
-                                    <div key={index} >
-                                        <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                    </div>
-                    ))}
+            {!isSpectator && (
+                <div className="player-section">
+                    <div className="player-hand">
+                        {Array.isArray(handCards) && handCards.map((carta, index) => (
+                                        <div key={index} >
+                                            <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                        </div>
+                        ))}
+                    </div>
+                    <div className="player-bag">
+                        {Array.isArray(bagCards) && bagCards.map((carta, index) => (
+                                        <div key={index} >
+                                            <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                        </div>
+                        ))}
 
+                    </div>
+                    
                 </div>
-                
-            </div>
-            <div>
-                <button className="bag-button"
-                    onClick={() => setBagOpen(true)}
-                    disabled={
-                    match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
-                    title="Accede to your bag"
-                >
-                    Form my bag
-                </button>
-                <button className="bag-button"
-                    onClick={() => setDiscardHandOpen(true)}
-                    disabled={
-                    match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
-                    title="Discard cards from hand"
-                    style={{ marginLeft: "10px" }}
-                >
-                    Discard
-                </button>
-                 <button className="bag-button"
-                    title="Discard cards from hand"
-                    onClick={() => setIsActionsModalOpen(true) }
-                     disabled={
-                    match.currentTurnUserId !== currentUser.id || 
-                    actionPoints <= 0 }
-                    style={{ marginLeft: "15px" }}
-                >
-                    Actions
-                </button>
+            )}
+            {!isSpectator && (
+                <div>
+                    <button className="bag-button"
+                        onClick={() => setBagOpen(true)}
+                        disabled={
+                        match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
+                        title="Accede to your bag"
+                    >
+                        Form my bag
+                    </button>
+                    <button className="bag-button"
+                        onClick={() => setDiscardHandOpen(true)}
+                        disabled={
+                        match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
+                        title="Discard cards from hand"
+                        style={{ marginLeft: "10px" }}
+                    >
+                        Discard
+                    </button>
+                    <button className="bag-button"
+                        title="Discard cards from hand"
+                        onClick={() => setIsActionsModalOpen(true) }
+                        disabled={
+                        match.currentTurnUserId !== currentUser.id || 
+                        actionPoints <= 0 }
+                        style={{ marginLeft: "15px" }}
+                    >
+                        Actions
+                    </button>
 
-                <ActionsModal
-                isOpen={isActionsModalOpen}
-                onClose={() => setIsActionsModalOpen(false)}
-                moveToAdyacent={() => setMoveToAdyacentRoom(true) }
-            />
+                    <ActionsModal
+                        isOpen={isActionsModalOpen}
+                        onClose={() => setIsActionsModalOpen(false)}
+                        moveToAdyacent={() => setMoveToAdyacentRoom(true) }
+                    />
+                </div>
+            )}
 
     <FightModal
             isOpen={isFightModalOpen}
@@ -1135,9 +1159,7 @@ return (
             }}
     />
 
-            </div>
-            
-
+            {!isSpectator && (
                 <button
                     className="end-match-button"
                     onClick={endMatch}
@@ -1154,35 +1176,38 @@ return (
                 >
                     Finalizar partida
                 </button>
+            )}
 
-        <BagModal
-            isVisible={bagOpen}
-            hand={handCards}
-            bag={bagCards}
-            deck={deck}
-            player={currentPlayer[0]}
-            onClose={() => setBagOpen(false)}
-            onSave={async () =>{
-                await fetchCards()
-                setBagOpen(false)
+        {!isSpectator && (
+            <>
+                <BagModal
+                    isVisible={bagOpen}
+                    hand={handCards}
+                    bag={bagCards}
+                    deck={deck}
+                    player={currentPlayer[0]}
+                    onClose={() => setBagOpen(false)}
+                    onSave={async () =>{
+                        await fetchCards()
+                        setBagOpen(false)
+                    }}
+                />
 
-            }
-                }
-            />
-
-        <DiscardHandModal
-            isVisible={discardHandOpen}
-            hand={handCards}
-            bag={bagCards}
-            deck={deck}
-            player={currentPlayer[0]}
-            onClose={() => setDiscardHandOpen(false)}
-            updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
-            onSave={async () =>{
-                await fetchCards()
-                setDiscardHandOpen(false)
-            }}
-            />
+                <DiscardHandModal
+                    isVisible={discardHandOpen}
+                    hand={handCards}
+                    bag={bagCards}
+                    deck={deck}
+                    player={currentPlayer[0]}
+                    onClose={() => setDiscardHandOpen(false)}
+                    updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
+                    onSave={async () =>{
+                        await fetchCards()
+                        setDiscardHandOpen(false)
+                    }}
+                />
+            </>
+        )}
 
       
             <div className="match-chat-icon">

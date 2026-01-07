@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './friends.css';
 import { FaSearch, FaUser, FaEye, FaGamepad, FaTrash } from 'react-icons/fa';
 import UserStatusIndicator from '../../components/UserStatusIndicator';
@@ -8,6 +9,7 @@ import useRequestStates from '../../hooks/useRequestStates';
 const jwt = tokenService.getLocalAccessToken();
 
 export default function Friends() {
+  const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState(null);
   const [visible, setVisible] = useState(false);
   
@@ -300,15 +302,26 @@ export default function Friends() {
                   {friend.displayName}
                 </span>
                 <div className="friend-actions">
-                  {friend.status === 'PLAYING' ? (
-                    <button className="play-btn" title="Visualizar partida">
-                      <FaEye style={{ marginRight: 4 }} /> Visualizar
-                    </button>
-                  ) : friend.status === 'ONLINE' ? (
+                  {(() => {
+                    const currentUsername = tokenService.getUser?.()?.username;
+                    const otherUser = friend.sender?.username !== currentUsername ? friend.sender : friend.receiver;
+                    return otherUser?.match && otherUser.match.status === 'PLAYING' ? (
+                      <button
+                        className="play-btn"
+                        title="Visualizar partida"
+                        onClick={() => {
+                          navigate(`/match/${otherUser.match.id}`, { state: { spectator: true } });
+                        }}
+                      >
+                        <FaEye style={{ marginRight: 4 }} /> Visualizar
+                      </button>
+                    ) : null;
+                  })()}
+                  {friend.status === 'ONLINE' && (
                     <button className="play-btn" title="Jugar">
                       <FaGamepad style={{ marginRight: 4 }} /> Jugar
                     </button>
-                  ) : null}
+                  )}
                   <button
                     className="remove-btn"
                     onClick={() => openDeleteModal(friend)}
