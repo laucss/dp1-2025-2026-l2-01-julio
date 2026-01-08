@@ -8,15 +8,13 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    background-size: over;
-  
+    background-size: cover;
 }
 
-
 .window {
-    width: 50%;            
-    max-width: 80%;
-    height: 80%;
+    width: 800px;
+    max-width: 90%;
+    height: 650px;
     background: white;
     border-radius: 15px;
     padding: 20px;
@@ -28,60 +26,137 @@
 
 .modal-content-wrapper {
     display: flex;
-    flex-direction: row;
-    gap: 20px;
+    flex-direction: column;
+    gap: 15px;
     height: 100%;
 }
 
 .sections-container {
     flex: 1;
     display: flex;
+    gap: 20px;
+    overflow: hidden;
+}
+
+.hand-section {
+    flex: 1;
+    background-color: #FFB3BA;
+    border-radius: 15px;
+    padding: 0;
+    display: flex;
     flex-direction: column;
-    gap: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.hand-section .section-title {
+    margin: 0;
+    padding: 15px 20px;
+    font-size: 1.3rem;
+    color: #333;
+    font-weight: bold;
+    border-bottom: 3px solid #333;
+    flex-shrink: 0;
+}
+
+.hand-section .cards-grid {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-content: flex-start;
+}
+
+.bag-section {
+    flex: 1;
+    background-color: #f9f9f9;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
 }
 
-.hand-section{
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 10px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-    background-color:  rgba(245, 117, 117, 0.7) ;
-    border-radius: 8px;
+.bag-section .section-title {
+    margin: 0 0 15px 0;
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: bold;
+    border-bottom: 3px solid #333;
+    padding-bottom: 8px;
 }
 
-.bag-section{
+.bag-section .cards-grid {
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 10px;
-    margin-bottom: 15px;
     flex-wrap: wrap;
-    background-color:  rgba(202, 49, 49, 0.7) ;
-    border-radius: 8px;
+    gap: 15px;
+    flex: 1;
+    align-content: flex-start;
 }
 
-.buttons{
+.card {
+    width: 80px;
+    height: 110px;
+    object-fit: cover;
+    border: 2px solid #333;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    background-color: white;
+}
+
+.card:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    border-color: #4CAF50;
+    cursor: pointer;
+}
+
+.buttons {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
     align-items: center;
-    gap: 15px;
-    padding-top: 20px;
+    margin-top: 5px;
 }
 
-.confirm-button{
-    border-color:  "black";
-    border-radius: 8px;
+.confirm-button,
+.cancel-button {
+    width: 180px;
+    padding: 12px 20px;
+    font-size: 1.05rem;
+    border: none;
+    border-radius: 6px;
     cursor: pointer;
-    width:100px;
-    height: 40px;
+    font-weight: bold;
+    transition: all 0.3s ease;
 }
-.section-title{
-    width: 100%;
-    text-align: center;
-    margin: 0 0 10px 0;
-    font-weight: 600;
+
+.confirm-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.confirm-button:hover:not(:disabled) {
+    background-color: #45a049;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+}
+
+.confirm-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.cancel-button {
+    background-color: #f44336;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #da190b;
+    box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
 }

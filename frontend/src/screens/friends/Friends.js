@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './friends.css';
-import { FaSearch, FaUser } from 'react-icons/fa';
+import { FaSearch, FaUser, FaEye, FaGamepad, FaTrash } from 'react-icons/fa';
+import UserStatusIndicator from '../../components/UserStatusIndicator';
 import tokenService from '../../services/token.service';
 import useRequestStates from '../../hooks/useRequestStates';
 
 const jwt = tokenService.getLocalAccessToken();
 
 export default function Friends() {
+  const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState(null);
   const [visible, setVisible] = useState(false);
   
@@ -291,19 +294,40 @@ export default function Friends() {
             return filtered.map(friend => (
               <div key={friend.id} className="friend-card">
                 <FaUser className="friend-avatar" />
-
+                {/* Mostrar el status del amigo, no del objeto friendRequest */}
+                <UserStatusIndicator status={
+                  (friend.sender?.username === friend.displayName ? friend.sender?.status : friend.receiver?.status) || friend.status
+                } />
                 <span className="friend-name">
                   {friend.displayName}
                 </span>
-
                 <div className="friend-actions">
-                  <button className="play-btn">Jugar</button>
-
+                  {(() => {
+                    const currentUsername = tokenService.getUser?.()?.username;
+                    const otherUser = friend.sender?.username !== currentUsername ? friend.sender : friend.receiver;
+                    return otherUser?.match && otherUser.match.status === 'PLAYING' ? (
+                      <button
+                        className="play-btn"
+                        title="Visualizar partida"
+                        onClick={() => {
+                          navigate(`/match/${otherUser.match.id}`, { state: { spectator: true } });
+                        }}
+                      >
+                        <FaEye style={{ marginRight: 4 }} /> Visualizar
+                      </button>
+                    ) : null;
+                  })()}
+                  {friend.status === 'ONLINE' && (
+                    <button className="play-btn" title="Jugar">
+                      <FaGamepad style={{ marginRight: 4 }} /> Jugar
+                    </button>
+                  )}
                   <button
                     className="remove-btn"
                     onClick={() => openDeleteModal(friend)}
+                    title="Eliminar amigo"
                   >
-                    Eliminar
+                    <FaTrash style={{ marginRight: 4 }} /> Eliminar
                   </button>
                 </div>
               </div>

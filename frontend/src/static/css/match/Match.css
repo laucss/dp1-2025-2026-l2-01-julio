@@ -7,8 +7,12 @@
     height: auto;
 
 }
+.points-section{
+    flex-direction: row;
+    display: flex;
 
-.action-points-section{
+}
+.action-points{
     background-color: rgb(251, 251, 251);
     border-color: rgb(0, 0, 0);
     border-style: solid;

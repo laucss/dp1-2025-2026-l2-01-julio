@@ -136,35 +136,40 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
                     <div className="sections-container">
                         <div className="hand-section">
                             <h3 className="section-title">Hand</h3>
-                            {handCards.map((card, index) => (
-                                <div key={index} >
-                                    <img 
-                                        src={`/resources${card.frontImage}`} 
-                                        alt={`Carta ${card.letter}`}  
-                                        className="card"
-                                        onClick={() => {
-                                            setBagCards(prev => [...prev, card]);
-                                            setHandCards(prev => prev.filter((_, i) => i !== index));
-                                        }}/>
-                                </div>
-                            ))}
+                            <div className="cards-grid">
+                                {handCards.map((card, index) => (
+                                    <div key={index}>
+                                        <img 
+                                            src={`/resources${card.frontImage}`} 
+                                            alt={`Carta ${card.letter}`}  
+                                            className="card"
+                                            onClick={() => {
+                                                setBagCards(prev => [...prev, card]);
+                                                setHandCards(prev => prev.filter((_, i) => i !== index));
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                         <div className="bag-section">
                             <h3 className="section-title">Bag</h3>
-                            {bagCards.map((card, index) => (
-                                <div key={index} >
-                                    <img 
-                                        src={`/resources${card.frontImage}`} 
-                                        alt={`Carta ${card.letter}`}  
-                                        className="card"
-                                        onClick={() => {
-                                            setHandCards(prev => [...prev, card]);
-                                            setBagCards(prev => prev.filter((_, i) => i !== index));
-                                        }}
-                                    />
-                                </div>
-                            ))}
+                            <div className="cards-grid">
+                                {bagCards.map((card, index) => (
+                                    <div key={index}>
+                                        <img 
+                                            src={`/resources${card.frontImage}`} 
+                                            alt={`Carta ${card.letter}`}  
+                                            className="card"
+                                            onClick={() => {
+                                                setHandCards(prev => [...prev, card]);
+                                                setBagCards(prev => prev.filter((_, i) => i !== index));
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
@@ -173,7 +178,7 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
                             Confirm
                         </button>
 
-                        <button onClick={onClose} className="confirm-button">
+                        <button onClick={onClose} className="cancel-button">
                             Cancel
                         </button>
                     </div>

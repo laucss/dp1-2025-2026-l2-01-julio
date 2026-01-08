@@ -111,38 +111,40 @@ export default function DiscardHandModal({isVisible, hand, bag, deck, onClose, p
                     <div className="sections-container">
                         <div className="hand-section">
                             <h3 className="section-title">Hand</h3>
-                            {handCards.map((card, index) => (
-                                <div key={index}>
-                                    <img 
-                                        src={`/resources${card.frontImage}`} 
-                                        alt={`Carta ${card.letter}`}  
-                                        className="card"
-                                        onClick={() => {
-                                            setCardsToDiscard(prev => [...prev, card]);
-                                            setHandCards(prev => prev.filter((_, i) => i !== index));
-                                        }}
-                                        style={{ cursor: 'pointer' }}
-                                    />
-                                </div>
-                            ))}
+                            <div className="cards-grid">
+                                {handCards.map((card, index) => (
+                                    <div key={index}>
+                                        <img 
+                                            src={`/resources${card.frontImage}`} 
+                                            alt={`Carta ${card.letter}`}  
+                                            className="card"
+                                            onClick={() => {
+                                                setCardsToDiscard(prev => [...prev, card]);
+                                                setHandCards(prev => prev.filter((_, i) => i !== index));
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                         <div className="bag-section">
                             <h3 className="section-title">To Discard</h3>
-                            {cardsToDiscard.map((card, index) => (
-                                <div key={index}>
-                                    <img 
-                                        src={`/resources${card.frontImage}`} 
-                                        alt={`Carta ${card.letter}`}  
-                                        className="card"
-                                        onClick={() => {
-                                            setHandCards(prev => [...prev, card]);
-                                            setCardsToDiscard(prev => prev.filter((_, i) => i !== index));
-                                        }}
-                                        style={{ cursor: 'pointer' }}
-                                    />
-                                </div>
-                            ))}
+                            <div className="cards-grid">
+                                {cardsToDiscard.map((card, index) => (
+                                    <div key={index}>
+                                        <img 
+                                            src={`/resources${card.frontImage}`} 
+                                            alt={`Carta ${card.letter}`}  
+                                            className="card"
+                                            onClick={() => {
+                                                setHandCards(prev => [...prev, card]);
+                                                setCardsToDiscard(prev => prev.filter((_, i) => i !== index));
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
@@ -151,7 +153,7 @@ export default function DiscardHandModal({isVisible, hand, bag, deck, onClose, p
                             Confirm
                         </button>
 
-                        <button onClick={handleCancel} className="confirm-button">
+                        <button onClick={handleCancel} className="cancel-button">
                             Cancel
                         </button>
                     </div>

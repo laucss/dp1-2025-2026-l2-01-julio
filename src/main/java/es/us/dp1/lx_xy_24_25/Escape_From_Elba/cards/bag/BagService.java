@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DictionaryService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
@@ -27,10 +27,12 @@ public class BagService {
     RestTemplate restTemplate;
     Checkers checkers;
     PlayerService playerService; 
+    DictionaryService dictionaryService;
 
-    public BagService(Checkers checkers, PlayerService playerService, RestTemplate restTemplate){
+    public BagService(Checkers checkers, PlayerService playerService, DictionaryService dictionaryService, RestTemplate restTemplate){
         this.checkers = checkers; 
         this.playerService = playerService; 
+        this.dictionaryService = dictionaryService;
         this.restTemplate=restTemplate; 
     }
 
@@ -128,41 +130,50 @@ public class BagService {
 
 
     /*
-     * Valida si la palabra que forma el usuario es valida para guardarse en la bolsa
-     * llamando a una api de diccionario si tiene más de letras
+     * Valida si la palabra que forma el usuario es valida para guardarse en la bolsa.
+     * Primero se va a checkear si la palabra está en el diccionario local (DictionaryService) que hemos añadido con más de 100 palabras y si no está, 
+     *          se hará una llamada a la API externa de free dictionary api. 
+     * Se ha hecho lo del diccionario local para intentar reducir el número de llamadas a la API externa, 
+     *          porque ya nos pasó que la api dejó de funcionar justo el día de la entrega y presentación del sprint. 
      * Despues, guarda y actualiza la nueva bolsa del juagador
      */
 
  
     @Transactional 
     public Boolean isValidWordForBag (String word) {
-
-        // hay que mirar a ver cómo hacer para que tampoco acepte nombres propios 
       
+        // si la palabra tiene 3 o más letras, checkear en el diccionario
         if (word.length() >= 3){
 
             // hacer llamada a la api de free dictionary api: 
             // https://api.dictionaryapi.dev/api/v2/entries/en/<word>
             // hay otra opción de api que es https://www.wordsapi.com/  aunque creo que es un poco menos completa pero ns 
+            
+            if (dictionaryService.containsWord(word)){
+                return true; 
 
-            String url = "https://api.dictionaryapi.dev/api/v2/entries/en/"+ word; 
+            } else {
+                String url = "https://api.dictionaryapi.dev/api/v2/entries/en/"+ word; 
 
-            try {
-                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class); 
+                try {
+                    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class); 
 
-                return response.getStatusCode().is2xxSuccessful(); // devuelve true
+                    return response.getStatusCode().is2xxSuccessful(); // devuelve true
+            
+                } catch (HttpClientErrorException e){
+                    return false; 
+                    
+                } catch (Exception e) {
+                    // TODO: handle exception en el validadr bag
+                    return false; 
+                }
+            }
         
-            } 
-            catch (HttpClientErrorException e){
-                return false; 
-                
-            } catch (Exception e) {
-                // TODO: handle exception en el validadr bag
-                return false; 
-            }}
+        }
+        
+        // si la palabra tiene menos de 3 letras, es válida automáticamente
         return true; 
         
-
     }
 
     /*
@@ -187,7 +198,7 @@ public class BagService {
 
 
     
-    public void update(BagInGameDTO bag, Integer matchId, Integer playerId){
+    public void update(ListCardsDTO bag, Integer matchId, Integer playerId){
 
         //checkear que exista el player y tal 
 
@@ -203,5 +214,22 @@ public class BagService {
         playerMap.put(playerId, newBag); 
         activesBags.put(matchId, playerMap); 
 
+    }
+
+    // función para checkear si la palabra es un arma, dentro de la lista que da el juego de posibles armas 
+
+    @Transactional 
+    public Boolean isValidWeapon(List<CardDTO> cards){ 
+
+        String word = wordFromCards(cards);
+      
+        if (dictionaryService.isWeapon(word)){
+            return true; 
+
+        } else {
+            return false;
+        }
+ 
+        
     }
 }

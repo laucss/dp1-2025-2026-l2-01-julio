@@ -79,6 +79,9 @@ public class HandService {
      */
 
 
+
+
+
     /*
      * Método para pasar la carta del mazo de robar a la mano del jugador que robe 
      * O método que añade una carta a la mano 
@@ -88,11 +91,7 @@ public class HandService {
     public HandInGame addCardToPlayerHand(Card card, Integer matchId, Integer playerId){
         HandInGame playerHand = findPlayerHand(matchId, playerId); 
 
-        // checkers.checkCardExists(card);
-        Class<?> pc =  playerHand.getCards().getClass(); 
-
         playerHand.getCards().add(card); 
-
 
         activesHands
             .computeIfAbsent(matchId, m -> new HashMap<>())
