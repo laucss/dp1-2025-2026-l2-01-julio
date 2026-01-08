@@ -25,6 +25,7 @@ import JoinMatch from "./screens/match/joinMatch";
 import MatchList from "./screens/prueba";
 import WaitingLobby from "./screens/match/waitingLobby";
 import Match from "./screens/match/Match";
+import Ranking from "./screens/statistics/Ranking";
 
 //import { useState } from "react";
 //import { fetchUser } from "./services/user.service";
@@ -105,7 +106,7 @@ function App() {
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/friends" element={<PrivateRoute><Friends /></PrivateRoute>} />
-        <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
+        <Route path="/ranking" element={<PrivateRoute><Ranking /></PrivateRoute>} />
         <Route path="/rules" element={<PrivateRoute><Rules /></PrivateRoute>} />
         <Route path="/matchs/new" element={<PrivateRoute><CreateMatch/></PrivateRoute>}></Route>
         <Route path="/lobbies" element={<PrivateRoute><JoinMatch/></PrivateRoute>}></Route>
