@@ -540,14 +540,14 @@ export default function Match(){
                     setMatch(data)
                     if (data.players) {
                         setPlayer(data.players)
-                        const me = data.players.find(p => p.user.id === currentUser.id)
+                        const me = data.players?.find(p => p.user.id === currentUser.id)
                         if (me) {
                             setCurrentPlayer([me])
                             setPlayersList(data.players.filter(p => p.user.id !== currentUser.id))
                         }
                     }
                     
-                    const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
+                    const movedPlayer = data.players?.find(p => p.user.id === currentUser.id);
                     if (movedPlayer) {
                         await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
                             method: 'POST',
@@ -603,7 +603,7 @@ export default function Match(){
             if (data.players) {
                 setPlayer(data.players);
                 
-                const movedPlayer = data.players.find(p => p.user.id === userId);
+                const movedPlayer = data.players?.find(p => p.user.id === userId);
                 if (movedPlayer) {
                     await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
                         method: 'POST',
@@ -631,28 +631,42 @@ export default function Match(){
     
     const endMatch = () => {
         if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return; 
-        const body =10;
-        console.log('body end match', body)
+        
+        // Determinar el ganador - usar el usuario actual
+        const winnerId = currentUser?.id;
+        
+        if (!winnerId) {
+            console.error("No se puede finalizar la partida: usuario actual no disponible");
+            return;
+        }
+
+        console.log('body end match - winnerId:', winnerId);
         fetch(`/api/v1/matches/${matchId}/end`, {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${jwt}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(winnerId)
         })
-        .then(res => res.json())
-        //.then(() => window.location.reload())
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(err => {
+                    throw new Error(`Error ${res.status}: ${err.message || 'Error al finalizar partida'}`);
+                });
+            }
+            return res.json();
+        })
         .then(updated => {
             console.log("Match finalizado:", updated)
             setMatch(updated)
         })
-        .catch(err => console.error(err))
+        .catch(err => console.error('Error finalizando partida:', err))
     }
 
     
 
-    const currentPlayerTurn = match?.players.find(p => p.user.id === match.currentTurnUserId);
+    const currentPlayerTurn = match?.players?.find(p => p.user.id === match.currentTurnUserId);
 
     const canDraw = match?.currentTurnUserId === currentUser?.id &&
                 match?.currentTurnPhase === "DRAW" &&
@@ -674,7 +688,7 @@ export default function Match(){
     // Keep spectator's points in sync with the player whose turn it is
     useEffect(() => {
         if (!isSpectator || !match?.players || !match?.currentTurnUserId) return;
-        const currentTurnPlayer = match.players.find(p => p.user?.id === match.currentTurnUserId);
+        const currentTurnPlayer = match?.players?.find(p => p.user?.id === match.currentTurnUserId);
         if (currentTurnPlayer) {
             setActionPoints(currentTurnPlayer.actionPoints ?? 0);
             setStrength(Math.min(6, currentTurnPlayer.strength ?? 1));
@@ -841,7 +855,7 @@ return (
                     <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
                     
                     {/* Fichas de jugadores sobre el mapa */}
-                    {match?.players.map(player => {
+                    {match?.players?.map(player => {
                         if (!player.currentRoom) return null;                      
                         const position = roomPositions[player.currentRoom.id];
                         if (!position) return null;
@@ -869,7 +883,7 @@ return (
                     })}
                     
                     {/* Fichas de NPCs sobre el mapa */}
-                    {match?.npcs.map((npc, index) => {
+                    {match?.npcs?.map((npc, index) => {
                         if (!npc.room) return null;                        
                         const position = roomPositions[npc.room.id];
                         if (!position) return null;
@@ -945,7 +959,7 @@ return (
                         </tr>
                     </thead>
                     <tbody>
-                        {match?.players.map(player => (
+                        {match?.players?.map(player => (
                             <tr 
                                 key={player.id} 
                                 style={{
@@ -959,7 +973,7 @@ return (
                                 <td style={{ padding: '3px' }}>{player.currentRoom?.name}</td>
                             </tr>
                         ))}
-                        {match?.npcs.map((npc, index) => (
+                        {match?.npcs?.map((npc, index) => (
                             <tr 
                                 key={index}
                                 style={{
@@ -1242,7 +1256,7 @@ return (
                 ? "Esperando..."
                 : match.currentTurnUserId === currentUser?.id
                     ? "Tu turno"
-                    : `${match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username} está en su turno`}
+                    : `${match.players?.find(p => p.user.id === match.currentTurnUserId)?.user.username} está en su turno`}
             </div>
         </div>
     );
