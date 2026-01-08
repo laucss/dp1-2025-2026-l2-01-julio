@@ -44,6 +44,11 @@ function Sidebar({ isOpen, toggle, user}) {
             </NavLink>
           </NavItem>
           <NavItem>
+            <NavLink tag={Link} to={`/ranking`} onClick={toggle}>
+              Ranking
+            </NavLink>
+          </NavItem>
+          <NavItem>
             <NavLink tag={Link} to="/rules" onClick={toggle}>
               Rules
             </NavLink>

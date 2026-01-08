@@ -291,3 +291,13 @@ INSERT INTO room_adjacency_list (room_id, adjacency_list_id)
                (37,27),
                (37,28);
 
+
+-- Grant one victory to player3 (appusers.id=6) via player.id=9 in match 1
+-- Ensure match 1 has a winner set to player.id=9
+UPDATE match
+   SET status = 'FINISHED',
+           start_time = '2025-12-01 18:00:00',
+           end_time   = '2025-12-01 19:00:00',
+           winner_id  = 9
+ WHERE id = 1;
+

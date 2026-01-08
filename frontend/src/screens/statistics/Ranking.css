@@ -78,3 +78,54 @@
     padding: 6px 10px;
   }
 }
+
+/* New styles used by Ranking.js */
+.ranking-page-container {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.ranking-card {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.ranking-title {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 1.6rem;
+  line-height: 1.25;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  transform: none !important;
+}
+
+.ranking-table {
+  width: 100%;
+  table-layout: auto;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.pagination-controls {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pagination-info {
+  font-weight: 600;
+}

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Button, ButtonGroup, Card, Table } from "reactstrap";
+import { Button, Card, Table } from "reactstrap";
 import tokenService from "../../services/token.service";
 import deleteFromList from "../../util/deleteFromList";
 import getErrorModal from "../../util/getErrorModal";
@@ -15,7 +14,7 @@ export default function Ranking() {
     const [visible, setVisible] = useState(false);
     const [users, setUsers] = useFetchState(
         [],
-        `/api/v1/users/ranking`,
+        `/api/v1/users`,
         jwt,
         setMessage,
         setVisible
@@ -25,19 +24,35 @@ export default function Ranking() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const usersPerPage = 5;
-    const totalPages = Math.ceil(users.length / usersPerPage);
+    const isEmpty = users.length === 0;
+    const totalPages = isEmpty ? 0 : Math.ceil(users.length / usersPerPage);
     const LastUser = currentPage * usersPerPage;
     const FirstUser = LastUser - usersPerPage;
     const currentUsers = users.slice(FirstUser, LastUser);
 
-    const [statsMap, setStatsMap] = useState({});
+    useEffect(() => {
+        if (!isEmpty && currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+        if (isEmpty && currentPage !== 1) {
+            setCurrentPage(1);
+        }
+    }, [users, totalPages, isEmpty, currentPage]);
 
+    const [statsMap, setStatsMap] = useState({});
+    const [sortedUsers, setSortedUsers] = useState([]);
+
+    // Fetch statistics for ALL users, then sort by totalVictories
     useEffect(() => {
         let cancelled = false;
-        const fetchStats = async () => {
+        const fetchAllStatsAndSort = async () => {
+            if (!users.length) {
+                setSortedUsers([]);
+                return;
+            }
             const map = {};
             await Promise.all(
-                currentUsers.map(async (user) => {
+                users.map(async (user) => {
                     try {
                         const res = await fetch(`/api/v1/statistics/${user.id}`, {
                             headers: { Authorization: `Bearer ${jwt}` },
@@ -53,16 +68,22 @@ export default function Ranking() {
                     }
                 })
             );
-            if (!cancelled) setStatsMap((prev) => ({ ...prev, ...map }));
+            if (!cancelled) {
+                setStatsMap(map);
+                const ordered = [...users].sort((a, b) => {
+                    const va = map[a.id]?.totalVictories || 0;
+                    const vb = map[b.id]?.totalVictories || 0;
+                    return vb - va;
+                });
+                setSortedUsers(ordered);
+            }
         };
+        fetchAllStatsAndSort();
+        return () => { cancelled = true; };
+    }, [users, jwt]);
 
-        if (currentUsers.length > 0) fetchStats();
-        return () => {
-            cancelled = true;
-        };
-    }, [currentUsers, jwt]);
-
-    const userList = currentUsers.map((user, index) => {
+    const listSource = sortedUsers.length ? sortedUsers.slice(FirstUser, LastUser) : currentUsers;
+    const userList = listSource.map((user, index) => {
         const stats = statsMap[user.id] || {};
         return (
             <tr key={user.id}>
@@ -81,7 +102,17 @@ export default function Ranking() {
     return (
         <div className="ranking-page-container">
             <Card className="ranking-card">
-                <h2 className="ranking-title">Ranking de Usuarios</h2>
+                <h2
+                    className="ranking-title"
+                    style={{
+                        writingMode: 'horizontal-tb',
+                        transform: 'none',
+                        whiteSpace: 'normal',
+                        wordBreak: 'normal'
+                    }}
+                >
+                    Ranking de Usuarios
+                </h2>
                 <Table striped className="ranking-table">
                     <thead>
                         <tr>
@@ -96,17 +127,17 @@ export default function Ranking() {
                 <div className="pagination-controls">
                     <Button
                         color="primary"
-                        disabled={currentPage === 1}
+                        disabled={isEmpty || currentPage === 1}
                         onClick={() => setCurrentPage(currentPage - 1)}
                     >
                         <FaArrowLeft /> Anterior
                     </Button>
                     <span className="pagination-info">
-                        Página {currentPage} de {totalPages}
+                        Página {isEmpty ? 0 : currentPage} de {isEmpty ? 0 : totalPages}
                     </span>
                     <Button
                         color="primary"
-                        disabled={currentPage === totalPages}
+                        disabled={isEmpty || currentPage === totalPages}
                         onClick={() => setCurrentPage(currentPage + 1)}
                     >
                         Siguiente <FaArrowRight />
