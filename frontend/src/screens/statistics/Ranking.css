@@ -84,7 +84,13 @@
   padding: 20px;
   display: flex;
   justify-content: center;
+  align-items: center;
   width: 100%;
+  min-height: 100vh;
+  background-image: url('../../static/images/menuBackGround.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .ranking-card {
@@ -93,6 +99,12 @@
   margin: 0 auto;
   padding: 16px;
   box-sizing: border-box;
+  transform: none !important;
+  transition: none !important;
+}
+
+.ranking-card:hover {
+  transform: none !important;
 }
 
 .ranking-title {
@@ -104,12 +116,22 @@
   text-orientation: mixed !important;
   white-space: normal !important;
   word-break: normal !important;
-  transform: none !important;
 }
 
 .ranking-table {
   width: 100%;
   table-layout: auto;
+  transform: none !important;
+  transition: none !important;
+}
+
+.ranking-table tbody tr {
+  transform: none !important;
+  transition: none !important;
+}
+
+.ranking-table tbody tr:hover {
+  transform: none !important;
 }
 
 .user-avatar {

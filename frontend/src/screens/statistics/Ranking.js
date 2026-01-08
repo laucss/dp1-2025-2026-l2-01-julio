@@ -113,7 +113,7 @@ export default function Ranking() {
                 >
                     Ranking de Usuarios
                 </h2>
-                <Table striped className="ranking-table">
+                <Table className="ranking-table">
                     <thead>
                         <tr>
                             <th>Posición</th>
