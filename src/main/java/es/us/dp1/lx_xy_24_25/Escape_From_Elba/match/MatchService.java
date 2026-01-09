@@ -337,6 +337,19 @@ public class MatchService {
     }
 
     /*
+     * Jugador roba una carta de recompensa (sin consumir puntos de acción)
+     */
+    @Transactional
+    public DrawCardResultDTO playerDrawsRewardCard(Integer matchId, Integer playerId){
+        Card stolenCard = deckService.drawCard(matchId);
+        DeckInGame deck = deckService.findDeckById(matchId);
+
+        HandInGame hand = handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+
+        return new DrawCardResultDTO(stolenCard, deck, hand);
+    }
+
+    /*
      * Método que devuelve el estado de todas las cartas relacionadas con un jugador en una partida
      */
 
@@ -508,7 +521,38 @@ public class MatchService {
         return match.getWinner();
     }
     
-    
+    @Transactional
+    public ActionPointsUpdateDTO consumeActionPointForUser(Integer matchId, Integer userId) {
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        Integer currentPoints = player.getActionPoints() != null ? player.getActionPoints() : 0;
+        if (currentPoints > 0) {
+            player.setActionPoints(currentPoints - 1);
+            playerRepo.save(player);
+        }
+        return new ActionPointsUpdateDTO(
+            player.getId(),
+            player.getUser().getId(),
+            player.getUser().getUsername(),
+            player.getActionPoints(),
+            System.currentTimeMillis()
+        );
+    }
+
+    @Transactional
+    public ActionPointsUpdateDTO consumeAllActionPointForUser(Integer matchId, Integer userId) {
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        player.setActionPoints(0);
+        playerRepo.save(player);
+        return new ActionPointsUpdateDTO(
+            player.getId(),
+            player.getUser().getId(),
+            player.getUser().getUsername(),
+            player.getActionPoints(),
+            System.currentTimeMillis()
+        );
+    }
 
 
     //Función para mover un jugador de una sala a otra adyacente

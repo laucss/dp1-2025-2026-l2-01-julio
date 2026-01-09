@@ -252,6 +252,13 @@ public class MatchController {
 
     } 
 
+    @PostMapping("/{matchId}/{playerId}/drawRewardCard")
+    public ResponseEntity<DrawCardResultDTO> drawRewardCard (@PathVariable Integer matchId, @PathVariable Integer playerId){
+        DrawCardResultDTO result = ms.playerDrawsRewardCard(matchId, playerId);
+        return ResponseEntity.ok(result);
+
+    }
+
     @GetMapping("/{matchId}/{playerId}/getAllCards")
     public ResponseEntity<AllCardsStatusDTO> getAllCards (@PathVariable Integer matchId, @PathVariable Integer playerId){
         AllCardsStatusDTO result = ms.getAllCards(matchId, playerId); 
@@ -351,6 +358,14 @@ public class MatchController {
     @PostMapping("/{matchId}/notify-action-points")
     @Operation(summary = "Notify action points", description = "Notifies all players when action points are updated.")
     public ResponseEntity<Void> notifyActionPoints(@PathVariable Integer matchId, @RequestBody ActionPointsUpdateDTO actionPointsUpdate) {
+        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/consume-all-action-points/{userId}")
+    @Operation(summary = "Consume all action points", description = "Consumes all action points for a user and notifies all players.")
+    public ResponseEntity<Void> consumeAllActionPoints(@PathVariable Integer matchId, @PathVariable Integer userId) {
+        ActionPointsUpdateDTO actionPointsUpdate = ms.consumeAllActionPointForUser(matchId, userId);
         matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
         return ResponseEntity.ok().build();
     }
