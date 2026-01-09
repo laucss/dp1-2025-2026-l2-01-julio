@@ -29,6 +29,7 @@ export default function StealCardModal({
         });
         if (res.ok) {
           const data = await res.json();
+          console.log('📥 Cartas recibidas del servidor:', data);
           setLoserCards({
             hand: Array.isArray(data.hand?.cards) ? data.hand.cards : [],
             bag: Array.isArray(data.bag?.cards) ? data.bag.cards : [],
@@ -55,9 +56,10 @@ export default function StealCardModal({
     }
   };
 
-  const stealCard = async (cardId, sourceToUse) => {
+  const stealCard = async (card, sourceToUse) => {
     try {
-      const idToSend = sourceToUse === 'hand' ? null : cardId;
+      const cardIdToSend = sourceToUse === 'hand' ? null : (card?.id || null);
+      console.log('📤 Enviando al backend:', { cardId: cardIdToSend, fromWhere: sourceToUse });
       const res = await fetch(`/api/v1/matches/${matchId}/${winnerId}/steal-card-from/${loserId}`, {
         method: 'POST',
         headers: {
@@ -65,7 +67,7 @@ export default function StealCardModal({
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          cardId: idToSend,
+          cardId: cardIdToSend,
           fromWhere: sourceToUse
         })
       });
@@ -88,10 +90,12 @@ export default function StealCardModal({
     }
   };
 
-  const handleSelectCard = async (cardId) => {
-    if (!source) return;
+  const handleSelectCard = async (card) => {
+    if (!source || !card) return;
+    console.log('🎯 Carta seleccionada:', card);
+    console.log('📦 Source:', source);
     setLoading(true);
-    await stealCard(cardId, source);
+    await stealCard(card, source);
   };
 
   if (!isOpen) return null;

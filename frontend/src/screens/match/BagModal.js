@@ -31,6 +31,7 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
             
             const bagToCheck = {
                 cards: bagCards.map(card => ({
+                    id: card.id,
                     frontImage: card.frontImage,
                     backImage: card.backImage,
                     letter: card.letter
@@ -73,6 +74,7 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
             
             const bagToUpdate = {
                 cards: bagCards.map(card => ({
+                    id: card.id,
                     frontImage: card.frontImage,
                     backImage: card.backImage,
                     letter: card.letter
@@ -81,6 +83,7 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
 
         const handToUpdate = {
                 cards: handCards.map(card => ({
+                    id: card.id,
                     frontImage: card.frontImage,
                     backImage: card.backImage,
                     letter: card.letter
@@ -89,11 +92,13 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
 
         const updatedDeckInGame = {
             notDiscardedCards: deckCards.notDiscardedCards.map(card => ({
+                id: card.id,
                 frontImage: card.frontImage,
                 backImage: card.backImage,
                 letter: card.letter
             })),
             discardedCards: deckCards.discardedCards.map(card => ({
+                id: card.id,
                 frontImage: card.frontImage,
                 backImage: card.backImage,
                 letter: card.letter

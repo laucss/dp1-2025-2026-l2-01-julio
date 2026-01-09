@@ -407,27 +407,33 @@ public class MatchController {
                 return ResponseEntity.badRequest().build();
             }
 
-            // Build a minimal Card reference using id when provided; null means random for 'hand'
+            // Build a Card reference using the complete card object when provided; null means random for 'hand'
             es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card cardRef = null;
-            if (request.getCardId() != null) {
-                cardRef = new es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card();
-                cardRef.setId(request.getCardId());
+            if (request.getCardId() != null && fromWhere.equals("bag")) {
+                // Para robo de bolsa, buscar la carta completa por ID
+                BagInGame loserBag = bagService.findPlayerBag(matchId, loserId);
+                
+                Integer cardId = request.getCardId();
+                final Integer finalCardId = cardId;
+                cardRef = loserBag.getCards().stream()
+                    .filter(c -> c.getId() != null && c.getId().equals(finalCardId))
+                    .findFirst()
+                    .orElse(null);
+                
+                if (cardRef == null) {
+                    return ResponseEntity.badRequest().body(null);
+                }
             }
 
             // Execute steal in service layer
             Integer currentTurnUserId = ms.getMatchById(matchId).getCurrentTurnUserId();
             ms.playerDrawsCardFromAnotherPlayerBag(cardRef, matchId, winnerId, loserId, fromWhere, currentTurnUserId);
 
-            System.out.println("📤 Obteniendo cartas actualizadas después del robo...");
             // Return updated card states for winner and loser and notify via WS
             AllCardsStatusDTO winnerCards = ms.getAllCards(matchId, winnerId);
             AllCardsStatusDTO loserCards = ms.getAllCards(matchId, loserId);
 
-            System.out.println("📊 Winner cards - Hand: " + winnerCards.getHand().getCards().size() + " | Bag: " + winnerCards.getBag().getCards().size());
-            System.out.println("📊 Loser cards - Hand: " + loserCards.getHand().getCards().size() + " | Bag: " + loserCards.getBag().getCards().size());
-
             CardsUpdateDTO update = new CardsUpdateDTO(matchId, winnerCards, loserCards);
-            System.out.println("🔔 Enviando notificación WebSocket con winner playerId: " + winnerCards.getPlayerId() + " y loser playerId: " + loserCards.getPlayerId());
             matchWebsocketController.notifyCardsUpdate(matchId, update);
 
             return ResponseEntity.ok(Map.of("winner", winnerCards, "loser", loserCards));

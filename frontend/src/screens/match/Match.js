@@ -221,45 +221,19 @@ export default function Match(){
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.cards`, (msg) => {
             const cardsUpdate = JSON.parse(msg.body);
-            console.log('🔔 Actualización de cartas recibida:', cardsUpdate);
-            console.log('👤 currentPlayer[0]?.id:', currentPlayer[0]?.id);
-            
             const { winner, loser } = cardsUpdate || {};
 
             const applyCardsUpdate = (info) => {
-                if (!info || !info.playerId) {
-                    console.log('⚠️ Info inválida:', info);
-                    return;
-                }
+                if (!info || !info.playerId) return;
                 const hand = Array.isArray(info.hand?.cards) ? info.hand.cards : [];
                 const bag = Array.isArray(info.bag?.cards) ? info.bag.cards : [];
 
-                console.log(`✅ Actualizando cartas para jugador ${info.playerId}`, { 
-                    hand: hand.length, 
-                    bag: bag.length,
-                    isCurrentPlayer: currentPlayer[0]?.id === info.playerId
-                });
-
                 // Si es el jugador actual, actualizamos su mano y bolsa
                 if (currentPlayer[0]?.id === info.playerId) {
-                    console.log('🎯 Actualizando MI mano y bolsa');
-                    console.log('📋 Datos completos de hand:', hand);
-                    console.log('💼 Datos completos de bag:', bag);
-                    console.log('📊 Estado actual handCards antes:', handCards.length, 'cartas');
-                    console.log('📊 Estado actual bagCards antes:', bagCards.length, 'cartas');
-                    
-                    const newHand = hand.map(c => ({...c}));
-                    const newBag = bag.map(c => ({...c}));
-                    
-                    setHandCards(newHand);
-                    setBagCards(newBag);
-                    
-                    setTimeout(() => {
-                        console.log('⏱️ Después de setState - handCards:', newHand.length, 'cartas');
-                    }, 100);
+                    setHandCards(hand.map(c => ({...c})));
+                    setBagCards(bag.map(c => ({...c})));
                 } else {
                     // Si es otro jugador, actualizamos su bolsa en el mapa de bolsas
-                    console.log('👥 Actualizando bolsa de otro jugador');
                     setOtherPlayersBags(prev => ({
                         ...prev,
                         [info.playerId]: bag
@@ -268,17 +242,10 @@ export default function Match(){
             };
 
             // Aplicar actualizaciones para winner, loser, o cualquier jugador
-            if (winner) {
-                console.log('🏆 Procesando winner:', winner.playerId);
-                applyCardsUpdate(winner);
-            }
-            if (loser) {
-                console.log('😢 Procesando loser:', loser.playerId);
-                applyCardsUpdate(loser);
-            }
+            if (winner) applyCardsUpdate(winner);
+            if (loser) applyCardsUpdate(loser);
             // Si no hay winner/loser, puede haber una actualización directa
             if (!winner && !loser && cardsUpdate.playerId) {
-                console.log('📦 Procesando actualización directa');
                 applyCardsUpdate(cardsUpdate);
             }
         });

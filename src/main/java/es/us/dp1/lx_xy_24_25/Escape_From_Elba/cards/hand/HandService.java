@@ -113,28 +113,18 @@ public class HandService {
     @Transactional
     public Card removeCardFromPlayerHand(Card card, Integer matchId, Integer playerId){
         if (card == null) {
-            System.out.println("⚠️ removeCardFromPlayerHand: card is null");
             return null;
         }
-        
-        System.out.println("🔍 removeCardFromPlayerHand: Intentando eliminar carta '" + card.getLetter() + "' (ID: " + card.getId() + ")");
         
         HandInGame playerHand = findPlayerHand(matchId, playerId); 
         List<Card> playerCards = playerHand.getCards(); 
         Card removedCard = null; 
-        
-        System.out.println("📋 Cartas en mano antes de eliminar:");
-        for (int j = 0; j < playerCards.size(); j++) {
-            Card c = playerCards.get(j);
-            System.out.println("   [" + j + "] Letra: " + c.getLetter() + " | ID: " + c.getId() + " | Same ref? " + (c == card));
-        }
         
         // Buscar por referencia exacta primero (más confiable para objetos en memoria)
         for (int i = 0; i < playerCards.size(); i++){
             if (playerCards.get(i) == card) {
                 removedCard = playerCards.get(i); 
                 playerCards.remove(i);
-                System.out.println("✅ Carta eliminada por referencia en índice " + i);
                 break; 
             }
         }
@@ -157,22 +147,15 @@ public class HandService {
                 if (match) {
                     removedCard = playerCards.get(i); 
                     playerCards.remove(i);
-                    System.out.println("✅ Carta eliminada por ID/letra en índice " + i);
                     break; 
                 }
             }
-        }
-        
-        if (removedCard == null) {
-            System.out.println("❌ No se pudo encontrar la carta para eliminar");
         }
         
         // Persist the updated hand back to the map
         activesHands
             .computeIfAbsent(matchId, m -> new HashMap<>())
             .put(playerId, playerHand);
-        
-        System.out.println("📊 Cartas en mano después de eliminar: " + playerCards.size());
         
         return removedCard; 
 

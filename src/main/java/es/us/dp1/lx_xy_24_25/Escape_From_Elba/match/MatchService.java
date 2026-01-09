@@ -419,10 +419,6 @@ public class MatchService {
         Player loser = playerService.findById(loserId); 
         playerService.findById(winnerId);
 
-        System.out.println("🔍 ANTES del robo:");
-        System.out.println("   Winner hand size: " + handService.findPlayerHand(matchId, winnerId).getCards().size());
-        System.out.println("   Loser hand size: " + handService.findPlayerHand(matchId, loserId).getCards().size());
-
         // quitamos la carta de la mano o bolsa del perdedor y se la añadimos a la mano del ganador
 
         if (fromWhere.equals("hand")){ 
@@ -433,13 +429,8 @@ public class MatchService {
                 throw new IllegalStateException("Loser has no cards in hand to steal");
             }
             Card randomCard = loserHandCards.get((int) Math.floor(Math.random() * loserHandCards.size()));
-            System.out.println("🎲 Carta seleccionada al azar: " + randomCard.getLetter() + " (ID: " + randomCard.getId() + ")");
-            
             handService.removeCardFromPlayerHand(randomCard, matchId, loserId);
-            System.out.println("❌ Después de removeCardFromPlayerHand - Loser hand size: " + handService.findPlayerHand(matchId, loserId).getCards().size());
-            
             handService.addCardToPlayerHand(randomCard, matchId, winnerId);
-            System.out.println("✅ Después de addCardToPlayerHand - Winner hand size: " + handService.findPlayerHand(matchId, winnerId).getCards().size());
 
         } else if (fromWhere.equals("bag")){
             bagService.removeCardFromPlayerBag(card, matchId, loserId);
@@ -448,10 +439,6 @@ public class MatchService {
         } else {
             throw new IllegalArgumentException("fromWhere must be 'hand' or 'bag'");
         }
-
-        System.out.println("✨ DESPUÉS del robo:");
-        System.out.println("   Winner hand size: " + handService.findPlayerHand(matchId, winnerId).getCards().size());
-        System.out.println("   Loser hand size: " + handService.findPlayerHand(matchId, loserId).getCards().size());
         
     }
 
