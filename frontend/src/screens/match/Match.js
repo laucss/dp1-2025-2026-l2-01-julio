@@ -69,6 +69,9 @@ export default function Match(){
     const [isStealModalOpen, setIsStealModalOpen] = useState(false);
     const [stealLoserPlayerId, setStealLoserPlayerId] = useState(null);
     
+    // Determinar si el usuario actual es un espectador
+    const isSpectator = !currentUser || !match?.players?.some(p => p.user.id === currentUser.id);
+    
     // Función para obtener un color único para cada jugador
     const getPlayerColor = (playerId) => {
         const colors = ['#FF6B6B', '#4ECDC4', '#f833e4ff', '#e5541aff', '#52a852ff', '#2a15ceff'];
@@ -870,11 +873,11 @@ export default function Match(){
         return (
             <div className="match-ended">
                 <div className="end-overlay">
-                <div className="end-text-box">
-                    <h2>La partida ha finalizado!!!!!</h2>
-                    <p>Gracias por jugar.</p>
-                    <button className="return-menu-button" onClick={() => navigate(`/`)}>Return to main menu</button>
-                </div>
+                    <div className="end-text-box">
+                        <h2>La partida ha finalizado!!!!!</h2>
+                        <p>Gracias por jugar.</p>
+                        <button className="return-menu-button" onClick={() => navigate(`/`)}>Return to main menu</button>
+                    </div>
                 </div>
             </div>
         );
@@ -1117,16 +1120,15 @@ return (
                 </div>
             )}
 
-            <div className="points-section">
+            <div className="points-section" style={{ position: 'absolute', left: '6%', transform: 'translateX(-30%)', marginTop: '-70px', display: 'flex', gap: '12px', alignItems: 'flex-end', zIndex: 100 }}>
                 <div className="action-points">
                     <h1>{actionPoints}</h1>
                     <p>Action points </p>
                 </div>
 
-                    <div className="action-points">
-                        <h1>{strength}</h1>
-                        <p>strength </p>
-                    </div>
+                <div className="action-points">
+                    <h1>{strength}</h1>
+                    <p>strength </p>
                 </div>
             </div>
 
@@ -1232,48 +1234,46 @@ return (
                                         <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
                                     </div>
                     ))}
-
-                    </div>
-                    
                 </div>
-            )}
+            </div>
+
             {!isSpectator && (
                 <div>
-                    <button className="bag-button"
-                        onClick={() => setBagOpen(true)}
-                        disabled={
-                        match.currentTurnUserId !== currentUser.id }
-                        title="Accede to your bag"
-                    >
-                        Form my bag
-                    </button>
-                    <button className="bag-button"
-                        onClick={() => setDiscardHandOpen(true)}
-                        disabled={
-                        match.currentTurnUserId !== currentUser.id }
-                        title="Discard cards from hand"
-                        style={{ marginLeft: "10px" }}
-                    >
-                        Discard
-                    </button>
-                    <button className="bag-button"
-                        title="Discard cards from hand"
-                        onClick={() => setIsActionsModalOpen(true) }
-                        disabled={
-                        match.currentTurnUserId !== currentUser.id || actionPoints === 0 }
-                        style={{ marginLeft: "15px" }}
-                    >
-                        Actions
-                    </button>
+            <button className="bag-button"
+                onClick={() => setBagOpen(true)}
+                disabled={
+                match.currentTurnUserId !== currentUser.id }
+                title="Accede to your bag"
+            >
+                Form my bag
+            </button>
+            <button className="bag-button"
+                onClick={() => setDiscardHandOpen(true)}
+                disabled={
+                match.currentTurnUserId !== currentUser.id }
+                title="Discard cards from hand"
+                style={{ marginLeft: "10px" }}
+            >
+                Discard
+            </button>
+            <button className="bag-button"
+                title="Discard cards from hand"
+                onClick={() => setIsActionsModalOpen(true) }
+                disabled={
+                match.currentTurnUserId !== currentUser.id || actionPoints === 0 }
+                style={{ marginLeft: "15px" }}
+            >
+                Actions
+            </button>
 
-                    <ActionsModal
-                        isOpen={isActionsModalOpen}
-                        onClose={() => setIsActionsModalOpen(false)}
-                        moveToAdyacent={() => setMoveToAdyacentRoom(true) }
-                        onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
-                    />
-                </div>
-            )}
+            <ActionsModal
+                isOpen={isActionsModalOpen}
+                onClose={() => setIsActionsModalOpen(false)}
+                moveToAdyacent={() => setMoveToAdyacentRoom(true) }
+                onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
+            />
+        </div>
+    )}
 
     <FightModal
             isOpen={isFightModalOpen}
@@ -1444,25 +1444,22 @@ return (
             }}
     />
 
-            </div>
-            
-
-                <button
-                    className="end-match-button"
-                    onClick={endMatch}
-                    style={{
-                        marginLeft: "10px",
-                        marginTop: "20px",
-                        padding: "10px 25px",
-                        background: "#c0392b",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "8px",
-                        cursor: "pointer"
-                    }}
-                >
-                    Finalizar partida
-                </button>
+            <button
+                className="end-match-button"
+                onClick={endMatch}
+                style={{
+                    marginLeft: "10px",
+                    marginTop: "20px",
+                    padding: "10px 25px",
+                    background: "#c0392b",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer"
+                }}
+            >
+                Finalizar partida
+            </button>
 
         <BagModal
             isVisible={bagOpen}
