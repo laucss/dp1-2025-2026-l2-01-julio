@@ -72,4 +72,25 @@ public class MatchWebsocketController {
             update
         );
     }
+
+    public void notifyCardsUpdate(Integer matchId, CardsUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".cards",
+            update
+        );
+    }
+
+    public void notifyFightResolved(Integer matchId, FightResolvedDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".fight",
+            update
+        );
+    }
+
+    public void notifyHandUpdate(Integer matchId, Integer playerId, HandUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".hand." + playerId,
+            update
+        );
+    }
 }

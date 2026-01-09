@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import {useNavigate, useLocation} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import '../../static/css/match/Match.css';
@@ -13,6 +13,7 @@ import ChatBox from "./chatBox";
 import { FaComments } from "react-icons/fa";
 import FightModal from "./FightModal";
 import StartDiceModal from "./StartDiceModal";
+import StealCardModal from "./StealCardModal";
 
 
 
@@ -23,8 +24,6 @@ const currentUser = tokenService.getUser();
 export default function Match(){
     const matchId = getIdFromUrl(2);
     const navigate = useNavigate();
-    const location = useLocation();
-    const isSpectator = location?.state?.spectator === true;
     const [currentPlayer, setCurrentPlayer] = useState({}) // el jugador asociado al usuario que está "viendo" la pantalla
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
@@ -37,6 +36,7 @@ export default function Match(){
     const [discardPile, setDiscardPile] = useState([])
     const [handCards, setHandCards] = useState([])
     const [bagCards, setBagCards] = useState([])
+    const [otherPlayersBags, setOtherPlayersBags] = useState({}) 
     const [numCardsDrawn, setNumCardsDrawn] = useState(0)
     const [bagOpen, setBagOpen] = useState(false)
     const [discardHandOpen, setDiscardHandOpen] = useState(false)
@@ -50,7 +50,6 @@ export default function Match(){
     const [strength, setStrength] = useState(1)
     const [moveToAdyacentRoom, setMoveToAdyacentRoom] = useState(false)
     const [isEndingTurn, setIsEndingTurn] = useState(false)
-
     
     // const [playerTurnId, setPlayerTurnId] = useState(null)
 
@@ -63,6 +62,8 @@ export default function Match(){
     const [fightDefender, setFightDefender] = useState(null);
     const [fightAttacker, setFightAttacker] = useState(null);
     const [pendingTargetRoom, setPendingTargetRoom] = useState(null);
+    const [isStealModalOpen, setIsStealModalOpen] = useState(false);
+    const [stealLoserPlayerId, setStealLoserPlayerId] = useState(null);
     
     // Función para obtener un color único para cada jugador
     const getPlayerColor = (playerId) => {
@@ -70,6 +71,13 @@ export default function Match(){
         const allPlayers = match?.players || [];
         const playerIndex = allPlayers.findIndex(p => p.id === playerId);
         return colors[playerIndex % colors.length];
+    };
+
+    // Agrupa los corredores duplicados (9/10 y 27/28) para tratarlos como la misma habitación
+    const normalizeRoomId = (roomId) => {
+        if (roomId === 10) return 9;
+        if (roomId === 28) return 27;
+        return roomId;
     };
     
     // const posiciones de las habitaciones en el mapa 
@@ -171,6 +179,15 @@ export default function Match(){
                     setPendingTargetRoom(fightUpdate.roomName);
                     setIsFightModalOpen(true);
                 }
+            } else if (fightUpdate.action === 'RESOLVE') {
+                const winnerId = fightUpdate.winnerId;
+                const winnerPlayerId = fightUpdate.winnerPlayerId;
+                const loserPlayerId = fightUpdate.loserPlayerId;
+
+                if (currentUser.id === winnerId && winnerPlayerId && loserPlayerId) {
+                    setStealLoserPlayerId(loserPlayerId);
+                    setIsStealModalOpen(true);
+                }
             }
         });
 
@@ -205,39 +222,87 @@ export default function Match(){
         return () => subscription.unsubscribe();
     }, [stompClient, matchId]);
 
+    // Suscripción a actualizaciones de cartas (mano/bolsa) de todos los jugadores
     useEffect(() => {
         if (!stompClient || !stompClient.active) return;
 
-        const subscription = stompClient.subscribe(`/topic/match.${matchId}.actionPoints`, (msg) => {
-            const update = JSON.parse(msg.body);
-            const isForCurrentUser = !!currentPlayer[0]?.user?.id && update.userId === currentPlayer[0].user.id;
-            const isForCurrentTurn = !!match?.currentTurnUserId && update.userId === match.currentTurnUserId;
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.cards`, (msg) => {
+            const cardsUpdate = JSON.parse(msg.body);
+            const { winner, loser } = cardsUpdate || {};
 
-            // Update when it's for me, or when I'm a spectator and it's the current-turn player
-            if (isForCurrentUser || (isSpectator && isForCurrentTurn)) {
-                setActionPoints(update.actionPoints);
+            const applyCardsUpdate = (info) => {
+                if (!info || !info.playerId) return;
+                const hand = Array.isArray(info.hand?.cards) ? info.hand.cards : [];
+                const bag = Array.isArray(info.bag?.cards) ? info.bag.cards : [];
+
+                // Si es el jugador actual, actualizamos su mano y bolsa
+                if (currentPlayer[0]?.id === info.playerId) {
+                    setHandCards(hand.map(c => ({...c})));
+                    setBagCards(bag.map(c => ({...c})));
+                } else {
+                    // Si es otro jugador, actualizamos su bolsa en el mapa de bolsas
+                    setOtherPlayersBags(prev => ({
+                        ...prev,
+                        [info.playerId]: bag
+                    }));
+                }
+            };
+
+            // Aplicar actualizaciones para winner, loser, o cualquier jugador
+            if (winner) applyCardsUpdate(winner);
+            if (loser) applyCardsUpdate(loser);
+            // Si no hay winner/loser, puede haber una actualización directa
+            if (!winner && !loser && cardsUpdate.playerId) {
+                applyCardsUpdate(cardsUpdate);
             }
         });
 
         return () => subscription.unsubscribe();
-    }, [stompClient, matchId, currentPlayer, isSpectator, match]);
+    }, [stompClient, matchId, currentPlayer]);
+
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.actionPoints`, (msg) => {
+            const actionPointsUpdate = JSON.parse(msg.body);
+            
+            // Only update action points if the update is for the current player
+            if (actionPointsUpdate.userId === currentPlayer[0].user.id) {
+                setActionPoints(actionPointsUpdate.actionPoints);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, currentPlayer]);
+
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.hand.${currentPlayer[0].id}`, (msg) => {
+            const handUpdate = JSON.parse(msg.body);
+            if (handUpdate && handUpdate.hand) {
+                const updatedHand = Array.isArray(handUpdate.hand.cards) ? handUpdate.hand.cards : [];
+                setHandCards(updatedHand);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, currentPlayer]);
 
     useEffect(() => {
         if (!stompClient || !stompClient.active) return;
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.strength`, (msg) => {
-            const update = JSON.parse(msg.body);
-            const isForCurrentUser = !!currentPlayer[0]?.user?.id && update.userId === currentPlayer[0].user.id;
-            const isForCurrentTurn = !!match?.currentTurnUserId && update.userId === match.currentTurnUserId;
-
-        // Update when it's for me, or when I'm a spectator and it's the current-turn player
-            if (isForCurrentUser || (isSpectator && isForCurrentTurn)) {
-                setStrength(Math.min(6, update.strength));
+            const strengthUpdate = JSON.parse(msg.body);
+            
+            // Only update strength if the update is for the current player
+            if (strengthUpdate.userId === currentPlayer[0].user.id) {
+                setStrength(Math.min(6, strengthUpdate.strength));
             }
         });
 
         return () => subscription.unsubscribe();
-    }, [stompClient, matchId, currentPlayer, isSpectator, match]);
+    }, [stompClient, matchId, currentPlayer]);
 
     useEffect(() => {
             if (player && Array.isArray(player)){
@@ -255,19 +320,22 @@ export default function Match(){
     }, [currentPlayer])
 
     useEffect(() => {
+        if (playersList.length > 0) {
+            fetchOtherPlayersBags()
+        }
+    }, [playersList])
+
+    useEffect(() => {
         calculateActionPoints()
     }, [handCards])
 
 
 
     useEffect(() => {
-        // Evitar errores cuando el espectador no es parte de la partida
-        if (isSpectator) return;
-        const myUserId = currentPlayer?.[0]?.user?.id;
-        if (currentTurnUserId && myUserId && myUserId === currentTurnUserId){
+        if (currentTurnUserId && currentPlayer[0].user.id === currentTurnUserId){
             fetchActionPoints()
         }
-    }, [currentTurnUserId, isSpectator, currentPlayer])
+    }, [currentTurnUserId])
 
     // Polling para actualizar el match mientras el modal de dados está abierto
     useEffect(() => {
@@ -364,7 +432,16 @@ export default function Match(){
             const data = await response.json();
             console.log('movePlayerToRoom success', data);
             setMatch(data);
-            if (data.players) setPlayer(data.players);
+            if (data.players) {
+                setPlayer(data.players);
+                
+                // Si el ganador es el jugador actual, actualizar los puntos de acción
+                const movedPlayer = data.players.find(p => p.user.id === currentUser?.id);
+                if (movedPlayer && userId === currentUser?.id) {
+                    setActionPoints(movedPlayer.actionPoints);
+                    console.log('Action points updated for winner:', movedPlayer.actionPoints);
+                }
+            }
             return data;
         } catch (err) {
             console.error('Error moving player:', err);
@@ -408,6 +485,32 @@ export default function Match(){
 
     }
 
+    const fetchOtherPlayersBags = async () => {
+        try {
+            const bags = {}
+            
+            for (const player of playersList) {
+                const response = await fetch(`/api/v1/matches/${matchId}/${player.id}/getAllCards`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                })
+                
+                if (response.ok) {
+                    const data = await response.json()
+                    bags[player.id] = Array.isArray(data.bag.cards) ? data.bag.cards : []
+                }
+            }
+            
+            setOtherPlayersBags(bags)
+        } catch (error) {
+            console.log('Error fetching other players bags:', error)
+        }
+    }
+
     /*
     console.log('hand' , handCards)
     console.log('bag' , bagCards)
@@ -446,7 +549,7 @@ export default function Match(){
     
     const drawCardForWinner = async (winnerId) => {
         try {
-            const response = await fetch(`/api/v1/matches/${matchId}/${winnerId}/drawCardFromDeck`, {
+            const response = await fetch(`/api/v1/matches/${matchId}/${winnerId}/drawRewardCard`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${jwt}`,
@@ -490,11 +593,11 @@ export default function Match(){
 
                 const isSafeArea = roomId === 37;
                 
-                const otherPlayer = match?.players?.find(p => p.user?.id !== currentUser?.id && (
-                    (p.currentRoom && p.currentRoom.id === roomId) ||
-                    (p.roomId && p.roomId === roomId) ||
-                    (p.room && p.room.id === roomId)
-                ));
+                const targetRoomNormalized = normalizeRoomId(roomId);
+                const otherPlayer = match?.players?.find(p => {
+                    const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
+                    return p.user?.id !== currentUser?.id && normalizeRoomId(playerRoomId) === targetRoomNormalized;
+                });
 
                 if (otherPlayer && !isSafeArea) {
                     setPendingTargetRoom(roomId);
@@ -541,14 +644,14 @@ export default function Match(){
                     setMatch(data)
                     if (data.players) {
                         setPlayer(data.players)
-                        const me = data.players?.find(p => p.user.id === currentUser.id)
+                        const me = data.players.find(p => p.user.id === currentUser.id)
                         if (me) {
                             setCurrentPlayer([me])
                             setPlayersList(data.players.filter(p => p.user.id !== currentUser.id))
                         }
                     }
                     
-                    const movedPlayer = data.players?.find(p => p.user.id === currentUser.id);
+                    const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
                     if (movedPlayer) {
                         await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
                             method: 'POST',
@@ -604,7 +707,7 @@ export default function Match(){
             if (data.players) {
                 setPlayer(data.players);
                 
-                const movedPlayer = data.players?.find(p => p.user.id === userId);
+                const movedPlayer = data.players.find(p => p.user.id === userId);
                 if (movedPlayer) {
                     await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
                         method: 'POST',
@@ -632,37 +735,23 @@ export default function Match(){
     
     const endMatch = () => {
         if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return; 
-        
-        // Determinar el ganador - usar el usuario actual
-        const winnerId = currentUser?.id;
-        
-        if (!winnerId) {
-            console.error("No se puede finalizar la partida: usuario actual no disponible");
-            return;
-        }
-
-        console.log('body end match - winnerId:', winnerId);
+        const body =10;
+        console.log('body end match', body)
         fetch(`/api/v1/matches/${matchId}/end`, {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${jwt}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(winnerId)
+            body: JSON.stringify(body)
         })
-        .then(res => {
-            if (!res.ok) {
-                return res.json().then(err => {
-                    throw new Error(`Error ${res.status}: ${err.message || 'Error al finalizar partida'}`);
-                });
-            }
-            return res.json();
-        })
+        .then(res => res.json())
+        //.then(() => window.location.reload())
         .then(updated => {
             console.log("Match finalizado:", updated)
             setMatch(updated)
         })
-        .catch(err => console.error('Error finalizando partida:', err))
+        .catch(err => console.error(err))
     }
 
     const handleEndTurn = async () => {
@@ -689,11 +778,9 @@ export default function Match(){
         } finally {
             setIsEndingTurn(false);
         }
-    }
+    };
 
-    
-
-    const currentPlayerTurn = match?.players?.find(p => p.user.id === match.currentTurnUserId);
+    const currentPlayerTurn = match?.players.find(p => p.user.id === match.currentTurnUserId);
 
     const canDraw = match?.currentTurnUserId === currentUser?.id &&
                 match?.currentTurnPhase === "DRAW" &&
@@ -702,25 +789,15 @@ export default function Match(){
 
 
     const calculateActionPoints = () => {
-        if (isSpectator) return;
         if (!match) return;
-        if (match.currentTurnPhase !== "DRAW") return;
+        if (match.currentTurnPhase !== "DRAW")
+            return;
         if (handCards.length > 7 ){
             setActionPoints(0)
         } else {
             setActionPoints(7-handCards.length)
         }
-    }
-
-    // Keep spectator's points in sync with the player whose turn it is
-    useEffect(() => {
-        if (!isSpectator || !match?.players || !match?.currentTurnUserId) return;
-        const currentTurnPlayer = match?.players?.find(p => p.user?.id === match.currentTurnUserId);
-        if (currentTurnPlayer) {
-            setActionPoints(currentTurnPlayer.actionPoints ?? 0);
-            setStrength(Math.min(6, currentTurnPlayer.strength ?? 1));
         }
-    }, [isSpectator, match]);
 
     const handleDiceRolled = (updatedMatch) => {
         setMatch(updatedMatch);
@@ -767,23 +844,43 @@ return (
             <div className="players-avatars-section">
                 {playersList.map((p) => (
                     <div key={p.user.id} className="player-avatar-card">
-                        <div style={{
-                            borderRadius: '50%',
-                            border: `4px solid ${getPlayerColor(p.id)}`,
-                            display: 'inline-block',
-                            padding: '3px'
-                        }}>
-                            {p.user.avatar ? (
-                                <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" style={{ borderRadius: '50%' }} />
-                            ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" style={{ borderRadius: '50%' }} />}
+                        <div className="player-info-row">
+                            <div style={{
+                                borderRadius: '50%',
+                                border: `4px solid ${getPlayerColor(p.id)}`,
+                                display: 'inline-block',
+                                padding: '3px',
+                                flexShrink: 0
+                            }}>
+                                {p.user.avatar ? (
+                                    <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" style={{ borderRadius: '50%' }} />
+                                ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" style={{ borderRadius: '50%' }} />}
+                            </div>
+                            <p className="player-username">{p.user.username}</p>
                         </div>
-                        <p className="player-username">{p.user.username}</p>
+                        <div className="player-bag-display">
+                            {otherPlayersBags[p.id] && otherPlayersBags[p.id].length > 0 ? (     
+                                    <div className="bag-cards-container">
+                                        {otherPlayersBags[p.id].map((carta, index) => (
+                                            <img 
+                                                key={index} 
+                                                src={`/resources${carta.frontImage}`} 
+                                                alt={`Carta ${carta.letter}`} 
+                                                className="player-bag-card"
+                                                title={carta.letter}
+                                            />
+                                        ))}
+                                    </div>
+                            ) : (
+                                <p className="empty-bag">Empty Bag</p>
+                            )}
+                        </div>
                     </div>
                 ))}
             </div>
 
             <StartDiceModal 
-                isOpen={!isSpectator && match?.currentTurnPhase === null && isDiceModalOpen}
+                isOpen={match?.currentTurnPhase === null && isDiceModalOpen}
                 onClose={() => setIsDiceModalOpen(false)}
                 onDiceRolled={handleDiceRolled}
                 matchData={match}
@@ -882,7 +979,7 @@ return (
                     <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
                     
                     {/* Fichas de jugadores sobre el mapa */}
-                    {match?.players?.map(player => {
+                    {match?.players.map(player => {
                         if (!player.currentRoom) return null;                      
                         const position = roomPositions[player.currentRoom.id];
                         if (!position) return null;
@@ -910,7 +1007,7 @@ return (
                     })}
                     
                     {/* Fichas de NPCs sobre el mapa */}
-                    {match?.npcs?.map((npc, index) => {
+                    {match?.npcs.map((npc, index) => {
                         if (!npc.room) return null;                        
                         const position = roomPositions[npc.room.id];
                         if (!position) return null;
@@ -944,20 +1041,20 @@ return (
                         );
                     })}
                 </div>
-            </div>
-            <div className="points-section">
-                <div className="action-points">
-                    <h1>{actionPoints}</h1>
-                    <p>Action points </p>
-                </div>
+                <div className="points-section">
+                    <div className="action-points">
+                        <h1>{actionPoints}</h1>
+                        <p>Action points </p>
+                    </div>
 
-                <div className="action-points">
-                    <h1>{strength}</h1>
-                    <p>strength </p>
+                    <div className="action-points">
+                        <h1>{strength}</h1>
+                        <p>strength </p>
+                    </div>
                 </div>
             </div>
 
-            {!isSpectator && match?.currentTurnUserId === currentUser?.id && (
+            {match?.currentTurnUserId === currentUser?.id && (
                 <button
                     className="end-your-turn-button"
                     onClick={handleEndTurn}
@@ -1014,7 +1111,7 @@ return (
                         </tr>
                     </thead>
                     <tbody>
-                        {match?.players?.map(player => (
+                        {match?.players.map(player => (
                             <tr 
                                 key={player.id} 
                                 style={{
@@ -1028,7 +1125,7 @@ return (
                                 <td style={{ padding: '3px' }}>{player.currentRoom?.name}</td>
                             </tr>
                         ))}
-                        {match?.npcs?.map((npc, index) => (
+                        {match?.npcs.map((npc, index) => (
                             <tr 
                                 key={index}
                                 style={{
@@ -1045,62 +1142,58 @@ return (
                 </table>
             </div>
             */}
-            {!isSpectator && (
-                <div className="player-section">
-                    <div className="player-hand">
-                        {Array.isArray(handCards) && handCards.map((carta, index) => (
-                                        <div key={index} >
-                                            <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                        </div>
-                        ))}
-                    </div>
-                    <div className="player-bag">
-                        {Array.isArray(bagCards) && bagCards.map((carta, index) => (
-                                        <div key={index} >
-                                            <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                        </div>
-                        ))}
-
-                    </div>
-                    
+            <div className="player-section">
+                <div className="player-hand">
+                    {Array.isArray(handCards) && handCards.map((carta, index) => (
+                                    <div key={index} >
+                                        <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                    </div>
+                    ))}
                 </div>
-            )}
-            {!isSpectator && (
-                <div>
-                    <button className="bag-button"
-                        onClick={() => setBagOpen(true)}
-                        disabled={
-                        match.currentTurnUserId !== currentUser.id }
-                        title="Accede to your bag"
-                    >
-                        Form my bag
-                    </button>
-                    <button className="bag-button"
-                        onClick={() => setDiscardHandOpen(true)}
-                        disabled={
-                        match.currentTurnUserId !== currentUser.id }
-                        title="Discard cards from hand"
-                        style={{ marginLeft: "10px" }}
-                    >
-                        Discard
-                    </button>
-                    <button className="bag-button"
-                        title="Discard cards from hand"
-                        onClick={() => setIsActionsModalOpen(true) }
-                        disabled={
-                        match.currentTurnUserId !== currentUser.id }
-                        style={{ marginLeft: "15px" }}
-                    >
-                        Actions
-                    </button>
+                <div className="player-bag">
+                    {Array.isArray(bagCards) && bagCards.map((carta, index) => (
+                                    <div key={index} >
+                                        <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                    </div>
+                    ))}
 
-                    <ActionsModal
-                        isOpen={isActionsModalOpen}
-                        onClose={() => setIsActionsModalOpen(false)}
-                        moveToAdyacent={() => setMoveToAdyacentRoom(true) }
-                    />
                 </div>
-            )}
+                
+            </div>
+            <div>
+                <button className="bag-button"
+                    onClick={() => setBagOpen(true)}
+                    disabled={
+                    match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
+                    title="Accede to your bag"
+                >
+                    Form my bag
+                </button>
+                <button className="bag-button"
+                    onClick={() => setDiscardHandOpen(true)}
+                    disabled={
+                    match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
+                    title="Discard cards from hand"
+                    style={{ marginLeft: "10px" }}
+                >
+                    Discard
+                </button>
+                 <button className="bag-button"
+                    title="Discard cards from hand"
+                    onClick={() => setIsActionsModalOpen(true) }
+                     disabled={
+                    match.currentTurnUserId !== currentUser.id || 
+                    actionPoints <= 0 }
+                    style={{ marginLeft: "15px" }}
+                >
+                    Actions
+                </button>
+
+                <ActionsModal
+                isOpen={isActionsModalOpen}
+                onClose={() => setIsActionsModalOpen(false)}
+                moveToAdyacent={() => setMoveToAdyacentRoom(true) }
+            />
 
     <FightModal
             isOpen={isFightModalOpen}
@@ -1144,16 +1237,19 @@ return (
                         21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
                     ];
                     const winnerPlayer = match?.players?.find(p => p.user?.id === (winnerUser?.id || winnerUser?.user?.id));
-                    const winnerRoomId = winnerPlayer?.currentRoom?.id || winnerPlayer?.roomId || null;
+                    const winnerRoomIdRaw = winnerPlayer?.currentRoom?.id || winnerPlayer?.roomId || null;
+                    const winnerRoomId = normalizeRoomId(winnerRoomIdRaw);
 
                     const occupiedRoomIds = new Set();
                     (match?.players || []).forEach(p => {
                         const rid = p.currentRoom?.id || p.roomId || p.room?.id;
-                        if (rid) occupiedRoomIds.add(rid);
+                        const normalized = normalizeRoomId(rid);
+                        if (normalized) occupiedRoomIds.add(normalized);
                     });
                     (match?.npcs || []).forEach(npc => {
                         const rid = npc.room?.id;
-                        if (rid) occupiedRoomIds.add(rid);
+                        const normalized = normalizeRoomId(rid);
+                        if (normalized) occupiedRoomIds.add(normalized);
                     });
 
                     const candidates = allRoomIds.filter(r => r !== winnerRoomId && !occupiedRoomIds.has(r));
@@ -1195,7 +1291,23 @@ return (
                         alert('No se pudo mover al perdedor. Revisa la consola para más detalles.');
                     } else {
                         console.log('Loser moved to', randomRoomId, moveResult);
+                        
+                        // Si el perdedor es el jugador del turno actual, quitar todos los puntos de acción
+                        if (loserUser.id === match.currentTurnUserId) {
+                            try {
+                                await fetch(`/api/v1/matches/${matchId}/consume-all-action-points/${loserUser.id}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Authorization': `Bearer ${jwt}`,
+                                        'Content-Type': 'application/json',
+                                    }
+                                });
+                                console.log('All action points consumed for loser:', loserUser.id);
+                            } catch (err) {
+                                console.error('Error consuming all action points for loser:', err);
+                            }
                         }
+                    }
 
                     // Si ganó el atacante, muévelo a la antigua sala del defensor
                     if (attackerWins && defenderRoomId) {
@@ -1209,10 +1321,35 @@ return (
                     }
 
                     const winnerPlayerId = attackerWins ? fightAttacker?.id : fightDefender?.id;
+                    const loserPlayerId = attackerWins ? fightDefender?.id : fightAttacker?.id;
                     if (winnerPlayerId) {
                         const drawSuccess = await drawCardForWinner(winnerPlayerId);
                         if (drawSuccess) {
                             console.log('Ganador robó una carta');
+                            
+                            // Publicar evento de resolución de pelea para que todos lo reciban
+                            await fetch(`/api/v1/matches/${matchId}/notify-fight-resolved`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${jwt}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    matchId: matchId,
+                                    winnerId: winnerUser?.id,
+                                    winnerPlayerId: winnerPlayerId,
+                                    loserPlayerId: loserPlayerId
+                                })
+                            }).catch(e => console.warn('Could not notify fight resolved:', e));
+
+                            // Abrir modal de robo si es el usuario actual el ganador
+                            if (currentUser.id === fightAttacker?.user?.id && attackerWins) {
+                                setStealLoserPlayerId(loserPlayerId);
+                                setIsStealModalOpen(true);
+                            } else if (currentUser.id === fightDefender?.user?.id && !attackerWins) {
+                                setStealLoserPlayerId(loserPlayerId);
+                                setIsStealModalOpen(true);
+                            }
                         } else {
                             console.log('No se pudo robar una carta para el ganador');
                         }
@@ -1227,7 +1364,9 @@ return (
             }}
     />
 
-            {!isSpectator && (
+            </div>
+            
+
                 <button
                     className="end-match-button"
                     onClick={endMatch}
@@ -1244,48 +1383,60 @@ return (
                 >
                     Finalizar partida
                 </button>
-            )}
 
-        {!isSpectator && (
-            <>
-                <BagModal
-                    isVisible={bagOpen}
-                    hand={handCards}
-                    bag={bagCards}
-                    deck={deck}
-                    player={currentPlayer[0]}
-                    onClose={() => setBagOpen(false)}
-                    onSave={async () =>{
-                        await fetchCards()
-                        setBagOpen(false)
-                    }}
-                />
+        <BagModal
+            isVisible={bagOpen}
+            hand={handCards}
+            bag={bagCards}
+            deck={deck}
+            player={currentPlayer[0]}
+            onClose={() => setBagOpen(false)}
+            onSave={async () =>{
+                await fetchCards()
+                setBagOpen(false)
 
-                <DiscardHandModal
-                    isVisible={discardHandOpen}
-                    hand={handCards}
-                    bag={bagCards}
-                    deck={deck}
-                    player={currentPlayer[0]}
-                    onClose={() => setDiscardHandOpen(false)}
-                    updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
-                    onSave={async () =>{
-                        await fetchCards()
-                        setDiscardHandOpen(false)
-                    }}
-                />
-            </>
-        )}
+            }
+                }
+            />
 
-            {!isSpectator && (
-                <div className="match-chat-icon">
-                    <div className="chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
-                        <FaComments size={30} color="white" />
-                    </div>
+        <DiscardHandModal
+            isVisible={discardHandOpen}
+            hand={handCards}
+            bag={bagCards}
+            deck={deck}
+            player={currentPlayer[0]}
+            onClose={() => setDiscardHandOpen(false)}
+            updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
+            onSave={async () =>{
+                await fetchCards()
+                setDiscardHandOpen(false)
+            }}
+            />
+
+        <StealCardModal
+            isOpen={isStealModalOpen}
+            loserId={stealLoserPlayerId}
+            matchId={matchId}
+            winnerId={currentPlayer[0]?.id}
+            onClose={() => {
+                setIsStealModalOpen(false);
+                setStealLoserPlayerId(null);
+            }}
+            onSteal={async () => {
+                await fetchCards();
+                setIsStealModalOpen(false);
+                setStealLoserPlayerId(null);
+            }}
+        />
+
+      
+            <div className="match-chat-icon">
+                <div className="chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
+                    <FaComments size={30} color="white" />
                 </div>
-            )}
+            </div>
 
-            {!isSpectator && chatOpen && <ChatBox matchId={matchId} />}
+            {chatOpen && <ChatBox matchId={matchId} />}
 
             {/* Mensaje de turno */}
             <div
@@ -1310,7 +1461,8 @@ return (
                 ? "Esperando..."
                 : match.currentTurnUserId === currentUser?.id
                     ? "Tu turno"
-                    : `${match.players?.find(p => p.user.id === match.currentTurnUserId)?.user.username} está en su turno`}
+                    : `${match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username} está en su turno`}
+
             </div>
         </div>
     );

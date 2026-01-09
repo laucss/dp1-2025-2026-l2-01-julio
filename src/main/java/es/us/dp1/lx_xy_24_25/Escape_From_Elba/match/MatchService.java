@@ -333,7 +333,30 @@ public class MatchService {
         // actualimos el valor de los puntos de acción del jugador en la bd 
         playerService.removePlayerActionPoint(matchId, playerId);
 
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
+
         return new DrawCardResultDTO(stolenCard, deck, hand); 
+    }
+
+    /*
+     * Jugador roba una carta de recompensa (sin consumir puntos de acción)
+     */
+    @Transactional
+    public DrawCardResultDTO playerDrawsRewardCard(Integer matchId, Integer playerId){
+        Card stolenCard = deckService.drawCard(matchId);
+        DeckInGame deck = deckService.findDeckById(matchId);
+
+        HandInGame hand = handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
+
+        return new DrawCardResultDTO(stolenCard, deck, hand);
     }
 
     /*
@@ -399,8 +422,15 @@ public class MatchService {
         // quitamos la carta de la mano o bolsa del perdedor y se la añadimos a la mano del ganador
 
         if (fromWhere.equals("hand")){ 
-            handService.removeCardFromPlayerHand(card, matchId, loserId);
-            handService.addCardToPlayerHand(card, matchId, winnerId);
+            // Selección aleatoria de carta de la mano del perdedor
+            HandInGame loserHand = handService.findPlayerHand(matchId, loserId);
+            java.util.List<Card> loserHandCards = loserHand.getCards();
+            if (loserHandCards == null || loserHandCards.isEmpty()) {
+                throw new IllegalStateException("Loser has no cards in hand to steal");
+            }
+            Card randomCard = loserHandCards.get((int) Math.floor(Math.random() * loserHandCards.size()));
+            handService.removeCardFromPlayerHand(randomCard, matchId, loserId);
+            handService.addCardToPlayerHand(randomCard, matchId, winnerId);
 
         } else if (fromWhere.equals("bag")){
             bagService.removeCardFromPlayerBag(card, matchId, loserId);
@@ -408,12 +438,6 @@ public class MatchService {
         
         } else {
             throw new IllegalArgumentException("fromWhere must be 'hand' or 'bag'");
-        }
-
-        // le quitamos todos los puntos de acción al perdedor si es su turno actual
-        if (loserId.equals(currentTurnUserId)){
-            loser.setActionPoints(0);
-            playerService.save(loser);
         }
         
     }
@@ -508,7 +532,38 @@ public class MatchService {
         return match.getWinner();
     }
     
-    
+    @Transactional
+    public ActionPointsUpdateDTO consumeActionPointForUser(Integer matchId, Integer userId) {
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        Integer currentPoints = player.getActionPoints() != null ? player.getActionPoints() : 0;
+        if (currentPoints > 0) {
+            player.setActionPoints(currentPoints - 1);
+            playerRepo.save(player);
+        }
+        return new ActionPointsUpdateDTO(
+            player.getId(),
+            player.getUser().getId(),
+            player.getUser().getUsername(),
+            player.getActionPoints(),
+            System.currentTimeMillis()
+        );
+    }
+
+    @Transactional
+    public ActionPointsUpdateDTO consumeAllActionPointForUser(Integer matchId, Integer userId) {
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        player.setActionPoints(0);
+        playerRepo.save(player);
+        return new ActionPointsUpdateDTO(
+            player.getId(),
+            player.getUser().getId(),
+            player.getUser().getUsername(),
+            player.getActionPoints(),
+            System.currentTimeMillis()
+        );
+    }
 
 
     //Función para mover un jugador de una sala a otra adyacente
