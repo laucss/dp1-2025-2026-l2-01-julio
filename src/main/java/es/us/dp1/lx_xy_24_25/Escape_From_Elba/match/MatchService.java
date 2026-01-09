@@ -333,6 +333,11 @@ public class MatchService {
         // actualimos el valor de los puntos de acción del jugador en la bd 
         playerService.removePlayerActionPoint(matchId, playerId);
 
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
+
         return new DrawCardResultDTO(stolenCard, deck, hand); 
     }
 
@@ -345,6 +350,11 @@ public class MatchService {
         DeckInGame deck = deckService.findDeckById(matchId);
 
         HandInGame hand = handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
 
         return new DrawCardResultDTO(stolenCard, deck, hand);
     }
@@ -409,11 +419,27 @@ public class MatchService {
         Player loser = playerService.findById(loserId); 
         playerService.findById(winnerId);
 
+        System.out.println("🔍 ANTES del robo:");
+        System.out.println("   Winner hand size: " + handService.findPlayerHand(matchId, winnerId).getCards().size());
+        System.out.println("   Loser hand size: " + handService.findPlayerHand(matchId, loserId).getCards().size());
+
         // quitamos la carta de la mano o bolsa del perdedor y se la añadimos a la mano del ganador
 
         if (fromWhere.equals("hand")){ 
-            handService.removeCardFromPlayerHand(card, matchId, loserId);
-            handService.addCardToPlayerHand(card, matchId, winnerId);
+            // Selección aleatoria de carta de la mano del perdedor
+            HandInGame loserHand = handService.findPlayerHand(matchId, loserId);
+            java.util.List<Card> loserHandCards = loserHand.getCards();
+            if (loserHandCards == null || loserHandCards.isEmpty()) {
+                throw new IllegalStateException("Loser has no cards in hand to steal");
+            }
+            Card randomCard = loserHandCards.get((int) Math.floor(Math.random() * loserHandCards.size()));
+            System.out.println("🎲 Carta seleccionada al azar: " + randomCard.getLetter() + " (ID: " + randomCard.getId() + ")");
+            
+            handService.removeCardFromPlayerHand(randomCard, matchId, loserId);
+            System.out.println("❌ Después de removeCardFromPlayerHand - Loser hand size: " + handService.findPlayerHand(matchId, loserId).getCards().size());
+            
+            handService.addCardToPlayerHand(randomCard, matchId, winnerId);
+            System.out.println("✅ Después de addCardToPlayerHand - Winner hand size: " + handService.findPlayerHand(matchId, winnerId).getCards().size());
 
         } else if (fromWhere.equals("bag")){
             bagService.removeCardFromPlayerBag(card, matchId, loserId);
@@ -423,11 +449,9 @@ public class MatchService {
             throw new IllegalArgumentException("fromWhere must be 'hand' or 'bag'");
         }
 
-        // le quitamos todos los puntos de acción al perdedor si es su turno actual
-        if (loserId.equals(currentTurnUserId)){
-            loser.setActionPoints(0);
-            playerService.save(loser);
-        }
+        System.out.println("✨ DESPUÉS del robo:");
+        System.out.println("   Winner hand size: " + handService.findPlayerHand(matchId, winnerId).getCards().size());
+        System.out.println("   Loser hand size: " + handService.findPlayerHand(matchId, loserId).getCards().size());
         
     }
 

@@ -13,6 +13,7 @@ import ChatBox from "./chatBox";
 import { FaComments } from "react-icons/fa";
 import FightModal from "./FightModal";
 import StartDiceModal from "./StartDiceModal";
+import StealCardModal from "./StealCardModal";
 
 
 
@@ -61,6 +62,8 @@ export default function Match(){
     const [fightDefender, setFightDefender] = useState(null);
     const [fightAttacker, setFightAttacker] = useState(null);
     const [pendingTargetRoom, setPendingTargetRoom] = useState(null);
+    const [isStealModalOpen, setIsStealModalOpen] = useState(false);
+    const [stealLoserPlayerId, setStealLoserPlayerId] = useState(null);
     
     // Función para obtener un color único para cada jugador
     const getPlayerColor = (playerId) => {
@@ -169,6 +172,15 @@ export default function Match(){
                     setPendingTargetRoom(fightUpdate.roomName);
                     setIsFightModalOpen(true);
                 }
+            } else if (fightUpdate.action === 'RESOLVE') {
+                const winnerId = fightUpdate.winnerId;
+                const winnerPlayerId = fightUpdate.winnerPlayerId;
+                const loserPlayerId = fightUpdate.loserPlayerId;
+
+                if (currentUser.id === winnerId && winnerPlayerId && loserPlayerId) {
+                    setStealLoserPlayerId(loserPlayerId);
+                    setIsStealModalOpen(true);
+                }
             }
         });
 
@@ -203,6 +215,77 @@ export default function Match(){
         return () => subscription.unsubscribe();
     }, [stompClient, matchId]);
 
+    // Suscripción a actualizaciones de cartas (mano/bolsa) de todos los jugadores
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.cards`, (msg) => {
+            const cardsUpdate = JSON.parse(msg.body);
+            console.log('🔔 Actualización de cartas recibida:', cardsUpdate);
+            console.log('👤 currentPlayer[0]?.id:', currentPlayer[0]?.id);
+            
+            const { winner, loser } = cardsUpdate || {};
+
+            const applyCardsUpdate = (info) => {
+                if (!info || !info.playerId) {
+                    console.log('⚠️ Info inválida:', info);
+                    return;
+                }
+                const hand = Array.isArray(info.hand?.cards) ? info.hand.cards : [];
+                const bag = Array.isArray(info.bag?.cards) ? info.bag.cards : [];
+
+                console.log(`✅ Actualizando cartas para jugador ${info.playerId}`, { 
+                    hand: hand.length, 
+                    bag: bag.length,
+                    isCurrentPlayer: currentPlayer[0]?.id === info.playerId
+                });
+
+                // Si es el jugador actual, actualizamos su mano y bolsa
+                if (currentPlayer[0]?.id === info.playerId) {
+                    console.log('🎯 Actualizando MI mano y bolsa');
+                    console.log('📋 Datos completos de hand:', hand);
+                    console.log('💼 Datos completos de bag:', bag);
+                    console.log('📊 Estado actual handCards antes:', handCards.length, 'cartas');
+                    console.log('📊 Estado actual bagCards antes:', bagCards.length, 'cartas');
+                    
+                    const newHand = hand.map(c => ({...c}));
+                    const newBag = bag.map(c => ({...c}));
+                    
+                    setHandCards(newHand);
+                    setBagCards(newBag);
+                    
+                    setTimeout(() => {
+                        console.log('⏱️ Después de setState - handCards:', newHand.length, 'cartas');
+                    }, 100);
+                } else {
+                    // Si es otro jugador, actualizamos su bolsa en el mapa de bolsas
+                    console.log('👥 Actualizando bolsa de otro jugador');
+                    setOtherPlayersBags(prev => ({
+                        ...prev,
+                        [info.playerId]: bag
+                    }));
+                }
+            };
+
+            // Aplicar actualizaciones para winner, loser, o cualquier jugador
+            if (winner) {
+                console.log('🏆 Procesando winner:', winner.playerId);
+                applyCardsUpdate(winner);
+            }
+            if (loser) {
+                console.log('😢 Procesando loser:', loser.playerId);
+                applyCardsUpdate(loser);
+            }
+            // Si no hay winner/loser, puede haber una actualización directa
+            if (!winner && !loser && cardsUpdate.playerId) {
+                console.log('📦 Procesando actualización directa');
+                applyCardsUpdate(cardsUpdate);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, currentPlayer]);
+
     useEffect(() => {
         if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
 
@@ -220,6 +303,20 @@ export default function Match(){
 
     useEffect(() => {
         if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.hand.${currentPlayer[0].id}`, (msg) => {
+            const handUpdate = JSON.parse(msg.body);
+            if (handUpdate && handUpdate.hand) {
+                const updatedHand = Array.isArray(handUpdate.hand.cards) ? handUpdate.hand.cards : [];
+                setHandCards(updatedHand);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, currentPlayer]);
+
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.strength`, (msg) => {
             const strengthUpdate = JSON.parse(msg.body);
@@ -1195,10 +1292,35 @@ return (
                     }
 
                     const winnerPlayerId = attackerWins ? fightAttacker?.id : fightDefender?.id;
+                    const loserPlayerId = attackerWins ? fightDefender?.id : fightAttacker?.id;
                     if (winnerPlayerId) {
                         const drawSuccess = await drawCardForWinner(winnerPlayerId);
                         if (drawSuccess) {
                             console.log('Ganador robó una carta');
+                            
+                            // Publicar evento de resolución de pelea para que todos lo reciban
+                            await fetch(`/api/v1/matches/${matchId}/notify-fight-resolved`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${jwt}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    matchId: matchId,
+                                    winnerId: winnerUser?.id,
+                                    winnerPlayerId: winnerPlayerId,
+                                    loserPlayerId: loserPlayerId
+                                })
+                            }).catch(e => console.warn('Could not notify fight resolved:', e));
+
+                            // Abrir modal de robo si es el usuario actual el ganador
+                            if (currentUser.id === fightAttacker?.user?.id && attackerWins) {
+                                setStealLoserPlayerId(loserPlayerId);
+                                setIsStealModalOpen(true);
+                            } else if (currentUser.id === fightDefender?.user?.id && !attackerWins) {
+                                setStealLoserPlayerId(loserPlayerId);
+                                setIsStealModalOpen(true);
+                            }
                         } else {
                             console.log('No se pudo robar una carta para el ganador');
                         }
@@ -1261,6 +1383,22 @@ return (
                 setDiscardHandOpen(false)
             }}
             />
+
+        <StealCardModal
+            isOpen={isStealModalOpen}
+            loserId={stealLoserPlayerId}
+            matchId={matchId}
+            winnerId={currentPlayer[0]?.id}
+            onClose={() => {
+                setIsStealModalOpen(false);
+                setStealLoserPlayerId(null);
+            }}
+            onSteal={async () => {
+                await fetchCards();
+                setIsStealModalOpen(false);
+                setStealLoserPlayerId(null);
+            }}
+        />
 
       
             <div className="match-chat-icon">

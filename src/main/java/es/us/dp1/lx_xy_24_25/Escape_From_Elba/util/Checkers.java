@@ -55,9 +55,13 @@ public class Checkers {
 
     // CARTAS 
     public void checkCardExists(Card card) {
+        if (card == null || card.getId() == null) {
+            throw new IllegalArgumentException("Card id must not be null");
+        }
         Optional<Card> givenCard = cardRepository.findById(card.getId()); 
-        if (givenCard == null)
+        if (givenCard.isEmpty()) {
             throw new ResourceNotFoundException("This card does not exist or is not found");
+        }
     }
      
 
