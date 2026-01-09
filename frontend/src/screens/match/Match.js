@@ -72,6 +72,13 @@ export default function Match(){
         const playerIndex = allPlayers.findIndex(p => p.id === playerId);
         return colors[playerIndex % colors.length];
     };
+
+    // Agrupa los corredores duplicados (9/10 y 27/28) para tratarlos como la misma habitación
+    const normalizeRoomId = (roomId) => {
+        if (roomId === 10) return 9;
+        if (roomId === 28) return 27;
+        return roomId;
+    };
     
     // const posiciones de las habitaciones en el mapa 
     const roomPositions = {
@@ -586,11 +593,11 @@ export default function Match(){
 
                 const isSafeArea = roomId === 37;
                 
-                const otherPlayer = match?.players?.find(p => p.user?.id !== currentUser?.id && (
-                    (p.currentRoom && p.currentRoom.id === roomId) ||
-                    (p.roomId && p.roomId === roomId) ||
-                    (p.room && p.room.id === roomId)
-                ));
+                const targetRoomNormalized = normalizeRoomId(roomId);
+                const otherPlayer = match?.players?.find(p => {
+                    const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
+                    return p.user?.id !== currentUser?.id && normalizeRoomId(playerRoomId) === targetRoomNormalized;
+                });
 
                 if (otherPlayer && !isSafeArea) {
                     setPendingTargetRoom(roomId);
@@ -1230,16 +1237,19 @@ return (
                         21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
                     ];
                     const winnerPlayer = match?.players?.find(p => p.user?.id === (winnerUser?.id || winnerUser?.user?.id));
-                    const winnerRoomId = winnerPlayer?.currentRoom?.id || winnerPlayer?.roomId || null;
+                    const winnerRoomIdRaw = winnerPlayer?.currentRoom?.id || winnerPlayer?.roomId || null;
+                    const winnerRoomId = normalizeRoomId(winnerRoomIdRaw);
 
                     const occupiedRoomIds = new Set();
                     (match?.players || []).forEach(p => {
                         const rid = p.currentRoom?.id || p.roomId || p.room?.id;
-                        if (rid) occupiedRoomIds.add(rid);
+                        const normalized = normalizeRoomId(rid);
+                        if (normalized) occupiedRoomIds.add(normalized);
                     });
                     (match?.npcs || []).forEach(npc => {
                         const rid = npc.room?.id;
-                        if (rid) occupiedRoomIds.add(rid);
+                        const normalized = normalizeRoomId(rid);
+                        if (normalized) occupiedRoomIds.add(normalized);
                     });
 
                     const candidates = allRoomIds.filter(r => r !== winnerRoomId && !occupiedRoomIds.has(r));

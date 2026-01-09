@@ -58,7 +58,9 @@ export default function StealCardModal({
 
   const stealCard = async (card, sourceToUse) => {
     try {
-      const cardIdToSend = sourceToUse === 'hand' ? null : (card?.id || null);
+      const cardIdToSend = sourceToUse === 'hand'
+        ? null
+        : (typeof card === 'object' ? card?.id : card);
       console.log('📤 Enviando al backend:', { cardId: cardIdToSend, fromWhere: sourceToUse });
       const res = await fetch(`/api/v1/matches/${matchId}/${winnerId}/steal-card-from/${loserId}`, {
         method: 'POST',
@@ -140,7 +142,7 @@ export default function StealCardModal({
                 <div 
                   key={idx} 
                   style={{ cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1 }} 
-                  onClick={() => !loading && handleSelectCard(card.id)}
+                  onClick={() => !loading && handleSelectCard(card)}
                 >
                   <img
                     src={source === 'bag' ? `/resources${card.frontImage}` : '/backCard.png'}
