@@ -99,3 +99,22 @@
   background-color: #3b24a1;
   transform: scale(1.05);
 }
+/* Estilos para el modal de partida llena */
+.modal-content {
+  background-color: rgba(15, 35, 95, 0.95);
+  border-radius: 15px;
+  border: 2px solid rgba(255, 200, 0, 0.3);
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(255, 200, 0, 0.2);
+}
+
+.modal-body {
+  color: #fff;
+  font-size: 16px;
+}
+
+.modal.fade.show {
+  background-color: rgba(0, 0, 0, 0.7);
+}

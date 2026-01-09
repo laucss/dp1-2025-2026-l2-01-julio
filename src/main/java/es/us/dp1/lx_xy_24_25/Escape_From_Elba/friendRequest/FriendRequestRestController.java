@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth.payload.response.MessageResponse;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,11 +33,13 @@ public class FriendRequestRestController {
 
     FriendRequestService friendRequestService;
     UserService userService;
+    PlayerService playerService;
 
     @Autowired
-    public FriendRequestRestController(FriendRequestService friendRequestService, UserService userService) {
+    public FriendRequestRestController(FriendRequestService friendRequestService, UserService userService, PlayerService playerService) {
         this.friendRequestService = friendRequestService;
         this.userService = userService;
+        this.playerService = playerService;
     }
 
     @GetMapping("{userId}")
@@ -45,7 +48,7 @@ public class FriendRequestRestController {
         // Usar el método que devuelve las solicitudes aceptadas (amigos)
         List<MiniRequestDTO> friends = friendRequestService.findAcceptedFriendRequestsByUserId(userId)
         .stream()
-        .map(fr -> new MiniRequestDTO(fr))
+        .map(fr -> new MiniRequestDTO(fr, playerService))
         .toList();
         return new ResponseEntity<>(friends, HttpStatus.OK);
     }
@@ -54,7 +57,7 @@ public class FriendRequestRestController {
     @Operation(summary = "Get pending requests by user id", description = "Get all pending friend requests of a user by user id.")
     public ResponseEntity<List<MiniRequestDTO>> getPendingRequestsByUserId(@PathVariable("userId") Integer userId) {
         List<MiniRequestDTO> pendingRequests = friendRequestService.findFriendRequestsByUserId(userId).stream()
-                .map(r -> new MiniRequestDTO(r)).toList();
+                .map(r -> new MiniRequestDTO(r, playerService)).toList();
         return new ResponseEntity<>(pendingRequests, HttpStatus.OK);
     }
 
@@ -62,7 +65,7 @@ public class FriendRequestRestController {
     @Operation(summary = "Get received requests by user id", description = "Get all received friend requests of a user by user id.")
     public ResponseEntity<List<MiniRequestDTO>> getPendingRequestsForUserId(@PathVariable("userId") Integer userId) {
         List<MiniRequestDTO> pendingRequests = friendRequestService.findFriendRequestsForUserId(userId).stream()
-                .map(r -> new MiniRequestDTO(r)).toList();
+                .map(r -> new MiniRequestDTO(r, playerService)).toList();
         return new ResponseEntity<>(pendingRequests, HttpStatus.OK);
     }
 
@@ -74,7 +77,7 @@ public class FriendRequestRestController {
             log.error("User cannot send friend request to himself: senderId={}, receiverId={}", senderId, receiverId);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        MiniRequestDTO newRequest = new MiniRequestDTO(friendRequestService.sendRequest(senderId, receiverId));
+        MiniRequestDTO newRequest = new MiniRequestDTO(friendRequestService.sendRequest(senderId, receiverId), playerService);
         return new ResponseEntity<>(newRequest, HttpStatus.OK);
     }
 
@@ -89,7 +92,7 @@ public class FriendRequestRestController {
             
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        MiniRequestDTO acceptedRequest = new MiniRequestDTO(friendRequestService.acceptRequest(friendRequestToAccept));
+        MiniRequestDTO acceptedRequest = new MiniRequestDTO(friendRequestService.acceptRequest(friendRequestToAccept), playerService);
         return new ResponseEntity<>(acceptedRequest, HttpStatus.OK);
     }
 
@@ -104,7 +107,7 @@ public class FriendRequestRestController {
             
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        MiniRequestDTO rejectedRequest = new MiniRequestDTO(friendRequestService.rejectRequest(friendRequestToReject));
+        MiniRequestDTO rejectedRequest = new MiniRequestDTO(friendRequestService.rejectRequest(friendRequestToReject), playerService);
         return new ResponseEntity<>(rejectedRequest, HttpStatus.OK);
     }
 
