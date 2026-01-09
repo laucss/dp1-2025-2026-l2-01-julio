@@ -50,6 +50,9 @@ export default function Match(){
     const [strength, setStrength] = useState(1)
     const [moveToAdyacentRoom, setMoveToAdyacentRoom] = useState(false)
     const [isEndingTurn, setIsEndingTurn] = useState(false)
+    const [moveNpcMode, setMoveNpcMode] = useState(false)
+    const [selectedNpcId, setSelectedNpcId] = useState(null)
+    const [selectedNpcIndex, setSelectedNpcIndex] = useState(null)
 
     
     // const [playerTurnId, setPlayerTurnId] = useState(null)
@@ -476,6 +479,58 @@ export default function Match(){
 
 
     const move = async (roomId) => {
+        // If we're in NPC-move mode, interpret clicks as target rooms for the selected NPC
+        if (moveNpcMode) {
+            if (selectedNpcIndex === null) {
+                alert('Selecciona primero un NPC en el mapa');
+                return;
+            }
+
+            const npc = match?.npcs?.[selectedNpcIndex];
+            const npcIdToSend = npc?.id ?? null;
+            if (!npcIdToSend) {
+                alert('No se puede mover: el NPC no tiene identificador. Reinicia el servidor backend.');
+                setSelectedNpcIndex(null);
+                setSelectedNpcId(null);
+                setMoveNpcMode(false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/matches/${matchId}/moveNpc`, {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userId: currentUser.id, roomId: roomId, npcId: npcIdToSend })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setMatch(data);
+                    if (data.players) setPlayer(data.players);
+                    setSelectedNpcIndex(null);
+                    setSelectedNpcId(null);
+                    setMoveNpcMode(false);
+                } else {
+                    const text = await response.text();
+                    console.error('Error moving NPC:', response.status, text);
+                    setSelectedNpcIndex(null);
+                    setSelectedNpcId(null);
+                    setMoveNpcMode(false);
+                }
+            } catch (err) {
+                console.error('Error moving NPC:', err);
+                setSelectedNpcIndex(null);
+                setSelectedNpcId(null);
+                setMoveNpcMode(false);
+            }
+            return;
+        }
+
+        // Player move flow
         //console.log('roomId destino', roomId)
         //console.log('actual roomID', currentPlayer?.[0]?.currentRoom?.id || currentPlayer?.[0]?.roomId || currentPlayer?.[0]?.room?.id)
         if (moveToAdyacentRoom===false) return ;
@@ -682,7 +737,7 @@ export default function Match(){
                 console.error('Error advancing to next turn:', response.status, text);
             }
 
-            // Refresh match state after advancing turn
+            // Actualizar el estado del match después de cambiar de turno
             await fetchMatchAndPlayers();
         } catch (err) {
             console.error('Error calling next-turn:', err);
@@ -783,13 +838,13 @@ return (
             </div>
 
             <StartDiceModal 
-                isOpen={!isSpectator && match?.currentTurnPhase === null && isDiceModalOpen}
+                isOpen={!isSpectator && isDiceModalOpen && (match?.turnNumber === 0 || match?.currentTurnPhase === null)}
                 onClose={() => setIsDiceModalOpen(false)}
                 onDiceRolled={handleDiceRolled}
                 matchData={match}
             />
             
-            <div className="match-board">
+            <div className="match-board" style={{ position: 'relative' }}>
                 <div className="deck-column">
                     <div className="deck-section">
                         <button 
@@ -911,13 +966,21 @@ return (
                     
                     {/* Fichas de NPCs sobre el mapa */}
                     {match?.npcs?.map((npc, index) => {
-                        if (!npc.room) return null;                        
+                        if (!npc.room) return null;
                         const position = roomPositions[npc.room.id];
                         if (!position) return null;
+                        const isSelectable = moveNpcMode && !isSpectator && match?.currentTurnUserId === currentUser?.id;
+                        const isSelected = selectedNpcIndex === index || (selectedNpcId != null && selectedNpcId === npc.id);
                         return (
                             <div
                                 key={`npc-${index}`}
                                 title={npc.name || `NPC ${index+1}`}
+                                onClick={(e) => {
+                                    if (!isSelectable) return;
+                                    e.stopPropagation();
+                                    setSelectedNpcIndex(index);
+                                    setSelectedNpcId(npc.id ?? null);
+                                }}
                                 style={{
                                     position: 'absolute',
                                     left: position.left,
@@ -927,16 +990,17 @@ return (
                                     height: '25px',
                                     borderRadius: '50%',
                                     backgroundColor: npc.isNiallCampbell ? '#ff0000' : '#666',
-                                    border: '2px solid white',
+                                    border: isSelected ? '3px solid yellow' : '2px solid white',
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                                    zIndex: 10,
-                                    pointerEvents: 'none',
+                                    zIndex: 20,
+                                    pointerEvents: isSelectable ? 'auto' : 'none',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     color: 'white',
                                     fontSize: '10px',
-                                    fontWeight: 'bold'
+                                    fontWeight: 'bold',
+                                    cursor: isSelectable ? 'pointer' : 'default'
                                 }}
                             >
                                 {npc.isNiallCampbell ? 'N' : 'X'}
@@ -945,6 +1009,16 @@ return (
                     })}
                 </div>
             </div>
+
+            {/*Mensaje de movimiento de los NPC*/}
+            {moveNpcMode && !isSpectator && match?.currentTurnUserId === currentUser?.id && (
+                <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '50px', zIndex: 30 }}>
+                    <div style={{ padding: '14px 22px', background: '#d200005e', color: '#fff', borderRadius: '10px', fontWeight: '700', fontSize: '20px', minWidth: '280px', textAlign: 'center', transform: 'translateX(70px)' }}>
+                        {selectedNpcIndex === null ? 'Select the NPC you want to move' : 'Select the room'}
+                    </div>
+                </div>
+            )}
+
             <div className="points-section">
                 <div className="action-points">
                     <h1>{actionPoints}</h1>
@@ -1088,7 +1162,7 @@ return (
                         title="Discard cards from hand"
                         onClick={() => setIsActionsModalOpen(true) }
                         disabled={
-                        match.currentTurnUserId !== currentUser.id }
+                        match.currentTurnUserId !== currentUser.id || actionPoints === 0 }
                         style={{ marginLeft: "15px" }}
                     >
                         Actions
@@ -1098,6 +1172,7 @@ return (
                         isOpen={isActionsModalOpen}
                         onClose={() => setIsActionsModalOpen(false)}
                         moveToAdyacent={() => setMoveToAdyacentRoom(true) }
+                        onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
                     />
                 </div>
             )}
