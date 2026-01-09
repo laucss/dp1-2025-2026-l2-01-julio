@@ -8,9 +8,11 @@
 
 }
 .points-section{
-    flex-direction: row;
+    flex-direction: column;
     display: flex;
-
+    gap: 15px;
+    align-items: center;
+    width: auto;
 }
 .action-points{
     background-color: rgb(251, 251, 251);
@@ -19,12 +21,14 @@
     border-radius: 10px;
     width: 150px;
     height: 120px;
-    margin-bottom: 10px;
-    margin-left: 10px;
+    margin-bottom: 0;
+    margin-left: 0;
     align-content: center;
     text-align: center;
     align-items: center;
-
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .players-avatars-section {
@@ -56,9 +60,9 @@
     background-color: rgb(253, 70, 70);
     margin-bottom: 15px;
     flex-wrap: wrap;
-    width: 48%;
+    width: 35%;
     border-radius: 10px;
-    min-height: 170px;
+    min-height: 100px;
 }
 
 .player-bag{
@@ -69,9 +73,9 @@
     background-color: rgb(246, 135, 135);
     margin-bottom: 15px;
     flex-wrap: wrap;
-    width: 48%;
+    width: 35%;
     border-radius: 10px;
-    min-height: 170px;
+    min-height: 100px;
 
 }
 
@@ -89,9 +93,61 @@
     gap: 8px;
 }
 
+.player-info-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+}
+
+.player-bag-display {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    padding: 8px;
+    background-color: rgba(200, 150, 100, 0.1);
+    border-radius: 8px;
+    max-width: 120px;
+}
+
+.bag-label {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+}
+
+.bag-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+}
+
+.player-bag-card {
+    width: 35px;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.empty-bag {
+    margin: 0;
+    font-size: 11px;
+    color: #999;
+    font-style: italic;
+}
+
 .player-avatar-img {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #007bff;

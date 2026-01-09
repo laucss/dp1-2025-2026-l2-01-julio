@@ -1,5 +1,5 @@
 import React, { Profiler, useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
 import AppNavbar from "./AppNavbar";
@@ -49,6 +49,7 @@ function App() {
   //const [chatIsShown, setChatIsShown] = useState(false);
 
   const jwt = tokenService.getLocalAccessToken();
+  const location = useLocation();
 
   // Marcar usuario como ONLINE al cargar la app y OFFLINE al cerrar
   useEffect(() => {
@@ -134,7 +135,7 @@ function App() {
     <div>
       <ErrorBoundary FallbackComponent={ErrorFallback} >
         {/*Poner cosas del chat*/}
-            <AppNavbar />
+            {!location.pathname.match(/^\/match\/\d+$/) && <AppNavbar />}
             <Routes>
               <Route path="/" exact={true} element={<Home />} />
               <Route path="/plans" element={<PlanList />} />
