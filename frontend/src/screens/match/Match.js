@@ -49,7 +49,7 @@ export default function Match(){
     const [actionPoints, setActionPoints] = useState(0)
     const [strength, setStrength] = useState(1)
     const [moveToAdyacentRoom, setMoveToAdyacentRoom] = useState(false)
-
+    const [isEndingTurn, setIsEndingTurn] = useState(false)
     
     // const [playerTurnId, setPlayerTurnId] = useState(null)
 
@@ -747,7 +747,31 @@ export default function Match(){
         .catch(err => console.error(err))
     }
 
-    
+    const handleEndTurn = async () => {
+        if (isEndingTurn) return;
+        setIsEndingTurn(true);
+        try {
+            const response = await fetch(`/api/v1/matches/${matchId}/next-turn`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('Error advancing to next turn:', response.status, text);
+            }
+
+            // Refresh match state after advancing turn
+            await fetchMatchAndPlayers();
+        } catch (err) {
+            console.error('Error calling next-turn:', err);
+        } finally {
+            setIsEndingTurn(false);
+        }
+    };
 
     const currentPlayerTurn = match?.players.find(p => p.user.id === match.currentTurnUserId);
 
@@ -1022,6 +1046,34 @@ return (
                     </div>
                 </div>
             </div>
+
+            {match?.currentTurnUserId === currentUser?.id && (
+                <button
+                    className="end-your-turn-button"
+                    onClick={handleEndTurn}
+                    style={{
+                            marginLeft: "050px",
+                            position: "absolute",
+                            left: "87%",                 
+                            transform: "translateX(-50%)",
+                            marginTop: "-80px",
+                            padding: "15px 35px", 
+                            fontSize: "22px",
+                            background: "#c0392b",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "8px",
+                            maxWidth: "500px",
+                            minWidth: "230px",
+                            cursor: "pointer"
+                    }}
+                    disabled={isEndingTurn}
+                >
+                End your turn
+                </button>
+            )}
+
+
             
 
             {/* TABLA DE JUGADORES Y NPCS 
