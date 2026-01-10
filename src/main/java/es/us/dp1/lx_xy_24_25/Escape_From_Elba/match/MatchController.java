@@ -36,6 +36,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.FightResolvedDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
@@ -451,6 +452,71 @@ public class MatchController {
             @RequestBody FightResolvedDTO fightResolved) {
         matchWebsocketController.notifyFightResolved(matchId, fightResolved);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{matchId}/player-strength")
+    @Operation(summary = "Update player strength", description = "Updates the strength of a player and notifies all players.")
+    public ResponseEntity<MatchDTO> updatePlayerStrength(@PathVariable Integer matchId, @RequestBody Map<String, Integer> data) {
+        Integer userId = data.get("userId");
+        Integer newStrength = data.get("strength");
+        
+        Player player = playerService.findByMatchIdAndUserId(matchId, userId)
+            .orElseThrow(() -> new RuntimeException("Player no encontrado"));
+        player.setStrength(newStrength);
+        playerService.save(player);
+        
+        Match match = ms.getMatchById(matchId);
+        
+        StrengthUpdateDTO strengthUpdate = new StrengthUpdateDTO(
+            player.getId(),
+            player.getUser().getId(),
+            player.getUser().getUsername(),
+            player.getStrength(),
+            System.currentTimeMillis()
+        );
+        matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);
+        
+        return ResponseEntity.ok(new MatchDTO(match));
+    }
+
+    @PutMapping("/{matchId}/npc-strength")
+    @Operation(summary = "Update NPC strength", description = "Updates the strength of an NPC and notifies all players.")
+    public ResponseEntity<MatchDTO> updateNpcStrength(@PathVariable Integer matchId, @RequestBody Map<String, Integer> data) {
+        Integer npcId = data.get("npcId");
+        Integer newStrength = data.get("strength");
+        
+        Match match = ms.getMatchById(matchId);
+        Npc npc = match.getNpcs().stream()
+            .filter(n -> n.getId().equals(npcId))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("NPC no encontrado"));
+        
+        npc.setStrength(newStrength);
+        ms.save(match);
+        
+        return ResponseEntity.ok(new MatchDTO(match));
+    }
+
+    @PutMapping("/{matchId}/moveNpc")
+    @Operation(summary = "Move NPC to a room", description = "Moves an NPC to a specified room.")
+    public ResponseEntity<MatchDTO> moveNpc(@PathVariable Integer matchId, @RequestBody Map<String, Integer> data) {
+        Integer npcId = data.get("npcId");
+        Integer roomId = data.get("roomId");
+        
+        Match match = ms.getMatchById(matchId);
+        Npc npc = match.getNpcs().stream()
+            .filter(n -> n.getId().equals(npcId))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("NPC no encontrado"));
+        
+        npc.setRoom(roomService.findById(roomId));
+        ms.save(match);
+        
+        // Notify all clients about NPC location update
+        NpcLocationUpdateDTO locationUpdate = new NpcLocationUpdateDTO(npc);
+        matchWebsocketController.notifyNpcLocationUpdate(matchId, locationUpdate);
+        
+        return ResponseEntity.ok(new MatchDTO(match));
     }
 
 }

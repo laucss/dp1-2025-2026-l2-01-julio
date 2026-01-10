@@ -170,8 +170,11 @@ export default function Match(){
                 // Identificar al atacante (quien inicia la batalla)
                 const attacker = match?.players?.find(p => p.user.id === fightUpdate.attackerId);
                 
-                // Identificar al defensor (quien está en la habitación)
-                const defender = match?.players?.find(p => p.user.id === fightUpdate.defenderId);
+                // Identificar al defensor (puede ser jugador o NPC)
+                let defender = match?.players?.find(p => p.user.id === fightUpdate.defenderId);
+                if (!defender && fightUpdate.isBot) {
+                    defender = match?.npcs?.find(n => n.id === fightUpdate.defenderId);
+                }
                 
                 if (attacker && defender) {
                     setFightAttacker(attacker);
@@ -214,6 +217,34 @@ export default function Match(){
                             };
                         }
                         return p;
+                    })
+                };
+            });
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
+
+    // Suscripción a actualizaciones de ubicación de NPCs
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.npc.location`, (msg) => {
+            const locationUpdate = JSON.parse(msg.body);
+            
+            setMatch(prevMatch => {
+                if (!prevMatch || !prevMatch.npcs) return prevMatch;
+                
+                return {
+                    ...prevMatch,
+                    npcs: prevMatch.npcs.map(npc => {
+                        if (npc.id === locationUpdate.npcId) {
+                            return {
+                                ...npc,
+                                room: locationUpdate.newRoom
+                            };
+                        }
+                        return npc;
                     })
                 };
             });
@@ -619,6 +650,45 @@ export default function Match(){
                             defenderUsername: otherPlayer.user.username,
                             roomId: roomId,
                             action: 'START'
+                        })
+                    });
+                    
+                    return;
+                }
+
+                // Detectar NPCs en la habitación de destino
+                console.log('Buscando NPCs. match?.npcs:', match?.npcs);
+                console.log('targetRoomNormalized:', targetRoomNormalized);
+                const botInRoom = match?.npcs?.find(npc => {
+                    const npcRoomId = npc.room?.id;
+                    console.log('NPC:', npc, 'npcRoomId:', npcRoomId, 'normalizado:', normalizeRoomId(npcRoomId));
+                    return npcRoomId && normalizeRoomId(npcRoomId) === targetRoomNormalized;
+                });
+
+                console.log('botInRoom encontrado:', botInRoom);
+                if (botInRoom && !isSafeArea) {
+                    const currentPlayerData = currentPlayer?.[0];
+                    setPendingTargetRoom(roomId);
+                    setFightDefender(botInRoom);
+                    setFightAttacker(currentPlayerData);
+                    setIsFightModalOpen(true);
+                    setMoveToAdyacentRoom(false);
+                    
+                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${jwt}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            matchId: matchId,
+                            attackerId: currentUser.id,
+                            attackerUsername: currentUser.username,
+                            defenderId: botInRoom.id,
+                            defenderUsername: `Bot ${botInRoom.id}`,
+                            roomId: roomId,
+                            action: 'START',
+                            isBot: true
                         })
                     });
                     
@@ -1221,8 +1291,141 @@ return (
 
                     // currentUserWon aquí representa si el atacante ganó (porque solo el atacante ejecuta esto)
                     const attackerWins = currentUserWon;
+                    
+                    // Obtener el perdedor (puede ser jugador o NPC)
+                    const isDefenderNPC = !fightDefender?.user;
                     const loserUser = attackerWins ? fightDefender?.user : fightAttacker?.user;
-                    const winnerUser = attackerWins ? fightAttacker?.user : fightDefender?.user;
+                    const loser = attackerWins ? fightDefender : fightAttacker;
+                    const winnerUser = attackerWins ? fightAttacker?.user : (fightDefender?.user || fightDefender);
+
+                    // Si el defensor es un NPC
+                    if (isDefenderNPC) {
+                        try {
+                            if (attackerWins) {
+                                // El jugador ganó contra el bot: ganar una carta, mover a la habitación del bot y enviar el bot a una aleatoria
+                                console.log('Player won against NPC. Drawing a reward card...');
+                                await drawCardForWinner(currentPlayer?.[0]?.id);
+                                
+                                // Mover al jugador ganador a la habitación donde estaba el bot
+                                if (defenderRoomId) {
+                                    console.log('Moving winner to defender room:', defenderRoomId);
+                                    await movePlayerToRoom(fightAttacker?.user?.id, defenderRoomId);
+                                }
+                                
+                                // Enviar al bot perdedor a una habitación aleatoria
+                                const allRoomIds = [
+                                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                                    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
+                                ];
+                                
+                                const occupiedRoomIds = new Set();
+                                (match?.players || []).forEach(p => {
+                                    const rid = p.currentRoom?.id || p.roomId || p.room?.id;
+                                    const normalized = normalizeRoomId(rid);
+                                    if (normalized) occupiedRoomIds.add(normalized);
+                                });
+                                (match?.npcs || []).forEach(npc => {
+                                    const rid = npc.room?.id;
+                                    const normalized = normalizeRoomId(rid);
+                                    if (normalized) occupiedRoomIds.add(normalized);
+                                });
+                                
+                                const candidates = allRoomIds.filter(r => !occupiedRoomIds.has(r) && r !== normalizeRoomId(defenderRoomId));
+                                let botRandomRoomId = null;
+                                if (candidates.length > 0) {
+                                    botRandomRoomId = candidates[Math.floor(Math.random() * candidates.length)];
+                                } else {
+                                    const fallback = allRoomIds.filter(r => r !== normalizeRoomId(defenderRoomId));
+                                    botRandomRoomId = fallback[Math.floor(Math.random() * fallback.length)];
+                                }
+                                
+                                console.log('Moving NPC loser to random room:', botRandomRoomId);
+                                await fetch(`/api/v1/matches/${matchId}/moveNpc`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Authorization': `Bearer ${jwt}`,
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        npcId: fightDefender.id,
+                                        roomId: botRandomRoomId
+                                    })
+                                });
+                                
+                                // Actualizar el estado del match después de mover al NPC
+                                await fetchMatchAndPlayers();
+                                
+                                // Incrementar fuerza del bot perdedor
+                                await fetch(`/api/v1/matches/${matchId}/npc-strength`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Authorization': `Bearer ${jwt}`,
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        npcId: fightDefender.id,
+                                        strength: (fightDefender?.strength || 1) + 1
+                                    })
+                                });
+                            } else {
+                                // El jugador perdió contra el bot: mover solo al jugador a habitación aleatoria e incrementar fuerza del jugador
+                                console.log('Player lost against NPC. Moving player to random room and increasing player strength...');
+                                
+                                const allRoomIds = [
+                                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                                    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
+                                ];
+                                
+                                const playerRoomId = normalizeRoomId(currentPlayer?.[0]?.currentRoom?.id);
+                                
+                                const occupiedRoomIds = new Set();
+                                (match?.players || []).forEach(p => {
+                                    const rid = p.currentRoom?.id || p.roomId || p.room?.id;
+                                    const normalized = normalizeRoomId(rid);
+                                    if (normalized) occupiedRoomIds.add(normalized);
+                                });
+                                (match?.npcs || []).forEach(npc => {
+                                    const rid = npc.room?.id;
+                                    const normalized = normalizeRoomId(rid);
+                                    if (normalized) occupiedRoomIds.add(normalized);
+                                });
+                                
+                                // Mover al jugador perdedor a una sala aleatoria
+                                const candidatesPlayer = allRoomIds.filter(r => !occupiedRoomIds.has(r) && r !== playerRoomId);
+                                let randomRoomIdPlayer = null;
+                                if (candidatesPlayer.length > 0) {
+                                    randomRoomIdPlayer = candidatesPlayer[Math.floor(Math.random() * candidatesPlayer.length)];
+                                } else {
+                                    const fallback = allRoomIds.filter(r => r !== playerRoomId);
+                                    randomRoomIdPlayer = fallback[Math.floor(Math.random() * fallback.length)];
+                                }
+                                
+                                console.log('Moving player loser to random room:', randomRoomIdPlayer);
+                                await moveLoserToRandomRoom(currentUser.id, randomRoomIdPlayer);
+                                
+                                // Incrementar fuerza del jugador perdedor
+                                await fetch(`/api/v1/matches/${matchId}/player-strength`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Authorization': `Bearer ${jwt}`,
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        userId: currentUser.id,
+                                        strength: (currentPlayer?.[0]?.strength || 1) + 1
+                                    })
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error handling NPC fight result:', error);
+                        }
+                        
+                        setIsFightModalOpen(false);
+                        setFightDefender(null);
+                        setFightAttacker(null);
+                        setPendingTargetRoom(null);
+                        return;
+                    }
 
                     // Si no hay perdedor identificado, no mover
                     if (!loserUser) {
