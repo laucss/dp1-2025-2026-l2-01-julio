@@ -60,7 +60,11 @@ public class HandService {
 
     @Transactional(readOnly = true)
     public HandInGame findPlayerHand(Integer matchId, Integer playerId){
-        Map<Integer, HandInGame> playerMap = activesHands.get(matchId); 
+        Map<Integer, HandInGame> playerMap = activesHands.get(matchId);
+        if (playerMap == null) {
+            throw new ResourceNotFoundException("No player hands found for match " + matchId);
+        }
+        
         HandInGame playerHand = playerMap.get(playerId); 
 
         if (playerHand == null) {
@@ -108,19 +112,51 @@ public class HandService {
 
     @Transactional
     public Card removeCardFromPlayerHand(Card card, Integer matchId, Integer playerId){
-        checkers.checkCardExists(card);
+        if (card == null) {
+            return null;
+        }
         
         HandInGame playerHand = findPlayerHand(matchId, playerId); 
         List<Card> playerCards = playerHand.getCards(); 
         Card removedCard = null; 
         
-        for (int i=0; i<playerCards.size(); i++){
-            if (playerCards.get(i).equals(card)){
+        // Buscar por referencia exacta primero (más confiable para objetos en memoria)
+        for (int i = 0; i < playerCards.size(); i++){
+            if (playerCards.get(i) == card) {
                 removedCard = playerCards.get(i); 
-                playerCards.remove(i); 
+                playerCards.remove(i);
                 break; 
             }
         }
+        
+        // Si no se encontró por referencia, buscar por ID o letra
+        if (removedCard == null) {
+            for (int i = 0; i < playerCards.size(); i++){
+                Card c = playerCards.get(i);
+                boolean match = false;
+                
+                // Comparar por ID si ambos tienen ID
+                if (card.getId() != null && c.getId() != null && card.getId().equals(c.getId())) {
+                    match = true;
+                }
+                // Si no hay ID, comparar por letra
+                else if (card.getLetter() != null && card.getLetter().equals(c.getLetter())) {
+                    match = true;
+                }
+                
+                if (match) {
+                    removedCard = playerCards.get(i); 
+                    playerCards.remove(i);
+                    break; 
+                }
+            }
+        }
+        
+        // Persist the updated hand back to the map
+        activesHands
+            .computeIfAbsent(matchId, m -> new HashMap<>())
+            .put(playerId, playerHand);
+        
         return removedCard; 
 
     }

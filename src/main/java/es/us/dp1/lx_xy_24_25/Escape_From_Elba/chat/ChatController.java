@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/match/{matchId}/chat")
 public class ChatController {
@@ -31,7 +33,7 @@ public class ChatController {
 
     //Crear un nuevo mensaje
     @PostMapping
-    public ResponseEntity<ChatMessageDTO> createMessage(@PathVariable("matchId") Integer matchId, @RequestBody ChatMessageDTO dto) {
+    public ResponseEntity<ChatMessageDTO> createMessage(@PathVariable("matchId") Integer matchId, @Valid @RequestBody ChatMessageDTO dto) {
         ChatMessage created = chatService.createChatMessage(matchId, dto);
         return ResponseEntity.ok(new ChatMessageDTO(created));
     }

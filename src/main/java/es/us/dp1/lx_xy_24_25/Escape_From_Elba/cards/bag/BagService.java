@@ -96,19 +96,46 @@ public class BagService {
 
     @Transactional 
     public Card removeCardFromPlayerBag(Card card, Integer matchId, Integer playerId){
-        checkers.checkCardExists(card);
+        if (card == null) {
+            return null;
+        }
         
         BagInGame playerBag = findPlayerBag(matchId, playerId); 
         List<Card> playerCards = playerBag.getCards(); 
         Card removedCard = null; 
         
-        for (int i=0; i<playerCards.size(); i++){
-            if (playerCards.get(i).equals(card)){
+        // Buscar por referencia exacta primero (más confiable para objetos en memoria)
+        for (int i = 0; i < playerCards.size(); i++){
+            if (playerCards.get(i) == card) {
                 removedCard = playerCards.get(i); 
-                playerCards.remove(i); 
+                playerCards.remove(i);
                 break; 
             }
         }
+        
+        // Si no se encontró por referencia, buscar por ID o letra
+        if (removedCard == null) {
+            for (int i = 0; i < playerCards.size(); i++){
+                Card c = playerCards.get(i);
+                boolean match = false;
+                
+                // Comparar por ID si ambos tienen ID
+                if (card.getId() != null && c.getId() != null && card.getId().equals(c.getId())) {
+                    match = true;
+                }
+                // Si no hay ID, comparar por letra
+                else if (card.getLetter() != null && card.getLetter().equals(c.getLetter())) {
+                    match = true;
+                }
+                
+                if (match) {
+                    removedCard = playerCards.get(i); 
+                    playerCards.remove(i);
+                    break; 
+                }
+            }
+        }
+        
         return removedCard; 
 
     }

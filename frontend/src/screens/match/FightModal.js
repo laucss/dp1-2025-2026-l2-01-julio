@@ -22,20 +22,26 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     const [totalAttacker, setTotalAttacker] = useState(0)
     const [totalDefender, setTotalDefender] = useState(0)
 
-    // puntos de los bonus de armas
-    const [weaponsAttacker, setWeaponsAttacker] = useState(0);
-    const [weaponsDefender, setWeaponsDefender] = useState(0);
+    // armas seleccionadas 
+    const [weaponsAttacker, setWeaponsAttacker] = useState([]);
+    const [weaponsDefender, setWeaponsDefender] = useState([]);
 
     const [whiteDice, setWhiteDice] = useState('1');
     const [blackDice, setBlackDice] = useState('1');
     const [whiteRolled, setWhiteRolled] = useState(false);
     const [blackRolled, setBlackRolled] = useState(false);
+    const [whiteRolling, setWhiteRolling] = useState(false);
+    const [blackRolling, setBlackRolling] = useState(false);
 
     // Estado del modal de armas
     const [isWeaponModalOpen, setIsWeaponModalOpen] = useState(false);
     const [currentWeaponUser, setCurrentWeaponUser] = useState(null);
 
-    // Suscribirse a las actualizaciones de dados en combate
+    useEffect(() => {
+        setAttackerStrength(Math.min(6, attacker?.strength || 1));
+        setDefenderStrength(Math.min(6, defender?.strength || 1));
+    }, [attacker?.strength, defender?.strength]);
+
     useEffect(() => {
         if (!stompClient || !stompClient.active || !isOpen) return;
 
@@ -63,6 +69,24 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
             
             setTotalAttacker(totalsUpdate.attackerTotal);
             setTotalDefender(totalsUpdate.defenderTotal);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, isOpen]);
+
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !isOpen) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight.weapons`, (msg) => {
+            const weaponsUpdate = JSON.parse(msg.body);
+            
+            if (weaponsUpdate.playerRole === 'ATTACKER') {
+                setWeaponsAttacker(weaponsUpdate.weapons || []);
+                setTotalAttacker(weaponsUpdate.totalAttacker);
+            } else if (weaponsUpdate.playerRole === 'DEFENDER') {
+                setWeaponsDefender(weaponsUpdate.weapons || []);
+                setTotalDefender(weaponsUpdate.totalDefender);
+            }
         });
 
         return () => subscription.unsubscribe();
@@ -96,95 +120,108 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
             setTotalAttacker(attackerStrength)
             setTotalDefender(defenderStrength)
 
-            setWeaponsAttacker(0);
-            setWeaponsDefender(0);
+            setWeaponsAttacker([]);
+            setWeaponsDefender([]);
 
             setButtonStateAttacker(false);
             setButtonStateDefender(false);
         }
     }, [isOpen]);
 
-    // Resolver el combate cuando ambos jugadores presionan Ready
+    
+    useEffect(() => {
+        if (whiteRolled) {
+            setTotalAttacker(attackerStrength + parseInt(whiteDice, 10) + getTotalWeaponsBonus(weaponsAttacker));
+        }
+    }, [weaponsAttacker, attackerStrength, whiteDice, whiteRolled]);
+
+    
+    useEffect(() => {
+        if (blackRolled) {
+            setTotalDefender(defenderStrength + parseInt(blackDice, 10) + getTotalWeaponsBonus(weaponsDefender));
+        }
+    }, [weaponsDefender, defenderStrength, blackDice, blackRolled]);
+
+    
     useEffect(() => {
         if (buttonStateAttacker && buttonStateDefender && whiteRolled && blackRolled) {
-            const w = parseInt(whiteDice, 10);
-            const b = parseInt(blackDice, 10);
-            const attackerWins = w >= b;  // En caso de empate "attacker" gana
+            
+            const attackerWins = totalAttacker >= totalDefender;  
             const currentUserWon = attackerWins ? isAttacker : isDefender;
-            // pequeña pausa para mostrar el resultado visualmente
             setTimeout(() => {
                 onResolve(currentUserWon);
             }, 700);
         }
-    }, [buttonStateAttacker, buttonStateDefender, whiteRolled, blackRolled]);
+    }, [buttonStateAttacker, buttonStateDefender, whiteRolled, blackRolled, totalAttacker, totalDefender]);
 
     const rollDice = async (diceType) => {
         const roll = Math.floor(Math.random() * 6) + 1;
         const diceTypeUpper = diceType === 'Negro' ? 'BLACK' : 'WHITE';
-        
-        // Calcular los nuevos totales
-        let newTotalAttacker = totalAttacker;
-        let newTotalDefender = totalDefender;
-        
-        if (diceType === 'Negro') {
-            newTotalDefender = defenderStrength + roll + weaponsDefender;
-            setTotalDefender(newTotalDefender);
-            setBlackDice(roll.toString());
-            setBlackRolled(true);
-        }
-        if (diceType === 'Blanco') {
-            newTotalAttacker = attackerStrength + roll + weaponsAttacker;
-            setTotalAttacker(newTotalAttacker);
-            setWhiteDice(roll.toString());
-            setWhiteRolled(true);
-        }
-        
-        // Notificar a todos los jugadores sobre la tirada
-        await fetch(`/api/v1/matches/${matchId}/notify-fight-dice`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${jwt}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                matchId: matchId,
-                playerId: currentUser.id,
-                playerUsername: currentUser.username,
-                diceType: diceTypeUpper,
-                diceValue: roll
-            })
-        });
+        const setRolling = diceType === 'Negro' ? setBlackRolling : setWhiteRolling;
+        setRolling(true);
+        try {
+            let newTotalAttacker = totalAttacker;
+            let newTotalDefender = totalDefender;
+            
+            if (diceType === 'Negro') {
+                newTotalDefender = defenderStrength + roll + weaponsDefender;
+                setTotalDefender(newTotalDefender);
+                setBlackDice(roll.toString());
+                setBlackRolled(true);
+            }
+            if (diceType === 'Blanco') {
+                newTotalAttacker = attackerStrength + roll + weaponsAttacker;
+                setTotalAttacker(newTotalAttacker);
+                setWhiteDice(roll.toString());
+                setWhiteRolled(true);
+            }
+            
+            await fetch(`/api/v1/matches/${matchId}/notify-fight-dice`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    matchId: matchId,
+                    playerId: currentUser.id,
+                    playerUsername: currentUser.username,
+                    diceType: diceTypeUpper,
+                    diceValue: roll
+                })
+            });
 
-        // Notificar los nuevos totales a todos los jugadores
-        await fetch(`/api/v1/matches/${matchId}/notify-dice-totals`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${jwt}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                matchId: matchId,
-                attackerId: attacker.id,
-                attackerTotal: diceType === 'Blanco' ? newTotalAttacker : totalAttacker,
-                defenderId: defender.id,
-                defenderTotal: diceType === 'Negro' ? newTotalDefender : totalDefender
-            })
-        });
+            await fetch(`/api/v1/matches/${matchId}/notify-dice-totals`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    matchId: matchId,
+                    attackerId: attacker.id,
+                    attackerTotal: diceType === 'Blanco' ? newTotalAttacker : totalAttacker,
+                    defenderId: defender.id,
+                    defenderTotal: diceType === 'Negro' ? newTotalDefender : totalDefender
+                })
+            });
 
-        return roll;
+            return roll;
+        } finally {
+            setTimeout(() => setRolling(false), 200);
+        }
     };
 
     const toggleReadyState = async (playerRole, currentState) => {
         const newState = !currentState;
         
-        // Actualizar el estado localmente primero para respuesta inmediata
+        
         if (playerRole === 'ATTACKER') {
             setButtonStateAttacker(newState);
         } else {
             setButtonStateDefender(newState);
         }
         
-        // Notificar a todos los jugadores sobre el cambio de estado
         await fetch(`/api/v1/matches/${matchId}/notify-ready-state`, {
             method: 'POST',
             headers: {
@@ -205,14 +242,43 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         setIsWeaponModalOpen(true);
     };
 
-    const handleWeaponSelected = (weaponData) => {
+    const getTotalWeaponsBonus = (weapons) => {
+        return weapons.reduce((sum, w) => sum + (w.bonus || 0), 0);
+    };
+
+    const handleWeaponSelected = async (weaponData) => {
+        let newWeapons, playerRole, newTotal;
+        
         if (currentWeaponUser === 'ATTACKER') {
-            setWeaponsAttacker(weaponData.bonus);
-            setTotalAttacker(attackerStrength + parseInt(whiteDice, 10) + weaponData.bonus);
+            newWeapons = [...weaponsAttacker, weaponData];
+            playerRole = 'ATTACKER';
+            newTotal = attackerStrength + parseInt(whiteDice, 10) + getTotalWeaponsBonus(newWeapons);
+            setWeaponsAttacker(newWeapons);
+            setTotalAttacker(newTotal);
         } else {
-            setWeaponsDefender(weaponData.bonus);
-            setTotalDefender(defenderStrength + parseInt(blackDice, 10) + weaponData.bonus);
+            newWeapons = [...weaponsDefender, weaponData];
+            playerRole = 'DEFENDER';
+            newTotal = defenderStrength + parseInt(blackDice, 10) + getTotalWeaponsBonus(newWeapons);
+            setWeaponsDefender(newWeapons);
+            setTotalDefender(newTotal);
         }
+        
+        await fetch(`/api/v1/matches/${matchId}/notify-fight-weapons`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${jwt}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                matchId: matchId,
+                playerId: currentUser.id,
+                playerRole: playerRole,
+                weapons: newWeapons,
+                totalAttacker: playerRole === 'ATTACKER' ? newTotal : totalAttacker,
+                totalDefender: playerRole === 'DEFENDER' ? newTotal : totalDefender
+            })
+        });
+        
         setIsWeaponModalOpen(false);
         setCurrentWeaponUser(null);
     };
@@ -237,7 +303,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                                 />
                             </div>
 
-                            <div className="total-box">{totalAttacker}</div>
+                            <div className="total-box">{whiteRolled ? totalAttacker : '?'}</div>
 
                             {/*FUERZA */}
                             <div className="calc-row">
@@ -251,14 +317,18 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                                     title="Dado Blanco"
                                     disabled={!isAttacker || whiteRolled}
                                 >
-                                    <img src={`/Dice/B${whiteDice}.png`} alt="Dado Blanco" className='dice' />
+                                    <img
+                                        src={`/Dice/B${whiteDice}.png`}
+                                        alt="Dado Blanco"
+                                        className={`dice ${whiteRolling ? 'rolling' : ''}`}
+                                    />
                                 </button>
 
                                 <span className="calc-operator">+</span>
 
-                                <div className="calc-box">Weapons: {weaponsAttacker}</div>
+                                <div className="calc-box">Weapons: {getTotalWeaponsBonus(weaponsAttacker)}</div>
                             </div>
-        
+                            
                         </div>
 
                         <div className='vs-container'>
@@ -275,7 +345,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                                 />
                             </div>
 
-                            <div className="total-box">{totalDefender}</div>
+                            <div className="total-box">{blackRolled ? totalDefender : '?'}</div>
 
                             {/*FUERZA */}
                             <div className="calc-row">
@@ -290,14 +360,17 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                                     title="Dado Negro"
 
                                 >
-                                    <img src={`/Dice/N${blackDice}.png`} alt="Dado Negro" className='dice' />
+                                    <img
+                                        src={`/Dice/N${blackDice}.png`}
+                                        alt="Dado Negro"
+                                        className={`dice ${blackRolling ? 'rolling' : ''}`}
+                                    />
                                 </button>
 
                                 <span className="calc-operator">+</span>
 
-                                <div className="calc-box">Weapons: {weaponsDefender}</div>
+                                <div className="calc-box">Weapons: {getTotalWeaponsBonus(weaponsDefender)}</div>
                             </div>
-                            
                         </div>
 
 

@@ -184,6 +184,15 @@
     transform: scale(1.1);
 }
 
+.dice.rolling {
+  animation: spin 0.12s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* VS CENTRAL */
 .vs-container {
   display: flex;
