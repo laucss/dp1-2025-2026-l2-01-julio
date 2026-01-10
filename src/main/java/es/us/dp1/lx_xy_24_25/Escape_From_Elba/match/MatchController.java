@@ -293,6 +293,15 @@ public class MatchController {
         return ResponseEntity.ok(new MatchDTO(match)); 
     }
 
+    
+    @PutMapping("/{matchId}/moveNpc")
+    public ResponseEntity<MatchDTO> moveNpcToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveNpcToRoomDTO data){
+        ms.moveNpcToAdyacentRoom(matchId, data.getNpcId(), data.getRoomId(), data.getUserId()); 
+        Match match = ms.getMatchById(matchId);
+        
+        return ResponseEntity.ok(new MatchDTO(match)); 
+    }
+
     @PutMapping("/{matchId}/moveLoser")
     public ResponseEntity<MatchDTO> moveLoserToRandomRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
         ms.moveLoserPlayer(matchId, data.getUserId(), data.getRoomId()); 

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 
 
@@ -56,5 +57,9 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
     @Query("SELECT CASE WHEN COUNT(m) > 0 THEN MAX(m.id) ELSE NULL END " +
            "FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NULL")
     Integer userInMatch(Integer userId);
+
+    @Query("SELECT m FROM Match m LEFT JOIN FETCH m.npcs WHERE m.id = :id")
+    Optional<Match> findByIdWithNpcs(@Param("id") Integer id);
+
 
 }
