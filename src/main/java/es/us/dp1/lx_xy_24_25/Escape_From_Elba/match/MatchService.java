@@ -33,7 +33,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
-import jakarta.persistence.criteria.CriteriaBuilder.In;
+
 
 @Service
 public class MatchService {
@@ -298,6 +298,10 @@ public class MatchService {
         m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());
         m.setCurrentTurnPhase(TurnPhase.DRAW);
 
+        // actualizamos sus puntos de acción por si acaso 
+        playerService.getPlayerActionPoints(matchId, nextPlayerTurn.getId()); 
+
+        // actualizamos el estado de la partida 
         matchRepo.save(m);
         
         // Notificar a todos los jugadores el cambio de turno
@@ -638,8 +642,8 @@ public class MatchService {
         if (player.getActionPoints() > 0) {
             player.setActionPoints(player.getActionPoints() - 1);
         } 
+
         //Guardar cambios
-        
         return playerRepo.save(player);
     }
 
@@ -709,8 +713,8 @@ public class MatchService {
         //Actualizar la sala y fuerza del jugador
         player.setRoom(targetRoom);
         player.setStrength(player.getStrength() + 1);
+        
         //Guardar cambios
-
         return playerRepo.save(player);
     }
 

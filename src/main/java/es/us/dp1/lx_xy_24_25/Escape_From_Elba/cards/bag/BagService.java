@@ -234,6 +234,8 @@ public class BagService {
         //newBag.setCards(bag.getCards());
 
 
+                // tengo que hacer lo de newArrayList<>(deck...) dentro del set porque si no se hace así ç
+        // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
         Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
         newBag.setCards(new ArrayList<>(bag.getCards().stream()
             .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));

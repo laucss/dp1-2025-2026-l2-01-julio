@@ -82,7 +82,7 @@ function App() {
   }
 
   let adminRoutes = <></>;
-  let ownerRoutes = <></>;
+  let playerRoutes = <></>;
   let userRoutes = <></>;
   //let vetRoutes = <></>; //TODO: BORRAR
   let publicRoutes = <></>;
@@ -99,7 +99,7 @@ function App() {
         </>)
     }
     if (role === "PLAYER") {
-      ownerRoutes = (
+      playerRoutes = (
         <>
           <Route path="/users/:username" exact={true} element={<Profile />} />
           <Route path="users/:username/achievements" element={<PrivateRoute><AchievementUserList /></PrivateRoute>} />
@@ -113,6 +113,8 @@ function App() {
       <>        
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/ranking" element={<Ranking />} />
+        <Route path="/rules" element={<Rules />} />
       </>
     )
   } else {
@@ -143,7 +145,7 @@ function App() {
               {publicRoutes}
               {userRoutes}
               {adminRoutes}
-              {ownerRoutes}
+              {playerRoutes}
               {/* {vetRoutes} //TODO: BORRAR */}
             </Routes>         
       </ErrorBoundary>
