@@ -617,7 +617,16 @@ export default function Match(){
                 if (response.ok) {
                     const data = await response.json();
                     setMatch(data);
-                    if (data.players) setPlayer(data.players);
+                    if (data.players) {
+                        setPlayer(data.players);
+                        const me = data.players.find(p => p.user.id === currentUser.id);
+                        if (me) {
+                            setCurrentPlayer([me]);
+                            setPlayersList(data.players.filter(p => p.user.id !== currentUser.id));
+                            setActionPoints(me.actionPoints ?? actionPoints);
+                            setStrength(Math.min(6, me.strength ?? strength));
+                        }
+                    }
                     setSelectedNpcIndex(null);
                     setSelectedNpcId(null);
                     setMoveNpcMode(false);
