@@ -116,6 +116,38 @@ public class MatchService {
         matchRepo.deleteById(id);
     }
 
+    //Para devolver el listado de partidas en curso 
+    @Transactional(readOnly = true)
+    public List<Match> getInProgressMatches() {
+        return matchRepo.findInProgress();
+    }
+
+
+    //Para devolver el listado de partidas finalizadas
+    @Transactional(readOnly = true)
+    public List<Match> getFinishedMatches() {
+        return matchRepo.findFinished();
+    }
+
+
+    //Para devolver el listado de partidas jugadas por un usuario
+    @Transactional(readOnly = true)
+    public List<Match> getMatchesPlayedByUser(Integer userId) {
+        return matchRepo.findMatchesPlayedByUser(userId);
+    }
+
+    //Para devolver el listado de partidas creadas por un usuario 
+    @Transactional(readOnly = true)
+    public List<Match> getMatchesPlayedAndCreatedByUser(Integer userId) {
+        return matchRepo.findMatchesPlayedAndCreatedByUser(userId);
+    }
+
+    //Para devolver el listado de partidas ganadas por un usuario 
+    @Transactional(readOnly = true)
+    public List<Match> getMatchesWonByUser(Integer userId) {
+        return matchRepo.findMatchesWonByUser(userId);
+    }
+
 
 
     //Función para inicializar un match 
@@ -613,7 +645,7 @@ public class MatchService {
 
     @Transactional
     public Npc moveNpcToAdyacentRoom(Integer matchId, Integer npcId, Integer targetRoomId, Integer userId) {
-        Match match = matchRepo.findByIdWithNpcs(matchId)
+        Match match = matchRepo.findById(matchId)
             .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
 
         if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
