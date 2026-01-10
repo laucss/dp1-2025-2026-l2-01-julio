@@ -26,6 +26,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundExcepti
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
@@ -50,16 +51,18 @@ public class MatchService {
     MatchRepository matchRepo;
     PlayerRepository playerRepo;
     RoomRepository roomRepository;
+    NpcRepository npcRepository;
     RoomService roomService;
 
     @Autowired
     public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, 
             RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
             PlayerService playerService, LobbyWebsocketController lobbyWebsocketController,
-            MatchWebsocketController matchWebsocketController) {
+            MatchWebsocketController matchWebsocketController, NpcRepository npcRepository) {
         this.matchRepo = mrepo;
         this.playerRepo = playerRepo;
         this.roomRepository = roomRepository;
+        this.npcRepository = npcRepository;
         this.roomService = roomService;
         this.deckService = deckService;
         this.handService = handService;
@@ -113,6 +116,38 @@ public class MatchService {
         matchRepo.deleteById(id);
     }
 
+    //Para devolver el listado de partidas en curso 
+    @Transactional(readOnly = true)
+    public List<Match> getInProgressMatches() {
+        return matchRepo.findInProgress();
+    }
+
+
+    //Para devolver el listado de partidas finalizadas
+    @Transactional(readOnly = true)
+    public List<Match> getFinishedMatches() {
+        return matchRepo.findFinished();
+    }
+
+
+    //Para devolver el listado de partidas jugadas por un usuario
+    @Transactional(readOnly = true)
+    public List<Match> getMatchesPlayedByUser(Integer userId) {
+        return matchRepo.findMatchesPlayedByUser(userId);
+    }
+
+    //Para devolver el listado de partidas creadas por un usuario 
+    @Transactional(readOnly = true)
+    public List<Match> getMatchesPlayedAndCreatedByUser(Integer userId) {
+        return matchRepo.findMatchesPlayedAndCreatedByUser(userId);
+    }
+
+    //Para devolver el listado de partidas ganadas por un usuario 
+    @Transactional(readOnly = true)
+    public List<Match> getMatchesWonByUser(Integer userId) {
+        return matchRepo.findMatchesWonByUser(userId);
+    }
+
 
 
     //Función para inicializar un match 
@@ -135,6 +170,7 @@ public class MatchService {
             npc.setStrength(1); // El valor de la fuerza al inicio es 1
             npc.setMatch(m);// Lo asociamos a la partida
             m.getNpcs().add(npc);// Lo añadimos a la lista de npcs de la partida 
+            npcRepository.save(npc); // Lo guardamos en la base de datos
         } 
 
 
@@ -611,6 +647,55 @@ public class MatchService {
         return playerRepo.save(player);
     }
 
+    @Transactional
+    public Npc moveNpcToAdyacentRoom(Integer matchId, Integer npcId, Integer targetRoomId, Integer userId) {
+        Match match = matchRepo.findById(matchId)
+            .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
+
+        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
+            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+        }
+        matchRepo.save(match);
+
+        //Buscamos al npc que queremos mover de la partida
+        Npc npc = npcRepository.findById(npcId)
+            .orElseThrow(() -> new RuntimeException("NPC no encontrado en la partida"));
+
+        //Obtenemos la habitación actual en la que se encuentra el npc
+        Room currentRoomNpc = npc.getRoom();
+        if (currentRoomNpc == null) {
+            throw new RuntimeException("NPC no tiene sala asignada"); }
+
+        //Obtenemos la sala destino a la que queremos mover al npc
+        Room targetRoom = roomRepository.findById(targetRoomId)
+            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
+
+        //Comprobamos que el jugador tiene puntos de acción para poder mover al npc
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        if (player.getActionPoints() <= 0) {
+            throw new NoActionPointsException("Move not allowed: player has no action points left"); }
+
+        //Comprobamos que la sala destino es adyacente a la sala actual del npc
+        List<Room> adjacent = currentRoomNpc.getAdjacencyList();
+        boolean canMove = adjacent.stream()
+                .anyMatch(r -> r.getId().equals(targetRoom.getId()));
+        if (!canMove) {
+            throw new RuntimeException("Movimiento no permitido: la sala destino no es adyacente"); }
+
+        //Actualizamos la sala del npc y los puntos de acción del jugador
+
+        npc.setRoom(targetRoom);
+        
+
+        if (player.getActionPoints() > 0) {
+            player.setActionPoints(player.getActionPoints() - 1);
+            playerRepo.save(player);
+        }
+        //Guardamos los cambios
+        return npcRepository.save(npc);
+    }
+
 
     @Transactional
     public Player moveLoserPlayer(Integer matchId, Integer userId, Integer targetRoomId) {
@@ -632,6 +717,9 @@ public class MatchService {
         //Guardar cambios
         return playerRepo.save(player);
     }
+
+
+
 
 
 }
