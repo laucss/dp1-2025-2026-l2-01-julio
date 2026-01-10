@@ -128,7 +128,7 @@ export default function JoinMatch() {
             className="back-arrow-btn"
             onClick={() => navigate('/')}
           >
-            ←
+            ￩
       </button>
 
       <h1>Lobbies</h1>

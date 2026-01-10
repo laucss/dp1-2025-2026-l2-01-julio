@@ -19,6 +19,7 @@ export default function AchievementUserList() {
         setVisible
     );
 
+    console.log('imagen', achievements)
     const [statisticsUser, setStatistics] = useFetchState(
         {},
         `/api/v1/statistics/${userId}`,

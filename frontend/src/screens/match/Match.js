@@ -312,12 +312,16 @@ export default function Match(){
             }
     }, [match])
 
+    // TODO: revisar si esto se puede sacar a otro lado 
+
     useEffect(() => {
         if (Array.isArray(currentPlayer) && currentPlayer[0]?.id){
             fetchCards()
-            setStrength(Math.min(6, currentPlayer[0].strength))
-        }     
-    }, [currentPlayer])
+        }
+        if (currentPlayerTurn) { 
+            setStrength(Math.min(6, currentPlayer[0].strength)) }
+        setNumCardsDrawn(0)
+    }, [currentTurnUserId])
 
     useEffect(() => {
         if (playersList.length > 0) {
@@ -837,7 +841,7 @@ if (!match) {
         return Array.isArray(neighbors) && neighbors.includes(toId);
     };
 
-//console.log('cards', handCards)
+//console.log('hand', handCards)
 
 return (
         <div className="match-container">
@@ -922,16 +926,7 @@ return (
                                 style={{ width: "150px", height: "auto" }}
                             />
                         ) : (
-                            <div style={{ 
-                                width: "150px", 
-                                height: "210px", 
-                                border: "2px dashed #ccc", 
-                                borderRadius: "8px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: "#999"
-                            }}>
+                            <div className="dicard-pile">
                                 Empty
                             </div>
                         )}
@@ -1056,24 +1051,8 @@ return (
 
             {match?.currentTurnUserId === currentUser?.id && (
                 <button
-                    className="end-your-turn-button"
+                    className="end-turn-button"
                     onClick={handleEndTurn}
-                    style={{
-                            marginLeft: "050px",
-                            position: "absolute",
-                            left: "87%",                 
-                            transform: "translateX(-50%)",
-                            marginTop: "-80px",
-                            padding: "15px 35px", 
-                            fontSize: "22px",
-                            background: "#c0392b",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "8px",
-                            maxWidth: "500px",
-                            minWidth: "230px",
-                            cursor: "pointer"
-                    }}
                     disabled={isEndingTurn}
                 >
                 End your turn
@@ -1370,16 +1349,6 @@ return (
                 <button
                     className="end-match-button"
                     onClick={endMatch}
-                    style={{
-                        marginLeft: "10px",
-                        marginTop: "20px",
-                        padding: "10px 25px",
-                        background: "#c0392b",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "8px",
-                        cursor: "pointer"
-                    }}
                 >
                     Finalizar partida
                 </button>
@@ -1439,23 +1408,7 @@ return (
             {chatOpen && <ChatBox matchId={matchId} />}
 
             {/* Mensaje de turno */}
-            <div
-                style={{
-                        marginLeft: "050px",
-                        position: "absolute",
-                        left: "10%",                 
-                        transform: "translateX(90%)",
-                        marginTop: "-80px",
-                        padding: "15px 35px", 
-                        fontSize: "22px",
-                        background: "#c0392b",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "8px",
-                        maxWidth: "500px",
-                        minWidth: "230px",
-                        cursor: "pointer"
-                }}
+            <div className="chat-button"
             >
                 {!match?.currentTurnUserId
                 ? "Esperando..."

@@ -4,7 +4,7 @@ import tokenService from "../../services/token.service";
 import getIdFromUrl from "../../util/getIdFromUrl";
 
 // imports del dnd-kit (librería para el arrastre de cartas)
-import {DndContext, DragOverlay } from '@dnd-kit/core';
+import {DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import Card from "./dnd-kit/Card";
 import BagZone from "./dnd-kit/BagZone";
 import { arrayMove } from '@dnd-kit/sortable';
@@ -28,6 +28,15 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
 
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+            distance: 3
+            },
+        })
+    );
+
 
     useEffect(() => {
         setHandCards(hand)
@@ -191,6 +200,7 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
                 <div className="modal-content-wrapper">
                     <div className="sections-container">
                         <DndContext 
+                            sensors={sensors}
                             onDragStart={handleDragStart} 
                             onDragEnd={handleDragEnd}>
 

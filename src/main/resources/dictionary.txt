@@ -42,6 +42,7 @@ boar
 boa
 boas
 broom
+boss
 
 cabs
 crabs 
@@ -165,6 +166,7 @@ member
 members
 more 
 mop
+mall
 
 oar 
 off 
@@ -175,6 +177,10 @@ paper
 pass 
 passes
 per 
+peel
+pee
+peep 
+peer
 par
 peace 
 peaces 
@@ -238,6 +244,7 @@ sells
 sleep 
 sleeps
 small
+smaller 
 some 
 space 
 spaces 
