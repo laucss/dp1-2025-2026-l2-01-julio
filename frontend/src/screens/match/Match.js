@@ -586,7 +586,7 @@ export default function Match(){
 
 
     const move = async (roomId) => {
-        // If we're in NPC-move mode, interpret clicks as target rooms for the selected NPC
+        // Si vamos a mover un NPC
         if (moveNpcMode) {
             if (selectedNpcIndex === null) {
                 alert('Selecciona primero un NPC en el mapa');
@@ -1109,28 +1109,28 @@ return (
                         );
                     })}
                 </div>
+                
+            <div className="points-section">
+                                <div className="action-points">
+                                    <h1>{actionPoints}</h1>
+                                    <p>Action points </p>
+                                </div>
+
+                                <div className="action-points">
+                                    <h1>{strength}</h1>
+                                    <p>strength </p>
+                                </div>
+                            </div>
             </div>
 
             {/*Mensaje de movimiento de los NPC*/}
             {moveNpcMode && !isSpectator && match?.currentTurnUserId === currentUser?.id && (
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '50px', zIndex: 30 }}>
-                    <div style={{ padding: '14px 22px', background: '#d200005e', color: '#fff', borderRadius: '10px', fontWeight: '700', fontSize: '20px', minWidth: '280px', textAlign: 'center', transform: 'translateX(70px)' }}>
+                <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: '60px', zIndex: 30 }}>
+                    <div style={{ padding: '14px 42px', background: '#d200005e', color: '#fff', borderRadius: '10px', fontWeight: '700', fontSize: '20px', minWidth: '280px', textAlign: 'center', transform: 'translateX(20px)' }}>
                         {selectedNpcIndex === null ? 'Select the NPC you want to move' : 'Select the room'}
                     </div>
                 </div>
             )}
-
-            <div className="points-section" style={{ position: 'absolute', left: '6%', transform: 'translateX(-30%)', marginTop: '-70px', display: 'flex', gap: '12px', alignItems: 'flex-end', zIndex: 100 }}>
-                <div className="action-points">
-                    <h1>{actionPoints}</h1>
-                    <p>Action points </p>
-                </div>
-
-                <div className="action-points">
-                    <h1>{strength}</h1>
-                    <p>strength </p>
-                </div>
-            </div>
 
             {match?.currentTurnUserId === currentUser?.id && (
                 <button
@@ -1237,8 +1237,7 @@ return (
                 </div>
             </div>
 
-            {!isSpectator && (
-                <div>
+            <div>
             <button className="bag-button"
                 onClick={() => setBagOpen(true)}
                 disabled={
@@ -1273,7 +1272,6 @@ return (
                 onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
             />
         </div>
-    )}
 
     <FightModal
             isOpen={isFightModalOpen}

@@ -296,7 +296,6 @@ public class MatchController {
     
     @PutMapping("/{matchId}/moveNpc")
     public ResponseEntity<MatchDTO> moveNpcToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveNpcToRoomDTO data){
-        // Service expects: (matchId, npcId, targetRoomId, userId)
         ms.moveNpcToAdyacentRoom(matchId, data.getNpcId(), data.getRoomId(), data.getUserId()); 
         Match match = ms.getMatchById(matchId);
         
