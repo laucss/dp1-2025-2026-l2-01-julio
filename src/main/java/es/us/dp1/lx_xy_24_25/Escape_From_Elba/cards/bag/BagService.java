@@ -204,15 +204,21 @@ public class BagService {
     }
 
     /*
-     * Método que realiza la checkeación completa del array de cartas que manda el frontend 
+     * Método que realiza la comprobación completa del array de cartas que manda el frontend de la bolsa 
      * (la unión de las dos funciones anteriores, básicamente)
      */
 
     @Transactional 
     public Boolean checkBagIsValid (List<CardDTO> cards){
 
-        String word = wordFromCards(cards); 
-        return isValidWordForBag(word); 
+        // si la bolsa no está vacía hacemos la comprobación
+        if (!cards.isEmpty()){
+            String word = wordFromCards(cards); 
+            return isValidWordForBag(word); 
+        }
+
+        // si está vacía devolvemos true para que pueda seguir 
+        return true;  
 
     }
 

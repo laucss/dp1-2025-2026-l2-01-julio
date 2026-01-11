@@ -23,6 +23,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.BagNotValidException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
@@ -446,6 +447,25 @@ public class MatchService {
 
     }
 
+    @Transactional
+    public Integer confirmDiscardPhase(Integer matchId, AllCardsStatusDTO data ){
+
+        Boolean validBag = bagService.checkBagIsValid(data.getBag().getCards()); 
+        
+        // si la palabra de la bolsa es válida o está vacía, actualizamos todo y pasamos al siguiente turno 
+        if (validBag) {
+            handService.update(data.getHand(), matchId, data.getPlayerId());
+            bagService.update(data.getBag(), matchId, data.getPlayerId());
+            deckService.update(data.getDeck(), matchId);
+            DeckInGame deck = deckService.findDeckById(matchId); 
+            Integer nextTurnId = nextTurn(matchId).getCurrentTurnUserId(); 
+            return nextTurnId; 
+        } else { // si la bolsa no está vacía y no es válida: 
+            throw new BagNotValidException("The word of the bag is not valid"); 
+        }
+
+    }
+
 
     // ------------------------------------------- FUNCIONES LLEVADAS A CABO EN LAS PELEAS -------------------------------------------------------------------
 
@@ -501,14 +521,10 @@ public class MatchService {
 
     @Transactional
     public Card playerBeatsNonPlayer(Integer matchId, Integer playerId, Integer npcId){
-        // TODO: hay que hacer la gestión de los npcs, services, repositorios, etc
 
         Card stolenCard =deckService.drawCard(matchId);
         handService.addCardToPlayerHand(stolenCard, matchId, playerId);
 
-        // A LO MEJOR HAY QUE PASAR EL NPC NO SOLO SU ID
-        // actualizar fuerza del npc
-        // npc.setStrength(npc.getStrength() + 1);
         return stolenCard;
     
     }
@@ -726,6 +742,24 @@ public class MatchService {
         
         //Guardar cambios
         return playerRepo.save(player);
+    }
+
+    public ActionPointsUpdateDTO consumeOneActionPoint(Integer matchId, Integer userId) {
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+            .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+
+        int current = Optional.ofNullable(player.getActionPoints()).orElse(0);
+        int updated = Math.max(0, current - 1);
+        player.setActionPoints(updated);
+        playerRepo.save(player);
+
+        return new ActionPointsUpdateDTO(
+            player.getId(),
+            player.getUser().getId(),
+            player.getUser().getUsername(),
+            updated,
+            System.currentTimeMillis()
+        );
     }
 
 

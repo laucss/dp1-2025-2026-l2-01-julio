@@ -7,13 +7,14 @@ import getIdFromUrl from '../../util/getIdFromUrl'
 import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
 import BagModal from "./BagModal";
-import DiscardHandModal from "./DiscardHandModal";
+import DiscardPhaseModal from "./DiscardPhaseModal";
 import ActionsModal from "./ActionsModal";
 import ChatBox from "./chatBox";
 import { FaComments } from "react-icons/fa";
 import FightModal from "./FightModal";
 import StartDiceModal from "./StartDiceModal";
 import StealCardModal from "./StealCardModal";
+import NpcLossDiscardModal from "./NpcLossDiscardModal";
 
 
 
@@ -25,6 +26,7 @@ export default function Match(){
     const matchId = getIdFromUrl(2);
     const navigate = useNavigate();
     const [currentPlayer, setCurrentPlayer] = useState({}) // el jugador asociado al usuario que está "viendo" la pantalla
+    console.log('jugador', currentPlayer)
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
     const [match, setMatch] = useState(null)
@@ -39,7 +41,7 @@ export default function Match(){
     const [otherPlayersBags, setOtherPlayersBags] = useState({}) 
     const [numCardsDrawn, setNumCardsDrawn] = useState(0)
     const [bagOpen, setBagOpen] = useState(false)
-    const [discardHandOpen, setDiscardHandOpen] = useState(false)
+    const [discardPhaseOpen, setDiscardPhaseOpen] = useState(false)
 
     // DADOS 
     const [whiteDice, setWhiteDice] = useState("1")
@@ -68,13 +70,14 @@ export default function Match(){
     const [pendingTargetRoom, setPendingTargetRoom] = useState(null);
     const [isStealModalOpen, setIsStealModalOpen] = useState(false);
     const [stealLoserPlayerId, setStealLoserPlayerId] = useState(null);
+    const [isNpcLossModalOpen, setIsNpcLossModalOpen] = useState(false);
     
     // Determinar si el usuario actual es un espectador
     const isSpectator = !currentUser || !match?.players?.some(p => p.user.id === currentUser.id);
     
     // Función para obtener un color único para cada jugador
     const getPlayerColor = (playerId) => {
-        const colors = ['#FF6B6B', '#4ECDC4', '#f833e4ff', '#e5541aff', '#52a852ff', '#2a15ceff'];
+        const colors = ['#ff5353ff', '#4ECDC4', '#ffac3fff', '#e5541aff', '#52a852ff', '#2a15ceff'];
         const allPlayers = match?.players || [];
         const playerIndex = allPlayers.findIndex(p => p.id === playerId);
         return colors[playerIndex % colors.length];
@@ -170,21 +173,56 @@ export default function Match(){
     useEffect(() => {
         if (!stompClient || !stompClient.active) return;
 
-        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, (msg) => {
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, async (msg) => {
             const fightUpdate = JSON.parse(msg.body);
+            console.log('🔔 Fight notification received:', fightUpdate);
             
             if (fightUpdate.action === 'START') {
-                // Identificar al atacante (quien inicia la batalla)
-                const attacker = match?.players?.find(p => p.user.id === fightUpdate.attackerId);
-                
-                // Identificar al defensor (quien está en la habitación)
-                const defender = match?.players?.find(p => p.user.id === fightUpdate.defenderId);
-                
-                if (attacker && defender) {
-                    setFightAttacker(attacker);
-                    setFightDefender(defender);
-                    setPendingTargetRoom(fightUpdate.roomName);
-                    setIsFightModalOpen(true);
+                console.log('🥊 Starting fight...');
+                // Actualizar el match primero para tener datos frescos
+                try {
+                    const response = await fetch(`/api/v1/matches/${matchId}`, {
+                        headers: {
+                            Authorization: `Bearer ${jwt}`,
+                        },
+                    });
+                    
+                    if (response.ok) {
+                        const freshMatch = await response.json();
+                        console.log('✅ Fresh match data:', freshMatch);
+                        setMatch(freshMatch);
+                        
+                        // Identificar al atacante (quien inicia la batalla)
+                        const attacker = freshMatch.players?.find(p => p.user.id === fightUpdate.attackerId);
+                        console.log('👊 Attacker found:', attacker);
+                        
+                        // Identificar al defensor (puede ser jugador o NPC)
+                        let defender = null;
+                        
+                        console.log('🔍 Is defender an NPC (isBot):', fightUpdate.isBot);
+                        
+                        if (fightUpdate.isBot) {
+                            console.log('🤖 Buscando NPC con ID:', fightUpdate.defenderId);
+                            console.log('🤖 NPCs disponibles:', freshMatch.npcs?.map(n => ({ id: n.id, name: n.isNiallCampbell ? 'NiallCampbell' : 'NPC' })));
+                            defender = freshMatch.npcs?.find(n => n.id === fightUpdate.defenderId);
+                            console.log('🛡️ Defensor NPC encontrado:', defender);
+                        } else {
+                            defender = freshMatch.players?.find(p => p.user.id === fightUpdate.defenderId);
+                            console.log('🛡️ Defensor Jugador encontrado:', defender);
+                        }
+                        
+                        if (attacker && defender) {
+                            console.log('✅ Opening fight modal with:', { attacker, defender });
+                            setFightAttacker(attacker);
+                            setFightDefender(defender);
+                            setPendingTargetRoom(fightUpdate.roomId || fightUpdate.roomName);
+                            setIsFightModalOpen(true);
+                        } else {
+                            console.error('❌ Could not find attacker or defender:', { attacker, defender, fightUpdate });
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error fetching fresh match data for fight:', error);
                 }
             } else if (fightUpdate.action === 'RESOLVE') {
                 const winnerId = fightUpdate.winnerId;
@@ -199,7 +237,7 @@ export default function Match(){
         });
 
         return () => subscription.unsubscribe();
-    }, [stompClient, matchId, match, currentUser]);
+    }, [stompClient, matchId, jwt, currentUser]);
 
 
     useEffect(() => {
@@ -229,6 +267,34 @@ export default function Match(){
         return () => subscription.unsubscribe();
     }, [stompClient, matchId]);
 
+    // Suscripción a actualizaciones de ubicación de NPCs
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.npc.location`, (msg) => {
+            const locationUpdate = JSON.parse(msg.body);
+            
+            setMatch(prevMatch => {
+                if (!prevMatch || !prevMatch.npcs) return prevMatch;
+                
+                return {
+                    ...prevMatch,
+                    npcs: prevMatch.npcs.map(npc => {
+                        if (npc.id === locationUpdate.npcId) {
+                            return {
+                                ...npc,
+                                room: locationUpdate.newRoom
+                            };
+                        }
+                        return npc;
+                    })
+                };
+            });
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
+
     // Suscripción a actualizaciones de cartas (mano/bolsa) de todos los jugadores
     useEffect(() => {
         if (!stompClient || !stompClient.active) return;
@@ -241,9 +307,10 @@ export default function Match(){
                 if (!info || !info.playerId) return;
                 const hand = Array.isArray(info.hand?.cards) ? info.hand.cards : [];
                 const bag = Array.isArray(info.bag?.cards) ? info.bag.cards : [];
+                const deckInfo = info.deck;
 
                 // Si es el jugador actual, actualizamos su mano y bolsa
-                if (currentPlayer[0]?.id === info.playerId) {
+                if (currentPlayer?.id === info.playerId) {
                     setHandCards(hand.map(c => ({...c})));
                     setBagCards(bag.map(c => ({...c})));
                 } else {
@@ -252,6 +319,13 @@ export default function Match(){
                         ...prev,
                         [info.playerId]: bag
                     }));
+                }
+
+                // Actualizar el mazo y la pila de descarte globalmente
+                if (deckInfo) {
+                    setDeck(deckInfo);
+                    const discarded = Array.isArray(deckInfo.discardedCards) ? deckInfo.discardedCards : [];
+                    setDiscardPile(discarded);
                 }
             };
 
@@ -268,13 +342,13 @@ export default function Match(){
     }, [stompClient, matchId, currentPlayer]);
 
     useEffect(() => {
-        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+        if (!stompClient || !stompClient.active || !currentPlayer) return;
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.actionPoints`, (msg) => {
             const actionPointsUpdate = JSON.parse(msg.body);
             
             // Only update action points if the update is for the current player
-            if (actionPointsUpdate.userId === currentPlayer[0].user.id) {
+            if (actionPointsUpdate.userId === currentPlayer.user.id) {
                 setActionPoints(actionPointsUpdate.actionPoints);
             }
         });
@@ -283,9 +357,9 @@ export default function Match(){
     }, [stompClient, matchId, currentPlayer]);
 
     useEffect(() => {
-        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+        if (!stompClient || !stompClient.active || !currentPlayer) return;
 
-        const subscription = stompClient.subscribe(`/topic/match.${matchId}.hand.${currentPlayer[0].id}`, (msg) => {
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.hand.${currentPlayer.id}`, (msg) => {
             const handUpdate = JSON.parse(msg.body);
             if (handUpdate && handUpdate.hand) {
                 const updatedHand = Array.isArray(handUpdate.hand.cards) ? handUpdate.hand.cards : [];
@@ -303,7 +377,7 @@ export default function Match(){
             const strengthUpdate = JSON.parse(msg.body);
             
             // Only update strength if the update is for the current player
-            if (strengthUpdate.userId === currentPlayer[0].user.id) {
+            if (strengthUpdate.userId === currentPlayer.user.id) {
                 setStrength(Math.min(6, strengthUpdate.strength));
             }
         });
@@ -314,7 +388,7 @@ export default function Match(){
     useEffect(() => {
             if (player && Array.isArray(player)){
                 setPlayersList(player.filter(p => p.user.id !== currentUser?.id))
-                setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
+                setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id)[0])
                 
             }
     }, [match])
@@ -322,12 +396,16 @@ export default function Match(){
     // TODO: revisar si esto se puede sacar a otro lado 
 
     useEffect(() => {
-        if (Array.isArray(currentPlayer) && currentPlayer[0]?.id){
+        if (Array.isArray(currentPlayer) && currentPlayer?.id){
             fetchCards()
         }
         if (currentPlayerTurn) { 
-            setStrength(Math.min(6, currentPlayer[0].strength)) }
+            setStrength(Math.min(6, currentPlayer.strength)) }
         setNumCardsDrawn(0)
+        
+        if (currentTurnUserId && currentPlayer.user.id === currentTurnUserId){ 
+            fetchActionPoints() 
+        }
     }, [currentTurnUserId])
 
     useEffect(() => {
@@ -341,12 +419,6 @@ export default function Match(){
     }, [handCards])
 
 
-
-    useEffect(() => {
-        if (currentTurnUserId && currentPlayer[0].user.id === currentTurnUserId){
-            fetchActionPoints()
-        }
-    }, [currentTurnUserId])
 
     // Polling para actualizar el match mientras el modal de dados está abierto
     useEffect(() => {
@@ -379,7 +451,7 @@ export default function Match(){
     // console.log('currentPlayer', currentPlayer)
     const fetchActionPoints = async () => {
         try {
-            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/actionPoints`, {
+            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/actionPoints`, {
             method: "GET",
                     headers: {
                         Authorization: `Bearer ${jwt}`,
@@ -409,6 +481,32 @@ export default function Match(){
                     }
                     })
                 const data = await response.json()
+
+                // Normalizar los roomIds de todos los jugadores y NPCs
+                if (data.players) {
+                    data.players = data.players.map(p => ({
+                        ...p,
+                        currentRoom: p.currentRoom ? {
+                            ...p.currentRoom,
+                            id: normalizeRoomId(p.currentRoom.id)
+                        } : null,
+                        room: p.room ? {
+                            ...p.room,
+                            id: normalizeRoomId(p.room.id)
+                        } : null,
+                        roomId: p.roomId ? normalizeRoomId(p.roomId) : null
+                    }));
+                }
+
+                if (data.npcs) {
+                    data.npcs = data.npcs.map(npc => ({
+                        ...npc,
+                        room: npc.room ? {
+                            ...npc.room,
+                            id: normalizeRoomId(npc.room.id)
+                        } : null
+                    }));
+                }
 
                 setMatch(data)
                 setPlayer(data.players)
@@ -464,7 +562,7 @@ export default function Match(){
     const fetchCards = async () => {
         try {
             //console.log('ENTRA EN EL FETCHCARDS')
-            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/getAllCards`, {
+            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/getAllCards`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${jwt}`,
@@ -525,13 +623,14 @@ export default function Match(){
     /*
     console.log('hand' , handCards)
     console.log('bag' , bagCards)
-    console.log('deck' , deck)
     */
+    console.log('deck' , deck)
+    
 
     // FUNCION ROBAR CARTA
-    const drawCard = async () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO DE CHATI PQ QUERIA SOLO PROBARLO
+    const drawCard = async () => { 
         try {
-            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/drawCardFromDeck`, {
+            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/drawCardFromDeck`, {
                 method: "POST",
                 headers: {
                 Authorization: `Bearer ${jwt}`,
@@ -545,9 +644,10 @@ export default function Match(){
             }
 
             const data = await response.json()
+            //console.log('carta', data.card)
             
             setDeck(data.deck)
-            setHandCards(prev => [...prev, data.card])
+            //setHandCards(prev => [...prev, data.card])
             setNumCardsDrawn(prev => prev + 1)
             
         } catch (error) {
@@ -575,7 +675,7 @@ export default function Match(){
 
             const data = await response.json()
             
-            if (winnerId === currentPlayer[0]?.id) {
+            if (winnerId === currentPlayer?.id) {
                 setDeck(data.deck)
                 setHandCards(prev => [...prev, data.card])
             }
@@ -634,6 +734,40 @@ export default function Match(){
                     setSelectedNpcIndex(null);
                     setSelectedNpcId(null);
                     setMoveNpcMode(false);
+
+                    // Verificar si hay un jugador en la habitación destino
+                    const targetRoomNormalized = normalizeRoomId(roomId);
+                    const playerInRoom = data.players.find(p => {
+                        const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
+                        return normalizeRoomId(playerRoomId) === targetRoomNormalized;
+                    });
+
+                    if (playerInRoom && roomId !== 37) {
+                        // Encontrar el NPC que se acaba de mover
+                        const movedNpc = data.npcs.find(n => n.id === npcIdToSend);
+                        
+                        if (movedNpc) {
+                            // Notificar a todos los jugadores sobre el combate (incluido el jugador local)
+                            // No abrir el modal aquí - se abrirá cuando llegue la notificación WebSocket
+                            await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${jwt}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    matchId: matchId,
+                                    attackerId: playerInRoom.user.id,
+                                    attackerUsername: playerInRoom.user.username,
+                                    defenderId: movedNpc.id,
+                                    defenderUsername: movedNpc.isNiallCampbell ? 'NiallCampbell' : 'NPC',
+                                    roomId: roomId,
+                                    action: 'START',
+                                    isBot: true
+                                })
+                            });
+                        }
+                    }
                 } else {
                     const text = await response.text();
                     console.error('Error moving NPC:', response.status, text);
@@ -652,11 +786,11 @@ export default function Match(){
 
         // Player move flow
         //console.log('roomId destino', roomId)
-        //console.log('actual roomID', currentPlayer?.[0]?.currentRoom?.id || currentPlayer?.[0]?.roomId || currentPlayer?.[0]?.room?.id)
+        //console.log('actual roomID', currentPlayer?.?.currentRoom?.id || currentPlayer?.?.roomId || currentPlayer?.?.room?.id)
         if (moveToAdyacentRoom===false) return ;
         if (moveToAdyacentRoom === true){
             try {
-                const currentRoomId = currentPlayer?.[0]?.currentRoom?.id || currentPlayer?.[0]?.roomId || currentPlayer?.[0]?.room?.id;
+                const currentRoomId = currentPlayer?.currentRoom?.id || currentPlayer?.roomId || currentPlayer?.room?.id;
                 if (!areRoomsAdjacent(currentRoomId, roomId)) {
                     alert('No puedes moverte a una habitación no adyacente');
                     setMoveToAdyacentRoom(false);
@@ -691,6 +825,61 @@ export default function Match(){
                             defenderUsername: otherPlayer.user.username,
                             roomId: roomId,
                             action: 'START'
+                        })
+                    });
+                    
+                    return;
+                }
+
+                // Detectar NPCs en la habitación de destino
+                console.log('Buscando NPCs. match?.npcs:', match?.npcs);
+                console.log('targetRoomNormalized:', targetRoomNormalized);
+                const botInRoom = match?.npcs?.find(npc => {
+                    const npcRoomId = npc.room?.id;
+                    console.log('NPC:', npc, 'npcRoomId:', npcRoomId, 'normalizado:', normalizeRoomId(npcRoomId));
+                    return npcRoomId && normalizeRoomId(npcRoomId) === targetRoomNormalized;
+                });
+
+                console.log('botInRoom encontrado:', botInRoom);
+                if (botInRoom && !isSafeArea) {
+                    const currentPlayerData = currentPlayer?.[0];
+                    setPendingTargetRoom(roomId);
+                    setFightDefender(botInRoom);
+                    setFightAttacker(currentPlayerData);
+                    setIsFightModalOpen(true);
+                    setMoveToAdyacentRoom(false);
+
+                    // Consumir 1 punto de acción por el intento de movimiento, incluso si luego se pierde la batalla
+                    try {
+                        const consumeResponse = await fetch(`/api/v1/matches/${matchId}/consume-action-point/${currentUser.id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${jwt}`,
+                                'Content-Type': 'application/json',
+                            },
+                        });
+                        if (consumeResponse.ok) {
+                            setActionPoints(prev => Math.max(0, prev - 1));
+                        }
+                    } catch (err) {
+                        console.error('Error consuming action point on NPC fight start:', err);
+                    }
+                    
+                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${jwt}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            matchId: matchId,
+                            attackerId: currentUser.id,
+                            attackerUsername: currentUser.username,
+                            defenderId: botInRoom.id,
+                            defenderUsername: `Bot ${botInRoom.id}`,
+                            roomId: roomId,
+                            action: 'START',
+                            isBot: true
                         })
                     });
                     
@@ -802,6 +991,40 @@ export default function Match(){
         }
     }
 
+    const handleNpcLossDiscard = async ({ cardId, fromWhere }) => {
+        if (!cardId || !fromWhere || !currentPlayer[0]?.id) {
+            setIsNpcLossModalOpen(false);
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/lose-against-npc`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cardId,
+                    fromWhere
+                })
+            });
+
+            if (!res.ok) {
+                console.error('Error discarding card after NPC loss:', res.status);
+                alert('No se pudo descartar la carta tras perder contra el NPC.');
+            } else {
+                await fetchCards();
+                await fetchOtherPlayersBags();
+            }
+        } catch (error) {
+            console.error('Error discarding card after NPC loss:', error);
+            alert('Ocurrió un error al descartar la carta.');
+        } finally {
+            setIsNpcLossModalOpen(false);
+        }
+    }
+
 
 
     
@@ -877,6 +1100,7 @@ export default function Match(){
         if (updatedMatch.players) {
             setPlayer(updatedMatch.players);
         }
+        fetchCards()
     };
 
     //console.log('match', match)
@@ -909,48 +1133,12 @@ if (!match) {
         return Array.isArray(neighbors) && neighbors.includes(toId);
     };
 
-//console.log('hand', handCards)
+console.log('handCards', handCards)
 
 return (
         <div className="match-container">
-            <div className="players-avatars-section">
-                {playersList.map((p) => (
-                    <div key={p.user.id} className="player-avatar-card">
-                        <div className="player-info-row">
-                            <div style={{
-                                borderRadius: '50%',
-                                border: `4px solid ${getPlayerColor(p.id)}`,
-                                display: 'inline-block',
-                                padding: '3px',
-                                flexShrink: 0
-                            }}>
-                                {p.user.avatar ? (
-                                    <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" style={{ borderRadius: '50%' }} />
-                                ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" style={{ borderRadius: '50%' }} />}
-                            </div>
-                            <p className="player-username">{p.user.username}</p>
-                        </div>
-                        <div className="player-bag-display">
-                            {otherPlayersBags[p.id] && otherPlayersBags[p.id].length > 0 ? (     
-                                    <div className="bag-cards-container">
-                                        {otherPlayersBags[p.id].map((carta, index) => (
-                                            <img 
-                                                key={index} 
-                                                src={`/resources${carta.frontImage}`} 
-                                                alt={`Carta ${carta.letter}`} 
-                                                className="player-bag-card"
-                                                title={carta.letter}
-                                            />
-                                        ))}
-                                    </div>
-                            ) : (
-                                <p className="empty-bag">Empty Bag</p>
-                            )}
-                        </div>
-                    </div>
-                ))}
-            </div>
 
+            {/*Modal donde se tiran los dados nada más empezar la partida para elegir el orden de los turnos*/}
             <StartDiceModal 
                 isOpen={!isSpectator && isDiceModalOpen && (match?.turnNumber === 0 || match?.currentTurnPhase === null)}
                 onClose={() => setIsDiceModalOpen(false)}
@@ -959,47 +1147,85 @@ return (
             />
             
             <div className="match-board" style={{ position: 'relative' }}>
-                <div className="deck-column">
-                    <div className="deck-section">
-                        <button 
-                            onClick={ () => {
-                                if (numCardsDrawn < 7) {
-                                    drawCard()
-                                } else {
-                                    alert("No puedes robar más de 7 cartas")
-                                } 
-                            }}
-                            disabled={!canDraw}
-                            style={{ 
-                                border: "none", 
-                                background: "transparent", 
-                                padding: 0, 
-                                cursor: !canDraw ? "not-allowed" : "pointer", 
-                                opacity: !canDraw ? 0.4 : 1,
-                                outline: "none",
-                            }}
-                        >
-                            <img 
-                                src="/backCard.png" 
-                                alt="Robar carta"
-                                style={{ width: "150px", height: "auto", outline: "none", }}
-                            />
-                        </button>
-                    </div>
-                    <div className="discard-pile-section">
-                        {discardPile.length > 0 ? (
-                            <img 
-                                src={`/resources${discardPile[discardPile.length - 1].frontImage}`} 
-                                alt="Última carta descartada"
-                                style={{ width: "150px", height: "auto" }}
-                            />
-                        ) : (
-                            <div className="dicard-pile">
-                                Empty
+                <div className="player-and-decks-section"> 
+                    <div className="current-player"> 
+                        <div className="current-player-info"> 
+                            <div style={{
+                                    borderRadius: '50%',
+                                    border: `4px solid ${getPlayerColor(currentPlayer?.id)}`,
+                                    display: "flex",
+                                    flexShrink: 0,
+                                    boxSizing: 'border-box',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
+                                    {currentPlayer?.user?.avatar ? (
+                                        <img src={currentPlayer.user.avatar} alt={`${currentPlayer.user.username} avatar`} className="current-avatar-img" style={{ borderRadius: '50%' }} />
+                                    ) : <img src="/Avatar_default.png" alt="Default avatar" className="current-avatar-img" style={{ borderRadius: '50%' }} />}
+                                </div>
+                                <p className="player-username">{currentPlayer?.user.username}</p>
+
+                        </div>
+                        <div className="points-section">
+                                        <div className="action-points">
+                                            <h1>{actionPoints}</h1>
+                                            <p>Action points </p>
+                                        </div>
+
+                                        <div className="action-points">
+                                            <h1>{strength}</h1>
+                                            <p>strength </p>
+                                        </div>
+                    
                             </div>
-                        )}
+                        
+                    </div>
+
+
+
+                    <div className="deck-row">
+                            <button 
+                                onClick={ () => {
+                                    if (numCardsDrawn < 7) {
+                                        drawCard()
+                                    } else {
+                                        alert("No puedes robar más de 7 cartas")
+                                    } 
+                                }}
+                                disabled={!canDraw}
+                                style={{ 
+                                    border: "none", 
+                                    background: "transparent", 
+                                    padding: 0, 
+                                    cursor: !canDraw ? "not-allowed" : "pointer", 
+                                    opacity: !canDraw ? 0.4 : 1,
+                                    outline: "none",
+                                }}
+                            >
+                                <img 
+                                    src="/backCard.png" 
+                                    alt="Robar carta"
+                                    className="deck-pile"
+                                />
+                            </button>
+
+                        <div className="discard-pile-section">
+                            {discardPile.length > 0 ? (
+                                <img 
+                                    src={`/resources${discardPile[discardPile.length - 1].frontImage}`} 
+                                    alt="Última carta descartada"
+                                    style={{ width: "150px", height: "auto" }}
+                                />
+                            ) : (
+                                <div className="dicard-pile">
+                                    Empty
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
+
+                
 
                 <div className="map-column" style={{ position: 'relative' }}>
                     <map name="Map">
@@ -1060,7 +1286,7 @@ return (
                                     width: '30px',
                                     height: '30px',
                                     borderRadius: '50%',
-                                    border: currentPlayer[0]?.id === player.id ? '3px solid yellow' : `3px solid ${getPlayerColor(player.id)}`,
+                                    border: currentPlayer?.id === player.id ? '3px solid yellow' : `3px solid ${getPlayerColor(player.id)}`,
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
                                     zIndex: 10,
                                     pointerEvents: 'none'
@@ -1114,17 +1340,49 @@ return (
                     })}
                 </div>
                 
-            <div className="points-section">
-                                <div className="action-points">
-                                    <h1>{actionPoints}</h1>
-                                    <p>Action points </p>
-                                </div>
-
-                                <div className="action-points">
-                                    <h1>{strength}</h1>
-                                    <p>strength </p>
-                                </div>
+                <div className="other-players-section"> 
+                    <div className="players-avatars-section">
+                    {playersList.map((p) => (
+                        <div key={p.user.id} className="player-avatar-card">
+                            
+                            <div className="player-bag-display">
+                                {otherPlayersBags[p.id] && otherPlayersBags[p.id].length > 0 ? (     
+                                        <div className="bag-cards-container">
+                                            {otherPlayersBags[p.id].map((carta, index) => (
+                                                <img 
+                                                    key={index} 
+                                                    src={`/resources${carta.frontImage}`} 
+                                                    alt={`Carta ${carta.letter}`} 
+                                                    className="player-bag-card"
+                                                    title={carta.letter}
+                                                />
+                                            ))}
+                                        </div>
+                                ) : (
+                                    <p className="empty-bag">Empty Bag</p>
+                                )}
                             </div>
+                            
+                            <div className="player-info-row">
+                                <div style={{
+                                    borderRadius: '50%',
+                                    border: `4px solid ${getPlayerColor(p.id)}`,
+                                    display: 'inline-block',
+                                    padding: '3px',
+                                    flexShrink: 0
+                                }}>
+                                    {p.user.avatar ? (
+                                        <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" style={{ borderRadius: '50%' }} />
+                                    ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" style={{ borderRadius: '50%' }} />}
+                                </div>
+                                <p className="player-username">{p.user.username}</p>
+                            </div>
+                            
+                        </div>
+                    ))}
+                </div>
+            </div>
+            
             </div>
 
             {/*Mensaje de movimiento de los NPC*/}
@@ -1135,6 +1393,9 @@ return (
                     </div>
                 </div>
             )}
+
+
+
 
             {match?.currentTurnUserId === currentUser?.id && (
                 <button
@@ -1183,7 +1444,7 @@ return (
                                 style={{
                                     backgroundColor: '#ff4c4cff', // Color de fondo para jugadores
                                     color: 'white',
-                                    fontWeight: currentPlayer[0]?.id === player.id ? 'bold' : 'normal' // Resalta tu jugador
+                                    fontWeight: currentPlayer?.id === player.id ? 'bold' : 'normal' // Resalta tu jugador
                                 }}
                             >
                                 <td style={{ padding: '3px' }}>{player.user.username}</td>
@@ -1210,38 +1471,35 @@ return (
             */}
             <div className="player-section">
                 <div className="player-hand">
-                    {Array.isArray(handCards) && handCards.map((carta, index) => (
-                                    <div key={index} >
-                                        <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                    </div>
-                    ))}
+                    <div className="hand-cards"> 
+                        {Array.isArray(handCards) && handCards.map((carta) => (
+                                        <div key={carta.id} >
+                                            <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                        </div>
+                        ))}
+                    </div>
                 </div>
                 <div className="player-bag">
-                    {Array.isArray(bagCards) && bagCards.map((carta, index) => (
-                                    <div key={index} >
-                                        <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                    </div>
-                    ))}
+                    <div className="bag-cards"> 
+                        {Array.isArray(bagCards) && bagCards.map((carta) => (
+                                        <div key={carta.id} >
+                                            <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                        </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
             <div>
+
             <button className="bag-button"
-                onClick={() => setBagOpen(true)}
-                disabled={
-                match.currentTurnUserId !== currentUser.id }
-                title="Accede to your bag"
-            >
-                Form my bag
-            </button>
-            <button className="bag-button"
-                onClick={() => setDiscardHandOpen(true)}
+                onClick={() => setDiscardPhaseOpen(true)}
                 disabled={
                 match.currentTurnUserId !== currentUser.id }
                 title="Discard cards from hand"
                 style={{ marginLeft: "10px" }}
             >
-                Discard
+                Discard and bag
             </button>
             <button className="bag-button"
                 title="Discard cards from hand"
@@ -1287,8 +1545,165 @@ return (
 
                     // currentUserWon aquí representa si el atacante ganó (porque solo el atacante ejecuta esto)
                     const attackerWins = currentUserWon;
+                    
+                    // Obtener el perdedor (puede ser jugador o NPC)
+                    const isDefenderNPC = !fightDefender?.user;
                     const loserUser = attackerWins ? fightDefender?.user : fightAttacker?.user;
-                    const winnerUser = attackerWins ? fightAttacker?.user : fightDefender?.user;
+                    const loser = attackerWins ? fightDefender : fightAttacker;
+                    const winnerUser = attackerWins ? fightAttacker?.user : (fightDefender?.user || fightDefender);
+
+                    // Si el defensor es un NPC
+                    if (isDefenderNPC) {
+                        try {
+                            if (attackerWins) {
+                                // El jugador ganó contra el bot
+                                console.log('Player won against NPC. Defender is NiallCampbell:', fightDefender?.isNiallCampbell);
+                                
+                                // Si es NiallCampbell, roba de la pila de descarte
+                                if (fightDefender?.isNiallCampbell) {
+                                    console.log('Drawing from discard pile for beating Niall Campbell...');
+                                    await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0]?.id}/playerWinsNiallCampbell`, {
+                                        method: "POST",
+                                        headers: {
+                                            Authorization: `Bearer ${jwt}`,
+                                            Accept: 'application/json',
+                                            'Content-Type': 'application/json',
+                                        },
+                                    }).then(r => r.json()).then(data => {
+                                        // Actualizamos inmediatamente el mazo; la mano se sincroniza por WebSocket
+                                        setDeck(data.deck);
+                                    });
+                                } else {
+                                    // Si es un NPC normal, roba 2 cartas de recompensa
+                                    console.log('Drawing 2 reward cards for beating regular NPC...');
+                                    await drawCardForWinner(currentPlayer?.[0]?.id);
+                                    await drawCardForWinner(currentPlayer?.[0]?.id);
+                                }
+                                
+                                // Mover al jugador ganador a la habitación donde estaba el bot
+                                if (defenderRoomId) {
+                                    console.log('Moving winner to defender room:', defenderRoomId);
+                                    await movePlayerToRoom(fightAttacker?.user?.id, defenderRoomId);
+                                }
+                                
+                                // Enviar al bot perdedor a una habitación aleatoria
+                                const allRoomIds = [
+                                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                                    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
+                                ];
+                                
+                                const occupiedRoomIds = new Set();
+                                (match?.players || []).forEach(p => {
+                                    const rid = p.currentRoom?.id || p.roomId || p.room?.id;
+                                    const normalized = normalizeRoomId(rid);
+                                    if (normalized) occupiedRoomIds.add(normalized);
+                                });
+                                (match?.npcs || []).forEach(npc => {
+                                    const rid = npc.room?.id;
+                                    const normalized = normalizeRoomId(rid);
+                                    if (normalized) occupiedRoomIds.add(normalized);
+                                });
+                                
+                                const candidates = allRoomIds.filter(r => !occupiedRoomIds.has(r) && r !== normalizeRoomId(defenderRoomId));
+                                let botRandomRoomId = null;
+                                if (candidates.length > 0) {
+                                    botRandomRoomId = candidates[Math.floor(Math.random() * candidates.length)];
+                                } else {
+                                    const fallback = allRoomIds.filter(r => r !== normalizeRoomId(defenderRoomId));
+                                    botRandomRoomId = fallback[Math.floor(Math.random() * fallback.length)];
+                                }
+                                
+                                console.log('Moving NPC loser to random room:', botRandomRoomId);
+                                await fetch(`/api/v1/matches/${matchId}/npc/location`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Authorization': `Bearer ${jwt}`,
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        npcId: fightDefender.id,
+                                        roomId: botRandomRoomId
+                                    })
+                                });
+                                
+                                // Actualizar el estado del match después de mover al NPC
+                                await fetchMatchAndPlayers();
+                                
+                                // Incrementar fuerza del bot perdedor
+                                await fetch(`/api/v1/matches/${matchId}/npc-strength`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Authorization': `Bearer ${jwt}`,
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        npcId: fightDefender.id,
+                                        strength: (fightDefender?.strength || 1) + 1
+                                    })
+                                });
+                            } else {
+                                // El jugador perdió contra el bot: mover solo al jugador a habitación aleatoria e incrementar fuerza del jugador
+                                console.log('Player lost against NPC. Moving player to random room and increasing player strength...');
+                                
+                                const allRoomIds = [
+                                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                                    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
+                                ];
+                                
+                                const playerRoomId = normalizeRoomId(currentPlayer?.[0]?.currentRoom?.id);
+                                
+                                const occupiedRoomIds = new Set();
+                                (match?.players || []).forEach(p => {
+                                    const rid = p.currentRoom?.id || p.roomId || p.room?.id;
+                                    const normalized = normalizeRoomId(rid);
+                                    if (normalized) occupiedRoomIds.add(normalized);
+                                });
+                                (match?.npcs || []).forEach(npc => {
+                                    const rid = npc.room?.id;
+                                    const normalized = normalizeRoomId(rid);
+                                    if (normalized) occupiedRoomIds.add(normalized);
+                                });
+                                
+                                // Mover al jugador perdedor a una sala aleatoria
+                                const candidatesPlayer = allRoomIds.filter(r => !occupiedRoomIds.has(r) && r !== playerRoomId);
+                                let randomRoomIdPlayer = null;
+                                if (candidatesPlayer.length > 0) {
+                                    randomRoomIdPlayer = candidatesPlayer[Math.floor(Math.random() * candidatesPlayer.length)];
+                                } else {
+                                    const fallback = allRoomIds.filter(r => r !== playerRoomId);
+                                    randomRoomIdPlayer = fallback[Math.floor(Math.random() * fallback.length)];
+                                }
+                                
+                                console.log('Moving player loser to random room:', randomRoomIdPlayer);
+                                await moveLoserToRandomRoom(currentUser.id, randomRoomIdPlayer);
+                                
+                                // Incrementar fuerza del jugador perdedor
+                                await fetch(`/api/v1/matches/${matchId}/player-strength`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Authorization': `Bearer ${jwt}`,
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        userId: currentUser.id,
+                                        strength: (currentPlayer?.[0]?.strength || 1) + 1
+                                    })
+                                });
+
+                                if ((handCards?.length || 0) > 0 || (bagCards?.length || 0) > 0) {
+                                    setIsNpcLossModalOpen(true);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error handling NPC fight result:', error);
+                        }
+                        
+                        setIsFightModalOpen(false);
+                        setFightDefender(null);
+                        setFightAttacker(null);
+                        setPendingTargetRoom(null);
+                        return;
+                    }
 
                     // Si no hay perdedor identificado, no mover
                     if (!loserUser) {
@@ -1437,32 +1852,18 @@ return (
                     Finalizar partida
                 </button>
 
-        <BagModal
-            isVisible={bagOpen}
+
+        <DiscardPhaseModal
+            isVisible={discardPhaseOpen}
             hand={handCards}
             bag={bagCards}
             deck={deck}
-            player={currentPlayer[0]}
-            onClose={() => setBagOpen(false)}
-            onSave={async () =>{
-                await fetchCards()
-                setBagOpen(false)
-
-            }
-                }
-            />
-
-        <DiscardHandModal
-            isVisible={discardHandOpen}
-            hand={handCards}
-            bag={bagCards}
-            deck={deck}
-            player={currentPlayer[0]}
-            onClose={() => setDiscardHandOpen(false)}
+            player={currentPlayer}
+            onClose={() => setDiscardPhaseOpen(false)}
             updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
             onSave={async () =>{
                 await fetchCards()
-                setDiscardHandOpen(false)
+                setDiscardPhaseOpen(false)
             }}
             />
 
@@ -1470,7 +1871,7 @@ return (
             isOpen={isStealModalOpen}
             loserId={stealLoserPlayerId}
             matchId={matchId}
-            winnerId={currentPlayer[0]?.id}
+            winnerId={currentPlayer?.id}
             onClose={() => {
                 setIsStealModalOpen(false);
                 setStealLoserPlayerId(null);
@@ -1480,6 +1881,14 @@ return (
                 setIsStealModalOpen(false);
                 setStealLoserPlayerId(null);
             }}
+        />
+
+        <NpcLossDiscardModal
+            isOpen={isNpcLossModalOpen}
+            handCards={handCards}
+            bagCards={bagCards}
+            onClose={() => setIsNpcLossModalOpen(false)}
+            onDiscard={handleNpcLossDiscard}
         />
 
       

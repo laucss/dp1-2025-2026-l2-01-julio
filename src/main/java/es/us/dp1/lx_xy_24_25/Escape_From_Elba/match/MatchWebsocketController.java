@@ -38,6 +38,13 @@ public class MatchWebsocketController {
         );
     }
 
+    public void notifyNpcLocationUpdate(Integer matchId, NpcLocationUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".npc.location",
+            update
+        );
+    }
+
     public void notifyDiceTotalsUpdate(Integer matchId, DiceTotalsUpdateDTO update) {
         messagingTemplate.convertAndSend(
             "/topic/match." + matchId + ".fight.totals",

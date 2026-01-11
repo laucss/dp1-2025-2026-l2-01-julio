@@ -92,13 +92,13 @@ public class DeckService {
    
 
     /*
-     * Método para una vez, acabadas las cartas para robar, coja las descartadas, las baraje de nuevo y las devuelva al mazo de robar
+     * Método que una vez, acabadas las cartas para robar, coge las descartadas, las baraja de nuevo y las devuelve al mazo de robar
      */
 
     
     @Transactional
-    public DeckInGame shuffleAndDicardedToNotDiscarded(Integer macthId, DeckInGame deck){
-        // checkear si quedan menos de x cartas en vez de cero 
+    public DeckInGame shuffleAndDicardedToNotDiscarded(DeckInGame deck){
+        // checkear si quedan menos de x cartas en vez de cero?
 
 
         List<Card> discardedCards = deck.getDiscardedCards();
@@ -119,7 +119,7 @@ public class DeckService {
     public Card drawCard(Integer matchId){
         DeckInGame deck = findDeckById(matchId); 
         if (deck.getNotDiscardedCards().isEmpty()) {
-            deck = shuffleAndDicardedToNotDiscarded(matchId, deck); 
+            deck = shuffleAndDicardedToNotDiscarded(deck); 
 }
 
         Card card = deck.getNotDiscardedCards().getLast();
