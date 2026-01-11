@@ -116,6 +116,9 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.DELETE,"/api/v1/achievements/**").hasAuthority(ADMIN)
                 .requestMatchers(HttpMethod.POST,"/api/v1/users/**").hasAuthority(ADMIN)
                 .requestMatchers(HttpMethod.DELETE,"/api/v1/users/**").hasAuthority(ADMIN)
+                .requestMatchers(HttpMethod.GET,"/api/v1/matches/finishedAndInProgress").hasAuthority(ADMIN)
+                .requestMatchers(HttpMethod.GET,"/api/v1/matches/finishedMatches").hasAuthority(ADMIN)
+
 
                 // API restringida para jugadores o administradores
                 .requestMatchers("/api/v1/matches/**").hasAnyAuthority(PLAYER, ADMIN)
