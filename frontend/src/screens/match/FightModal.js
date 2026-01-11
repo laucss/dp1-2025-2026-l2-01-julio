@@ -1,22 +1,443 @@
-import React from 'react';
-import '../../static/css/match/discardModal.css';
+import React, {useState, useEffect} from 'react';
+import '../../static/css/match/fightModal.css';
+import Fight from '../../static/images/Fight.png';
+import tokenService from '../../services/token.service';
+import getIdFromUrl from '../../util/getIdFromUrl';
+import WeaponModal from './WeaponModal';
 
-export default function FightModal({ isOpen, onClose, opponent, onResolve }) {
-    if (!isOpen) return null;
+export default function FightModal({ isOpen, onClose, defender, attacker, onResolve, stompClient, bagCards = [] }) {
+    const currentUser = tokenService.getUser();
+    const jwt = tokenService.getLocalAccessToken();
+    const matchId = getIdFromUrl(2);
+    const isAttacker = currentUser?.id === attacker?.user?.id;
+    const isDefender = currentUser?.id === defender?.user?.id;
 
-    //TODO: Configurar el modal de pelea
+    const [buttonStateAttacker, setButtonStateAttacker] = useState(false);
+    const [buttonStateDefender, setButtonStateDefender] = useState(false);
+    // fuerza de cada jugador 
+    const [attackerStrength, setAttackerStrength] = useState(attacker?.strength || 1);
+    const [defenderStrength, setDefenderStrength] = useState(defender?.strength || 1);
+
+    //total de puntos
+    const [totalAttacker, setTotalAttacker] = useState(0)
+    const [totalDefender, setTotalDefender] = useState(0)
+
+    // armas seleccionadas 
+    const [weaponsAttacker, setWeaponsAttacker] = useState([]);
+    const [weaponsDefender, setWeaponsDefender] = useState([]);
+
+    const [whiteDice, setWhiteDice] = useState('1');
+    const [blackDice, setBlackDice] = useState('1');
+    const [whiteRolled, setWhiteRolled] = useState(false);
+    const [blackRolled, setBlackRolled] = useState(false);
+    const [whiteRolling, setWhiteRolling] = useState(false);
+    const [blackRolling, setBlackRolling] = useState(false);
+
+    // Estado del modal de armas
+    const [isWeaponModalOpen, setIsWeaponModalOpen] = useState(false);
+    const [currentWeaponUser, setCurrentWeaponUser] = useState(null);
+
+    useEffect(() => {
+        setAttackerStrength(Math.min(6, attacker?.strength || 1));
+        setDefenderStrength(Math.min(6, defender?.strength || 1));
+    }, [attacker?.strength, defender?.strength]);
+
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !isOpen) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight.dice`, (msg) => {
+            const diceUpdate = JSON.parse(msg.body);
+            
+            if (diceUpdate.diceType === 'WHITE') {
+                setWhiteDice(diceUpdate.diceValue.toString());
+                setWhiteRolled(true);
+            } else if (diceUpdate.diceType === 'BLACK') {
+                setBlackDice(diceUpdate.diceValue.toString());
+                setBlackRolled(true);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, isOpen]);
+
+    // Suscribirse a las actualizaciones de totales en combate
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !isOpen) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight.totals`, (msg) => {
+            const totalsUpdate = JSON.parse(msg.body);
+            
+            setTotalAttacker(totalsUpdate.attackerTotal);
+            setTotalDefender(totalsUpdate.defenderTotal);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, isOpen]);
+
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !isOpen) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight.weapons`, (msg) => {
+            const weaponsUpdate = JSON.parse(msg.body);
+            
+            if (weaponsUpdate.playerRole === 'ATTACKER') {
+                setWeaponsAttacker(weaponsUpdate.weapons || []);
+                setTotalAttacker(weaponsUpdate.totalAttacker);
+            } else if (weaponsUpdate.playerRole === 'DEFENDER') {
+                setWeaponsDefender(weaponsUpdate.weapons || []);
+                setTotalDefender(weaponsUpdate.totalDefender);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, isOpen]);
+
+    // Suscribirse a las actualizaciones del estado Ready
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !isOpen) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight.ready`, (msg) => {
+            const readyUpdate = JSON.parse(msg.body);
+            
+            if (readyUpdate.playerRole === 'ATTACKER') {
+                setButtonStateAttacker(readyUpdate.isReady);
+            } else if (readyUpdate.playerRole === 'DEFENDER') {
+                setButtonStateDefender(readyUpdate.isReady);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, isOpen]);
+
+    // Resetear dados cuando se abre el modal
+    useEffect(() => {
+        if (isOpen) {
+            setWhiteDice('1');
+            setBlackDice('1');
+            setWhiteRolled(false);
+            setBlackRolled(false);
+
+            setTotalAttacker(attackerStrength)
+            setTotalDefender(defenderStrength)
+
+            setWeaponsAttacker([]);
+            setWeaponsDefender([]);
+
+            setButtonStateAttacker(false);
+            setButtonStateDefender(false);
+        }
+    }, [isOpen]);
+
+    
+    useEffect(() => {
+        if (whiteRolled) {
+            setTotalAttacker(attackerStrength + parseInt(whiteDice, 10) + getTotalWeaponsBonus(weaponsAttacker));
+        }
+    }, [weaponsAttacker, attackerStrength, whiteDice, whiteRolled]);
+
+    
+    useEffect(() => {
+        if (blackRolled) {
+            setTotalDefender(defenderStrength + parseInt(blackDice, 10) + getTotalWeaponsBonus(weaponsDefender));
+        }
+    }, [weaponsDefender, defenderStrength, blackDice, blackRolled]);
+
+    
+    useEffect(() => {
+        if (buttonStateAttacker && buttonStateDefender && whiteRolled && blackRolled) {
+            
+            const attackerWins = totalAttacker >= totalDefender;  
+            const currentUserWon = attackerWins ? isAttacker : isDefender;
+            setTimeout(() => {
+                onResolve(currentUserWon);
+            }, 700);
+        }
+    }, [buttonStateAttacker, buttonStateDefender, whiteRolled, blackRolled, totalAttacker, totalDefender]);
+
+    const rollDice = async (diceType) => {
+        const roll = Math.floor(Math.random() * 6) + 1;
+        const diceTypeUpper = diceType === 'Negro' ? 'BLACK' : 'WHITE';
+        const setRolling = diceType === 'Negro' ? setBlackRolling : setWhiteRolling;
+        setRolling(true);
+        try {
+            let newTotalAttacker = totalAttacker;
+            let newTotalDefender = totalDefender;
+            
+            if (diceType === 'Negro') {
+                newTotalDefender = defenderStrength + roll + weaponsDefender;
+                setTotalDefender(newTotalDefender);
+                setBlackDice(roll.toString());
+                setBlackRolled(true);
+            }
+            if (diceType === 'Blanco') {
+                newTotalAttacker = attackerStrength + roll + weaponsAttacker;
+                setTotalAttacker(newTotalAttacker);
+                setWhiteDice(roll.toString());
+                setWhiteRolled(true);
+            }
+            
+            await fetch(`/api/v1/matches/${matchId}/notify-fight-dice`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    matchId: matchId,
+                    playerId: currentUser.id,
+                    playerUsername: currentUser.username,
+                    diceType: diceTypeUpper,
+                    diceValue: roll
+                })
+            });
+
+            await fetch(`/api/v1/matches/${matchId}/notify-dice-totals`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    matchId: matchId,
+                    attackerId: attacker.id,
+                    attackerTotal: diceType === 'Blanco' ? newTotalAttacker : totalAttacker,
+                    defenderId: defender.id,
+                    defenderTotal: diceType === 'Negro' ? newTotalDefender : totalDefender
+                })
+            });
+
+            return roll;
+        } finally {
+            setTimeout(() => setRolling(false), 200);
+        }
+    };
+
+    const toggleReadyState = async (playerRole, currentState) => {
+        const newState = !currentState;
+        
+        
+        if (playerRole === 'ATTACKER') {
+            setButtonStateAttacker(newState);
+        } else {
+            setButtonStateDefender(newState);
+        }
+        
+        await fetch(`/api/v1/matches/${matchId}/notify-ready-state`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${jwt}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                matchId: matchId,
+                playerId: currentUser.id,
+                playerRole: playerRole,
+                isReady: newState
+            })
+        });
+    };
+
+    const openWeaponModal = (role) => {
+        setCurrentWeaponUser(role);
+        setIsWeaponModalOpen(true);
+    };
+
+    const getTotalWeaponsBonus = (weapons) => {
+        return weapons.reduce((sum, w) => sum + (w.bonus || 0), 0);
+    };
+
+    const handleWeaponSelected = async (weaponData) => {
+        let newWeapons, playerRole, newTotal;
+        
+        if (currentWeaponUser === 'ATTACKER') {
+            newWeapons = [...weaponsAttacker, weaponData];
+            playerRole = 'ATTACKER';
+            newTotal = attackerStrength + parseInt(whiteDice, 10) + getTotalWeaponsBonus(newWeapons);
+            setWeaponsAttacker(newWeapons);
+            setTotalAttacker(newTotal);
+        } else {
+            newWeapons = [...weaponsDefender, weaponData];
+            playerRole = 'DEFENDER';
+            newTotal = defenderStrength + parseInt(blackDice, 10) + getTotalWeaponsBonus(newWeapons);
+            setWeaponsDefender(newWeapons);
+            setTotalDefender(newTotal);
+        }
+        
+        await fetch(`/api/v1/matches/${matchId}/notify-fight-weapons`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${jwt}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                matchId: matchId,
+                playerId: currentUser.id,
+                playerRole: playerRole,
+                weapons: newWeapons,
+                totalAttacker: playerRole === 'ATTACKER' ? newTotal : totalAttacker,
+                totalDefender: playerRole === 'DEFENDER' ? newTotal : totalDefender
+            })
+        });
+        
+        setIsWeaponModalOpen(false);
+        setCurrentWeaponUser(null);
+    };
+
+    if (!isOpen || !attacker || !defender) return null;
+
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content-wrapper" onClick={(e) => e.stopPropagation()}>
-                <h2>¡Encuentro!</h2>
-                <p>Has entrado en la misma habitación que <b>{opponent?.user?.username || 'otro jugador'}</b>.</p>
-                <p>Elige quién gana la pelea:</p>
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                    <button onClick={() => onResolve(true)}>Tú ganas</button>
-                    <button onClick={() => onResolve(false)}>{opponent?.user?.username || 'Oponente'} gana</button>
-                    <button onClick={onClose}>Cerrar</button>
+        <div className="modal-fight-overlay">
+            <div className="modal-fight-content-wrapper">
+                
+                <div className='combat-container'>
+                    
+                    <div className='combat-top'> 
+
+                        <div className='combat-panel'> {/*zona del atacante */}
+                            <div className='combat-header'> 
+                                <span>{attacker?.user?.username || 'Attacker'}</span>
+                                <img 
+                                    src={attacker.user.avatar}
+                                    alt={`${attacker.user.username}'s avatar`}
+                                    style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                                />
+                            </div>
+
+                            <div className="total-box">{whiteRolled ? totalAttacker : '?'}</div>
+
+                            {/*FUERZA */}
+                            <div className="calc-row">
+                                <div className="calc-box"> Strength: {attackerStrength}</div>
+
+                                <span className="calc-operator">+</span>
+                                        
+                                <button
+                                    onClick={() => rollDice('Blanco')}
+                                    className='dice-button'
+                                    title="Dado Blanco"
+                                    disabled={!isAttacker || whiteRolled}
+                                >
+                                    <img
+                                        src={`/Dice/B${whiteDice}.png`}
+                                        alt="Dado Blanco"
+                                        className={`dice ${whiteRolling ? 'rolling' : ''}`}
+                                    />
+                                </button>
+
+                                <span className="calc-operator">+</span>
+
+                                <div className="calc-box">Weapons: {getTotalWeaponsBonus(weaponsAttacker)}</div>
+                            </div>
+                            
+                        </div>
+
+                        <div className='vs-container'>
+                            <img src={Fight} alt="Fight" className="fight-logo-central" />
+                        </div>
+
+                        <div className='combat-panel'> {/*zona del oponente */}
+                            <div className='combat-header'> 
+                                <span>{defender?.user?.username || "Defender"}</span>
+                                <img 
+                                    src={defender.user.avatar}
+                                    alt={`${defender.user.username}'s avatar`}
+                                    style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                                />
+                            </div>
+
+                            <div className="total-box">{blackRolled ? totalDefender : '?'}</div>
+
+                            {/*FUERZA */}
+                            <div className="calc-row">
+                                <div className="calc-box">Strength: {defenderStrength}</div>
+
+                                <span className="calc-operator">+</span>
+                                        
+                                <button
+                                    onClick={() => rollDice("Negro")}
+                                    disabled={!isDefender || blackRolled}
+                                    className='dice-button'
+                                    title="Dado Negro"
+
+                                >
+                                    <img
+                                        src={`/Dice/N${blackDice}.png`}
+                                        alt="Dado Negro"
+                                        className={`dice ${blackRolling ? 'rolling' : ''}`}
+                                    />
+                                </button>
+
+                                <span className="calc-operator">+</span>
+
+                                <div className="calc-box">Weapons: {getTotalWeaponsBonus(weaponsDefender)}</div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+                    {/* ZONA INFERIOR */}
+                    <div className="combat-bottom"> 
+
+                        <div className='action-column'>
+                            <div className='actions'>
+                                <button 
+                                    className="action-button"
+                                    onClick={() => openWeaponModal('ATTACKER')}
+                                    disabled={!isAttacker}
+                                    title={isAttacker ? "Weapon" : "Solo el atacante puede formar arma"}
+                                >
+                                    Weapon
+                                </button>
+                            </div>
+                            <button 
+                                className={`ready-button ${buttonStateAttacker ? 'green' : ''}`}
+                                onClick={() => toggleReadyState('ATTACKER', buttonStateAttacker)}
+                                disabled={!isAttacker}
+                                title={isAttacker ? "Ready" : "Solo el atacante puede pulsar listo"}
+                            >
+                                Ready
+                            </button>
+                        </div>
+
+                        <div className='action-column'>
+                            <div className='actions'>
+                                <button 
+                                    className="action-button"
+                                    onClick={() => openWeaponModal('DEFENDER')}
+                                    disabled={!isDefender}
+                                    title={isDefender ? "Weapon" : "Solo el defensor puede formar arma"}
+                                >
+                                    Weapon
+                                </button>
+                            </div>
+                            <button 
+                                className={`ready-button ${buttonStateDefender ? 'green' : 'red'}`}
+                                onClick={() => toggleReadyState('DEFENDER', buttonStateDefender)}
+                                disabled={!isDefender}
+                                title={isDefender ? "Ready" : "Solo el defensor puede pulsar listo"}
+                            > 
+                                Ready
+                            </button>
+                        </div>
+
+                    </div>
+
+
                 </div>
             </div>
+
+            <WeaponModal
+                isVisible={isWeaponModalOpen}
+                bagCards={bagCards}
+                onClose={() => {
+                    setIsWeaponModalOpen(false);
+                    setCurrentWeaponUser(null);
+                }}
+                player={currentWeaponUser === 'ATTACKER' ? attacker : defender}
+                onWeaponSelected={handleWeaponSelected}
+            />
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import React, { Profiler, useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
 import AppNavbar from "./AppNavbar";
@@ -26,6 +26,7 @@ import JoinMatch from "./screens/match/joinMatch";
 import MatchList from "./screens/prueba";
 import WaitingLobby from "./screens/match/waitingLobby";
 import Match from "./screens/match/Match";
+import Ranking from "./screens/statistics/Ranking";
 
 //import { useState } from "react";
 //import { fetchUser } from "./services/user.service";
@@ -48,6 +49,7 @@ function App() {
   //const [chatIsShown, setChatIsShown] = useState(false);
 
   const jwt = tokenService.getLocalAccessToken();
+  const location = useLocation();
 
   // Marcar usuario como ONLINE al cargar la app y OFFLINE al cerrar
   useEffect(() => {
@@ -80,7 +82,7 @@ function App() {
   }
 
   let adminRoutes = <></>;
-  let ownerRoutes = <></>;
+  let playerRoutes = <></>;
   let userRoutes = <></>;
   //let vetRoutes = <></>; //TODO: BORRAR
   let publicRoutes = <></>;
@@ -97,7 +99,7 @@ function App() {
         </>)
     }
     if (role === "PLAYER") {
-      ownerRoutes = (
+      playerRoutes = (
         <>
           <Route path="/users/:username" exact={true} element={<Profile />} />
           <Route path="users/:username/achievements" element={<PrivateRoute><AchievementUserList /></PrivateRoute>} />
@@ -111,6 +113,8 @@ function App() {
       <>        
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/ranking" element={<Ranking />} />
+        <Route path="/rules" element={<Rules />} />
       </>
     )
   } else {
@@ -120,7 +124,7 @@ function App() {
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/friends" element={<PrivateRoute><Friends /></PrivateRoute>} />
-        <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
+        <Route path="/ranking" element={<PrivateRoute><Ranking /></PrivateRoute>} />
         <Route path="/rules" element={<PrivateRoute><Rules /></PrivateRoute>} />
         <Route path="/matchs/new" element={<PrivateRoute><CreateMatch/></PrivateRoute>}></Route>
         <Route path="/lobbies" element={<PrivateRoute><JoinMatch/></PrivateRoute>}></Route>
@@ -133,7 +137,7 @@ function App() {
     <div>
       <ErrorBoundary FallbackComponent={ErrorFallback} >
         {/*Poner cosas del chat*/}
-            <AppNavbar />
+            {!location.pathname.match(/^\/match\/\d+$/) && <AppNavbar />}
             <Routes>
               <Route path="/" exact={true} element={<Home />} />
               <Route path="/plans" element={<PlanList />} />
@@ -141,7 +145,7 @@ function App() {
               {publicRoutes}
               {userRoutes}
               {adminRoutes}
-              {ownerRoutes}
+              {playerRoutes}
               {/* {vetRoutes} //TODO: BORRAR */}
             </Routes>         
       </ErrorBoundary>

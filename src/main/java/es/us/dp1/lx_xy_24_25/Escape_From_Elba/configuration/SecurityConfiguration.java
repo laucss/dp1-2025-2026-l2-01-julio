@@ -80,6 +80,9 @@ public class SecurityConfiguration {
                     "/swagger-resources/**"
                 ).permitAll()
 
+                // Permitir el handshake SockJS (info/xhr) sin autenticación
+                .requestMatchers("/ws/**").permitAll()
+
                  .requestMatchers("/resources/images/**").permitAll()
 
                 // API pública
@@ -98,8 +101,12 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/lobbies").hasAnyAuthority(PLAYER)
                 .requestMatchers(HttpMethod.PUT, "/api/v1/matches/{id}/discardConfirmed").hasAnyAuthority(PLAYER)
                 .requestMatchers(HttpMethod.GET,"/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers(HttpMethod.POST,"/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers(HttpMethod.POST,"/api/v1/matches/{matchId}/{playerId}/drawRewardCard").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers(HttpMethod.POST,"/api/v1/matches/{matchId}/{winnerId}/steal-card-from/{loserId}").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers(HttpMethod.POST,"/api/v1/matches/{matchId}/notify-fight-resolved").hasAnyAuthority(PLAYER, ADMIN)
                 .requestMatchers(HttpMethod.PUT,"/api/v1/matches/{matchId}/move").hasAnyAuthority(PLAYER, ADMIN)
-
+                .requestMatchers(HttpMethod.POST, "/api/v1/bag/validate-weapon").hasAnyAuthority(PLAYER)
                 .requestMatchers(HttpMethod.GET, "/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
 
 
@@ -116,8 +123,7 @@ public class SecurityConfiguration {
                 
                 .requestMatchers("/api/v1/friendRequests/**").authenticated()
 
-                
-                
+                .requestMatchers("/api/v1/notifications/**").authenticated()
 
                 .requestMatchers("/api/v1/players/**").authenticated()
 

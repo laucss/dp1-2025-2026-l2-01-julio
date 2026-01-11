@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 
 
@@ -31,15 +32,16 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
     Optional<Match> findPrivateLobbyByCode(String codeLobby);
 
     //Devuelve si el usuario esta en algun lobby
-       @Query("SELECT m FROM Match m JOIN m.players p WHERE m.status = 'WAITING'AND p.user.id = :userId")
-       Optional<Match> findLobbyWhereUserIsIn(Integer userId);
-
-
+    @Query("SELECT m FROM Match m JOIN m.players p WHERE m.status = 'WAITING'AND p.user.id = :userId")
+    Optional<Match> findLobbyWhereUserIsIn(Integer userId);
 
     // Devuelve todas las partidas en progreso (he hecho una propiedad del estilo en match)
     @Query("SELECT m FROM Match m WHERE m.startTime IS NOT NULL AND m.endTime IS NULL")
     List<Match> findInProgress();
 
+    //Devuelve todas las partidas finalizadas
+    @Query("SELECT m FROM Match m WHERE m.endTime IS NOT NULL")
+    List<Match> findFinished();
 
     // Partidas no iniciadas que ya han alcanzadoo el número mínimo de jugadores y se pueden empezar
     @Query("SELECT m FROM Match m WHERE m.startTime IS NULL AND m.endTime IS NULL AND " +
@@ -56,5 +58,21 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
     @Query("SELECT CASE WHEN COUNT(m) > 0 THEN MAX(m.id) ELSE NULL END " +
            "FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NULL")
     Integer userInMatch(Integer userId);
+
+
+       //Devuelves todas las partidas jugadas por un usuario 
+       @Query("SELECT m FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NOT NULL")
+       List<Match> findMatchesPlayedByUser(Integer userId);
+
+       //Devuelves todas las partidas jugadas por un usuario y creadas por él
+       @Query("SELECT m FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NOT NULL AND m.creatorId = :userId")
+       List<Match> findMatchesPlayedAndCreatedByUser( Integer userId);
+
+       //Devuelve todas las partidas ganadas por un usuario
+       @Query("SELECT m FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NOT NULL AND m.winner = p")
+       List<Match> findMatchesWonByUser( Integer userId);
+
+
+
 
 }

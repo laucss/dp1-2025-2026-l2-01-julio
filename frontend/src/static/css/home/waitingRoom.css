@@ -1,3 +1,9 @@
+.waiting-invite-text-small {
+  font-size: 1rem;
+  color: #4a4a8a;
+  font-weight: 500;
+  margin-left: 1.2rem;
+}
 .waiting-room-background {
     position: relative;
     width: 100%;
@@ -58,6 +64,133 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
+/* Modal styles for OnlineFriendsModal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+
+.modal-card.enlarged-modal {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(31, 0, 170, 0.22);
+  padding: 2.5rem 3rem;
+  width: 520px;
+  max-width: 96vw;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.waiting-invite-text {
+  font-size: 1.3rem;
+  color: #4a4a8a;
+  font-weight: 600;
+  text-align: center;
+  margin: 2.5rem 0 2.5rem 0;
+}
+
+.modal-card h2 {
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  color: #3a2d7d;
+}
+
+.friends-list-scroll {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1.2rem;
+  padding-right: 6px;
+  max-height: 250px;
+}
+
+.friend-mini-container {
+  background: #f5f5fa;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(31, 0, 170, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.7rem;
+  transition: box-shadow 0.2s;
+}
+.friend-mini-container:hover {
+  box-shadow: 0 4px 16px rgba(31, 0, 170, 0.18);
+}
+
+.friend-avatar-name {
+  display: flex;
+  align-items: center;
+}
+.friend-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 0.8rem;
+  border: 2px solid #c3b6f7;
+}
+.friend-avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #d1c4e9;
+  margin-right: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.friend-name {
+  font-weight: 500;
+  color: #3a2d7d;
+  font-size: 1.05rem;
+}
+.invite-btn {
+  background: #6c63ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.28rem 0.7rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.invite-btn:hover {
+  background: #5548c8;
+}
+.close-btn {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.3rem;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+.close-btn:hover {
+  background: #c0392b;
+}
+.no-friends {
+  color: #888;
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
 .player-avatar {
   width: 48px;
   height: 48px;
@@ -74,4 +207,56 @@
   align-items: center;
   justify-content: center;
   font-weight: 600;
+}
+
+.invite-friends-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #28a745;
+  color: white;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-card {
+  background: #e6fff2;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 420px;
+  max-width: 90%;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+.friend-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+.close-btn {
+  margin-top: 20px;
+  background: #218838;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 20px;
+  cursor: pointer;
 }

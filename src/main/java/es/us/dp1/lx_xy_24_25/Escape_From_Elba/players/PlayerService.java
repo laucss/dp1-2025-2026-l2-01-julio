@@ -80,13 +80,15 @@ public class PlayerService {
      */
     @Transactional
     public Integer getPlayerActionPoints(Integer matchId, Integer playerId){
+        // checkeamos que el jugador exista 
         Player player = findById(playerId); 
-        if (player == null){
-            throw new ResourceNotFoundException("Player not found"); 
-        } 
+         
+        // vemos cuandas cartas tiene en su mano
         HandInGame playerHand = handService.findPlayerHand(matchId, playerId); 
         Integer totalCards = playerHand.getCards().size(); 
 
+        // si tiene más de 7 cartas, automáticamente no tiene puntos de acción, 
+        // si tiene menos, los puntos de acción son 7 - número de cartas en mano
         if (totalCards > 7 ){
             player.setActionPoints(0); 
         } else {
@@ -112,6 +114,8 @@ public class PlayerService {
             }
         }
     }
+
+
 
 
 }

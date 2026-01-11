@@ -96,19 +96,46 @@ public class BagService {
 
     @Transactional 
     public Card removeCardFromPlayerBag(Card card, Integer matchId, Integer playerId){
-        checkers.checkCardExists(card);
+        if (card == null) {
+            return null;
+        }
         
         BagInGame playerBag = findPlayerBag(matchId, playerId); 
         List<Card> playerCards = playerBag.getCards(); 
         Card removedCard = null; 
         
-        for (int i=0; i<playerCards.size(); i++){
-            if (playerCards.get(i).equals(card)){
+        // Buscar por referencia exacta primero (más confiable para objetos en memoria)
+        for (int i = 0; i < playerCards.size(); i++){
+            if (playerCards.get(i) == card) {
                 removedCard = playerCards.get(i); 
-                playerCards.remove(i); 
+                playerCards.remove(i);
                 break; 
             }
         }
+        
+        // Si no se encontró por referencia, buscar por ID o letra
+        if (removedCard == null) {
+            for (int i = 0; i < playerCards.size(); i++){
+                Card c = playerCards.get(i);
+                boolean match = false;
+                
+                // Comparar por ID si ambos tienen ID
+                if (card.getId() != null && c.getId() != null && card.getId().equals(c.getId())) {
+                    match = true;
+                }
+                // Si no hay ID, comparar por letra
+                else if (card.getLetter() != null && card.getLetter().equals(c.getLetter())) {
+                    match = true;
+                }
+                
+                if (match) {
+                    removedCard = playerCards.get(i); 
+                    playerCards.remove(i);
+                    break; 
+                }
+            }
+        }
+        
         return removedCard; 
 
     }
@@ -198,7 +225,7 @@ public class BagService {
 
 
     
-    public void update(BagInGameDTO bag, Integer matchId, Integer playerId){
+    public void update(ListCardsDTO bag, Integer matchId, Integer playerId){
 
         //checkear que exista el player y tal 
 
@@ -207,6 +234,8 @@ public class BagService {
         //newBag.setCards(bag.getCards());
 
 
+                // tengo que hacer lo de newArrayList<>(deck...) dentro del set porque si no se hace así ç
+        // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
         Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
         newBag.setCards(new ArrayList<>(bag.getCards().stream()
             .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
@@ -219,7 +248,9 @@ public class BagService {
     // función para checkear si la palabra es un arma, dentro de la lista que da el juego de posibles armas 
 
     @Transactional 
-    public Boolean isValidWeapon(String word) {
+    public Boolean isValidWeapon(List<CardDTO> cards){ 
+
+        String word = wordFromCards(cards);
       
         if (dictionaryService.isWeapon(word)){
             return true; 

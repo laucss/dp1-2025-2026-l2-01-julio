@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './friends.css';
 import { FaSearch, FaUser, FaEye, FaGamepad, FaTrash } from 'react-icons/fa';
 import UserStatusIndicator from '../../components/UserStatusIndicator';
@@ -8,6 +9,7 @@ import useRequestStates from '../../hooks/useRequestStates';
 const jwt = tokenService.getLocalAccessToken();
 
 export default function Friends() {
+  const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState(null);
   const [visible, setVisible] = useState(false);
   
@@ -228,6 +230,32 @@ export default function Friends() {
     }
   }, []);
 
+  // Función para verificar si el usuario actual es amigo de todos los jugadores de una partida
+  const isUserFriendOfAllPlayers = (matchPlayers, otherUserData) => {
+    if (!matchPlayers || matchPlayers.length === 0) {
+      return false;
+    }
+    
+    const currentUserId = tokenService.getUser?.()?.id;
+    if (!currentUserId) return false;
+
+    // Para cada jugador de la partida, verificar si es el usuario actual o si es amigo
+    return matchPlayers.every(player => {
+      const playerId = player.userId || player.user?.id || player.id;
+      
+      // Si es el propio usuario, no necesita ser amigo de sí mismo
+      if (playerId === currentUserId) return true;
+      
+      // Verificar si este jugador está en la lista de amigos
+      return allFriends.some(friend => {
+        const friendUserId = friend.sender?.id === currentUserId 
+          ? friend.receiver?.id 
+          : friend.sender?.id;
+        return friendUserId === playerId;
+      });
+    });
+  };
+
   return (
     <div className="friends-page">
 
@@ -300,15 +328,37 @@ export default function Friends() {
                   {friend.displayName}
                 </span>
                 <div className="friend-actions">
-                  {friend.status === 'PLAYING' ? (
-                    <button className="play-btn" title="Visualizar partida">
-                      <FaEye style={{ marginRight: 4 }} /> Visualizar
-                    </button>
-                  ) : friend.status === 'ONLINE' ? (
+                  {(() => {
+                    const currentUsername = tokenService.getUser?.()?.username;
+                    const otherUser = friend.sender?.username !== currentUsername ? friend.sender : friend.receiver;
+                    
+                    // Verificar si el amigo está en una partida PLAYING
+                    if (otherUser?.match && otherUser.match.status === 'PLAYING') {
+                      // Verificar si el usuario actual es amigo de TODOS los jugadores de la partida
+                      const matchPlayers = otherUser.match.players || [];
+                      const canSpectate = isUserFriendOfAllPlayers(matchPlayers, otherUser);
+                      
+                      if (canSpectate) {
+                        return (
+                          <button
+                            className="play-btn"
+                            title="Visualizar partida"
+                            onClick={() => {
+                              navigate(`/match/${otherUser.match.id}`, { state: { spectator: true } });
+                            }}
+                          >
+                            <FaEye style={{ marginRight: 4 }} /> Visualizar
+                          </button>
+                        );
+                      }
+                    }
+                    return null;
+                  })()}
+                  {friend.status === 'ONLINE' && (
                     <button className="play-btn" title="Jugar">
                       <FaGamepad style={{ marginRight: 4 }} /> Jugar
                     </button>
-                  ) : null}
+                  )}
                   <button
                     className="remove-btn"
                     onClick={() => openDeleteModal(friend)}
