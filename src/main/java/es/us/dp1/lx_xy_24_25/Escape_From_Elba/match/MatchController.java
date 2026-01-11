@@ -235,13 +235,9 @@ public class MatchController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{matchId}/discardConfirmed")
-    public ResponseEntity<Integer> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
-        handService.update(data.getHand(), matchId, data.getPlayerId());
-        bagService.update(data.getBag(), matchId, data.getPlayerId());
-        deckService.update(data.getDeck(), matchId);
-        Integer nextTurnId = ms.nextTurn(matchId).getCurrentTurnUserId(); 
-
+    @PutMapping("/{matchId}/confirmDiscardPhase")
+    public ResponseEntity<Integer> confirmDiscardPhase(@PathVariable Integer matchId, @RequestBody @Valid AllCardsStatusDTO data){
+        Integer nextTurnId = ms.confirmDiscardPhase(matchId, data); 
         return ResponseEntity.ok(nextTurnId); 
         
     }
