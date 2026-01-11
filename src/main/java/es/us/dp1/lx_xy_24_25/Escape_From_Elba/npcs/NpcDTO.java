@@ -10,7 +10,7 @@ import lombok.Setter;
 public class NpcDTO {
 
     private Integer id;
-    
+
     private Integer strength;
 
     private Boolean isNiallCampbell;

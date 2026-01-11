@@ -512,14 +512,10 @@ public class MatchService {
 
     @Transactional
     public Card playerBeatsNonPlayer(Integer matchId, Integer playerId, Integer npcId){
-        // TODO: hay que hacer la gestión de los npcs, services, repositorios, etc
 
         Card stolenCard =deckService.drawCard(matchId);
         handService.addCardToPlayerHand(stolenCard, matchId, playerId);
 
-        // A LO MEJOR HAY QUE PASAR EL NPC NO SOLO SU ID
-        // actualizar fuerza del npc
-        // npc.setStrength(npc.getStrength() + 1);
         return stolenCard;
     
     }
@@ -736,6 +732,24 @@ public class MatchService {
         
         //Guardar cambios
         return playerRepo.save(player);
+    }
+
+    public ActionPointsUpdateDTO consumeOneActionPoint(Integer matchId, Integer userId) {
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+            .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+
+        int current = Optional.ofNullable(player.getActionPoints()).orElse(0);
+        int updated = Math.max(0, current - 1);
+        player.setActionPoints(updated);
+        playerRepo.save(player);
+
+        return new ActionPointsUpdateDTO(
+            player.getId(),
+            player.getUser().getId(),
+            player.getUser().getUsername(),
+            updated,
+            System.currentTimeMillis()
+        );
     }
 
 
