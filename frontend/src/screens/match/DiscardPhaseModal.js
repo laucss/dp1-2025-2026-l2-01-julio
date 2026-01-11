@@ -46,6 +46,9 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
         })
     );
 
+    console.log('handModal', handCards)
+    console.log('deckModal', deckCards)
+
     useEffect(() => {
         setHandCards(hand)
         setBagCards(bag)
@@ -61,6 +64,7 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
         try {
             const handToUpdate = {
                 cards: handCards.map(card => ({
+                    id: card.id,
                     frontImage: card.frontImage,
                     backImage: card.backImage,
                     letter: card.letter
@@ -68,9 +72,11 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
             };
             const bagToUpdate = {
                 cards: bagCards.map(card => ({
+                    id: card.id,
                     frontImage: card.frontImage,
                     backImage: card.backImage,
                     letter: card.letter
+                    
                 }))
             }
 
@@ -82,11 +88,13 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
 
             const updatedDeckInGame = {
                 notDiscardedCards: (deckCards.notDiscardedCards || []).map(card => ({
+                    id: card.id, 
                     frontImage: card.frontImage,
                     backImage: card.backImage,
                     letter: card.letter
                 })),
                 discardedCards: updatedDiscardedCards.map(card => ({
+                    id: card.id,
                     frontImage: card.frontImage,
                     backImage: card.backImage,
                     letter: card.letter
@@ -184,6 +192,7 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
         
 
     };
+
 
     return (
         <div className="modal-overlay">

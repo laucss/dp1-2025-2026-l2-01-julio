@@ -236,7 +236,7 @@ public class MatchController {
     }
 
     @PutMapping("/{matchId}/confirmDiscardPhase")
-    public ResponseEntity<Integer> confirmDiscardPhase(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
+    public ResponseEntity<Integer> confirmDiscardPhase(@PathVariable Integer matchId, @RequestBody @Valid AllCardsStatusDTO data){
         Integer nextTurnId = ms.confirmDiscardPhase(matchId, data); 
         return ResponseEntity.ok(nextTurnId); 
         

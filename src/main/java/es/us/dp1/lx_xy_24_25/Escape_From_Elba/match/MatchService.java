@@ -448,6 +448,7 @@ public class MatchService {
             handService.update(data.getHand(), matchId, data.getPlayerId());
             bagService.update(data.getBag(), matchId, data.getPlayerId());
             deckService.update(data.getDeck(), matchId);
+            DeckInGame deck = deckService.findDeckById(matchId); 
             Integer nextTurnId = nextTurn(matchId).getCurrentTurnUserId(); 
             return nextTurnId; 
         } else { // si la bolsa no está vacía y no es válida: 

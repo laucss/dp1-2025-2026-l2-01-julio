@@ -25,6 +25,7 @@ export default function Match(){
     const matchId = getIdFromUrl(2);
     const navigate = useNavigate();
     const [currentPlayer, setCurrentPlayer] = useState({}) // el jugador asociado al usuario que está "viendo" la pantalla
+    console.log('jugador', currentPlayer)
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
     const [match, setMatch] = useState(null)
@@ -74,7 +75,7 @@ export default function Match(){
     
     // Función para obtener un color único para cada jugador
     const getPlayerColor = (playerId) => {
-        const colors = ['#FF6B6B', '#4ECDC4', '#f833e4ff', '#e5541aff', '#52a852ff', '#2a15ceff'];
+        const colors = ['#ff5353ff', '#4ECDC4', '#ffac3fff', '#e5541aff', '#52a852ff', '#2a15ceff'];
         const allPlayers = match?.players || [];
         const playerIndex = allPlayers.findIndex(p => p.id === playerId);
         return colors[playerIndex % colors.length];
@@ -243,7 +244,7 @@ export default function Match(){
                 const bag = Array.isArray(info.bag?.cards) ? info.bag.cards : [];
 
                 // Si es el jugador actual, actualizamos su mano y bolsa
-                if (currentPlayer[0]?.id === info.playerId) {
+                if (currentPlayer?.id === info.playerId) {
                     setHandCards(hand.map(c => ({...c})));
                     setBagCards(bag.map(c => ({...c})));
                 } else {
@@ -268,13 +269,13 @@ export default function Match(){
     }, [stompClient, matchId, currentPlayer]);
 
     useEffect(() => {
-        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+        if (!stompClient || !stompClient.active || !currentPlayer) return;
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.actionPoints`, (msg) => {
             const actionPointsUpdate = JSON.parse(msg.body);
             
             // Only update action points if the update is for the current player
-            if (actionPointsUpdate.userId === currentPlayer[0].user.id) {
+            if (actionPointsUpdate.userId === currentPlayer.user.id) {
                 setActionPoints(actionPointsUpdate.actionPoints);
             }
         });
@@ -283,9 +284,9 @@ export default function Match(){
     }, [stompClient, matchId, currentPlayer]);
 
     useEffect(() => {
-        if (!stompClient || !stompClient.active || !currentPlayer[0]) return;
+        if (!stompClient || !stompClient.active || !currentPlayer) return;
 
-        const subscription = stompClient.subscribe(`/topic/match.${matchId}.hand.${currentPlayer[0].id}`, (msg) => {
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.hand.${currentPlayer.id}`, (msg) => {
             const handUpdate = JSON.parse(msg.body);
             if (handUpdate && handUpdate.hand) {
                 const updatedHand = Array.isArray(handUpdate.hand.cards) ? handUpdate.hand.cards : [];
@@ -303,7 +304,7 @@ export default function Match(){
             const strengthUpdate = JSON.parse(msg.body);
             
             // Only update strength if the update is for the current player
-            if (strengthUpdate.userId === currentPlayer[0].user.id) {
+            if (strengthUpdate.userId === currentPlayer.user.id) {
                 setStrength(Math.min(6, strengthUpdate.strength));
             }
         });
@@ -314,7 +315,7 @@ export default function Match(){
     useEffect(() => {
             if (player && Array.isArray(player)){
                 setPlayersList(player.filter(p => p.user.id !== currentUser?.id))
-                setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id))
+                setCurrentPlayer(player.filter(p => p.user.id === currentUser?.id)[0])
                 
             }
     }, [match])
@@ -322,14 +323,14 @@ export default function Match(){
     // TODO: revisar si esto se puede sacar a otro lado 
 
     useEffect(() => {
-        if (Array.isArray(currentPlayer) && currentPlayer[0]?.id){
+        if (Array.isArray(currentPlayer) && currentPlayer?.id){
             fetchCards()
         }
         if (currentPlayerTurn) { 
-            setStrength(Math.min(6, currentPlayer[0].strength)) }
+            setStrength(Math.min(6, currentPlayer.strength)) }
         setNumCardsDrawn(0)
         
-        if (currentTurnUserId && currentPlayer[0].user.id === currentTurnUserId){ 
+        if (currentTurnUserId && currentPlayer.user.id === currentTurnUserId){ 
             fetchActionPoints() 
         }
     }, [currentTurnUserId])
@@ -377,7 +378,7 @@ export default function Match(){
     // console.log('currentPlayer', currentPlayer)
     const fetchActionPoints = async () => {
         try {
-            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/actionPoints`, {
+            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/actionPoints`, {
             method: "GET",
                     headers: {
                         Authorization: `Bearer ${jwt}`,
@@ -462,7 +463,7 @@ export default function Match(){
     const fetchCards = async () => {
         try {
             //console.log('ENTRA EN EL FETCHCARDS')
-            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/getAllCards`, {
+            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/getAllCards`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${jwt}`,
@@ -523,13 +524,14 @@ export default function Match(){
     /*
     console.log('hand' , handCards)
     console.log('bag' , bagCards)
-    console.log('deck' , deck)
     */
+    console.log('deck' , deck)
+    
 
     // FUNCION ROBAR CARTA
-    const drawCard = async () => { // TODO: CAMBIAR EL FORMATO Y ESTRUCTURA, ESTA SACADO DE CHATI PQ QUERIA SOLO PROBARLO
+    const drawCard = async () => { 
         try {
-            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/drawCardFromDeck`, {
+            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/drawCardFromDeck`, {
                 method: "POST",
                 headers: {
                 Authorization: `Bearer ${jwt}`,
@@ -543,9 +545,10 @@ export default function Match(){
             }
 
             const data = await response.json()
+            //console.log('carta', data.card)
             
             setDeck(data.deck)
-            setHandCards(prev => [...prev, data.card])
+            //setHandCards(prev => [...prev, data.card])
             setNumCardsDrawn(prev => prev + 1)
             
         } catch (error) {
@@ -573,7 +576,7 @@ export default function Match(){
 
             const data = await response.json()
             
-            if (winnerId === currentPlayer[0]?.id) {
+            if (winnerId === currentPlayer?.id) {
                 setDeck(data.deck)
                 setHandCards(prev => [...prev, data.card])
             }
@@ -650,11 +653,11 @@ export default function Match(){
 
         // Player move flow
         //console.log('roomId destino', roomId)
-        //console.log('actual roomID', currentPlayer?.[0]?.currentRoom?.id || currentPlayer?.[0]?.roomId || currentPlayer?.[0]?.room?.id)
+        //console.log('actual roomID', currentPlayer?.?.currentRoom?.id || currentPlayer?.?.roomId || currentPlayer?.?.room?.id)
         if (moveToAdyacentRoom===false) return ;
         if (moveToAdyacentRoom === true){
             try {
-                const currentRoomId = currentPlayer?.[0]?.currentRoom?.id || currentPlayer?.[0]?.roomId || currentPlayer?.[0]?.room?.id;
+                const currentRoomId = currentPlayer?.currentRoom?.id || currentPlayer?.roomId || currentPlayer?.room?.id;
                 if (!areRoomsAdjacent(currentRoomId, roomId)) {
                     alert('No puedes moverte a una habitación no adyacente');
                     setMoveToAdyacentRoom(false);
@@ -875,6 +878,7 @@ export default function Match(){
         if (updatedMatch.players) {
             setPlayer(updatedMatch.players);
         }
+        fetchCards()
     };
 
     //console.log('match', match)
@@ -907,48 +911,12 @@ if (!match) {
         return Array.isArray(neighbors) && neighbors.includes(toId);
     };
 
-//console.log('hand', handCards)
+console.log('handCards', handCards)
 
 return (
         <div className="match-container">
-            <div className="players-avatars-section">
-                {playersList.map((p) => (
-                    <div key={p.user.id} className="player-avatar-card">
-                        <div className="player-info-row">
-                            <div style={{
-                                borderRadius: '50%',
-                                border: `4px solid ${getPlayerColor(p.id)}`,
-                                display: 'inline-block',
-                                padding: '3px',
-                                flexShrink: 0
-                            }}>
-                                {p.user.avatar ? (
-                                    <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" style={{ borderRadius: '50%' }} />
-                                ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" style={{ borderRadius: '50%' }} />}
-                            </div>
-                            <p className="player-username">{p.user.username}</p>
-                        </div>
-                        <div className="player-bag-display">
-                            {otherPlayersBags[p.id] && otherPlayersBags[p.id].length > 0 ? (     
-                                    <div className="bag-cards-container">
-                                        {otherPlayersBags[p.id].map((carta, index) => (
-                                            <img 
-                                                key={index} 
-                                                src={`/resources${carta.frontImage}`} 
-                                                alt={`Carta ${carta.letter}`} 
-                                                className="player-bag-card"
-                                                title={carta.letter}
-                                            />
-                                        ))}
-                                    </div>
-                            ) : (
-                                <p className="empty-bag">Empty Bag</p>
-                            )}
-                        </div>
-                    </div>
-                ))}
-            </div>
 
+            {/*Modal donde se tiran los dados nada más empezar la partida para elegir el orden de los turnos*/}
             <StartDiceModal 
                 isOpen={!isSpectator && isDiceModalOpen && (match?.turnNumber === 0 || match?.currentTurnPhase === null)}
                 onClose={() => setIsDiceModalOpen(false)}
@@ -957,47 +925,85 @@ return (
             />
             
             <div className="match-board" style={{ position: 'relative' }}>
-                <div className="deck-column">
-                    <div className="deck-section">
-                        <button 
-                            onClick={ () => {
-                                if (numCardsDrawn < 7) {
-                                    drawCard()
-                                } else {
-                                    alert("No puedes robar más de 7 cartas")
-                                } 
-                            }}
-                            disabled={!canDraw}
-                            style={{ 
-                                border: "none", 
-                                background: "transparent", 
-                                padding: 0, 
-                                cursor: !canDraw ? "not-allowed" : "pointer", 
-                                opacity: !canDraw ? 0.4 : 1,
-                                outline: "none",
-                            }}
-                        >
-                            <img 
-                                src="/backCard.png" 
-                                alt="Robar carta"
-                                style={{ width: "150px", height: "auto", outline: "none", }}
-                            />
-                        </button>
-                    </div>
-                    <div className="discard-pile-section">
-                        {discardPile.length > 0 ? (
-                            <img 
-                                src={`/resources${discardPile[discardPile.length - 1].frontImage}`} 
-                                alt="Última carta descartada"
-                                style={{ width: "150px", height: "auto" }}
-                            />
-                        ) : (
-                            <div className="dicard-pile">
-                                Empty
+                <div className="player-and-decks-section"> 
+                    <div className="current-player"> 
+                        <div className="current-player-info"> 
+                            <div style={{
+                                    borderRadius: '50%',
+                                    border: `4px solid ${getPlayerColor(currentPlayer?.id)}`,
+                                    display: "flex",
+                                    flexShrink: 0,
+                                    boxSizing: 'border-box',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
+                                    {currentPlayer?.user?.avatar ? (
+                                        <img src={currentPlayer.user.avatar} alt={`${currentPlayer.user.username} avatar`} className="current-avatar-img" style={{ borderRadius: '50%' }} />
+                                    ) : <img src="/Avatar_default.png" alt="Default avatar" className="current-avatar-img" style={{ borderRadius: '50%' }} />}
+                                </div>
+                                <p className="player-username">{currentPlayer?.user.username}</p>
+
+                        </div>
+                        <div className="points-section">
+                                        <div className="action-points">
+                                            <h1>{actionPoints}</h1>
+                                            <p>Action points </p>
+                                        </div>
+
+                                        <div className="action-points">
+                                            <h1>{strength}</h1>
+                                            <p>strength </p>
+                                        </div>
+                    
                             </div>
-                        )}
+                        
+                    </div>
+
+
+
+                    <div className="deck-row">
+                            <button 
+                                onClick={ () => {
+                                    if (numCardsDrawn < 7) {
+                                        drawCard()
+                                    } else {
+                                        alert("No puedes robar más de 7 cartas")
+                                    } 
+                                }}
+                                disabled={!canDraw}
+                                style={{ 
+                                    border: "none", 
+                                    background: "transparent", 
+                                    padding: 0, 
+                                    cursor: !canDraw ? "not-allowed" : "pointer", 
+                                    opacity: !canDraw ? 0.4 : 1,
+                                    outline: "none",
+                                }}
+                            >
+                                <img 
+                                    src="/backCard.png" 
+                                    alt="Robar carta"
+                                    className="deck-pile"
+                                />
+                            </button>
+
+                        <div className="discard-pile-section">
+                            {discardPile.length > 0 ? (
+                                <img 
+                                    src={`/resources${discardPile[discardPile.length - 1].frontImage}`} 
+                                    alt="Última carta descartada"
+                                    style={{ width: "150px", height: "auto" }}
+                                />
+                            ) : (
+                                <div className="dicard-pile">
+                                    Empty
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
+
+                
 
                 <div className="map-column" style={{ position: 'relative' }}>
                     <map name="Map">
@@ -1058,7 +1064,7 @@ return (
                                     width: '30px',
                                     height: '30px',
                                     borderRadius: '50%',
-                                    border: currentPlayer[0]?.id === player.id ? '3px solid yellow' : `3px solid ${getPlayerColor(player.id)}`,
+                                    border: currentPlayer?.id === player.id ? '3px solid yellow' : `3px solid ${getPlayerColor(player.id)}`,
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
                                     zIndex: 10,
                                     pointerEvents: 'none'
@@ -1112,17 +1118,49 @@ return (
                     })}
                 </div>
                 
-            <div className="points-section">
-                                <div className="action-points">
-                                    <h1>{actionPoints}</h1>
-                                    <p>Action points </p>
-                                </div>
-
-                                <div className="action-points">
-                                    <h1>{strength}</h1>
-                                    <p>strength </p>
-                                </div>
+                <div className="other-players-section"> 
+                    <div className="players-avatars-section">
+                    {playersList.map((p) => (
+                        <div key={p.user.id} className="player-avatar-card">
+                            
+                            <div className="player-bag-display">
+                                {otherPlayersBags[p.id] && otherPlayersBags[p.id].length > 0 ? (     
+                                        <div className="bag-cards-container">
+                                            {otherPlayersBags[p.id].map((carta, index) => (
+                                                <img 
+                                                    key={index} 
+                                                    src={`/resources${carta.frontImage}`} 
+                                                    alt={`Carta ${carta.letter}`} 
+                                                    className="player-bag-card"
+                                                    title={carta.letter}
+                                                />
+                                            ))}
+                                        </div>
+                                ) : (
+                                    <p className="empty-bag">Empty Bag</p>
+                                )}
                             </div>
+                            
+                            <div className="player-info-row">
+                                <div style={{
+                                    borderRadius: '50%',
+                                    border: `4px solid ${getPlayerColor(p.id)}`,
+                                    display: 'inline-block',
+                                    padding: '3px',
+                                    flexShrink: 0
+                                }}>
+                                    {p.user.avatar ? (
+                                        <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" style={{ borderRadius: '50%' }} />
+                                    ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" style={{ borderRadius: '50%' }} />}
+                                </div>
+                                <p className="player-username">{p.user.username}</p>
+                            </div>
+                            
+                        </div>
+                    ))}
+                </div>
+            </div>
+            
             </div>
 
             {/*Mensaje de movimiento de los NPC*/}
@@ -1133,6 +1171,9 @@ return (
                     </div>
                 </div>
             )}
+
+
+
 
             {match?.currentTurnUserId === currentUser?.id && (
                 <button
@@ -1181,7 +1222,7 @@ return (
                                 style={{
                                     backgroundColor: '#ff4c4cff', // Color de fondo para jugadores
                                     color: 'white',
-                                    fontWeight: currentPlayer[0]?.id === player.id ? 'bold' : 'normal' // Resalta tu jugador
+                                    fontWeight: currentPlayer?.id === player.id ? 'bold' : 'normal' // Resalta tu jugador
                                 }}
                             >
                                 <td style={{ padding: '3px' }}>{player.user.username}</td>
@@ -1208,18 +1249,22 @@ return (
             */}
             <div className="player-section">
                 <div className="player-hand">
-                    {Array.isArray(handCards) && handCards.map((carta, index) => (
-                                    <div key={index} >
-                                        <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                    </div>
-                    ))}
+                    <div className="hand-cards"> 
+                        {Array.isArray(handCards) && handCards.map((carta) => (
+                                        <div key={carta.id} >
+                                            <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                        </div>
+                        ))}
+                    </div>
                 </div>
                 <div className="player-bag">
-                    {Array.isArray(bagCards) && bagCards.map((carta, index) => (
-                                    <div key={index} >
-                                        <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                    </div>
-                    ))}
+                    <div className="bag-cards"> 
+                        {Array.isArray(bagCards) && bagCards.map((carta) => (
+                                        <div key={carta.id} >
+                                            <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                        </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -1434,7 +1479,7 @@ return (
             hand={handCards}
             bag={bagCards}
             deck={deck}
-            player={currentPlayer[0]}
+            player={currentPlayer}
             onClose={() => setDiscardPhaseOpen(false)}
             updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
             onSave={async () =>{
@@ -1447,7 +1492,7 @@ return (
             isOpen={isStealModalOpen}
             loserId={stealLoserPlayerId}
             matchId={matchId}
-            winnerId={currentPlayer[0]?.id}
+            winnerId={currentPlayer?.id}
             onClose={() => {
                 setIsStealModalOpen(false);
                 setStealLoserPlayerId(null);
