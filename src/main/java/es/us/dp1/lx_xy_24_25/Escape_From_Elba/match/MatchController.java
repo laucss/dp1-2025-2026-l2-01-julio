@@ -567,9 +567,9 @@ public class MatchController {
         return ResponseEntity.ok(new MatchDTO(match));
     }
 
-    @PutMapping("/{matchId}/moveNpc")
-    @Operation(summary = "Move NPC to a room", description = "Moves an NPC to a specified room.")
-    public ResponseEntity<MatchDTO> moveNpc(@PathVariable Integer matchId, @RequestBody Map<String, Integer> data) {
+    @PutMapping("/{matchId}/npc/location")
+    @Operation(summary = "Force move NPC", description = "Moves an NPC to a specified room without consuming player actions (used for system-driven moves).")
+    public ResponseEntity<MatchDTO> forceMoveNpc(@PathVariable Integer matchId, @RequestBody Map<String, Integer> data) {
         Integer npcId = data.get("npcId");
         Integer roomId = data.get("roomId");
         

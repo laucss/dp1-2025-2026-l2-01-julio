@@ -358,7 +358,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
 
                         <div className='combat-panel'> {/*zona del oponente */}
                             <div className='combat-header'> 
-                                <span>{defender?.user?.username || defender?.name || `Bot ${defender?.id}`}</span>
+                                <span>{defender?.user?.username || (defender?.isNiallCampbell ? 'NiallCampbell' : 'NPC')}</span>
                                 {defender?.user?.avatar ? (
                                     <img 
                                         src={defender.user.avatar}

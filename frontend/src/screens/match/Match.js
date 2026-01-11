@@ -172,24 +172,56 @@ export default function Match(){
     useEffect(() => {
         if (!stompClient || !stompClient.active) return;
 
-        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, (msg) => {
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, async (msg) => {
             const fightUpdate = JSON.parse(msg.body);
+            console.log('🔔 Fight notification received:', fightUpdate);
             
             if (fightUpdate.action === 'START') {
-                // Identificar al atacante (quien inicia la batalla)
-                const attacker = match?.players?.find(p => p.user.id === fightUpdate.attackerId);
-                
-                // Identificar al defensor (puede ser jugador o NPC)
-                let defender = match?.players?.find(p => p.user.id === fightUpdate.defenderId);
-                if (!defender && fightUpdate.isBot) {
-                    defender = match?.npcs?.find(n => n.id === fightUpdate.defenderId);
-                }
-                
-                if (attacker && defender) {
-                    setFightAttacker(attacker);
-                    setFightDefender(defender);
-                    setPendingTargetRoom(fightUpdate.roomName);
-                    setIsFightModalOpen(true);
+                console.log('🥊 Starting fight...');
+                // Actualizar el match primero para tener datos frescos
+                try {
+                    const response = await fetch(`/api/v1/matches/${matchId}`, {
+                        headers: {
+                            Authorization: `Bearer ${jwt}`,
+                        },
+                    });
+                    
+                    if (response.ok) {
+                        const freshMatch = await response.json();
+                        console.log('✅ Fresh match data:', freshMatch);
+                        setMatch(freshMatch);
+                        
+                        // Identificar al atacante (quien inicia la batalla)
+                        const attacker = freshMatch.players?.find(p => p.user.id === fightUpdate.attackerId);
+                        console.log('👊 Attacker found:', attacker);
+                        
+                        // Identificar al defensor (puede ser jugador o NPC)
+                        let defender = null;
+                        
+                        console.log('🔍 Is defender an NPC (isBot):', fightUpdate.isBot);
+                        
+                        if (fightUpdate.isBot) {
+                            console.log('🤖 Buscando NPC con ID:', fightUpdate.defenderId);
+                            console.log('🤖 NPCs disponibles:', freshMatch.npcs?.map(n => ({ id: n.id, name: n.isNiallCampbell ? 'NiallCampbell' : 'NPC' })));
+                            defender = freshMatch.npcs?.find(n => n.id === fightUpdate.defenderId);
+                            console.log('🛡️ Defensor NPC encontrado:', defender);
+                        } else {
+                            defender = freshMatch.players?.find(p => p.user.id === fightUpdate.defenderId);
+                            console.log('🛡️ Defensor Jugador encontrado:', defender);
+                        }
+                        
+                        if (attacker && defender) {
+                            console.log('✅ Opening fight modal with:', { attacker, defender });
+                            setFightAttacker(attacker);
+                            setFightDefender(defender);
+                            setPendingTargetRoom(fightUpdate.roomId || fightUpdate.roomName);
+                            setIsFightModalOpen(true);
+                        } else {
+                            console.error('❌ Could not find attacker or defender:', { attacker, defender, fightUpdate });
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error fetching fresh match data for fight:', error);
                 }
             } else if (fightUpdate.action === 'RESOLVE') {
                 const winnerId = fightUpdate.winnerId;
@@ -204,7 +236,7 @@ export default function Match(){
         });
 
         return () => subscription.unsubscribe();
-    }, [stompClient, matchId, match, currentUser]);
+    }, [stompClient, matchId, jwt, currentUser]);
 
 
     useEffect(() => {
@@ -443,6 +475,32 @@ export default function Match(){
                     })
                 const data = await response.json()
 
+                // Normalizar los roomIds de todos los jugadores y NPCs
+                if (data.players) {
+                    data.players = data.players.map(p => ({
+                        ...p,
+                        currentRoom: p.currentRoom ? {
+                            ...p.currentRoom,
+                            id: normalizeRoomId(p.currentRoom.id)
+                        } : null,
+                        room: p.room ? {
+                            ...p.room,
+                            id: normalizeRoomId(p.room.id)
+                        } : null,
+                        roomId: p.roomId ? normalizeRoomId(p.roomId) : null
+                    }));
+                }
+
+                if (data.npcs) {
+                    data.npcs = data.npcs.map(npc => ({
+                        ...npc,
+                        room: npc.room ? {
+                            ...npc.room,
+                            id: normalizeRoomId(npc.room.id)
+                        } : null
+                    }));
+                }
+
                 setMatch(data)
                 setPlayer(data.players)
                 
@@ -667,6 +725,40 @@ export default function Match(){
                     setSelectedNpcIndex(null);
                     setSelectedNpcId(null);
                     setMoveNpcMode(false);
+
+                    // Verificar si hay un jugador en la habitación destino
+                    const targetRoomNormalized = normalizeRoomId(roomId);
+                    const playerInRoom = data.players.find(p => {
+                        const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
+                        return normalizeRoomId(playerRoomId) === targetRoomNormalized;
+                    });
+
+                    if (playerInRoom && roomId !== 37) {
+                        // Encontrar el NPC que se acaba de mover
+                        const movedNpc = data.npcs.find(n => n.id === npcIdToSend);
+                        
+                        if (movedNpc) {
+                            // Notificar a todos los jugadores sobre el combate (incluido el jugador local)
+                            // No abrir el modal aquí - se abrirá cuando llegue la notificación WebSocket
+                            await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${jwt}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    matchId: matchId,
+                                    attackerId: playerInRoom.user.id,
+                                    attackerUsername: playerInRoom.user.username,
+                                    defenderId: movedNpc.id,
+                                    defenderUsername: movedNpc.isNiallCampbell ? 'NiallCampbell' : 'NPC',
+                                    roomId: roomId,
+                                    action: 'START',
+                                    isBot: true
+                                })
+                            });
+                        }
+                    }
                 } else {
                     const text = await response.text();
                     console.error('Error moving NPC:', response.status, text);
@@ -1459,7 +1551,7 @@ return (
                                 }
                                 
                                 console.log('Moving NPC loser to random room:', botRandomRoomId);
-                                await fetch(`/api/v1/matches/${matchId}/moveNpc`, {
+                                await fetch(`/api/v1/matches/${matchId}/npc/location`, {
                                     method: 'PUT',
                                     headers: {
                                         'Authorization': `Bearer ${jwt}`,

@@ -15,8 +15,6 @@ public class NpcLocationUpdateDTO {
     
     private Integer npcId;
     
-    private String npcName;
-    
     private Boolean isNiallCampbell;
     
     private RoomDTO newRoom;
@@ -25,8 +23,7 @@ public class NpcLocationUpdateDTO {
     
     public NpcLocationUpdateDTO(Npc npc) {
         this.npcId = npc.getId();
-        this.npcName = npc.getName();
-        this.isNiallCampbell = npc.isNiallCampbell();
+        this.isNiallCampbell = npc.getIsNiallCampbell();
         this.newRoom = npc.getRoom() != null ? new RoomDTO(npc.getRoom()) : null;
         this.timestamp = System.currentTimeMillis();
     }

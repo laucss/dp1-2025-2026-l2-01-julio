@@ -7,7 +7,9 @@ public class FightUpdateDTO {
     private Integer defenderId;
     private String defenderUsername;
     private String roomName;
+    private Integer roomId;
     private String action; // "START", "END"
+    private Boolean isBot;
 
     public FightUpdateDTO() {}
 
@@ -40,8 +42,14 @@ public class FightUpdateDTO {
     public String getRoomName() { return roomName; }
     public void setRoomName(String roomName) { this.roomName = roomName; }
 
+    public Integer getRoomId() { return roomId; }
+    public void setRoomId(Integer roomId) { this.roomId = roomId; }
+
     public String getAction() { return action; }
     public void setAction(String action) { this.action = action; }
+
+    public Boolean getIsBot() { return isBot; }
+    public void setIsBot(Boolean isBot) { this.isBot = isBot; }
 
     @Override
     public String toString() {
@@ -52,7 +60,9 @@ public class FightUpdateDTO {
                 ", defenderId=" + defenderId +
                 ", defenderUsername='" + defenderUsername + '\'' +
                 ", roomName='" + roomName + '\'' +
+                ", roomId=" + roomId +
                 ", action='" + action + '\'' +
+                ", isBot=" + isBot +
                 '}';
     }
 }
