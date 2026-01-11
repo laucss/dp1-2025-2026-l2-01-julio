@@ -230,6 +230,8 @@ public class DeckService {
 
         DeckInGame newDeck = activesDecks.get(matchId); 
 
+        // tengo que hacer lo de newArrayList<>(deck...) dentro del set porque si no se hace así ç
+        // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
         newDeck.setDiscardedCards(new ArrayList<>(deck.getDiscardedCards().stream()
             .map(dto -> new Card(dto.getId(), dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
         

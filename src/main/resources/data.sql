@@ -3,15 +3,15 @@ INSERT INTO authorities(id,authority) VALUES (1,'ADMIN');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (1,'admin1','admin1@example.com','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS',1,25,'/Avatar_default.png');
 
 
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (1,'Si juegas 5 partidas',5.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED','FACIL');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (2,'Si juegas 15 partidas',15.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED','INTERMEDIO');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (3,'Si juegas 25 partidas',25.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED','DIFICIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (1,'Si juegas 5 partidas',5.0,'https://cdn-icons-png.flaticon.com/512/3430/3430778.png ','GAMES_PLAYED','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (2,'Si juegas 15 partidas',15.0,'https://cdn-icons-png.flaticon.com/512/3430/3430778.png','GAMES_PLAYED','INTERMEDIO');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (3,'Si juegas 25 partidas',25.0,'https://cdn-icons-png.flaticon.com/512/3430/3430778.png','GAMES_PLAYED','DIFICIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (4,'Si ganas 5 partidas',5.0,'https://cdn-icons-png.flaticon.com/512/5021/5021877.png','VICTORIES','FACIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (5,'Si ganas 10 partidas',10.0,'https://cdn-icons-png.flaticon.com/512/5021/5021877.png','VICTORIES','INTERMEDIO');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (6,'Si ganas 20 partidas',20.0,'https://cdn-icons-png.flaticon.com/512/5021/5021877.png','VICTORIES','DIFICIL');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (7,'Si juegas mas de 20 minutos',20.1,'https://cdn-icons-png.flaticon.com/512/15452/15452718.png','TOTAL_PLAY_TIME','FACIL');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (8,'Si juegas mas de 60 minutos',60.1,'https://cdn-icons-png.flaticon.com/512/15452/15452718.png','TOTAL_PLAY_TIME','INTERMEDIO');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (9,'Si juegas mas de 120 minutos',120.1,'https://cdn-icons-png.flaticon.com/512/15452/15452718.png','TOTAL_PLAY_TIME','DIFICIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (7,'Si juegas mas de 20 minutos',20.1,'https://cdn-icons-png.flaticon.com/512/850/850960.png','TOTAL_PLAY_TIME','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (8,'Si juegas mas de 60 minutos',60.1,'https://cdn-icons-png.flaticon.com/512/850/850960.png','TOTAL_PLAY_TIME','INTERMEDIO');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (9,'Si juegas mas de 120 minutos',120.1,'https://cdn-icons-png.flaticon.com/512/850/850960.png','TOTAL_PLAY_TIME','DIFICIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (10,'Si acumulas 50 puntos de accion',50.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','FACIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (11,'Si acumulas 100 puntos de accion',100.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','INTERMEDIO');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (12,'Si acumulas 200 puntos de accion',200.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','DIFICIL');

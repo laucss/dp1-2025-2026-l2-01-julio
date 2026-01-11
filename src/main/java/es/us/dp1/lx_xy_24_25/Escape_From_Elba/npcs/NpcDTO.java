@@ -15,9 +15,7 @@ public class NpcDTO {
 
     private Boolean isNiallCampbell;
 
-
-
-     private RoomDTO room;
+    private RoomDTO room;
 
     public NpcDTO(Npc npc) {
         this.id = npc.getId();

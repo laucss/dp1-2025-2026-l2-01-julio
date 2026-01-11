@@ -51,6 +51,10 @@ export default function Match(){
     const [strength, setStrength] = useState(1)
     const [moveToAdyacentRoom, setMoveToAdyacentRoom] = useState(false)
     const [isEndingTurn, setIsEndingTurn] = useState(false)
+    const [moveNpcMode, setMoveNpcMode] = useState(false)
+    const [selectedNpcId, setSelectedNpcId] = useState(null)
+    const [selectedNpcIndex, setSelectedNpcIndex] = useState(null)
+
     
     // const [playerTurnId, setPlayerTurnId] = useState(null)
 
@@ -66,6 +70,9 @@ export default function Match(){
     const [isStealModalOpen, setIsStealModalOpen] = useState(false);
     const [stealLoserPlayerId, setStealLoserPlayerId] = useState(null);
     const [isNpcLossModalOpen, setIsNpcLossModalOpen] = useState(false);
+    
+    // Determinar si el usuario actual es un espectador
+    const isSpectator = !currentUser || !match?.players?.some(p => p.user.id === currentUser.id);
     
     // Función para obtener un color único para cada jugador
     const getPlayerColor = (playerId) => {
@@ -345,12 +352,16 @@ export default function Match(){
             }
     }, [match])
 
+    // TODO: revisar si esto se puede sacar a otro lado 
+
     useEffect(() => {
         if (Array.isArray(currentPlayer) && currentPlayer[0]?.id){
             fetchCards()
-            setStrength(Math.min(6, currentPlayer[0].strength))
-        }     
-    }, [currentPlayer])
+        }
+        if (currentPlayerTurn) { 
+            setStrength(Math.min(6, currentPlayer[0].strength)) }
+        setNumCardsDrawn(0)
+    }, [currentTurnUserId])
 
     useEffect(() => {
         if (playersList.length > 0) {
@@ -612,6 +623,67 @@ export default function Match(){
 
 
     const move = async (roomId) => {
+        // Si vamos a mover un NPC
+        if (moveNpcMode) {
+            if (selectedNpcIndex === null) {
+                alert('Selecciona primero un NPC en el mapa');
+                return;
+            }
+
+            const npc = match?.npcs?.[selectedNpcIndex];
+            const npcIdToSend = npc?.id ?? null;
+            if (!npcIdToSend) {
+                alert('No se puede mover: el NPC no tiene identificador. Reinicia el servidor backend.');
+                setSelectedNpcIndex(null);
+                setSelectedNpcId(null);
+                setMoveNpcMode(false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/matches/${matchId}/moveNpc`, {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userId: currentUser.id, roomId: roomId, npcId: npcIdToSend })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setMatch(data);
+                    if (data.players) {
+                        setPlayer(data.players);
+                        const me = data.players.find(p => p.user.id === currentUser.id);
+                        if (me) {
+                            setCurrentPlayer([me]);
+                            setPlayersList(data.players.filter(p => p.user.id !== currentUser.id));
+                            setActionPoints(me.actionPoints ?? actionPoints);
+                            setStrength(Math.min(6, me.strength ?? strength));
+                        }
+                    }
+                    setSelectedNpcIndex(null);
+                    setSelectedNpcId(null);
+                    setMoveNpcMode(false);
+                } else {
+                    const text = await response.text();
+                    console.error('Error moving NPC:', response.status, text);
+                    setSelectedNpcIndex(null);
+                    setSelectedNpcId(null);
+                    setMoveNpcMode(false);
+                }
+            } catch (err) {
+                console.error('Error moving NPC:', err);
+                setSelectedNpcIndex(null);
+                setSelectedNpcId(null);
+                setMoveNpcMode(false);
+            }
+            return;
+        }
+
+        // Player move flow
         //console.log('roomId destino', roomId)
         //console.log('actual roomID', currentPlayer?.[0]?.currentRoom?.id || currentPlayer?.[0]?.roomId || currentPlayer?.[0]?.room?.id)
         if (moveToAdyacentRoom===false) return ;
@@ -893,7 +965,7 @@ export default function Match(){
                 console.error('Error advancing to next turn:', response.status, text);
             }
 
-            // Refresh match state after advancing turn
+            // Actualizar el estado del match después de cambiar de turno
             await fetchMatchAndPlayers();
         } catch (err) {
             console.error('Error calling next-turn:', err);
@@ -936,11 +1008,11 @@ export default function Match(){
         return (
             <div className="match-ended">
                 <div className="end-overlay">
-                <div className="end-text-box">
-                    <h2>La partida ha finalizado!!!!!</h2>
-                    <p>Gracias por jugar.</p>
-                    <button className="return-menu-button" onClick={() => navigate(`/`)}>Return to main menu</button>
-                </div>
+                    <div className="end-text-box">
+                        <h2>La partida ha finalizado!!!!!</h2>
+                        <p>Gracias por jugar.</p>
+                        <button className="return-menu-button" onClick={() => navigate(`/`)}>Return to main menu</button>
+                    </div>
                 </div>
             </div>
         );
@@ -959,7 +1031,7 @@ if (!match) {
         return Array.isArray(neighbors) && neighbors.includes(toId);
     };
 
-//console.log('cards', handCards)
+//console.log('hand', handCards)
 
 return (
         <div className="match-container">
@@ -1002,13 +1074,13 @@ return (
             </div>
 
             <StartDiceModal 
-                isOpen={match?.currentTurnPhase === null && isDiceModalOpen}
+                isOpen={!isSpectator && isDiceModalOpen && (match?.turnNumber === 0 || match?.currentTurnPhase === null)}
                 onClose={() => setIsDiceModalOpen(false)}
                 onDiceRolled={handleDiceRolled}
                 matchData={match}
             />
             
-            <div className="match-board">
+            <div className="match-board" style={{ position: 'relative' }}>
                 <div className="deck-column">
                     <div className="deck-section">
                         <button 
@@ -1044,16 +1116,7 @@ return (
                                 style={{ width: "150px", height: "auto" }}
                             />
                         ) : (
-                            <div style={{ 
-                                width: "150px", 
-                                height: "210px", 
-                                border: "2px dashed #ccc", 
-                                borderRadius: "8px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: "#999"
-                            }}>
+                            <div className="dicard-pile">
                                 Empty
                             </div>
                         )}
@@ -1130,13 +1193,21 @@ return (
                     
                     {/* Fichas de NPCs sobre el mapa */}
                     {match?.npcs.map((npc, index) => {
-                        if (!npc.room) return null;                        
+                        if (!npc.room) return null;
                         const position = roomPositions[npc.room.id];
                         if (!position) return null;
+                        const isSelectable = moveNpcMode && !isSpectator && match?.currentTurnUserId === currentUser?.id;
+                        const isSelected = selectedNpcIndex === index || (selectedNpcId != null && selectedNpcId === npc.id);
                         return (
                             <div
                                 key={`npc-${index}`}
                                 title={npc.name || `NPC ${index+1}`}
+                                onClick={(e) => {
+                                    if (!isSelectable) return;
+                                    e.stopPropagation();
+                                    setSelectedNpcIndex(index);
+                                    setSelectedNpcId(npc.id ?? null);
+                                }}
                                 style={{
                                     position: 'absolute',
                                     left: position.left,
@@ -1146,16 +1217,17 @@ return (
                                     height: '25px',
                                     borderRadius: '50%',
                                     backgroundColor: npc.isNiallCampbell ? '#ff0000' : '#666',
-                                    border: '2px solid white',
+                                    border: isSelected ? '3px solid yellow' : '2px solid white',
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                                    zIndex: 10,
-                                    pointerEvents: 'none',
+                                    zIndex: 20,
+                                    pointerEvents: isSelectable ? 'auto' : 'none',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     color: 'white',
                                     fontSize: '10px',
-                                    fontWeight: 'bold'
+                                    fontWeight: 'bold',
+                                    cursor: isSelectable ? 'pointer' : 'default'
                                 }}
                             >
                                 {npc.isNiallCampbell ? 'N' : 'X'}
@@ -1163,39 +1235,33 @@ return (
                         );
                     })}
                 </div>
-                <div className="points-section">
-                    <div className="action-points">
-                        <h1>{actionPoints}</h1>
-                        <p>Action points </p>
-                    </div>
+                
+            <div className="points-section">
+                                <div className="action-points">
+                                    <h1>{actionPoints}</h1>
+                                    <p>Action points </p>
+                                </div>
 
-                    <div className="action-points">
-                        <h1>{strength}</h1>
-                        <p>strength </p>
+                                <div className="action-points">
+                                    <h1>{strength}</h1>
+                                    <p>strength </p>
+                                </div>
+                            </div>
+            </div>
+
+            {/*Mensaje de movimiento de los NPC*/}
+            {moveNpcMode && !isSpectator && match?.currentTurnUserId === currentUser?.id && (
+                <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: '60px', zIndex: 30 }}>
+                    <div style={{ padding: '14px 42px', background: '#d200005e', color: '#fff', borderRadius: '10px', fontWeight: '700', fontSize: '20px', minWidth: '280px', textAlign: 'center', transform: 'translateX(20px)' }}>
+                        {selectedNpcIndex === null ? 'Select the NPC you want to move' : 'Select the room'}
                     </div>
                 </div>
-            </div>
+            )}
 
             {match?.currentTurnUserId === currentUser?.id && (
                 <button
-                    className="end-your-turn-button"
+                    className="end-turn-button"
                     onClick={handleEndTurn}
-                    style={{
-                            marginLeft: "050px",
-                            position: "absolute",
-                            left: "87%",                 
-                            transform: "translateX(-50%)",
-                            marginTop: "-80px",
-                            padding: "15px 35px", 
-                            fontSize: "22px",
-                            background: "#c0392b",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "8px",
-                            maxWidth: "500px",
-                            minWidth: "230px",
-                            cursor: "pointer"
-                    }}
                     disabled={isEndingTurn}
                 >
                 End your turn
@@ -1278,44 +1344,44 @@ return (
                                         <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
                                     </div>
                     ))}
-
                 </div>
-                
             </div>
-            <div>
-                <button className="bag-button"
-                    onClick={() => setBagOpen(true)}
-                    disabled={
-                    match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
-                    title="Accede to your bag"
-                >
-                    Form my bag
-                </button>
-                <button className="bag-button"
-                    onClick={() => setDiscardHandOpen(true)}
-                    disabled={
-                    match.currentTurnUserId !== currentUser.id || actionPoints > 0 }
-                    title="Discard cards from hand"
-                    style={{ marginLeft: "10px" }}
-                >
-                    Discard
-                </button>
-                 <button className="bag-button"
-                    title="Discard cards from hand"
-                    onClick={() => setIsActionsModalOpen(true) }
-                     disabled={
-                    match.currentTurnUserId !== currentUser.id || 
-                    actionPoints <= 0 }
-                    style={{ marginLeft: "15px" }}
-                >
-                    Actions
-                </button>
 
-                <ActionsModal
+            <div>
+            <button className="bag-button"
+                onClick={() => setBagOpen(true)}
+                disabled={
+                match.currentTurnUserId !== currentUser.id }
+                title="Accede to your bag"
+            >
+                Form my bag
+            </button>
+            <button className="bag-button"
+                onClick={() => setDiscardHandOpen(true)}
+                disabled={
+                match.currentTurnUserId !== currentUser.id }
+                title="Discard cards from hand"
+                style={{ marginLeft: "10px" }}
+            >
+                Discard
+            </button>
+            <button className="bag-button"
+                title="Discard cards from hand"
+                onClick={() => setIsActionsModalOpen(true) }
+                disabled={
+                match.currentTurnUserId !== currentUser.id || actionPoints === 0 }
+                style={{ marginLeft: "15px" }}
+            >
+                Actions
+            </button>
+
+            <ActionsModal
                 isOpen={isActionsModalOpen}
                 onClose={() => setIsActionsModalOpen(false)}
                 moveToAdyacent={() => setMoveToAdyacentRoom(true) }
+                onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
             />
+        </div>
 
     <FightModal
             isOpen={isFightModalOpen}
@@ -1624,22 +1690,9 @@ return (
             }}
     />
 
-            </div>
-            
-
                 <button
                     className="end-match-button"
                     onClick={endMatch}
-                    style={{
-                        marginLeft: "10px",
-                        marginTop: "20px",
-                        padding: "10px 25px",
-                        background: "#c0392b",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "8px",
-                        cursor: "pointer"
-                    }}
                 >
                     Finalizar partida
                 </button>
@@ -1707,23 +1760,7 @@ return (
             {chatOpen && <ChatBox matchId={matchId} />}
 
             {/* Mensaje de turno */}
-            <div
-                style={{
-                        marginLeft: "050px",
-                        position: "absolute",
-                        left: "10%",                 
-                        transform: "translateX(90%)",
-                        marginTop: "-80px",
-                        padding: "15px 35px", 
-                        fontSize: "22px",
-                        background: "#c0392b",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "8px",
-                        maxWidth: "500px",
-                        minWidth: "230px",
-                        cursor: "pointer"
-                }}
+            <div className="chat-button"
             >
                 {!match?.currentTurnUserId
                 ? "Esperando..."

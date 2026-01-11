@@ -102,6 +102,7 @@
     justify-content: center;
 }
 
+
 .player-bag-display {
     width: 100%;
     display: flex;
@@ -186,15 +187,17 @@
     justify-content: center;
 }
 
-.deck-column {
-    width: 160px;
+
+.map-column {
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.map-column {
-    flex: 1 1 auto;
+/* ------------------------ DECK SECTION ------------------------*/
+.deck-column {
+    width: 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -204,6 +207,18 @@
     margin-bottom: 12px;
 }
 
+.dicard-pile{
+    width: 145px; 
+    height: 210px; 
+    border: 2px dashed #ccc; 
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999
+}
+
+/* ------------------------ DICE SECTION ------------------------*/
 .Dice-pack {
     display: flex;
     gap: 15px;
@@ -295,3 +310,49 @@
     -webkit-text-stroke: 2px #2c70d3;
     transform: scale(1.05);           
 }
+
+.end-turn-button{
+    margin-left: 050px;
+    position: absolute;
+    left: 87%;                
+    transform: translateX(-50%);
+    margin-top: -80px;
+    padding: 15px 35px; 
+    font-size: 22px;
+    background: #c0392b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    max-width: 500px;
+    min-width: 230px;
+    cursor: pointer
+}
+
+.end-match-button{
+    margin-left: 10px;
+    margin-top: 20px;
+    padding: 10px 25px;
+    background: #c0392b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer
+}
+
+.chat-button{
+    margin-left: 050px;
+    position: absolute;
+    left: 10%;                 
+    transform: translateX(90%);
+    margin-top: -80px;
+    padding: 15px 35px; 
+    font-size: 22px;
+    background: #c0392b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    max-width: 500px;
+    min-width: 230px;
+    cursor: pointer
+}
+

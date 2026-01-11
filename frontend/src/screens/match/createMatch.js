@@ -48,7 +48,16 @@ export default function CreateLobby() {
   return (
   <div className="center-box">
     <div className="lobbies-overlay">
-  <div className="lobbies-box">
+  <div className="creation-box">
+
+ {/* Flecha de volver al inicio */}
+     <button 
+            className="back-arrow-btn"
+            onClick={() => navigate('/')}
+          >
+            ￩
+      </button>
+
   <div className="lobby-creation-content">
     <h1 style={{color:"black"}}>Crear Partida</h1>
 

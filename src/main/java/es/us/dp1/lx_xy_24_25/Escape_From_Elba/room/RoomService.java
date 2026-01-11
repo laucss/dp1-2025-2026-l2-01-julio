@@ -63,6 +63,19 @@ public class RoomService {
         List<Room> availableRooms = new ArrayList<>(rooms);
         availableRooms.remove(safeZone); //Quitamos la safe zone de las habitaciones disponibles
         Random rand = new Random();
+        Room torre1 = roomRepository.findById(1).orElseThrow(() -> 
+        new IllegalStateException("Torre 1 (ID 1) not found"));
+        Room torre2 = roomRepository.findById(31).orElseThrow(() -> 
+        new IllegalStateException("Torre 2 (ID 31) not found"));
+        Room torre3 = roomRepository.findById(6).orElseThrow(() -> 
+        new IllegalStateException("Torre 3 (ID 6) not found"));
+        Room torre4 = roomRepository.findById(36).orElseThrow(() -> 
+        new IllegalStateException("Torre 4 (ID 36) not found"));
+        //Para que las torres no se asignen
+        availableRooms.remove(torre1);
+        availableRooms.remove(torre2);
+        availableRooms.remove(torre3);
+        availableRooms.remove(torre4);
 
         //Asignamos habitaciones aleatoriamente a los NPCs
         //Niall Campbell debe de ir en la safe zone
