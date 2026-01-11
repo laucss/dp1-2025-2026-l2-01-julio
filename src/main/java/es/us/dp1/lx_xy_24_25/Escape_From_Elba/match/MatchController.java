@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -114,6 +115,18 @@ public class MatchController {
     @Operation(summary = "Get public matches", description = "Get all public matches available to join.")
     public List<Match> getPublicGames(){
         return ls.getAllPublicLobbies();
+    }
+
+    @GetMapping("/all-Matches")
+    public Page<MatchHistorialDTO> getAllMatches(@ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
+        Page<Match> finishedMatches = ms.getFinishedAndInProgressMatches(page, size);
+        return finishedMatches.map(MatchHistorialDTO::new);
+    }
+
+    @GetMapping("/finishedMatches")
+    public Page<MatchHistorialDTO> getFinishedMatches(@ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
+        Page<Match> finishedMatches = ms.getFinishedMatches(page, size);
+        return finishedMatches.map(MatchHistorialDTO::new);
     }
 
     @GetMapping("/lobbies/privates")

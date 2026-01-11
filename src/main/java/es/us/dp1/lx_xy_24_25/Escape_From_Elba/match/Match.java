@@ -8,6 +8,7 @@ import lombok.Setter;
 
 
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,12 +60,13 @@ public class Match extends NamedEntity {
     //Tiempos
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    /** estaría bien?? hay proyectos que lo tienen
+
+
     public Duration getDuration() {
         if(startTime == null || endTime == null) return null;
         return Duration.between(startTime, endTime);
     }
-    */
+    
 
     //Máximo y mínimo de jugadores
     @Min(3)
