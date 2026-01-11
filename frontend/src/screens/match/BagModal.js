@@ -12,7 +12,6 @@ import {restrictToWindowEdges} from '@dnd-kit/modifiers';
 import { SortableContext } from '@dnd-kit/sortable';
 import SortableCard from './dnd-kit/SortableCard';
 
-
 const jwt = tokenService.getLocalAccessToken();
 
 export default function BagModal({isVisible, hand, bag, deck, onClose, player, onSave}){

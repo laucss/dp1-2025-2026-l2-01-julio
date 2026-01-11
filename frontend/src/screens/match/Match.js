@@ -7,7 +7,7 @@ import getIdFromUrl from '../../util/getIdFromUrl'
 import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
 import BagModal from "./BagModal";
-import DiscardHandModal from "./DiscardHandModal";
+import DiscardPhaseModal from "./DiscardPhaseModal";
 import ActionsModal from "./ActionsModal";
 import ChatBox from "./chatBox";
 import { FaComments } from "react-icons/fa";
@@ -39,7 +39,7 @@ export default function Match(){
     const [otherPlayersBags, setOtherPlayersBags] = useState({}) 
     const [numCardsDrawn, setNumCardsDrawn] = useState(0)
     const [bagOpen, setBagOpen] = useState(false)
-    const [discardHandOpen, setDiscardHandOpen] = useState(false)
+    const [discardPhaseOpen, setDiscardPhaseOpen] = useState(false)
 
     // DADOS 
     const [whiteDice, setWhiteDice] = useState("1")
@@ -328,6 +328,10 @@ export default function Match(){
         if (currentPlayerTurn) { 
             setStrength(Math.min(6, currentPlayer[0].strength)) }
         setNumCardsDrawn(0)
+        
+        if (currentTurnUserId && currentPlayer[0].user.id === currentTurnUserId){ 
+            fetchActionPoints() 
+        }
     }, [currentTurnUserId])
 
     useEffect(() => {
@@ -341,12 +345,6 @@ export default function Match(){
     }, [handCards])
 
 
-
-    useEffect(() => {
-        if (currentTurnUserId && currentPlayer[0].user.id === currentTurnUserId){
-            fetchActionPoints()
-        }
-    }, [currentTurnUserId])
 
     // Polling para actualizar el match mientras el modal de dados está abierto
     useEffect(() => {
@@ -1226,22 +1224,15 @@ return (
             </div>
 
             <div>
+
             <button className="bag-button"
-                onClick={() => setBagOpen(true)}
-                disabled={
-                match.currentTurnUserId !== currentUser.id }
-                title="Accede to your bag"
-            >
-                Form my bag
-            </button>
-            <button className="bag-button"
-                onClick={() => setDiscardHandOpen(true)}
+                onClick={() => setDiscardPhaseOpen(true)}
                 disabled={
                 match.currentTurnUserId !== currentUser.id }
                 title="Discard cards from hand"
                 style={{ marginLeft: "10px" }}
             >
-                Discard
+                Discard and bag
             </button>
             <button className="bag-button"
                 title="Discard cards from hand"
@@ -1437,32 +1428,18 @@ return (
                     Finalizar partida
                 </button>
 
-        <BagModal
-            isVisible={bagOpen}
+
+        <DiscardPhaseModal
+            isVisible={discardPhaseOpen}
             hand={handCards}
             bag={bagCards}
             deck={deck}
             player={currentPlayer[0]}
-            onClose={() => setBagOpen(false)}
-            onSave={async () =>{
-                await fetchCards()
-                setBagOpen(false)
-
-            }
-                }
-            />
-
-        <DiscardHandModal
-            isVisible={discardHandOpen}
-            hand={handCards}
-            bag={bagCards}
-            deck={deck}
-            player={currentPlayer[0]}
-            onClose={() => setDiscardHandOpen(false)}
+            onClose={() => setDiscardPhaseOpen(false)}
             updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
             onSave={async () =>{
                 await fetchCards()
-                setDiscardHandOpen(false)
+                setDiscardPhaseOpen(false)
             }}
             />
 

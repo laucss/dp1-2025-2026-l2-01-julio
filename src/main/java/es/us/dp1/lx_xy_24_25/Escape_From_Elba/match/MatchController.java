@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DTOs.AllCardsStatusDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DTOs.DrawCardResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
@@ -235,13 +235,9 @@ public class MatchController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{matchId}/discardConfirmed")
-    public ResponseEntity<Integer> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
-        handService.update(data.getHand(), matchId, data.getPlayerId());
-        bagService.update(data.getBag(), matchId, data.getPlayerId());
-        deckService.update(data.getDeck(), matchId);
-        Integer nextTurnId = ms.nextTurn(matchId).getCurrentTurnUserId(); 
-
+    @PutMapping("/{matchId}/confirmDiscardPhase")
+    public ResponseEntity<Integer> confirmDiscardPhase(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
+        Integer nextTurnId = ms.confirmDiscardPhase(matchId, data); 
         return ResponseEntity.ok(nextTurnId); 
         
     }

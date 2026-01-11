@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-//import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
@@ -22,6 +21,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.BagNotValidException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
@@ -435,6 +435,24 @@ public class MatchService {
             }
         }
         return deck;     
+
+    }
+
+    @Transactional
+    public Integer confirmDiscardPhase(Integer matchId, AllCardsStatusDTO data ){
+
+        Boolean validBag = bagService.checkBagIsValid(data.getBag().getCards()); 
+        
+        // si la palabra de la bolsa es válida o está vacía, actualizamos todo y pasamos al siguiente turno 
+        if (validBag) {
+            handService.update(data.getHand(), matchId, data.getPlayerId());
+            bagService.update(data.getBag(), matchId, data.getPlayerId());
+            deckService.update(data.getDeck(), matchId);
+            Integer nextTurnId = nextTurn(matchId).getCurrentTurnUserId(); 
+            return nextTurnId; 
+        } else { // si la bolsa no está vacía y no es válida: 
+            throw new BagNotValidException("The word of the bag is not valid"); 
+        }
 
     }
 

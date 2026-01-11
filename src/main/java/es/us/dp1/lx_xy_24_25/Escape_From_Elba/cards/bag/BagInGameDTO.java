@@ -11,19 +11,20 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ListCardsDTO  {
+public class BagInGameDTO  {
 
     @NotNull
-    List<CardDTO> cards; 
-    
-    public ListCardsDTO(BagInGame bag){
+    private List<CardDTO> cards; 
+
+    public BagInGameDTO(BagInGame bag){
         List<Card> cards = bag.getCards(); 
-        List<CardDTO> newList = new ArrayList<>(); 
+        List<CardDTO> newBag = new ArrayList<>(); 
         for (Card card : cards){
-            newList.add(new CardDTO(card)); 
+            newBag.add(new CardDTO(card)); 
         }
-        this.cards=newList; 
+        this.cards=newBag; 
     }
 
-    public ListCardsDTO(){}
+    public BagInGameDTO(){}
+    
 }
