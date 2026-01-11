@@ -14,6 +14,7 @@ import { FaComments } from "react-icons/fa";
 import FightModal from "./FightModal";
 import StartDiceModal from "./StartDiceModal";
 import StealCardModal from "./StealCardModal";
+import NpcLossDiscardModal from "./NpcLossDiscardModal";
 
 
 
@@ -64,6 +65,7 @@ export default function Match(){
     const [pendingTargetRoom, setPendingTargetRoom] = useState(null);
     const [isStealModalOpen, setIsStealModalOpen] = useState(false);
     const [stealLoserPlayerId, setStealLoserPlayerId] = useState(null);
+    const [isNpcLossModalOpen, setIsNpcLossModalOpen] = useState(false);
     
     // Función para obtener un color único para cada jugador
     const getPlayerColor = (playerId) => {
@@ -673,6 +675,22 @@ export default function Match(){
                     setFightAttacker(currentPlayerData);
                     setIsFightModalOpen(true);
                     setMoveToAdyacentRoom(false);
+
+                    // Consumir 1 punto de acción por el intento de movimiento, incluso si luego se pierde la batalla
+                    try {
+                        const consumeResponse = await fetch(`/api/v1/matches/${matchId}/consume-action-point/${currentUser.id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${jwt}`,
+                                'Content-Type': 'application/json',
+                            },
+                        });
+                        if (consumeResponse.ok) {
+                            setActionPoints(prev => Math.max(0, prev - 1));
+                        }
+                    } catch (err) {
+                        console.error('Error consuming action point on NPC fight start:', err);
+                    }
                     
                     await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
                         method: 'POST',
@@ -797,6 +815,40 @@ export default function Match(){
         } catch (err) {
             console.error('Error moving player:', err);
             return null;
+        }
+    }
+
+    const handleNpcLossDiscard = async ({ cardId, fromWhere }) => {
+        if (!cardId || !fromWhere || !currentPlayer[0]?.id) {
+            setIsNpcLossModalOpen(false);
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/lose-against-npc`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cardId,
+                    fromWhere
+                })
+            });
+
+            if (!res.ok) {
+                console.error('Error discarding card after NPC loss:', res.status);
+                alert('No se pudo descartar la carta tras perder contra el NPC.');
+            } else {
+                await fetchCards();
+                await fetchOtherPlayersBags();
+            }
+        } catch (error) {
+            console.error('Error discarding card after NPC loss:', error);
+            alert('Ocurrió un error al descartar la carta.');
+        } finally {
+            setIsNpcLossModalOpen(false);
         }
     }
 
@@ -1302,8 +1354,9 @@ return (
                     if (isDefenderNPC) {
                         try {
                             if (attackerWins) {
-                                // El jugador ganó contra el bot: ganar una carta, mover a la habitación del bot y enviar el bot a una aleatoria
-                                console.log('Player won against NPC. Drawing a reward card...');
+                                // El jugador ganó contra el bot: ganar 2 cartas, mover a la habitación del bot y enviar el bot a una aleatoria
+                                console.log('Player won against NPC. Drawing 2 reward cards...');
+                                await drawCardForWinner(currentPlayer?.[0]?.id);
                                 await drawCardForWinner(currentPlayer?.[0]?.id);
                                 
                                 // Mover al jugador ganador a la habitación donde estaba el bot
@@ -1415,6 +1468,10 @@ return (
                                         strength: (currentPlayer?.[0]?.strength || 1) + 1
                                     })
                                 });
+
+                                if ((handCards?.length || 0) > 0 || (bagCards?.length || 0) > 0) {
+                                    setIsNpcLossModalOpen(true);
+                                }
                             }
                         } catch (error) {
                             console.error('Error handling NPC fight result:', error);
@@ -1630,6 +1687,14 @@ return (
                 setIsStealModalOpen(false);
                 setStealLoserPlayerId(null);
             }}
+        />
+
+        <NpcLossDiscardModal
+            isOpen={isNpcLossModalOpen}
+            handCards={handCards}
+            bagCards={bagCards}
+            onClose={() => setIsNpcLossModalOpen(false)}
+            onDiscard={handleNpcLossDiscard}
         />
 
       

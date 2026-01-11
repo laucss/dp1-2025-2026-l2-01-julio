@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
@@ -34,6 +35,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.FightResolvedDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.LoseAgainstNpcRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
@@ -372,6 +374,14 @@ public class MatchController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{matchId}/consume-action-point/{userId}")
+    @Operation(summary = "Consume one action point", description = "Consumes one action point for a user and notifies all players.")
+    public ResponseEntity<Void> consumeOneActionPoint(@PathVariable Integer matchId, @PathVariable Integer userId) {
+        ActionPointsUpdateDTO actionPointsUpdate = ms.consumeOneActionPoint(matchId, userId);
+        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/{matchId}/notify-strength")
     @Operation(summary = "Notify strength", description = "Notifies all players when strength is updated.")
     public ResponseEntity<Void> notifyStrength(@PathVariable Integer matchId, @RequestBody StrengthUpdateDTO strengthUpdate) {
@@ -440,6 +450,57 @@ public class MatchController {
             return ResponseEntity.ok(Map.of("winner", winnerCards, "loser", loserCards));
         } catch (Exception e) {
             System.err.println("Error al robar carta: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/{matchId}/{playerId}/lose-against-npc")
+    @Operation(summary = "Player loses against NPC", description = "Player chooses a card to discard after losing to an NPC.")
+    public ResponseEntity<AllCardsStatusDTO> playerLosesAgainstNpc(
+            @PathVariable Integer matchId,
+            @PathVariable Integer playerId,
+            @Valid @RequestBody LoseAgainstNpcRequestDTO request) {
+        try {
+            String fromWhere = request.getFromWhere();
+            Integer cardId = request.getCardId();
+
+            if (fromWhere == null || (!"hand".equals(fromWhere) && !"bag".equals(fromWhere))) {
+                return ResponseEntity.badRequest().build();
+            }
+            if (cardId == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Card cardRef = null;
+            if ("hand".equals(fromWhere)) {
+                HandInGame hand = handService.findPlayerHand(matchId, playerId);
+                cardRef = hand.getCards().stream()
+                    .filter(c -> c.getId() != null && c.getId().equals(cardId))
+                    .findFirst()
+                    .orElse(null);
+            } else {
+                BagInGame bag = bagService.findPlayerBag(matchId, playerId);
+                cardRef = bag.getCards().stream()
+                    .filter(c -> c.getId() != null && c.getId().equals(cardId))
+                    .findFirst()
+                    .orElse(null);
+            }
+
+            if (cardRef == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Integer currentTurnUserId = ms.getMatchById(matchId).getCurrentTurnUserId();
+            ms.playerLosesAgaintsNonPlayer(cardRef, matchId, playerId, currentTurnUserId, fromWhere);
+
+            AllCardsStatusDTO updatedCards = ms.getAllCards(matchId, playerId);
+            CardsUpdateDTO update = new CardsUpdateDTO(matchId, updatedCards, updatedCards);
+            matchWebsocketController.notifyCardsUpdate(matchId, update);
+
+            return ResponseEntity.ok(updatedCards);
+        } catch (Exception e) {
+            System.err.println("Error al descartar carta tras perder contra NPC: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
