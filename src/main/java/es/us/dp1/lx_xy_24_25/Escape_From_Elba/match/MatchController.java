@@ -263,6 +263,23 @@ public class MatchController {
 
     }
 
+    @PostMapping("/{matchId}/{playerId}/playerWinsNiallCampbell")
+    public ResponseEntity<DrawCardResultDTO> playerWinsNiallCampbell (@PathVariable Integer matchId, @PathVariable Integer playerId){
+        Card card = ms.playerWinsNiallCampbell(matchId, playerId);
+        // Si no hay carta descartada, retorna null sin robar nada
+        DeckInGame deck = deckService.findDeckById(matchId);
+        HandInGame hand = handService.findPlayerHand(matchId, playerId);
+        DrawCardResultDTO result = new DrawCardResultDTO(card, deck, hand);
+
+        // Notificar por WebSocket el estado actualizado de cartas (incluye deck/discard)
+        AllCardsStatusDTO playerCards = ms.getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, playerCards);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
+
+        return ResponseEntity.ok(result);
+
+    }
+
     @GetMapping("/{matchId}/{playerId}/getAllCards")
     public ResponseEntity<AllCardsStatusDTO> getAllCards (@PathVariable Integer matchId, @PathVariable Integer playerId){
         AllCardsStatusDTO result = ms.getAllCards(matchId, playerId); 

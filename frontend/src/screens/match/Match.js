@@ -306,6 +306,7 @@ export default function Match(){
                 if (!info || !info.playerId) return;
                 const hand = Array.isArray(info.hand?.cards) ? info.hand.cards : [];
                 const bag = Array.isArray(info.bag?.cards) ? info.bag.cards : [];
+                const deckInfo = info.deck;
 
                 // Si es el jugador actual, actualizamos su mano y bolsa
                 if (currentPlayer[0]?.id === info.playerId) {
@@ -317,6 +318,13 @@ export default function Match(){
                         ...prev,
                         [info.playerId]: bag
                     }));
+                }
+
+                // Actualizar el mazo y la pila de descarte globalmente
+                if (deckInfo) {
+                    setDeck(deckInfo);
+                    const discarded = Array.isArray(deckInfo.discardedCards) ? deckInfo.discardedCards : [];
+                    setDiscardPile(discarded);
                 }
             };
 
@@ -1512,10 +1520,29 @@ return (
                     if (isDefenderNPC) {
                         try {
                             if (attackerWins) {
-                                // El jugador ganó contra el bot: ganar 2 cartas, mover a la habitación del bot y enviar el bot a una aleatoria
-                                console.log('Player won against NPC. Drawing 2 reward cards...');
-                                await drawCardForWinner(currentPlayer?.[0]?.id);
-                                await drawCardForWinner(currentPlayer?.[0]?.id);
+                                // El jugador ganó contra el bot
+                                console.log('Player won against NPC. Defender is NiallCampbell:', fightDefender?.isNiallCampbell);
+                                
+                                // Si es NiallCampbell, roba de la pila de descarte
+                                if (fightDefender?.isNiallCampbell) {
+                                    console.log('Drawing from discard pile for beating Niall Campbell...');
+                                    await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0]?.id}/playerWinsNiallCampbell`, {
+                                        method: "POST",
+                                        headers: {
+                                            Authorization: `Bearer ${jwt}`,
+                                            Accept: 'application/json',
+                                            'Content-Type': 'application/json',
+                                        },
+                                    }).then(r => r.json()).then(data => {
+                                        // Actualizamos inmediatamente el mazo; la mano se sincroniza por WebSocket
+                                        setDeck(data.deck);
+                                    });
+                                } else {
+                                    // Si es un NPC normal, roba 2 cartas de recompensa
+                                    console.log('Drawing 2 reward cards for beating regular NPC...');
+                                    await drawCardForWinner(currentPlayer?.[0]?.id);
+                                    await drawCardForWinner(currentPlayer?.[0]?.id);
+                                }
                                 
                                 // Mover al jugador ganador a la habitación donde estaba el bot
                                 if (defenderRoomId) {
