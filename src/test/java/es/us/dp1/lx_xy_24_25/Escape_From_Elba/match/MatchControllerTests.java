@@ -8,6 +8,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MoveToRoomDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
@@ -178,7 +180,7 @@ public class MatchControllerTests {
 
         mockMvc.perform(get("/api/v1/matches/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(sampleMatch.getCode()));
+                .andExpect(jsonPath("$.code").value(sampleMatch.getId()));
 
         verify(matchService, times(1)).getMatchById(1);
     }

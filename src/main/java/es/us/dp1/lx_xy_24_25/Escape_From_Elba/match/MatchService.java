@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
@@ -25,8 +25,13 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.BagNotValidException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsInHand;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
@@ -436,7 +441,7 @@ public class MatchService {
 
         HandInGameDTO hand = new HandInGameDTO(handService.findPlayerHand(matchId, playerId)); 
 
-        ListCardsDTO bag = new ListCardsDTO(bagService.findPlayerBag(matchId, playerId));
+        BagInGameDTO bag = new BagInGameDTO(bagService.findPlayerBag(matchId, playerId));
 
         return new AllCardsStatusDTO(hand, bag, deck, playerId); 
     }
@@ -465,8 +470,13 @@ public class MatchService {
     }
 
     @Transactional
-    public Integer confirmDiscardPhase(Integer matchId, AllCardsStatusDTO data ){
+    public Integer confirmDiscardPhase(Integer matchId, AllCardsStatusDTO data ) {
 
+        // si tienes más de 7 cartas en la mano tiene que descartar sí o sí 
+        if (data.getHand().getCards().size() > 7 ){
+            throw new MoreThan7CardsInHand("You cannot have more than 7 cards in your hand, you must discard or use them in your bag"); 
+        }
+        // si no tiene más de 7 pasamos a comprobar que la palabra sea válida 
         Boolean validBag = bagService.checkBagIsValid(data.getBag().getCards()); 
         
         // si la palabra de la bolsa es válida o está vacía, actualizamos todo y pasamos al siguiente turno 

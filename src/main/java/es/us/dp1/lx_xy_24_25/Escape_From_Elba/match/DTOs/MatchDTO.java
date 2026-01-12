@@ -1,4 +1,4 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -6,6 +6,9 @@ import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.TurnPhase;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;

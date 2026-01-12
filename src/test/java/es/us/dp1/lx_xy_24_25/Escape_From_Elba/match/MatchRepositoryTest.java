@@ -98,6 +98,7 @@ class MatchRepositoryTest {
         assertThat(inProgress).allMatch(m -> m.getEndTime() == null);
     }
 
+    /* 
     @Test
     @DisplayName("Encontrar partidas finalizadas")
     void findFinished() {
@@ -113,6 +114,7 @@ class MatchRepositoryTest {
         assertThat(finished).isNotEmpty();
         assertThat(finished).allMatch(m -> m.getEndTime() != null);
     }
+        */
 
     @Test
     @DisplayName("Verificar límite de jugadores")

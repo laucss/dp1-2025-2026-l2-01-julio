@@ -5,6 +5,8 @@ import getIdFromUrl from "../../util/getIdFromUrl";
 
 import { useMemo } from 'react';
 
+import { toast } from "react-toastify";
+
 // imports del dnd-kit (librería para el arrastre de cartas)
 import {DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import Card from "./dnd-kit/Card";
@@ -118,15 +120,16 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
                 console.log('Cards discarded successfully')
                 updateCurrentTurnId(nextTurnId)
                 onSave()
-            } else { // "Could not discard cards or form de bag."
-                setMessage(response)
-                setVisible(true);
+            } if (!response.ok){
+                const error = await response.json();
+                throw error;
+
+            
             }
 
         } catch (error) {
             console.error("Error during discard:", error)
-            setMessage(error)
-            setVisible(true)
+            toast.error(error.message);
         }
     }
 

@@ -28,6 +28,8 @@ import WaitingLobby from "./screens/match/waitingLobby";
 import Match from "./screens/match/Match";
 import Ranking from "./screens/statistics/Ranking";
 
+import { ToastContainer } from "react-toastify";
+
 //import { useState } from "react";
 //import { fetchUser } from "./services/user.service";
 //import { CurrentUserContext } from "./context/currentUserContext";
@@ -135,6 +137,15 @@ function App() {
 
   return (
     <div>
+
+      {/* Toast GLOBAL: fuera del ErrorBoundary */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        pauseOnHover
+        theme="dark"
+        
+      />
       <ErrorBoundary FallbackComponent={ErrorFallback} >
         {/*Poner cosas del chat*/}
             {!location.pathname.match(/^\/match\/\d+$/) && <AppNavbar />}

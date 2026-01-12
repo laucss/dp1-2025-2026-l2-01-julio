@@ -25,20 +25,6 @@ public class DeckController {
         this.matchService=matchService;
     }
 
-    @GetMapping("/{matchId}")
-    public ResponseEntity<?> iniciarDeck(@PathVariable Integer matchId) {
-        DeckInGame deck = deckService.initializeDeck(matchId); 
-    
-
-        if (deck == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error: No se pudo crear el mazo de los cojones");
-        }
-
-        return ResponseEntity.ok(deck);
-
-    }
-
 
     /*
      

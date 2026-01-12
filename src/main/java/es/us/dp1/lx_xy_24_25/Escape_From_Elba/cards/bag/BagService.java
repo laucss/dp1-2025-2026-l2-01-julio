@@ -232,7 +232,7 @@ public class BagService {
 
 
     
-    public void update(ListCardsDTO bag, Integer matchId, Integer playerId){
+    public void update(BagInGameDTO bag, Integer matchId, Integer playerId){
 
         //checkear que exista el player y tal 
 
