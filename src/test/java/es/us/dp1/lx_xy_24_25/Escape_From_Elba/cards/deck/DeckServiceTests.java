@@ -1,4 +1,4 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.deck;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;

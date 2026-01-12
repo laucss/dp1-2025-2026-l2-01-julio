@@ -1,4 +1,4 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.hand;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
