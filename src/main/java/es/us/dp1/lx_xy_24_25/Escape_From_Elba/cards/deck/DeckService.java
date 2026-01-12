@@ -83,8 +83,9 @@ public class DeckService {
     @Transactional(readOnly = true)
     public DeckInGame findDeckById(Integer macthId) {
         DeckInGame deck = activesDecks.get(macthId); 
-        if (deck==null)
-            throw new ResourceNotFoundException("This deck does not exist or is not found"); 
+        if (deck == null){
+            return new DeckInGame(); 
+        }
         return deck;   
     }
 

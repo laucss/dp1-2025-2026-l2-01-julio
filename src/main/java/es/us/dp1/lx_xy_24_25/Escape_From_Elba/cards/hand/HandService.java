@@ -62,13 +62,13 @@ public class HandService {
     public HandInGame findPlayerHand(Integer matchId, Integer playerId){
         Map<Integer, HandInGame> playerMap = activesHands.get(matchId);
         if (playerMap == null) {
-            throw new ResourceNotFoundException("No player hands found for match " + matchId);
+            return new HandInGame(); // devuelvo una lista vacía por si acaso da error porque no se carga hasta que se le da a empezar partida 
         }
         
         HandInGame playerHand = playerMap.get(playerId); 
 
-        if (playerHand == null) {
-            throw new ResourceNotFoundException("The player hands was not found or does not exits"); 
+        if (playerHand == null) { // devuelvo una lista vacía por si acaso da error porque no se carga hasta que se le da a empezar partida 
+            return new HandInGame(); 
         }
 
         return playerHand; 

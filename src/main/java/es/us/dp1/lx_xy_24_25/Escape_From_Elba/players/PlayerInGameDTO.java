@@ -1,6 +1,10 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import lombok.Getter;
@@ -22,16 +26,12 @@ public class PlayerInGameDTO {
 
     private RoomDTO currentRoom;
     
-    // Cartas en juego
-    /* 
-    @JsonProperty("hand")
-    private List<Card> handCards;       
+
+    private HandInGameDTO hand;       
     
-    @JsonProperty("bag")
-    private List<Card> bagCards;  
-    
-    
-    */
+
+    private BagInGameDTO bag;  
+
 
     public PlayerInGameDTO(Player player) {
         this.id = player.getId();
@@ -39,11 +39,20 @@ public class PlayerInGameDTO {
         this.actionPoints = player.getActionPoints();
         this.user= player.getUser();
         this.currentRoom = player.getRoom() != null ? new RoomDTO(player.getRoom()) : null;
-        /*
-        this.handCards = player.getHandCards();
-        this.bagCards = player.getBagCards();
-        */
     }
+
+
+    public PlayerInGameDTO(Player player, HandInGame hand, BagInGame bag) {
+        this.id = player.getId();
+        this.strength = player.getStrength();
+        this.actionPoints = player.getActionPoints();
+        this.user= player.getUser();
+        this.currentRoom = player.getRoom() != null ? new RoomDTO(player.getRoom()) : null;
+        this.hand = new HandInGameDTO(hand);
+        this.bag = new BagInGameDTO(bag);
+
+    }
+
 
     public PlayerInGameDTO() {
     }

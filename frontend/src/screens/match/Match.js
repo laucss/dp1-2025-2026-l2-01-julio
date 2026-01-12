@@ -6,7 +6,6 @@ import '../../static/css/match/Match.css';
 import getIdFromUrl from '../../util/getIdFromUrl'
 import useFetchState from "../../util/useFetchState";
 import tokenService from "../../services/token.service";
-import BagModal from "./BagModal";
 import DiscardPhaseModal from "./DiscardPhaseModal";
 import ActionsModal from "./ActionsModal";
 import ChatBox from "./chatBox";
@@ -143,6 +142,8 @@ export default function Match(){
     useEffect(() => {
         fetchMatchAndPlayers()
     }, [matchId])
+    console.log('match', match)
+
     
     
     useEffect(() => {
@@ -418,6 +419,13 @@ export default function Match(){
         calculateActionPoints()
     }, [handCards])
 
+    useEffect(() => {
+        if (!currentPlayer || !currentPlayer.hand || !currentPlayer.bag) return;
+
+        setHandCards(currentPlayer.hand.cards || []);
+        setBagCards(currentPlayer.bag.cards || []);
+    }, [currentPlayer])
+
 
 
     // Polling para actualizar el match mientras el modal de dados está abierto
@@ -510,6 +518,8 @@ export default function Match(){
 
                 setMatch(data)
                 setPlayer(data.players)
+                setDeck(data.deck.notDiscardedCards)
+                setDiscardPile(data.deck.discardedCards)
                 
 
             } catch (error) {
@@ -517,7 +527,7 @@ export default function Match(){
             }
     }
 
-
+    console.log('deck', deck)
     // Mover el ganador a la habitación objetivo
     const movePlayerToRoom = async (userId, roomId) => {
         try {
@@ -624,7 +634,8 @@ export default function Match(){
     console.log('hand' , handCards)
     console.log('bag' , bagCards)
     */
-    console.log('deck' , deck)
+    //console.log('deck' , deck)
+    console.log('match', match)
     
 
     // FUNCION ROBAR CARTA
@@ -1075,7 +1086,7 @@ export default function Match(){
         }
     };
 
-    const currentPlayerTurn = match?.players.find(p => p.user.id === match.currentTurnUserId);
+    const currentPlayerTurn = match?.players?.find(p => p.user.id === match.currentTurnUserId);
 
     const canDraw = match?.currentTurnUserId === currentUser?.id &&
                 match?.currentTurnPhase === "DRAW" &&
@@ -1268,7 +1279,7 @@ return (
                     <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
                     
                     {/* Fichas de jugadores sobre el mapa */}
-                    {match?.players.map(player => {
+                    {match?.players?.map(player => {
                         if (!player.currentRoom) return null;                      
                         const position = roomPositions[player.currentRoom.id];
                         if (!position) return null;
@@ -1296,7 +1307,7 @@ return (
                     })}
                     
                     {/* Fichas de NPCs sobre el mapa */}
-                    {match?.npcs.map((npc, index) => {
+                    {match?.npcs?.map((npc, index) => {
                         if (!npc.room) return null;
                         const position = roomPositions[npc.room.id];
                         if (!position) return null;

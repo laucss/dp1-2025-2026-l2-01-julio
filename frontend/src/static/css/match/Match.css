@@ -172,8 +172,8 @@
     margin-bottom: 15px;
     flex-wrap: wrap;
     width: 40%;
-    max-height: 150px;
-    min-height: 100px;
+    max-height: 200px;
+    min-height: 150px;
     border-radius: 10px;
     overflow: hidden;
     overflow-x: auto;
@@ -219,8 +219,8 @@
     margin-bottom: 15px;
     flex-wrap: wrap;
     width: 40%;
-    max-height: 150px;
-    min-height: 100px;
+    max-height: 200px;
+    min-height: 150px;
     border-radius: 10px;
     overflow: hidden;
     overflow-x: auto;
