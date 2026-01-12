@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardRepository;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 
 
@@ -94,6 +93,7 @@ public class DeckService {
 
     /*
      * Método que una vez, acabadas las cartas para robar, coge las descartadas, las baraja de nuevo y las devuelve al mazo de robar
+     * No hemos puesto que se quede al menos una carta en la pila de descarte pues el juego no lo contempla.  
      */
 
     
@@ -146,29 +146,6 @@ public class DeckService {
         discardedCards.add(card); 
     }
 
-
-    
-
-    /*
-     * Método que añade VARIAS cartas al mazo de descartes
-     */
-
-     /*
-
-    public void addFewCardsToDiscardedPile (Integer macthId, List<Card> cards){
-    
-        DeckInGame deck = findDeckById(macthId);
- 
-        List<Card> discardedCards = deck.getDiscardedCards();
-
-        for (const card in cards){
-            checkers.checkCardExists(card);
-            discardedCards.add(card);
-        } 
-         
-    }
-
-    */
 
     /*
      * Método que devuelve (y quita del mazo de descarte) la última carta que haya sido descartada

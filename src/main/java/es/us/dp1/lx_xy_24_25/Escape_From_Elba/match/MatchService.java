@@ -43,6 +43,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 
 
 @Service
@@ -57,6 +58,7 @@ public class MatchService {
     Random ran = new Random();
     LobbyWebsocketController lobbyWebsocketController;
     MatchWebsocketController matchWebsocketController;
+    Checkers checkers; 
 
     MatchRepository matchRepo;
     PlayerRepository playerRepo;
@@ -68,7 +70,7 @@ public class MatchService {
     public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, 
             RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
             PlayerService playerService, LobbyWebsocketController lobbyWebsocketController,
-            MatchWebsocketController matchWebsocketController, NpcRepository npcRepository) {
+            MatchWebsocketController matchWebsocketController, NpcRepository npcRepository, Checkers checkers) {
         this.matchRepo = mrepo;
         this.playerRepo = playerRepo;
         this.roomRepository = roomRepository;
@@ -80,6 +82,7 @@ public class MatchService {
         this.playerService = playerService;
         this.lobbyWebsocketController = lobbyWebsocketController;
         this.matchWebsocketController = matchWebsocketController;
+        this.checkers = checkers; 
     }
 
     @Transactional(readOnly = true)
@@ -317,6 +320,11 @@ public class MatchService {
                 .filter(p -> p.getUser().getId().equals(currenUserTurnId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Player not found"));
+
+        // checkeamos que tenga menos de 7 cartas en su mano, pues si no tiene que descartar
+        HandInGame currentPlayerHand = handService.findPlayerHand(matchId, currentPlayerTurn.getId()); 
+        checkers.checkNoMoreThan7CardsInHand(new HandInGameDTO(currentPlayerHand));
+
         //Obtenemos el indice de orden del jugador actual
         Integer currentIndx = currentPlayerTurn.getOrderInMatch();
         //Calculamos el indice del siguiente jugador
@@ -471,26 +479,19 @@ public class MatchService {
 
     @Transactional
     public Integer confirmDiscardPhase(Integer matchId, AllCardsStatusDTO data ) {
-
-        // si tienes más de 7 cartas en la mano tiene que descartar sí o sí 
-        if (data.getHand().getCards().size() > 7 ){
-            throw new MoreThan7CardsInHand("You cannot have more than 7 cards in your hand, you must discard or use them in your bag"); 
-        }
-        // si no tiene más de 7 pasamos a comprobar que la palabra sea válida 
+        // vemos si la palabra es válida 
         Boolean validBag = bagService.checkBagIsValid(data.getBag().getCards()); 
         
-        // si la palabra de la bolsa es válida o está vacía, actualizamos todo y pasamos al siguiente turno 
-        if (validBag) {
-            handService.update(data.getHand(), matchId, data.getPlayerId());
-            bagService.update(data.getBag(), matchId, data.getPlayerId());
-            deckService.update(data.getDeck(), matchId);
-            DeckInGame deck = deckService.findDeckById(matchId); 
-            Integer nextTurnId = nextTurn(matchId).getCurrentTurnUserId(); 
-            return nextTurnId; 
-        } else { // si la bolsa no está vacía y no es válida: 
-            throw new BagNotValidException("The word of the bag is not valid"); 
-        }
+        // checkeamos que el jugador no tenga más de 7 cartas en la mano y su palabra sea válida 
+        checkers.checkNoMoreThan7CardsInHand(data.getHand());       
+        checkers.checkWordIsValid(validBag);       
 
+        // si la palabra de la bolsa es válida o está vacía, actualizamos todo y pasamos al siguiente turno 
+        handService.update(data.getHand(), matchId, data.getPlayerId());
+        bagService.update(data.getBag(), matchId, data.getPlayerId());
+        deckService.update(data.getDeck(), matchId); 
+        Integer nextTurnId = nextTurn(matchId).getCurrentTurnUserId(); 
+        return nextTurnId; 
     }
 
 

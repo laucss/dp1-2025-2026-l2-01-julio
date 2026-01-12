@@ -15,6 +15,9 @@ import StartDiceModal from "./StartDiceModal";
 import StealCardModal from "./StealCardModal";
 import NpcLossDiscardModal from "./NpcLossDiscardModal";
 
+// para alerta de errores
+import { toast } from "react-toastify";
+
 
 
 const jwt = tokenService.getLocalAccessToken();
@@ -520,6 +523,7 @@ export default function Match(){
                 setPlayer(data.players)
                 setDeck(data.deck.notDiscardedCards)
                 setDiscardPile(data.deck.discardedCards)
+                setActionPoints(data.players.filter(p=>p.user.id === currentUser.id)[0].actionPoints)
                 
 
             } catch (error) {
@@ -803,7 +807,7 @@ export default function Match(){
             try {
                 const currentRoomId = currentPlayer?.currentRoom?.id || currentPlayer?.roomId || currentPlayer?.room?.id;
                 if (!areRoomsAdjacent(currentRoomId, roomId)) {
-                    alert('No puedes moverte a una habitación no adyacente');
+                    toast.error("You cannot move to a room that is not adyacent");
                     setMoveToAdyacentRoom(false);
                     return;
                 }
@@ -946,7 +950,7 @@ export default function Match(){
 
                 else if (!response.ok) {
                     setMoveToAdyacentRoom(false)
-                    throw new Error(`Error ${response.status}: ${response.statusText}`)
+                    toast.error(response.statusText)
                 }
             } catch (error) {
                 console.log('error', error)
@@ -1073,14 +1077,15 @@ export default function Match(){
             });
 
             if (!response.ok) {
-                const text = await response.text();
-                console.error('Error advancing to next turn:', response.status, text);
+                const errorData = await response.json();
+                throw new Error(errorData.message);
             }
 
             // Actualizar el estado del match después de cambiar de turno
             await fetchMatchAndPlayers();
-        } catch (err) {
-            console.error('Error calling next-turn:', err);
+        } catch (error) {
+            console.error('Error calling next-turn:', error);
+            toast.error(error.message)
         } finally {
             setIsEndingTurn(false);
         }
@@ -1174,7 +1179,7 @@ return (
                                         <img src={currentPlayer.user.avatar} alt={`${currentPlayer.user.username} avatar`} className="current-avatar-img" style={{ borderRadius: '50%' }} />
                                     ) : <img src="/Avatar_default.png" alt="Default avatar" className="current-avatar-img" style={{ borderRadius: '50%' }} />}
                                 </div>
-                                <p className="player-username">{currentPlayer?.user.username}</p>
+                                <p className="player-username">{currentPlayer?.user?.username}</p>
 
                         </div>
                         <div className="points-section">
@@ -1297,7 +1302,7 @@ return (
                                     width: '30px',
                                     height: '30px',
                                     borderRadius: '50%',
-                                    border: currentPlayer?.id === player.id ? '3px solid yellow' : `3px solid ${getPlayerColor(player.id)}`,
+                                    border: `3px solid ${getPlayerColor(player.id)}`,
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
                                     zIndex: 10,
                                     pointerEvents: 'none'

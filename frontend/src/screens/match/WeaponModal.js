@@ -3,6 +3,9 @@ import '../../static/css/match/weaponModal.css';
 import tokenService from "../../services/token.service";
 import getIdFromUrl from "../../util/getIdFromUrl";
 
+// para mostrar las excepciones
+import { toast } from "react-toastify";
+
 const jwt = tokenService.getLocalAccessToken();
 
 export default function WeaponModal({ isVisible, bagCards, onClose, player, onWeaponSelected }) {
@@ -82,9 +85,9 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
                         });
                     }, 500);
                 } else {
-                    setMessage(`"${formedWord}" is not a valid weapon. Try another combination.`);
-                    setMessageType('error');
-                    setVisible(true);
+                    toast.error(`"${formedWord}" is not a valid weapon. Try another combination.`);
+                    //setMessageType('error');
+                    //setVisible(true);
                 }
             } else {
                 const errorData = await response.json();

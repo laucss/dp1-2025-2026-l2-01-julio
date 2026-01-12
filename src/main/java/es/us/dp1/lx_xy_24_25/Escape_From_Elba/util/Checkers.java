@@ -2,8 +2,11 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.util;
 
 import org.springframework.stereotype.Component;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.*;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
@@ -61,6 +64,20 @@ public class Checkers {
         Optional<Card> givenCard = cardRepository.findById(card.getId()); 
         if (givenCard.isEmpty()) {
             throw new ResourceNotFoundException("This card does not exist or is not found");
+        }
+    }
+
+
+    public void checkNoMoreThan7CardsInHand(HandInGameDTO hand ){
+        // no puede pasar al siguiente jugador si tiene más de 7 cartas en la mano 
+        if (hand.getCards().size() > 7 ){
+            throw new MoreThan7CardsInHand("You cannot have more than 7 cards in your hand, you must discard or use them in your bag"); 
+        }
+    }
+
+    public void checkWordIsValid(Boolean isValid){
+        if (!isValid){
+            throw new BagNotValidException("The word of the bag is not valid"); 
         }
     }
      

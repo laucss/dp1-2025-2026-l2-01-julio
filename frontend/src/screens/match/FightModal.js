@@ -220,7 +220,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                 },
                 body: JSON.stringify({
                     matchId: matchId,
-                    attackerId: attacker.id,
+                    attackerId: attacker?.id,
                     attackerTotal: diceType === 'Blanco' ? newTotalAttacker : totalAttacker,
                     defenderId: defender.id,
                     defenderTotal: diceType === 'Negro' ? newTotalDefender : totalDefender
