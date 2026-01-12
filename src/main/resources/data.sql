@@ -54,10 +54,13 @@ INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_player
 VALUES (2,'Partida en curso','ABC123','PLAYING','2025-10-26 20:00:00',NULL,5,3,3,true);
 
 -- Partida finalizada
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
-VALUES (3,'Partida terminada','XYZ789','FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true,NULL),
-       (6,'Partida terminada 2',NULL,'FINISHED','2025-10-25 18:00:00','2025-10-25 19:00:00',6,3,3,false,NULL),
-        (7,'Partida terminada 3','GHI456','FINISHED','2025-11-24 18:00:00','2025-11-24 19:00:00',5,3,3,true,NULL);
+INSERT INTO match(
+  id,name,code,creator_id,status,start_time,end_time,
+  max_players,min_players,num_npcs,is_private)
+VALUES
+(3,'Tinkissss','XYZ789',15,'FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true),
+(6,'Monster high',NULL,6,'FINISHED','2025-10-25 18:35:00','2025-10-25 19:00:00',6,3,3,false),
+(7,'Katseye','GHI456',11,'FINISHED','2025-11-24 16:00:00','2025-11-24 17:15:00',5,3,3,true);
 
 -- Cartas 
 INSERT INTO cards(id,front_image, back_image,letter ) 
@@ -136,7 +139,21 @@ INSERT INTO player (id, action_points, match_id, strength, user_id)
                (10,null,2,null,7),
                (11,12,3,null,9),
                (12,5,6,null,9),
-               (13,7,7,null,9);
+               (13,7,7,null,9),
+               (14,10,3,null,15),
+               (15,7,3,null,4),
+               (16,8,3,null,5),
+                 (17,6,6,null,6),
+                 (18,9,6,null,8),
+                 (19,11,6,null,10),
+                 (20,4,7,null,11),
+                 (21,8,7,null,12),
+                 (22,7,7,null,13),
+                 (23,10,7,null,14);
+
+UPDATE match SET winner_id = 14 WHERE id = 3;
+UPDATE match SET winner_id = 18 WHERE id = 6;
+UPDATE match SET winner_id = 20 WHERE id = 7;
 
 
 INSERT INTO Room (id, name, black_dice, white_dice) 

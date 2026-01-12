@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,6 +136,13 @@ public class MatchService {
         matchRepo.deleteById(id);
     }
 
+
+    //Para devolver el listado de todo el historial de partidas finalizadas y en curso
+    @Transactional(readOnly = true) 
+    public Page<Match> getFinishedAndInProgressMatches(Integer page, Integer size) {
+        return matchRepo.findFinishedAndInProgress(PageRequest.of(page,size));
+    }
+
     //Para devolver el listado de partidas en curso 
     @Transactional(readOnly = true)
     public List<Match> getInProgressMatches() {
@@ -143,8 +152,8 @@ public class MatchService {
 
     //Para devolver el listado de partidas finalizadas
     @Transactional(readOnly = true)
-    public List<Match> getFinishedMatches() {
-        return matchRepo.findFinished();
+    public Page<Match> getFinishedMatches(Integer page, Integer size) {
+        return matchRepo.findFinished(PageRequest.of(page,size));
     }
 
 
@@ -601,6 +610,7 @@ public class MatchService {
         if (match.getStatus() != MatchStatus.FINISHED) {
             throw new IllegalStateException("Match is not finished yet");
         }
+
 
         return match.getWinner();
     }

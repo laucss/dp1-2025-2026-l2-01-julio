@@ -2,7 +2,8 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import java.util.List;
 import java.util.Optional;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -41,7 +42,11 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
     //Devuelve todas las partidas finalizadas
     @Query("SELECT m FROM Match m WHERE m.endTime IS NOT NULL")
-    List<Match> findFinished();
+    Page<Match> findFinished(Pageable pageable);
+
+    //Devuelve las partidas finalizadas y en progreso
+       @Query("SELECT m FROM Match m WHERE m.endTime IS NOT NULL OR (m.startTime IS NOT NULL AND m.endTime IS NULL)")
+       Page<Match> findFinishedAndInProgress(Pageable pageable);
 
     // Partidas no iniciadas que ya han alcanzadoo el número mínimo de jugadores y se pueden empezar
     @Query("SELECT m FROM Match m WHERE m.startTime IS NULL AND m.endTime IS NULL AND " +
