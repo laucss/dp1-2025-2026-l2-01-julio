@@ -4,12 +4,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomDTO;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -58,9 +61,7 @@ public class MatchDTO {
 
     private List<RoomDTO> roomsState = new ArrayList<>();
 
-    
-    //@Transient
-    //private DeckInGameDTO deck;
+    private DeckInGameDTO deck;
 
     private Player winner;
 
@@ -86,6 +87,26 @@ public class MatchDTO {
         this.currentTurnUserId = match.getCurrentTurnUserId();
         this.roomsState = match.getRoomsState();
         //this.deck = new DeckInGameDTO(match.getDeck());
+        this.winner = match.getWinner();
+        this.isPrivate = match.getIsPrivate();
+    }
+
+    public MatchDTO(Match match, DeckInGame deck, List<PlayerInGameDTO> players ) {
+        this.code = match.getCode();
+        this.creatorId = match.getCreatorId();
+        this.status = match.getStatus();
+        this.startTime = match.getStartTime();
+        this.endTime = match.getEndTime();
+        this.maxPlayers = match.getMaxPlayers();
+        this.minPlayers = match.getMinPlayers();
+        this.players = players;
+        this.numNpcs = match.getNumNpcs();
+        this.npcs = match.getNpcs().stream().map(n-> new NpcDTO(n)).toList();
+        this.turnNumber = match.getTurnNumber();
+        this.currentTurnPhase = match.getCurrentTurnPhase();
+        this.currentTurnUserId = match.getCurrentTurnUserId();
+        this.roomsState = match.getRoomsState();
+        this.deck = new DeckInGameDTO(deck);
         this.winner = match.getWinner();
         this.isPrivate = match.getIsPrivate();
     }

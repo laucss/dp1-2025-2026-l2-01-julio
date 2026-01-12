@@ -29,18 +29,14 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.FightResolvedDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.LoseAgainstNpcRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -96,8 +92,8 @@ public class MatchController {
 
     @GetMapping("/{matchId}")
     public MatchDTO getMatchById(@PathVariable("matchId")Integer matchId){
-        Match m= ms.getMatchById(matchId);
-        return new MatchDTO(m);
+        MatchDTO m = ms.getMatchDTOById(matchId);
+        return m;
     }
 
     @GetMapping("/lobbies/private/{matchId}")

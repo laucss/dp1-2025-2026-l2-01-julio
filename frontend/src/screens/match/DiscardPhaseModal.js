@@ -46,9 +46,6 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
         })
     );
 
-    console.log('handModal', handCards)
-    console.log('deckModal', deckCards)
-
     useEffect(() => {
         setHandCards(hand)
         setBagCards(bag)

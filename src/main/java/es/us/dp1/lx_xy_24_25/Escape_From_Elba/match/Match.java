@@ -108,9 +108,8 @@ public class Match extends NamedEntity {
     @Enumerated(EnumType.STRING)
     private TurnPhase currentTurnPhase;
 
-    
-    @Transient
-    private DeckInGame deck; //No se si es deck o deckInGame
+    @Transient // transient porque no se guardan en la base de datos 
+    private DeckInGame deck; 
 
     @Transient
     private List<RoomDTO> roomsState = new ArrayList<>();

@@ -14,6 +14,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
@@ -29,6 +30,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketControll
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
@@ -106,6 +108,21 @@ public class MatchService {
             throw new ResourceNotFoundException("Match", "id", matchId);
         return m.get();
     }
+
+    @Transactional(readOnly=true)
+    public MatchDTO getMatchDTOById(Integer matchId){
+        Match m = getMatchById(matchId); 
+        DeckInGame deck = deckService.findDeckById(m.getId());
+        List<PlayerInGameDTO> newPlayersList = new ArrayList<>(); 
+        for (Player player : m.getPlayers()){
+            HandInGame hand = handService.findPlayerHand(m.getId(), player.getId()); 
+            BagInGame bag = bagService.findPlayerBag(m.getId(), player.getId()); 
+            newPlayersList.add(new PlayerInGameDTO(player, hand, bag)); 
+        }
+
+        return new MatchDTO(m, deck, newPlayersList);
+    }
+
 
     @Transactional(readOnly = true)
     public Integer userInMatch(Integer userId) {

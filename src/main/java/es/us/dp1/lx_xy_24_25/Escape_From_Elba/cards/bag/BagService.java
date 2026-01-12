@@ -82,11 +82,12 @@ public class BagService {
     @Transactional (readOnly = true)
     public BagInGame findPlayerBag(Integer matchId, Integer playerId){
         Map<Integer, BagInGame> playerMap = activesBags.get(matchId); 
-        BagInGame playersBag = playerMap.get(playerId); 
 
-        if ( playersBag == null){
-            throw new ResourceNotFoundException("The players bag does not exist or is not found"); 
+        if ( playerMap == null ){
+            return new BagInGame(); // devuelvo una lista vacía por si acaso da error porque no se carga hasta que se le da a empezar partida 
         }
+
+        BagInGame playersBag = playerMap.get(playerId); 
         return playersBag; 
     }
 
