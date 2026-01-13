@@ -55,9 +55,6 @@ public class ChatControllerTests {
 
     private static final String BASE_URL = "/api/v1/match/{matchId}/chat";
 
-    /* =========================
-     * GET /my
-     * ========================= */
 
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})
@@ -73,9 +70,6 @@ public class ChatControllerTests {
         verify(chatService, times(1)).findChatOfMyGame(1);
     }
 
-    /* =========================
-     * POST /
-     * ========================= */
 
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})
