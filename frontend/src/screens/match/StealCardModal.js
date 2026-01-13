@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import tokenService from '../../services/token.service';
+import '../../static/css/match/StealCardModal.css';
 
 export default function StealCardModal({
   isOpen,
@@ -103,30 +104,24 @@ export default function StealCardModal({
   if (!isOpen) return null;
 
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.6)', zIndex: 2000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center'
-    }}>
-      <div style={{
-        background: '#ffffff', borderRadius: 8, padding: 20,
-        width: 600, maxHeight: '80vh', overflowY: 'auto'
-      }}>
+    <div className="steal-card-modal-overlay">
+      <div className="steal-card-modal-content">
         {step === 'choose' && (
           <div>
-            <h3 style={{ marginTop: 0 }}>From where would you like to steal?</h3>
-            <div style={{ display: 'flex', gap: 12 }}>
+            <h3 style={{ marginTop: 0, color: '#000' }}>From where would you like to steal?</h3>
+            <div className="steal-card-modal-button-group">
               <button 
                 onClick={() => handleChoose('hand')} 
                 disabled={loading}
-                style={{ padding: '10px 16px', cursor: loading ? 'not-allowed' : 'pointer' }}
+                className='steal-button'
               >
                 Hand
               </button>
               <button 
                 onClick={() => handleChoose('bag')} 
                 disabled={loading || loserCards.bag.length === 0}
-                style={{ padding: '10px 16px', cursor: (loading || loserCards.bag.length === 0) ? 'not-allowed' : 'pointer' }}
+                className='steal-button'
+                style={{cursor: (loading || loserCards.bag.length === 0) ? 'not-allowed' : 'pointer' }}
               >
                 Bag
               </button>
@@ -136,7 +131,7 @@ export default function StealCardModal({
 
         {step === 'select' && (
           <div>
-            <h4 style={{ marginTop: 0 }}>Select a card from the {source}</h4>
+            <h4 style={{ marginTop: 0, color: '#000' }}>Select a card from the {source}</h4>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
               {(source === 'bag' ? loserCards.bag : loserCards.hand).map((card, idx) => (
                 <div 
@@ -148,31 +143,11 @@ export default function StealCardModal({
                     src={source === 'bag' ? `/resources${card.frontImage}` : '/backCard.png'}
                     alt={source === 'bag' ? `Carta ${card.letter}` : 'Carta oculta'}
                     style={{ width: 100, height: 'auto', borderRadius: 6, boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }}
+                    className='steal-card-img'
                   />
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 16 }}>
-              <button 
-                onClick={() => { setStep('choose'); setSource(null); }} 
-                disabled={loading}
-                style={{ padding: '8px 12px', cursor: loading ? 'not-allowed' : 'pointer' }}
-              >
-                Volver
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === 'choose' && (
-          <div style={{ marginTop: 20, textAlign: 'right' }}>
-            <button 
-              onClick={onClose}
-              disabled={loading}
-              style={{ padding: '8px 12px', cursor: loading ? 'not-allowed' : 'pointer' }}
-            >
-              Cerrar
-            </button>
           </div>
         )}
       </div>
