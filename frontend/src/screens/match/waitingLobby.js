@@ -189,7 +189,34 @@ export default function WaitingRoom() {
               <tbody>
                 {lobby.players?.map(p => (
                   <tr key={p.user.id}>
-                    <td>{p.user.username}</td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+                        {p.user.avatar ? (
+                          <img
+                            src={p.user.avatar}
+                            alt={p.user.username || "avatar"}
+                            style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: "2px solid #e6e6e6" }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: "36px",
+                              height: "36px",
+                              borderRadius: "50%",
+                              backgroundColor: "#ececec",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontWeight: 700,
+                              color: "#555"
+                            }}
+                          >
+                            {(p.user.username || "?").charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <span>{p.user.username}</span>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

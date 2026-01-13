@@ -35,6 +35,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth.payload.request.SignupRequest
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.jwt.JwtUtils;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.services.UserDetailsImpl;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Owner;
@@ -69,6 +70,9 @@ class AuthControllerTests {
 	@MockBean
 	private AuthService authService;
 
+	@MockBean
+	private RestTemplateBuilder restTemplateBuilder;
+
 	@Autowired
 	private ObjectMapper objectMapper;
 
@@ -89,6 +93,7 @@ class AuthControllerTests {
 		signupRequest = new SignupRequest();
 		signupRequest.setUsername("username");
 		signupRequest.setPassword("password");
+		signupRequest.setEmail("test@example.com");
 		signupRequest.setAuthority("OWNER");
 
 		userDetails = new UserDetailsImpl(1, loginRequest.getUsername(), loginRequest.getPassword(), loginRequest.getAvatar(),
