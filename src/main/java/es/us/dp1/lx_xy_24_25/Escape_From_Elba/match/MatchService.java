@@ -840,9 +840,60 @@ public class MatchService {
             System.currentTimeMillis()
         );
     }
+    @Transactional
+    public Player movePlayerByFormingRoomName(Integer matchId, Integer userId, Integer targetRoomId) {
+        Match match = matchRepo.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
+        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
+            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+        }
+        matchRepo.save(match);
 
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        
+        if (player.getActionPoints() <= 0) {
+            throw new NoActionPointsException("Move not allowed: player has no action points left");
+        }
 
+        Room targetRoom = roomRepository.findById(targetRoomId)
+            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
 
+        // Obtener la bolsa del jugador y sus letras
+        BagInGame playerBag = bagService.findPlayerBag(matchId, player.getId());
+        if (playerBag == null || playerBag.getCards().isEmpty()) {
+            throw new RuntimeException("El jugador no tiene cartas en su bolsa");
+        }
 
+        // Recopilar todas las letras de la bolsa
+        String availableLetters = "";
+        for (Card card : playerBag.getCards()) {
+            if (card.getLetter() != null) {
+                availableLetters += card.getLetter().toLowerCase();
+            }
+        }
+
+        // Obtener nombre de la sala sin espacios
+        String roomName = targetRoom.getName().toLowerCase().replaceAll("\\s+", "");
+
+        // Intentar formar la palabra con las letras disponibles
+        String remaining = availableLetters;
+        for (char c : roomName.toCharArray()) {
+            if (remaining.indexOf(c) >= 0) {
+                remaining = remaining.replaceFirst(String.valueOf(c), "");
+            } else {
+                throw new RuntimeException("No se puede formar '" + targetRoom.getName() + 
+                    "' con las letras disponibles en la bolsa");
+            }
+        }
+
+        // Si llegamos aquí, el movimiento es válido
+        player.setRoom(targetRoom);
+        if (player.getActionPoints() > 0) {
+            player.setActionPoints(player.getActionPoints() - 1);
+        }
+
+        return playerRepo.save(player);
+    }
 
 }
