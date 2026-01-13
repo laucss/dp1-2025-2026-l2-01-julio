@@ -1,3 +1,4 @@
+arbor
 ammo
 able
 ace
@@ -15,11 +16,15 @@ apes
 asp
 ass
 appear
+apple
+apples
 area
 arm 
 arms
 armor 
 
+ball
+balls
 bar
 bare
 barb 
@@ -44,6 +49,8 @@ boas
 broom
 boss
 
+cafe
+caesar
 cabs
 crabs 
 clap 
@@ -67,6 +74,7 @@ case
 cease
 cell
 cells
+cellar
 cobs
 come
 comes
@@ -94,6 +102,7 @@ common
 compare
 complete
 cross
+coral 
 
 ebola
 elba 
@@ -133,6 +142,8 @@ former
 free
 from 
 
+lab
+labs
 lamp 
 laser 
 lasso 
@@ -167,15 +178,18 @@ members
 more 
 mop
 mall
+meal 
 
 oar 
 off 
 offer 
 offers 
+opal 
 
 paper
 pass 
 passes
+parole
 per 
 peel
 pee
@@ -192,6 +206,7 @@ performer
 please 
 pleases
 poor 
+pool 
 pole 
 polearm 
 prefer 
@@ -222,6 +237,7 @@ roles
 room 
 rooms
 rope
+roof 
 
 saber 
 sober
@@ -233,6 +249,7 @@ escapes
 spear 
 scrap  
 sale 
+safe 
 same 
 sea 
 seas 
@@ -248,6 +265,7 @@ smaller
 some 
 space 
 spaces 
+spa
 
 
 

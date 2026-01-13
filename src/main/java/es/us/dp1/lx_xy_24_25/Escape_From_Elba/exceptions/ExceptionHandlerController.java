@@ -35,6 +35,8 @@ public class ExceptionHandlerController {
 		return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
 	}
 
+
+	// -------------------------------------------- Bad Request 400 -------------------------------------------------
 	@ExceptionHandler(ResourceNotOwnedException.class)
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	public ResponseEntity<ErrorMessage> resourceNotOwnedException(ResourceNotOwnedException ex, WebRequest request) {
@@ -43,6 +45,25 @@ public class ExceptionHandlerController {
 
 		return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
 	}
+
+	@ExceptionHandler({
+		MoreThan7CardsInHand.class,
+		BagNotValidException.class,
+		NoActionPointsException.class,
+		GameIsNotALobbyException.class,
+		LobbyIsFullException.class,
+		PlayerAlreadyInALobbyException.class, 
+		PlayerNotInTheGame.class, 
+		MoreThan7CardsDrawnException.class
+	})
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+	public ResponseEntity<ErrorMessage> handleBadRequestExceptions(RuntimeException ex, WebRequest request) {
+		ErrorMessage message = new ErrorMessage(HttpStatus.BAD_REQUEST.value(), new Date(), ex.getMessage(),
+				request.getDescription(false));
+
+		return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+	}
+
 
 //	@ExceptionHandler(value = TokenRefreshException.class)
 //	@ResponseStatus(HttpStatus.FORBIDDEN)
@@ -65,6 +86,9 @@ public class ExceptionHandlerController {
 
 		return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
 	}
+
+	
+
 
 	@ExceptionHandler(value = AccessDeniedException.class)
 	@ResponseStatus(HttpStatus.FORBIDDEN)

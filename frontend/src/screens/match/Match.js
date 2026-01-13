@@ -655,18 +655,22 @@ export default function Match(){
             })
 
             if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`)
+                const error = await response.json();
+                throw error;
             }
 
-            const data = await response.json()
-            //console.log('carta', data.card)
-            
-            setDeck(data.deck)
-            //setHandCards(prev => [...prev, data.card])
-            setNumCardsDrawn(prev => prev + 1)
+            if (response.ok){
+                const data = await response.json()
+                //console.log('carta', data.card)
+                
+                setDeck(data.deck)
+                //setHandCards(prev => [...prev, data.card])
+                setNumCardsDrawn(prev => prev + 1)
+            }
             
         } catch (error) {
             console.log('error', error)
+            toast.error(error.message)
             
         }    
 
@@ -1067,6 +1071,7 @@ export default function Match(){
     const handleEndTurn = async () => {
         if (isEndingTurn) return;
         setIsEndingTurn(true);
+        setNumCardsDrawn(0);
         try {
             const response = await fetch(`/api/v1/matches/${matchId}/next-turn`, {
                 method: 'POST',

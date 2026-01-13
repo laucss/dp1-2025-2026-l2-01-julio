@@ -164,9 +164,7 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
         const card = cardFromHand || cardFromBag;
 
         // de la mano o bolsa a zona de descarte 
-        if (over.id === 'discard') {
-            const card = handCards.find(c => c.id === active.id);
-
+        if (over.id === 'discard' && card) { 
             setHandCards(prev => prev.filter(c => c.id !== active.id));
             setBagCards(prev => prev.filter(c => c.id !== active.id));
             setCardsToDiscard(prev => [...prev, card]);
@@ -203,7 +201,7 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
                             sensors={sensors}
                             onDragStart={handleDragStart} 
                             onDragEnd={handleDragEnd}
-                             collisionDetection={closestCenter}>
+                            collisionDetection={closestCenter}>
 
                             <div className="hand-and-bag-container">
                                 
