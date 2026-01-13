@@ -8,6 +8,7 @@ import lombok.Setter;
 
 
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,12 +60,13 @@ public class Match extends NamedEntity {
     //Tiempos
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    /** estaría bien?? hay proyectos que lo tienen
+
+
     public Duration getDuration() {
         if(startTime == null || endTime == null) return null;
         return Duration.between(startTime, endTime);
     }
-    */
+    
 
     //Máximo y mínimo de jugadores
     @Min(3)
@@ -108,9 +110,8 @@ public class Match extends NamedEntity {
     @Enumerated(EnumType.STRING)
     private TurnPhase currentTurnPhase;
 
-    
-    @Transient
-    private DeckInGame deck; //No se si es deck o deckInGame
+    @Transient // transient porque no se guardan en la base de datos 
+    private DeckInGame deck; 
 
     @Transient
     private List<RoomDTO> roomsState = new ArrayList<>();

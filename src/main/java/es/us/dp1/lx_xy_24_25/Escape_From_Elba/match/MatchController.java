@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,18 +26,35 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.DiceTotalsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightDiceUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightResolvedDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.LoseAgainstNpcRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchHistorialDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MoveNpcToRoomDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MoveToRoomDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ReadyStateUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StealCardRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.WeaponsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -92,8 +110,8 @@ public class MatchController {
 
     @GetMapping("/{matchId}")
     public MatchDTO getMatchById(@PathVariable("matchId")Integer matchId){
-        Match m= ms.getMatchById(matchId);
-        return new MatchDTO(m);
+        MatchDTO m = ms.getMatchDTOById(matchId);
+        return m;
     }
 
     @GetMapping("/lobbies/private/{matchId}")
@@ -110,6 +128,18 @@ public class MatchController {
     @Operation(summary = "Get public matches", description = "Get all public matches available to join.")
     public List<Match> getPublicGames(){
         return ls.getAllPublicLobbies();
+    }
+
+    @GetMapping("/all-Matches")
+    public Page<MatchHistorialDTO> getAllMatches(@ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
+        Page<Match> finishedMatches = ms.getFinishedAndInProgressMatches(page, size);
+        return finishedMatches.map(MatchHistorialDTO::new);
+    }
+
+    @GetMapping("/finishedMatches")
+    public Page<MatchHistorialDTO> getFinishedMatches(@ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
+        Page<Match> finishedMatches = ms.getFinishedMatches(page, size);
+        return finishedMatches.map(MatchHistorialDTO::new);
     }
 
     @GetMapping("/lobbies/privates")
@@ -234,13 +264,10 @@ public class MatchController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{matchId}/discardConfirmed")
-    public ResponseEntity<Integer> updateAfterDiscard(@PathVariable Integer matchId, @RequestBody AllCardsStatusDTO data){
-        handService.update(data.getHand(), matchId, data.getPlayerId());
-        bagService.update(data.getBag(), matchId, data.getPlayerId());
-        deckService.update(data.getDeck(), matchId);
-        Integer nextTurnId = ms.nextTurn(matchId).getCurrentTurnUserId(); 
-
+    @Operation(summary = "Confirm the end of discard phase", description = "Confirm the bag formed and the discarded cards to pass turn.")
+    @PutMapping("/{matchId}/confirmDiscardPhase")
+    public ResponseEntity<Integer> confirmDiscardPhase(@PathVariable Integer matchId, @RequestBody @Valid AllCardsStatusDTO data){
+        Integer nextTurnId = ms.confirmDiscardPhase(matchId, data); 
         return ResponseEntity.ok(nextTurnId); 
         
     }
@@ -251,6 +278,30 @@ public class MatchController {
         return ResponseEntity.ok(result); 
 
     } 
+
+    @PostMapping("/{matchId}/{playerId}/drawRewardCard")
+    public ResponseEntity<DrawCardResultDTO> drawRewardCard (@PathVariable Integer matchId, @PathVariable Integer playerId){
+        DrawCardResultDTO result = ms.playerDrawsRewardCard(matchId, playerId);
+        return ResponseEntity.ok(result);
+
+    }
+
+    @PostMapping("/{matchId}/{playerId}/playerWinsNiallCampbell")
+    public ResponseEntity<DrawCardResultDTO> playerWinsNiallCampbell (@PathVariable Integer matchId, @PathVariable Integer playerId){
+        Card card = ms.playerWinsNiallCampbell(matchId, playerId);
+        // Si no hay carta descartada, retorna null sin robar nada
+        DeckInGame deck = deckService.findDeckById(matchId);
+        HandInGame hand = handService.findPlayerHand(matchId, playerId);
+        DrawCardResultDTO result = new DrawCardResultDTO(card, deck, hand);
+
+        // Notificar por WebSocket el estado actualizado de cartas (incluye deck/discard)
+        AllCardsStatusDTO playerCards = ms.getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, playerCards);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
+
+        return ResponseEntity.ok(result);
+
+    }
 
     @GetMapping("/{matchId}/{playerId}/getAllCards")
     public ResponseEntity<AllCardsStatusDTO> getAllCards (@PathVariable Integer matchId, @PathVariable Integer playerId){
@@ -281,6 +332,15 @@ public class MatchController {
             );
             matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
         }
+        
+        return ResponseEntity.ok(new MatchDTO(match)); 
+    }
+
+    
+    @PutMapping("/{matchId}/moveNpc")
+    public ResponseEntity<MatchDTO> moveNpcToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveNpcToRoomDTO data){
+        ms.moveNpcToAdyacentRoom(matchId, data.getNpcId(), data.getRoomId(), data.getUserId()); 
+        Match match = ms.getMatchById(matchId);
         
         return ResponseEntity.ok(new MatchDTO(match)); 
     }
@@ -355,6 +415,22 @@ public class MatchController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{matchId}/consume-all-action-points/{userId}")
+    @Operation(summary = "Consume all action points", description = "Consumes all action points for a user and notifies all players.")
+    public ResponseEntity<Void> consumeAllActionPoints(@PathVariable Integer matchId, @PathVariable Integer userId) {
+        ActionPointsUpdateDTO actionPointsUpdate = ms.consumeAllActionPointForUser(matchId, userId);
+        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/consume-action-point/{userId}")
+    @Operation(summary = "Consume one action point", description = "Consumes one action point for a user and notifies all players.")
+    public ResponseEntity<Void> consumeOneActionPoint(@PathVariable Integer matchId, @PathVariable Integer userId) {
+        ActionPointsUpdateDTO actionPointsUpdate = ms.consumeOneActionPoint(matchId, userId);
+        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/{matchId}/notify-strength")
     @Operation(summary = "Notify strength", description = "Notifies all players when strength is updated.")
     public ResponseEntity<Void> notifyStrength(@PathVariable Integer matchId, @RequestBody StrengthUpdateDTO strengthUpdate) {
@@ -374,6 +450,183 @@ public class MatchController {
     public ResponseEntity<Void> notifyFightWeapons(@PathVariable Integer matchId, @RequestBody WeaponsUpdateDTO weaponsUpdate) {
         matchWebsocketController.notifyWeaponsUpdate(matchId, weaponsUpdate);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{matchId}/{winnerId}/steal-card-from/{loserId}")
+    @Operation(summary = "Steal card from another player", description = "Winner steals a card from loser, either from hand (random/selected) or bag (selected). Returns updated card states for both players.")
+    public ResponseEntity<Map<String, AllCardsStatusDTO>> stealCardFromPlayer(
+            @PathVariable Integer matchId,
+            @PathVariable Integer winnerId,
+            @PathVariable Integer loserId,
+            @Valid @RequestBody StealCardRequestDTO request) {
+
+        try {
+            // Basic validation of source
+            String fromWhere = request.getFromWhere();
+            if (fromWhere == null || (!fromWhere.equals("hand") && !fromWhere.equals("bag"))) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            // Build a Card reference using the complete card object when provided; null means random for 'hand'
+            es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card cardRef = null;
+            if (request.getCardId() != null && fromWhere.equals("bag")) {
+                // Para robo de bolsa, buscar la carta completa por ID
+                BagInGame loserBag = bagService.findPlayerBag(matchId, loserId);
+                
+                Integer cardId = request.getCardId();
+                final Integer finalCardId = cardId;
+                cardRef = loserBag.getCards().stream()
+                    .filter(c -> c.getId() != null && c.getId().equals(finalCardId))
+                    .findFirst()
+                    .orElse(null);
+                
+                if (cardRef == null) {
+                    return ResponseEntity.badRequest().body(null);
+                }
+            }
+
+            // Execute steal in service layer
+            Integer currentTurnUserId = ms.getMatchById(matchId).getCurrentTurnUserId();
+            ms.playerDrawsCardFromAnotherPlayerBag(cardRef, matchId, winnerId, loserId, fromWhere, currentTurnUserId);
+
+            // Return updated card states for winner and loser and notify via WS
+            AllCardsStatusDTO winnerCards = ms.getAllCards(matchId, winnerId);
+            AllCardsStatusDTO loserCards = ms.getAllCards(matchId, loserId);
+
+            CardsUpdateDTO update = new CardsUpdateDTO(matchId, winnerCards, loserCards);
+            matchWebsocketController.notifyCardsUpdate(matchId, update);
+
+            return ResponseEntity.ok(Map.of("winner", winnerCards, "loser", loserCards));
+        } catch (Exception e) {
+            System.err.println("Error al robar carta: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/{matchId}/{playerId}/lose-against-npc")
+    @Operation(summary = "Player loses against NPC", description = "Player chooses a card to discard after losing to an NPC.")
+    public ResponseEntity<AllCardsStatusDTO> playerLosesAgainstNpc(
+            @PathVariable Integer matchId,
+            @PathVariable Integer playerId,
+            @Valid @RequestBody LoseAgainstNpcRequestDTO request) {
+        try {
+            String fromWhere = request.getFromWhere();
+            Integer cardId = request.getCardId();
+
+            if (fromWhere == null || (!"hand".equals(fromWhere) && !"bag".equals(fromWhere))) {
+                return ResponseEntity.badRequest().build();
+            }
+            if (cardId == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Card cardRef = null;
+            if ("hand".equals(fromWhere)) {
+                HandInGame hand = handService.findPlayerHand(matchId, playerId);
+                cardRef = hand.getCards().stream()
+                    .filter(c -> c.getId() != null && c.getId().equals(cardId))
+                    .findFirst()
+                    .orElse(null);
+            } else {
+                BagInGame bag = bagService.findPlayerBag(matchId, playerId);
+                cardRef = bag.getCards().stream()
+                    .filter(c -> c.getId() != null && c.getId().equals(cardId))
+                    .findFirst()
+                    .orElse(null);
+            }
+
+            if (cardRef == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Integer currentTurnUserId = ms.getMatchById(matchId).getCurrentTurnUserId();
+            ms.playerLosesAgaintsNonPlayer(cardRef, matchId, playerId, currentTurnUserId, fromWhere);
+
+            AllCardsStatusDTO updatedCards = ms.getAllCards(matchId, playerId);
+            CardsUpdateDTO update = new CardsUpdateDTO(matchId, updatedCards, updatedCards);
+            matchWebsocketController.notifyCardsUpdate(matchId, update);
+
+            return ResponseEntity.ok(updatedCards);
+        } catch (Exception e) {
+            System.err.println("Error al descartar carta tras perder contra NPC: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/{matchId}/notify-fight-resolved")
+    @Operation(summary = "Notify fight resolved", description = "Notifies all players when a fight is resolved and winner can steal a card.")
+    public ResponseEntity<Void> notifyFightResolved(
+            @PathVariable Integer matchId,
+            @RequestBody FightResolvedDTO fightResolved) {
+        matchWebsocketController.notifyFightResolved(matchId, fightResolved);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{matchId}/player-strength")
+    @Operation(summary = "Update player strength", description = "Updates the strength of a player and notifies all players.")
+    public ResponseEntity<MatchDTO> updatePlayerStrength(@PathVariable Integer matchId, @RequestBody Map<String, Integer> data) {
+        Integer userId = data.get("userId");
+        Integer newStrength = data.get("strength");
+        
+        Player player = playerService.findByMatchIdAndUserId(matchId, userId)
+            .orElseThrow(() -> new RuntimeException("Player no encontrado"));
+        player.setStrength(newStrength);
+        playerService.save(player);
+        
+        Match match = ms.getMatchById(matchId);
+        
+        StrengthUpdateDTO strengthUpdate = new StrengthUpdateDTO(
+            player.getId(),
+            player.getUser().getId(),
+            player.getUser().getUsername(),
+            player.getStrength(),
+            System.currentTimeMillis()
+        );
+        matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);
+        
+        return ResponseEntity.ok(new MatchDTO(match));
+    }
+
+    @PutMapping("/{matchId}/npc-strength")
+    @Operation(summary = "Update NPC strength", description = "Updates the strength of an NPC and notifies all players.")
+    public ResponseEntity<MatchDTO> updateNpcStrength(@PathVariable Integer matchId, @RequestBody Map<String, Integer> data) {
+        Integer npcId = data.get("npcId");
+        Integer newStrength = data.get("strength");
+        
+        Match match = ms.getMatchById(matchId);
+        Npc npc = match.getNpcs().stream()
+            .filter(n -> n.getId().equals(npcId))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("NPC no encontrado"));
+        
+        npc.setStrength(newStrength);
+        ms.save(match);
+        
+        return ResponseEntity.ok(new MatchDTO(match));
+    }
+
+    @PutMapping("/{matchId}/npc/location")
+    @Operation(summary = "Force move NPC", description = "Moves an NPC to a specified room without consuming player actions (used for system-driven moves).")
+    public ResponseEntity<MatchDTO> forceMoveNpc(@PathVariable Integer matchId, @RequestBody Map<String, Integer> data) {
+        Integer npcId = data.get("npcId");
+        Integer roomId = data.get("roomId");
+        
+        Match match = ms.getMatchById(matchId);
+        Npc npc = match.getNpcs().stream()
+            .filter(n -> n.getId().equals(npcId))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("NPC no encontrado"));
+        
+        npc.setRoom(roomService.findById(roomId));
+        ms.save(match);
+        
+        // Notify all clients about NPC location update
+        NpcLocationUpdateDTO locationUpdate = new NpcLocationUpdateDTO(npc);
+        matchWebsocketController.notifyNpcLocationUpdate(matchId, locationUpdate);
+        
+        return ResponseEntity.ok(new MatchDTO(match));
     }
 
 }

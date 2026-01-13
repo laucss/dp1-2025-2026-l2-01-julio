@@ -1,19 +1,19 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs;
 
-public class ActionPointsUpdateDTO {
+public class StrengthUpdateDTO {
     private Integer playerId;
     private Integer userId;
     private String username;
-    private Integer actionPoints;
+    private Integer strength;
     private Long timestamp;
 
-    public ActionPointsUpdateDTO() {}
+    public StrengthUpdateDTO() {}
 
-    public ActionPointsUpdateDTO(Integer playerId, Integer userId, String username, Integer actionPoints, Long timestamp) {
+    public StrengthUpdateDTO(Integer playerId, Integer userId, String username, Integer strength, Long timestamp) {
         this.playerId = playerId;
         this.userId = userId;
         this.username = username;
-        this.actionPoints = actionPoints;
+        this.strength = strength;
         this.timestamp = timestamp;
     }
 
@@ -26,19 +26,19 @@ public class ActionPointsUpdateDTO {
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
-    public Integer getActionPoints() { return actionPoints; }
-    public void setActionPoints(Integer actionPoints) { this.actionPoints = actionPoints; }
+    public Integer getStrength() { return strength; }
+    public void setStrength(Integer strength) { this.strength = strength; }
 
     public Long getTimestamp() { return timestamp; }
     public void setTimestamp(Long timestamp) { this.timestamp = timestamp; }
 
     @Override
     public String toString() {
-        return "ActionPointsUpdateDTO{" +
+        return "StrengthUpdateDTO{" +
                 "playerId=" + playerId +
                 ", userId=" + userId +
                 ", username='" + username + '\'' +
-                ", actionPoints=" + actionPoints +
+                ", strength=" + strength +
                 ", timestamp=" + timestamp +
                 '}';
     }

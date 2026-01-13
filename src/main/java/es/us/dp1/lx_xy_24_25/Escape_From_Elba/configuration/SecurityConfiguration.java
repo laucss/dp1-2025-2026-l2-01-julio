@@ -101,6 +101,10 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.POST, "/api/v1/matches/lobbies").hasAnyAuthority(PLAYER)
                 .requestMatchers(HttpMethod.PUT, "/api/v1/matches/{id}/discardConfirmed").hasAnyAuthority(PLAYER)
                 .requestMatchers(HttpMethod.GET,"/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers(HttpMethod.POST,"/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers(HttpMethod.POST,"/api/v1/matches/{matchId}/{playerId}/drawRewardCard").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers(HttpMethod.POST,"/api/v1/matches/{matchId}/{winnerId}/steal-card-from/{loserId}").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers(HttpMethod.POST,"/api/v1/matches/{matchId}/notify-fight-resolved").hasAnyAuthority(PLAYER, ADMIN)
                 .requestMatchers(HttpMethod.PUT,"/api/v1/matches/{matchId}/move").hasAnyAuthority(PLAYER, ADMIN)
                 .requestMatchers(HttpMethod.POST, "/api/v1/bag/validate-weapon").hasAnyAuthority(PLAYER)
                 .requestMatchers(HttpMethod.GET, "/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
@@ -112,6 +116,9 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.DELETE,"/api/v1/achievements/**").hasAuthority(ADMIN)
                 .requestMatchers(HttpMethod.POST,"/api/v1/users/**").hasAuthority(ADMIN)
                 .requestMatchers(HttpMethod.DELETE,"/api/v1/users/**").hasAuthority(ADMIN)
+                .requestMatchers(HttpMethod.GET,"/api/v1/matches/finishedAndInProgress").hasAuthority(ADMIN)
+                .requestMatchers(HttpMethod.GET,"/api/v1/matches/finishedMatches").hasAuthority(ADMIN)
+
 
                 // API restringida para jugadores o administradores
                 .requestMatchers("/api/v1/matches/**").hasAnyAuthority(PLAYER, ADMIN)

@@ -11,6 +11,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     const matchId = getIdFromUrl(2);
     const isAttacker = currentUser?.id === attacker?.user?.id;
     const isDefender = currentUser?.id === defender?.user?.id;
+    const isDefenderBot = !defender?.user; // El defensor es un bot si no tiene .user
 
     const [buttonStateAttacker, setButtonStateAttacker] = useState(false);
     const [buttonStateDefender, setButtonStateDefender] = useState(false);
@@ -128,6 +129,16 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         }
     }, [isOpen]);
 
+    // Lanzar dado automáticamente si el defensor es un bot
+    useEffect(() => {
+        if (isOpen && isDefenderBot && !blackRolled) {
+            const timer = setTimeout(() => {
+                rollDice('Negro');
+            }, 1000); // Esperar 1 segundo después de abrir el modal
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen, isDefenderBot, blackRolled]);
+
     
     useEffect(() => {
         if (whiteRolled) {
@@ -153,6 +164,16 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
             }, 700);
         }
     }, [buttonStateAttacker, buttonStateDefender, whiteRolled, blackRolled, totalAttacker, totalDefender]);
+
+    // Hacer que el bot haga ready automáticamente después de lanzar el dado
+    useEffect(() => {
+        if (isDefenderBot && blackRolled && !buttonStateDefender) {
+            const timer = setTimeout(() => {
+                toggleReadyState('DEFENDER', false);
+            }, 1500); // Esperar un poco después de lanzar el dado
+            return () => clearTimeout(timer);
+        }
+    }, [isDefenderBot, blackRolled, buttonStateDefender]);
 
     const rollDice = async (diceType) => {
         const roll = Math.floor(Math.random() * 6) + 1;
@@ -199,7 +220,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                 },
                 body: JSON.stringify({
                     matchId: matchId,
-                    attackerId: attacker.id,
+                    attackerId: attacker?.id,
                     attackerTotal: diceType === 'Blanco' ? newTotalAttacker : totalAttacker,
                     defenderId: defender.id,
                     defenderTotal: diceType === 'Negro' ? newTotalDefender : totalDefender
@@ -283,38 +304,6 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         setCurrentWeaponUser(null);
     };
 
-    const removeWeapon = async (role, weaponIndex) => {
-        let newWeapons, newTotal;
-        
-        if (role === 'ATTACKER') {
-            newWeapons = weaponsAttacker.filter((_, idx) => idx !== weaponIndex);
-            newTotal = attackerStrength + parseInt(whiteDice, 10) + getTotalWeaponsBonus(newWeapons);
-            setWeaponsAttacker(newWeapons);
-            setTotalAttacker(newTotal);
-        } else {
-            newWeapons = weaponsDefender.filter((_, idx) => idx !== weaponIndex);
-            newTotal = defenderStrength + parseInt(blackDice, 10) + getTotalWeaponsBonus(newWeapons);
-            setWeaponsDefender(newWeapons);
-            setTotalDefender(newTotal);
-        }
-        
-        await fetch(`/api/v1/matches/${matchId}/notify-fight-weapons`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${jwt}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                matchId: matchId,
-                playerId: currentUser.id,
-                playerRole: role,
-                weapons: newWeapons,
-                totalAttacker: role === 'ATTACKER' ? newTotal : totalAttacker,
-                totalDefender: role === 'DEFENDER' ? newTotal : totalDefender
-            })
-        });
-    };
-
     if (!isOpen || !attacker || !defender) return null;
 
     return (
@@ -347,7 +336,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                                     onClick={() => rollDice('Blanco')}
                                     className='dice-button'
                                     title="Dado Blanco"
-                                    disabled={!isAttacker || whiteRolled}
+                                    disabled={!isAttacker || whiteRolled || (isDefenderBot && !blackRolled)}
                                 >
                                     <img
                                         src={`/Dice/B${whiteDice}.png`}
@@ -369,12 +358,30 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
 
                         <div className='combat-panel'> {/*zona del oponente */}
                             <div className='combat-header'> 
-                                <span>{defender?.user?.username || "Defender"}</span>
-                                <img 
-                                    src={defender.user.avatar}
-                                    alt={`${defender.user.username}'s avatar`}
-                                    style={{ width: '40px', height: '40px', borderRadius: '50%' }}
-                                />
+                                <span>{defender?.user?.username || (defender?.isNiallCampbell ? 'NiallCampbell' : 'NPC')}</span>
+                                {defender?.user?.avatar ? (
+                                    <img 
+                                        src={defender.user.avatar}
+                                        alt={`${defender.user.username}'s avatar`}
+                                        style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                                    />
+                                ) : (
+                                    <div 
+                                        style={{ 
+                                            width: '40px', 
+                                            height: '40px', 
+                                            borderRadius: '50%',
+                                            backgroundColor: defender?.isNiallCampbell ? '#ff0000' : '#666',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'white',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        {defender?.isNiallCampbell ? 'N' : 'X'}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="total-box">{blackRolled ? totalDefender : '?'}</div>

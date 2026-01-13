@@ -9,15 +9,16 @@ import lombok.Setter;
 @Setter
 public class NpcDTO {
 
+    private Integer id;
+
     private Integer strength;
 
     private Boolean isNiallCampbell;
 
-
-
-     private RoomDTO room;
+    private RoomDTO room;
 
     public NpcDTO(Npc npc) {
+        this.id = npc.getId();
         this.strength = npc.getStrength();
         this.isNiallCampbell = npc.getIsNiallCampbell();
         this.room = npc.getRoom() != null ? new RoomDTO(npc.getRoom()) : null;

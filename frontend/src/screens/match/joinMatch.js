@@ -19,7 +19,9 @@ export default function JoinMatch() {
   );
 
   const [showModal, setShowModal] = useState(false);  
-  const [privateCode, setPrivateCode] = useState(""); 
+  const [privateCode, setPrivateCode] = useState("");
+  const [showFullMatchModal, setShowFullMatchModal] = useState(false);
+  const [showStartedMatchModal, setShowStartedMatchModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -38,8 +40,16 @@ export default function JoinMatch() {
       if (response.ok) {
         navigate(`/lobby/${match.id}`);
       } else {
-        const errorText = await response.text();
-        alert(" No se pudo unir al lobby: " + errorText);
+        let text = "";
+        try { text = await response.text(); } catch {}
+        const lower = (text || "").toLowerCase();
+        if (response.status === 400 && (lower.includes("llena") || lower.includes("full"))) {
+          setShowFullMatchModal(true);
+        } else if (response.status === 400 && (lower.includes("comenzado") || lower.includes("empezado") || lower.includes("correct status"))) {
+          setShowStartedMatchModal(true);
+        } else {
+          alert(" No se pudo unir al lobby: " + (text || "Error desconocido"));
+        }
       }
     } catch (error) {
       alert(" Error al conectar con el servidor.");
@@ -118,7 +128,7 @@ export default function JoinMatch() {
             className="back-arrow-btn"
             onClick={() => navigate('/')}
           >
-            ←
+            ￩
       </button>
 
       <h1>Lobbies</h1>
@@ -158,6 +168,38 @@ export default function JoinMatch() {
         <Button color="success" onClick={handleJoinPrivate}>Join</Button>
         <Button color="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
       </ModalFooter>
+    </Modal>
+
+    {/* Modal para partida llena */}
+    <Modal isOpen={showFullMatchModal} toggle={() => setShowFullMatchModal(false)} centered backdrop="static">
+      <ModalBody className="text-center" style={{ padding: '40px 20px' }}>
+        <p style={{ fontSize: '18px', marginBottom: '30px' }}>
+          La partida a la que te quieres unir ya está llena
+        </p>
+        <Button 
+          color="primary" 
+          onClick={() => setShowFullMatchModal(false)}
+          style={{ marginTop: '20px' }}
+        >
+          Cerrar
+        </Button>
+      </ModalBody>
+    </Modal>
+
+    {/* Modal para partida ya comenzada */}
+    <Modal isOpen={showStartedMatchModal} toggle={() => setShowStartedMatchModal(false)} centered backdrop="static">
+      <ModalBody className="text-center" style={{ padding: '40px 20px' }}>
+        <p style={{ fontSize: '18px', marginBottom: '30px' }}>
+          La partida a la que te quieres unir ya ha comenzado
+        </p>
+        <Button 
+          color="primary" 
+          onClick={() => setShowStartedMatchModal(false)}
+          style={{ marginTop: '20px' }}
+        >
+          Cerrar
+        </Button>
+      </ModalBody>
     </Modal>
     </div>
   </div>

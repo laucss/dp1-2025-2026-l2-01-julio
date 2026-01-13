@@ -82,11 +82,12 @@ public class BagService {
     @Transactional (readOnly = true)
     public BagInGame findPlayerBag(Integer matchId, Integer playerId){
         Map<Integer, BagInGame> playerMap = activesBags.get(matchId); 
-        BagInGame playersBag = playerMap.get(playerId); 
 
-        if ( playersBag == null){
-            throw new ResourceNotFoundException("The players bag does not exist or is not found"); 
+        if ( playerMap == null ){
+            return new BagInGame(); // devuelvo una lista vacía por si acaso da error porque no se carga hasta que se le da a empezar partida 
         }
+
+        BagInGame playersBag = playerMap.get(playerId); 
         return playersBag; 
     }
 
@@ -96,19 +97,46 @@ public class BagService {
 
     @Transactional 
     public Card removeCardFromPlayerBag(Card card, Integer matchId, Integer playerId){
-        checkers.checkCardExists(card);
+        if (card == null) {
+            return null;
+        }
         
         BagInGame playerBag = findPlayerBag(matchId, playerId); 
         List<Card> playerCards = playerBag.getCards(); 
         Card removedCard = null; 
         
-        for (int i=0; i<playerCards.size(); i++){
-            if (playerCards.get(i).equals(card)){
+        // Buscar por referencia exacta primero (más confiable para objetos en memoria)
+        for (int i = 0; i < playerCards.size(); i++){
+            if (playerCards.get(i) == card) {
                 removedCard = playerCards.get(i); 
-                playerCards.remove(i); 
+                playerCards.remove(i);
                 break; 
             }
         }
+        
+        // Si no se encontró por referencia, buscar por ID o letra
+        if (removedCard == null) {
+            for (int i = 0; i < playerCards.size(); i++){
+                Card c = playerCards.get(i);
+                boolean match = false;
+                
+                // Comparar por ID si ambos tienen ID
+                if (card.getId() != null && c.getId() != null && card.getId().equals(c.getId())) {
+                    match = true;
+                }
+                // Si no hay ID, comparar por letra
+                else if (card.getLetter() != null && card.getLetter().equals(c.getLetter())) {
+                    match = true;
+                }
+                
+                if (match) {
+                    removedCard = playerCards.get(i); 
+                    playerCards.remove(i);
+                    break; 
+                }
+            }
+        }
+        
         return removedCard; 
 
     }
@@ -177,15 +205,21 @@ public class BagService {
     }
 
     /*
-     * Método que realiza la checkeación completa del array de cartas que manda el frontend 
+     * Método que realiza la comprobación completa del array de cartas que manda el frontend de la bolsa 
      * (la unión de las dos funciones anteriores, básicamente)
      */
 
     @Transactional 
     public Boolean checkBagIsValid (List<CardDTO> cards){
 
-        String word = wordFromCards(cards); 
-        return isValidWordForBag(word); 
+        // si la bolsa no está vacía hacemos la comprobación
+        if (!cards.isEmpty()){
+            String word = wordFromCards(cards); 
+            return isValidWordForBag(word); 
+        }
+
+        // si está vacía devolvemos true para que pueda seguir 
+        return true;  
 
     }
 
@@ -198,7 +232,7 @@ public class BagService {
 
 
     
-    public void update(ListCardsDTO bag, Integer matchId, Integer playerId){
+    public void update(BagInGameDTO bag, Integer matchId, Integer playerId){
 
         //checkear que exista el player y tal 
 
@@ -207,6 +241,8 @@ public class BagService {
         //newBag.setCards(bag.getCards());
 
 
+                // tengo que hacer lo de newArrayList<>(deck...) dentro del set porque si no se hace así ç
+        // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
         Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
         newBag.setCards(new ArrayList<>(bag.getCards().stream()
             .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));

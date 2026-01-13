@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardRepository;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 
 
@@ -83,8 +82,9 @@ public class DeckService {
     @Transactional(readOnly = true)
     public DeckInGame findDeckById(Integer macthId) {
         DeckInGame deck = activesDecks.get(macthId); 
-        if (deck==null)
-            throw new ResourceNotFoundException("This deck does not exist or is not found"); 
+        if (deck == null){
+            return new DeckInGame(); 
+        }
         return deck;   
     }
 
@@ -92,13 +92,14 @@ public class DeckService {
    
 
     /*
-     * Método para una vez, acabadas las cartas para robar, coja las descartadas, las baraje de nuevo y las devuelva al mazo de robar
+     * Método que una vez, acabadas las cartas para robar, coge las descartadas, las baraja de nuevo y las devuelve al mazo de robar
+     * No hemos puesto que se quede al menos una carta en la pila de descarte pues el juego no lo contempla.  
      */
 
     
     @Transactional
-    public DeckInGame shuffleAndDicardedToNotDiscarded(Integer macthId, DeckInGame deck){
-        // checkear si quedan menos de x cartas en vez de cero 
+    public DeckInGame shuffleAndDicardedToNotDiscarded(DeckInGame deck){
+        // checkear si quedan menos de x cartas en vez de cero?
 
 
         List<Card> discardedCards = deck.getDiscardedCards();
@@ -119,7 +120,7 @@ public class DeckService {
     public Card drawCard(Integer matchId){
         DeckInGame deck = findDeckById(matchId); 
         if (deck.getNotDiscardedCards().isEmpty()) {
-            deck = shuffleAndDicardedToNotDiscarded(matchId, deck); 
+            deck = shuffleAndDicardedToNotDiscarded(deck); 
 }
 
         Card card = deck.getNotDiscardedCards().getLast();
@@ -145,29 +146,6 @@ public class DeckService {
         discardedCards.add(card); 
     }
 
-
-    
-
-    /*
-     * Método que añade VARIAS cartas al mazo de descartes
-     */
-
-     /*
-
-    public void addFewCardsToDiscardedPile (Integer macthId, List<Card> cards){
-    
-        DeckInGame deck = findDeckById(macthId);
- 
-        List<Card> discardedCards = deck.getDiscardedCards();
-
-        for (const card in cards){
-            checkers.checkCardExists(card);
-            discardedCards.add(card);
-        } 
-         
-    }
-
-    */
 
     /*
      * Método que devuelve (y quita del mazo de descarte) la última carta que haya sido descartada
@@ -230,6 +208,8 @@ public class DeckService {
 
         DeckInGame newDeck = activesDecks.get(matchId); 
 
+        // tengo que hacer lo de newArrayList<>(deck...) dentro del set porque si no se hace así ç
+        // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
         newDeck.setDiscardedCards(new ArrayList<>(deck.getDiscardedCards().stream()
             .map(dto -> new Card(dto.getId(), dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
         

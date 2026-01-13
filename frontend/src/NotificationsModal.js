@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import tokenService from "./services/token.service";
 import "./static/css/appnavbar/notificationsModal.css";
@@ -8,29 +8,48 @@ export default function NotificationsModal({ isOpen, onClose }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState("");
   const jwt = tokenService.getLocalAccessToken();
   const user = tokenService.getUser();
+  const pollingRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen || !user) return;
-    setLoading(true);
-    fetch(`/api/v1/notifications?receiverId=${user.id}`, {
-      headers: { Authorization: `Bearer ${jwt}` },
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setNotifications(data);
-        } else {
-          setNotifications([]);
+    let cancelled = false;
+
+    const fetchOnce = async () => {
+      try {
+        const controller = new AbortController();
+        setLoading(true);
+        const res = await fetch(`/api/v1/notifications?receiverId=${user.id}`, {
+          headers: { Authorization: `Bearer ${jwt}` },
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(txt || `HTTP ${res.status}`);
         }
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Error al cargar notificaciones");
-        setLoading(false);
-      });
-  }, [isOpen, user, jwt]);
+        const data = await res.json();
+        if (!cancelled) setNotifications(Array.isArray(data) ? data : []);
+      } catch (e) {
+        if (!cancelled) setError("Error al cargar notificaciones");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    // Primera carga inmediata
+    fetchOnce();
+    // Polling ligero cada 5s sólo mientras el panel está abierto
+    pollingRef.current = setInterval(fetchOnce, 5000);
+
+    return () => {
+      cancelled = true;
+      if (pollingRef.current) clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    };
+  }, [isOpen, user?.id, jwt]);
 
   const handleAccept = async (id) => {
     setLoading(true);
@@ -51,16 +70,21 @@ export default function NotificationsModal({ isOpen, onClose }) {
         window.location.href = `/lobby/${lobbyId}`;
       } else {
         setError('No se encontró el id de la partida en la invitación.');
+        setErrorModalMessage('No se encontró el id de la partida en la invitación.');
+        setShowErrorModal(true);
       }
     } else {
-      const text = await res.text();
-      if (text.includes("comenzado")) {
-        setError("La partida a la que te quieres unir ya ha comenzado.");
-      } else if (text.includes("llena")) {
-        setError("La partida a la que quieres unirte está llena.");
-      } else {
-        setError("No se pudo aceptar la invitación");
-      }
+      let text = "";
+      try { text = await res.text(); } catch {}
+      const lower = (text || "").toLowerCase();
+      const message = lower.includes("comenzado") || lower.includes("empezado")
+        ? "La partida a la que te quieres unir ya ha comenzado."
+        : lower.includes("llena") || lower.includes("full")
+          ? "La partida a la que quieres unirte está llena."
+          : "No se pudo aceptar la invitación";
+      setError(message);
+      setErrorModalMessage(message);
+      setShowErrorModal(true);
     }
     setLoading(false);
   };
@@ -117,6 +141,15 @@ export default function NotificationsModal({ isOpen, onClose }) {
           <button className="notif-close-btn" onClick={onClose}>Cerrar</button>
         </div>
       </div>
+
+      {showErrorModal && (
+        <div className="notif-error-overlay">
+          <div className="notif-error-card">
+            <p>{errorModalMessage}</p>
+            <button className="notif-error-close" onClick={() => setShowErrorModal(false)}>Cerrar</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

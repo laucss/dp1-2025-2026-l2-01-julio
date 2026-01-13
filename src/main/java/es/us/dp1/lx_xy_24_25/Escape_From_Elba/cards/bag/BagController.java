@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 
 
 
@@ -27,16 +29,9 @@ public class BagController {
         this.bagService=bagService;
     }
 
-
-
-    @PostMapping("/validate")
-    public ResponseEntity<Boolean> validateWord(@RequestBody ListCardsDTO cardsDTO) {
-        Boolean isValid = bagService.checkBagIsValid(cardsDTO.getCards());
-        return ResponseEntity.ok(isValid);
-    }
     
     @PostMapping("/validate-weapon")
-    public ResponseEntity<WeaponValidationDTO> validateWeapon(@RequestBody ListCardsDTO cardsDTO) {
+    public ResponseEntity<WeaponValidationDTO> validateWeapon(@RequestBody @Valid BagInGameDTO cardsDTO) {
         Boolean isValidWeapon = bagService.isValidWeapon(cardsDTO.getCards());
         Integer bonusValue = isValidWeapon ? bonusWeapons : 0;
         WeaponValidationDTO response = new WeaponValidationDTO(isValidWeapon, bonusValue);

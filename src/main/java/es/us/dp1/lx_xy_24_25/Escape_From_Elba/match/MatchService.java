@@ -7,13 +7,16 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
@@ -21,18 +24,27 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.BagNotValidException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsInHand;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
-import jakarta.persistence.criteria.CriteriaBuilder.In;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+
 
 @Service
 public class MatchService {
@@ -46,20 +58,23 @@ public class MatchService {
     Random ran = new Random();
     LobbyWebsocketController lobbyWebsocketController;
     MatchWebsocketController matchWebsocketController;
+    Checkers checkers; 
 
     MatchRepository matchRepo;
     PlayerRepository playerRepo;
     RoomRepository roomRepository;
+    NpcRepository npcRepository;
     RoomService roomService;
 
     @Autowired
     public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, 
             RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
             PlayerService playerService, LobbyWebsocketController lobbyWebsocketController,
-            MatchWebsocketController matchWebsocketController) {
+            MatchWebsocketController matchWebsocketController, NpcRepository npcRepository, Checkers checkers) {
         this.matchRepo = mrepo;
         this.playerRepo = playerRepo;
         this.roomRepository = roomRepository;
+        this.npcRepository = npcRepository;
         this.roomService = roomService;
         this.deckService = deckService;
         this.handService = handService;
@@ -67,6 +82,7 @@ public class MatchService {
         this.playerService = playerService;
         this.lobbyWebsocketController = lobbyWebsocketController;
         this.matchWebsocketController = matchWebsocketController;
+        this.checkers = checkers; 
     }
 
     @Transactional(readOnly = true)
@@ -103,6 +119,21 @@ public class MatchService {
         return m.get();
     }
 
+    @Transactional(readOnly=true)
+    public MatchDTO getMatchDTOById(Integer matchId){
+        Match m = getMatchById(matchId); 
+        DeckInGame deck = deckService.findDeckById(m.getId());
+        List<PlayerInGameDTO> newPlayersList = new ArrayList<>(); 
+        for (Player player : m.getPlayers()){
+            HandInGame hand = handService.findPlayerHand(m.getId(), player.getId()); 
+            BagInGame bag = bagService.findPlayerBag(m.getId(), player.getId()); 
+            newPlayersList.add(new PlayerInGameDTO(player, hand, bag)); 
+        }
+
+        return new MatchDTO(m, deck, newPlayersList);
+    }
+
+
     @Transactional(readOnly = true)
     public Integer userInMatch(Integer userId) {
         return matchRepo.userInMatch(userId);
@@ -111,6 +142,45 @@ public class MatchService {
     @Transactional
     public void delete(Integer id) {
         matchRepo.deleteById(id);
+    }
+
+
+    //Para devolver el listado de todo el historial de partidas finalizadas y en curso
+    @Transactional(readOnly = true) 
+    public Page<Match> getFinishedAndInProgressMatches(Integer page, Integer size) {
+        return matchRepo.findFinishedAndInProgress(PageRequest.of(page,size));
+    }
+
+    //Para devolver el listado de partidas en curso 
+    @Transactional(readOnly = true)
+    public List<Match> getInProgressMatches() {
+        return matchRepo.findInProgress();
+    }
+
+
+    //Para devolver el listado de partidas finalizadas
+    @Transactional(readOnly = true)
+    public Page<Match> getFinishedMatches(Integer page, Integer size) {
+        return matchRepo.findFinished(PageRequest.of(page,size));
+    }
+
+
+    //Para devolver el listado de partidas jugadas por un usuario
+    @Transactional(readOnly = true)
+    public List<Match> getMatchesPlayedByUser(Integer userId) {
+        return matchRepo.findMatchesPlayedByUser(userId);
+    }
+
+    //Para devolver el listado de partidas creadas por un usuario 
+    @Transactional(readOnly = true)
+    public List<Match> getMatchesPlayedAndCreatedByUser(Integer userId) {
+        return matchRepo.findMatchesPlayedAndCreatedByUser(userId);
+    }
+
+    //Para devolver el listado de partidas ganadas por un usuario 
+    @Transactional(readOnly = true)
+    public List<Match> getMatchesWonByUser(Integer userId) {
+        return matchRepo.findMatchesWonByUser(userId);
     }
 
 
@@ -135,6 +205,7 @@ public class MatchService {
             npc.setStrength(1); // El valor de la fuerza al inicio es 1
             npc.setMatch(m);// Lo asociamos a la partida
             m.getNpcs().add(npc);// Lo añadimos a la lista de npcs de la partida 
+            npcRepository.save(npc); // Lo guardamos en la base de datos
         } 
 
 
@@ -249,6 +320,11 @@ public class MatchService {
                 .filter(p -> p.getUser().getId().equals(currenUserTurnId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Player not found"));
+
+        // checkeamos que tenga menos de 7 cartas en su mano, pues si no tiene que descartar
+        HandInGame currentPlayerHand = handService.findPlayerHand(matchId, currentPlayerTurn.getId()); 
+        checkers.checkNoMoreThan7CardsInHand(new HandInGameDTO(currentPlayerHand));
+
         //Obtenemos el indice de orden del jugador actual
         Integer currentIndx = currentPlayerTurn.getOrderInMatch();
         //Calculamos el indice del siguiente jugador
@@ -262,6 +338,10 @@ public class MatchService {
         m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());
         m.setCurrentTurnPhase(TurnPhase.DRAW);
 
+        // actualizamos sus puntos de acción por si acaso 
+        playerService.getPlayerActionPoints(matchId, nextPlayerTurn.getId()); 
+
+        // actualizamos el estado de la partida 
         matchRepo.save(m);
         
         // Notificar a todos los jugadores el cambio de turno
@@ -333,7 +413,30 @@ public class MatchService {
         // actualimos el valor de los puntos de acción del jugador en la bd 
         playerService.removePlayerActionPoint(matchId, playerId);
 
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
+
         return new DrawCardResultDTO(stolenCard, deck, hand); 
+    }
+
+    /*
+     * Jugador roba una carta de recompensa (sin consumir puntos de acción)
+     */
+    @Transactional
+    public DrawCardResultDTO playerDrawsRewardCard(Integer matchId, Integer playerId){
+        Card stolenCard = deckService.drawCard(matchId);
+        DeckInGame deck = deckService.findDeckById(matchId);
+
+        HandInGame hand = handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
+
+        return new DrawCardResultDTO(stolenCard, deck, hand);
     }
 
     /*
@@ -346,7 +449,7 @@ public class MatchService {
 
         HandInGameDTO hand = new HandInGameDTO(handService.findPlayerHand(matchId, playerId)); 
 
-        ListCardsDTO bag = new ListCardsDTO(bagService.findPlayerBag(matchId, playerId));
+        BagInGameDTO bag = new BagInGameDTO(bagService.findPlayerBag(matchId, playerId));
 
         return new AllCardsStatusDTO(hand, bag, deck, playerId); 
     }
@@ -374,6 +477,23 @@ public class MatchService {
 
     }
 
+    @Transactional
+    public Integer confirmDiscardPhase(Integer matchId, AllCardsStatusDTO data ) {
+        // vemos si la palabra es válida 
+        Boolean validBag = bagService.checkBagIsValid(data.getBag().getCards()); 
+        
+        // checkeamos que el jugador no tenga más de 7 cartas en la mano y su palabra sea válida 
+        checkers.checkNoMoreThan7CardsInHand(data.getHand());       
+        checkers.checkWordIsValid(validBag);       
+
+        // si la palabra de la bolsa es válida o está vacía, actualizamos todo y pasamos al siguiente turno 
+        handService.update(data.getHand(), matchId, data.getPlayerId());
+        bagService.update(data.getBag(), matchId, data.getPlayerId());
+        deckService.update(data.getDeck(), matchId); 
+        Integer nextTurnId = nextTurn(matchId).getCurrentTurnUserId(); 
+        return nextTurnId; 
+    }
+
 
     // ------------------------------------------- FUNCIONES LLEVADAS A CABO EN LAS PELEAS -------------------------------------------------------------------
 
@@ -399,8 +519,15 @@ public class MatchService {
         // quitamos la carta de la mano o bolsa del perdedor y se la añadimos a la mano del ganador
 
         if (fromWhere.equals("hand")){ 
-            handService.removeCardFromPlayerHand(card, matchId, loserId);
-            handService.addCardToPlayerHand(card, matchId, winnerId);
+            // Selección aleatoria de carta de la mano del perdedor
+            HandInGame loserHand = handService.findPlayerHand(matchId, loserId);
+            java.util.List<Card> loserHandCards = loserHand.getCards();
+            if (loserHandCards == null || loserHandCards.isEmpty()) {
+                throw new IllegalStateException("Loser has no cards in hand to steal");
+            }
+            Card randomCard = loserHandCards.get((int) Math.floor(Math.random() * loserHandCards.size()));
+            handService.removeCardFromPlayerHand(randomCard, matchId, loserId);
+            handService.addCardToPlayerHand(randomCard, matchId, winnerId);
 
         } else if (fromWhere.equals("bag")){
             bagService.removeCardFromPlayerBag(card, matchId, loserId);
@@ -408,12 +535,6 @@ public class MatchService {
         
         } else {
             throw new IllegalArgumentException("fromWhere must be 'hand' or 'bag'");
-        }
-
-        // le quitamos todos los puntos de acción al perdedor si es su turno actual
-        if (loserId.equals(currentTurnUserId)){
-            loser.setActionPoints(0);
-            playerService.save(loser);
         }
         
     }
@@ -428,14 +549,10 @@ public class MatchService {
 
     @Transactional
     public Card playerBeatsNonPlayer(Integer matchId, Integer playerId, Integer npcId){
-        // TODO: hay que hacer la gestión de los npcs, services, repositorios, etc
 
         Card stolenCard =deckService.drawCard(matchId);
         handService.addCardToPlayerHand(stolenCard, matchId, playerId);
 
-        // A LO MEJOR HAY QUE PASAR EL NPC NO SOLO SU ID
-        // actualizar fuerza del npc
-        // npc.setStrength(npc.getStrength() + 1);
         return stolenCard;
     
     }
@@ -505,10 +622,42 @@ public class MatchService {
             throw new IllegalStateException("Match is not finished yet");
         }
 
+
         return match.getWinner();
     }
     
-    
+    @Transactional
+    public ActionPointsUpdateDTO consumeActionPointForUser(Integer matchId, Integer userId) {
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        Integer currentPoints = player.getActionPoints() != null ? player.getActionPoints() : 0;
+        if (currentPoints > 0) {
+            player.setActionPoints(currentPoints - 1);
+            playerRepo.save(player);
+        }
+        return new ActionPointsUpdateDTO(
+            player.getId(),
+            player.getUser().getId(),
+            player.getUser().getUsername(),
+            player.getActionPoints(),
+            System.currentTimeMillis()
+        );
+    }
+
+    @Transactional
+    public ActionPointsUpdateDTO consumeAllActionPointForUser(Integer matchId, Integer userId) {
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        player.setActionPoints(0);
+        playerRepo.save(player);
+        return new ActionPointsUpdateDTO(
+            player.getId(),
+            player.getUser().getId(),
+            player.getUser().getUsername(),
+            player.getActionPoints(),
+            System.currentTimeMillis()
+        );
+    }
 
 
     //Función para mover un jugador de una sala a otra adyacente
@@ -547,9 +696,58 @@ public class MatchService {
         if (player.getActionPoints() > 0) {
             player.setActionPoints(player.getActionPoints() - 1);
         } 
+
         //Guardar cambios
-        
         return playerRepo.save(player);
+    }
+
+    @Transactional
+    public Npc moveNpcToAdyacentRoom(Integer matchId, Integer npcId, Integer targetRoomId, Integer userId) {
+        Match match = matchRepo.findById(matchId)
+            .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
+
+        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
+            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+        }
+        matchRepo.save(match);
+
+        //Buscamos al npc que queremos mover de la partida
+        Npc npc = npcRepository.findById(npcId)
+            .orElseThrow(() -> new RuntimeException("NPC no encontrado en la partida"));
+
+        //Obtenemos la habitación actual en la que se encuentra el npc
+        Room currentRoomNpc = npc.getRoom();
+        if (currentRoomNpc == null) {
+            throw new RuntimeException("NPC no tiene sala asignada"); }
+
+        //Obtenemos la sala destino a la que queremos mover al npc
+        Room targetRoom = roomRepository.findById(targetRoomId)
+            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
+
+        //Comprobamos que el jugador tiene puntos de acción para poder mover al npc
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        if (player.getActionPoints() <= 0) {
+            throw new NoActionPointsException("Move not allowed: player has no action points left"); }
+
+        //Comprobamos que la sala destino es adyacente a la sala actual del npc
+        List<Room> adjacent = currentRoomNpc.getAdjacencyList();
+        boolean canMove = adjacent.stream()
+                .anyMatch(r -> r.getId().equals(targetRoom.getId()));
+        if (!canMove) {
+            throw new RuntimeException("Movimiento no permitido: la sala destino no es adyacente"); }
+
+        //Actualizamos la sala del npc y los puntos de acción del jugador
+
+        npc.setRoom(targetRoom);
+        
+
+        if (player.getActionPoints() > 0) {
+            player.setActionPoints(player.getActionPoints() - 1);
+            playerRepo.save(player);
+        }
+        //Guardamos los cambios
+        return npcRepository.save(npc);
     }
 
 
@@ -569,10 +767,31 @@ public class MatchService {
         //Actualizar la sala y fuerza del jugador
         player.setRoom(targetRoom);
         player.setStrength(player.getStrength() + 1);
+        
         //Guardar cambios
-
         return playerRepo.save(player);
     }
+
+    public ActionPointsUpdateDTO consumeOneActionPoint(Integer matchId, Integer userId) {
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+            .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+
+        int current = Optional.ofNullable(player.getActionPoints()).orElse(0);
+        int updated = Math.max(0, current - 1);
+        player.setActionPoints(updated);
+        playerRepo.save(player);
+
+        return new ActionPointsUpdateDTO(
+            player.getId(),
+            player.getUser().getId(),
+            player.getUser().getUsername(),
+            updated,
+            System.currentTimeMillis()
+        );
+    }
+
+
+
 
 
 }

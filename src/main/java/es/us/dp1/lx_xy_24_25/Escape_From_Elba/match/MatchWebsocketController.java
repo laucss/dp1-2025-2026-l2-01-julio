@@ -4,6 +4,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.DiceTotalsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightDiceUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightResolvedDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.HandUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ReadyStateUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.WeaponsUpdateDTO;
+
 @Controller
 public class MatchWebsocketController {
     
@@ -34,6 +48,13 @@ public class MatchWebsocketController {
     public void notifyPlayerLocationUpdate(Integer matchId, PlayerLocationUpdateDTO update) {
         messagingTemplate.convertAndSend(
             "/topic/match." + matchId + ".location",
+            update
+        );
+    }
+
+    public void notifyNpcLocationUpdate(Integer matchId, NpcLocationUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".npc.location",
             update
         );
     }
@@ -69,6 +90,27 @@ public class MatchWebsocketController {
     public void notifyWeaponsUpdate(Integer matchId, WeaponsUpdateDTO update) {
         messagingTemplate.convertAndSend(
             "/topic/match." + matchId + ".fight.weapons",
+            update
+        );
+    }
+
+    public void notifyCardsUpdate(Integer matchId, CardsUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".cards",
+            update
+        );
+    }
+
+    public void notifyFightResolved(Integer matchId, FightResolvedDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".fight",
+            update
+        );
+    }
+
+    public void notifyHandUpdate(Integer matchId, Integer playerId, HandUpdateDTO update) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".hand." + playerId,
             update
         );
     }

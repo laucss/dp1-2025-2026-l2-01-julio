@@ -42,6 +42,7 @@ boar
 boa
 boas
 broom
+boss
 
 cabs
 crabs 
@@ -71,7 +72,11 @@ come
 comes
 coma
 comes
-comas
+comas 
+compare 
+cop 
+cops 
+cope 
 crape
 crapes
 crops
@@ -80,6 +85,8 @@ classes
 clear
 close
 clamp
+clap
+claps
 corbel 
 color
 colors
@@ -159,6 +166,7 @@ member
 members
 more 
 mop
+mall
 
 oar 
 off 
@@ -169,6 +177,10 @@ paper
 pass 
 passes
 per 
+peel
+pee
+peep 
+peer
 par
 peace 
 peaces 
@@ -232,6 +244,7 @@ sells
 sleep 
 sleeps
 small
+smaller 
 some 
 space 
 spaces 

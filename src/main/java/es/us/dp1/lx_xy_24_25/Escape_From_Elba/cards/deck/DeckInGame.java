@@ -28,16 +28,18 @@ public class DeckInGame{
     public DeckInGame (List<Card> cards) {
         if (cards ==null){
             this.notDiscardedCards = new ArrayList<>();
-
             this.discardedCards = new ArrayList<>();
 
         } else {
             this.notDiscardedCards = new ArrayList<>(cards);
-
             this.discardedCards = new ArrayList<>();
         }
 
     }
-    public DeckInGame(){}
+    
+    public DeckInGame(){
+        this.notDiscardedCards = new ArrayList<>();
+        this.discardedCards = new ArrayList<>();
+    }
     
 }

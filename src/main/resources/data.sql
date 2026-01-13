@@ -3,15 +3,15 @@ INSERT INTO authorities(id,authority) VALUES (1,'ADMIN');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (1,'admin1','admin1@example.com','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS',1,25,'/Avatar_default.png');
 
 
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (1,'Si juegas 5 partidas',5.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED','FACIL');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (2,'Si juegas 15 partidas',15.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED','INTERMEDIO');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (3,'Si juegas 25 partidas',25.0,'https:/cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED','DIFICIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (1,'Si juegas 5 partidas',5.0,'https://cdn-icons-png.flaticon.com/512/3430/3430778.png ','GAMES_PLAYED','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (2,'Si juegas 15 partidas',15.0,'https://cdn-icons-png.flaticon.com/512/3430/3430778.png','GAMES_PLAYED','INTERMEDIO');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (3,'Si juegas 25 partidas',25.0,'https://cdn-icons-png.flaticon.com/512/3430/3430778.png','GAMES_PLAYED','DIFICIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (4,'Si ganas 5 partidas',5.0,'https://cdn-icons-png.flaticon.com/512/5021/5021877.png','VICTORIES','FACIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (5,'Si ganas 10 partidas',10.0,'https://cdn-icons-png.flaticon.com/512/5021/5021877.png','VICTORIES','INTERMEDIO');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (6,'Si ganas 20 partidas',20.0,'https://cdn-icons-png.flaticon.com/512/5021/5021877.png','VICTORIES','DIFICIL');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (7,'Si juegas mas de 20 minutos',20.1,'https://cdn-icons-png.flaticon.com/512/15452/15452718.png','TOTAL_PLAY_TIME','FACIL');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (8,'Si juegas mas de 60 minutos',60.1,'https://cdn-icons-png.flaticon.com/512/15452/15452718.png','TOTAL_PLAY_TIME','INTERMEDIO');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (9,'Si juegas mas de 120 minutos',120.1,'https://cdn-icons-png.flaticon.com/512/15452/15452718.png','TOTAL_PLAY_TIME','DIFICIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (7,'Si juegas mas de 20 minutos',20.1,'https://cdn-icons-png.flaticon.com/512/850/850960.png','TOTAL_PLAY_TIME','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (8,'Si juegas mas de 60 minutos',60.1,'https://cdn-icons-png.flaticon.com/512/850/850960.png','TOTAL_PLAY_TIME','INTERMEDIO');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (9,'Si juegas mas de 120 minutos',120.1,'https://cdn-icons-png.flaticon.com/512/850/850960.png','TOTAL_PLAY_TIME','DIFICIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (10,'Si acumulas 50 puntos de accion',50.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','FACIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (11,'Si acumulas 100 puntos de accion',100.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','INTERMEDIO');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (12,'Si acumulas 200 puntos de accion',200.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','DIFICIL');
@@ -54,10 +54,13 @@ INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_player
 VALUES (2,'Partida en curso','ABC123','PLAYING','2025-10-26 20:00:00',NULL,5,3,3,true);
 
 -- Partida finalizada
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
-VALUES (3,'Partida terminada','XYZ789','FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true,NULL),
-       (6,'Partida terminada 2',NULL,'FINISHED','2025-10-25 18:00:00','2025-10-25 19:00:00',6,3,3,false,NULL),
-        (7,'Partida terminada 3','GHI456','FINISHED','2025-11-24 18:00:00','2025-11-24 19:00:00',5,3,3,true,NULL);
+INSERT INTO match(
+  id,name,code,creator_id,status,start_time,end_time,
+  max_players,min_players,num_npcs,is_private)
+VALUES
+(3,'Tinkissss','XYZ789',15,'FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true),
+(6,'Monster high',NULL,6,'FINISHED','2025-10-25 18:35:00','2025-10-25 19:00:00',6,3,3,false),
+(7,'Katseye','GHI456',11,'FINISHED','2025-11-24 16:00:00','2025-11-24 17:15:00',5,3,3,true);
 
 -- Cartas 
 INSERT INTO cards(id,front_image, back_image,letter ) 
@@ -136,7 +139,21 @@ INSERT INTO player (id, action_points, match_id, strength, user_id)
                (10,null,2,null,7),
                (11,12,3,null,9),
                (12,5,6,null,9),
-               (13,7,7,null,9);
+               (13,7,7,null,9),
+               (14,10,3,null,15),
+               (15,7,3,null,4),
+               (16,8,3,null,5),
+                 (17,6,6,null,6),
+                 (18,9,6,null,8),
+                 (19,11,6,null,10),
+                 (20,4,7,null,11),
+                 (21,8,7,null,12),
+                 (22,7,7,null,13),
+                 (23,10,7,null,14);
+
+UPDATE match SET winner_id = 14 WHERE id = 3;
+UPDATE match SET winner_id = 18 WHERE id = 6;
+UPDATE match SET winner_id = 20 WHERE id = 7;
 
 
 INSERT INTO Room (id, name, black_dice, white_dice) 
@@ -218,6 +235,7 @@ INSERT INTO room_adjacency_list (room_id, adjacency_list_id)
                (14,13),
                (14,7),
                (14,15),
+               (15,8),
                (15,14),
                (15,37),
                (15,21),
@@ -294,10 +312,12 @@ INSERT INTO room_adjacency_list (room_id, adjacency_list_id)
 
 -- Grant one victory to player3 (appusers.id=6) via player.id=9 in match 1
 -- Ensure match 1 has a winner set to player.id=9
+/* Por facilitar el testeo lo comento
 UPDATE match
    SET status = 'FINISHED',
            start_time = '2025-12-01 18:00:00',
            end_time   = '2025-12-01 19:00:00',
            winner_id  = 9
  WHERE id = 1;
+ */
 

@@ -3,7 +3,7 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards;
 
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.ListCardsDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
@@ -20,7 +20,7 @@ public class AllCardsStatusDTO {
     private HandInGameDTO hand; 
     
     @NotNull
-    private ListCardsDTO bag;
+    private BagInGameDTO bag;
 
     @NotNull
     private DeckInGameDTO deck; 
@@ -32,12 +32,12 @@ public class AllCardsStatusDTO {
 
     public AllCardsStatusDTO(HandInGame hand, BagInGame bag, DeckInGame deck, Integer playerId){
         this.hand= new HandInGameDTO(hand); 
-        this.bag = new ListCardsDTO(bag); 
+        this.bag = new BagInGameDTO(bag); 
         this.deck = new DeckInGameDTO(deck); 
         this.playerId=playerId;
     }
 
-    public AllCardsStatusDTO(HandInGameDTO hand, ListCardsDTO bag, DeckInGameDTO deck, Integer playerId){
+    public AllCardsStatusDTO(HandInGameDTO hand, BagInGameDTO bag, DeckInGameDTO deck, Integer playerId){
         this.hand= hand; 
         this.bag = bag; 
         this.deck = deck; 

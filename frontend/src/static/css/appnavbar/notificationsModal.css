@@ -83,3 +83,45 @@
   color: #e53935;
   margin-bottom: 1rem;
 }
+
+/* Error modal overlay inside notifications */
+.notif-error-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 10000; /* above the notifications panel */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-error-card {
+  background: #ffffff;
+  color: #555;
+  border-radius: 12px;
+  padding: 24px 28px;
+  width: min(90vw, 420px);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+  text-align: center;
+}
+
+.notif-error-card p { margin: 0 0 16px 0; font-size: 16px; }
+
+.notif-error-close {
+  background: #e53935;
+  color: #fff;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(229, 57, 53, 0.18);
+}
+
+.notif-error-close:hover {
+  background: #d32f2f;
+  transform: translateY(-1px);
+}
