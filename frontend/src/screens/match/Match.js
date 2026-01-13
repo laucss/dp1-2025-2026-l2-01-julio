@@ -53,6 +53,7 @@ export default function Match(){
     const [actionPoints, setActionPoints] = useState(0)
     const [strength, setStrength] = useState(1)
     const [moveToAdyacentRoom, setMoveToAdyacentRoom] = useState(false)
+    const [moveToRoomWithWord, setMoveToRoomWithWord] = useState(false)
     const [isEndingTurn, setIsEndingTurn] = useState(false)
     const [moveNpcMode, setMoveNpcMode] = useState(false)
     const [selectedNpcId, setSelectedNpcId] = useState(null)
@@ -802,6 +803,151 @@ export default function Match(){
         // Player move flow
         //console.log('roomId destino', roomId)
         //console.log('actual roomID', currentPlayer?.?.currentRoom?.id || currentPlayer?.?.roomId || currentPlayer?.?.room?.id)
+        
+        // Move with words flow
+        if (moveToRoomWithWord === true){
+            try {
+                const isSafeArea = roomId === 37;
+                
+                const targetRoomNormalized = normalizeRoomId(roomId);
+                const otherPlayer = match?.players?.find(p => {
+                    const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
+                    return p.user?.id !== currentUser?.id && normalizeRoomId(playerRoomId) === targetRoomNormalized;
+                });
+
+                if (otherPlayer && !isSafeArea) {
+                    setPendingTargetRoom(roomId);
+                    setFightDefender(otherPlayer);
+                    setIsFightModalOpen(true);
+                    setMoveToRoomWithWord(false);
+                    
+                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${jwt}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            matchId: matchId,
+                            attackerId: currentUser.id,
+                            attackerUsername: currentUser.username,
+                            defenderId: otherPlayer.user.id,
+                            defenderUsername: otherPlayer.user.username,
+                            roomId: roomId,
+                            action: 'START'
+                        })
+                    });
+                    
+                    return;
+                }
+
+                // Detectar NPCs en la habitación de destino
+                const botInRoom = match?.npcs?.find(npc => {
+                    const npcRoomId = npc.room?.id;
+                    return npcRoomId && normalizeRoomId(npcRoomId) === targetRoomNormalized;
+                });
+
+                if (botInRoom && !isSafeArea) {
+                    const currentPlayerData = currentPlayer?.[0];
+                    setPendingTargetRoom(roomId);
+                    setFightDefender(botInRoom);
+                    setFightAttacker(currentPlayerData);
+                    setIsFightModalOpen(true);
+                    setMoveToRoomWithWord(false);
+
+                    // Consumir 1 punto de acción por el intento de movimiento, incluso si luego se pierde la batalla
+                    try {
+                        const consumeResponse = await fetch(`/api/v1/matches/${matchId}/consume-action-point/${currentUser.id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${jwt}`,
+                                'Content-Type': 'application/json',
+                            },
+                        });
+                        if (consumeResponse.ok) {
+                            setActionPoints(prev => Math.max(0, prev - 1));
+                        }
+                    } catch (err) {
+                        console.error('Error consuming action point on NPC fight start:', err);
+                    }
+                    
+                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${jwt}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            matchId: matchId,
+                            attackerId: currentUser.id,
+                            attackerUsername: currentUser.username,
+                            defenderId: botInRoom.id,
+                            defenderUsername: `Bot ${botInRoom.id}`,
+                            roomId: roomId,
+                            action: 'START',
+                            isBot: true
+                        })
+                    });
+                    
+                    return;
+                }
+
+                const response = await fetch (`/api/v1/matches/${matchId}/moveByLetters`, {
+                method: "PUT",
+                headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                }, body: JSON.stringify({
+                    userId: currentUser.id,
+                    roomId: roomId
+                }) 
+
+                })
+
+                if (response.ok){
+                    const data = await response.json()
+                    setMatch(data)
+                    if (data.players) {
+                        setPlayer(data.players)
+                        const me = data.players.find(p => p.user.id === currentUser.id)
+                        if (me) {
+                            setCurrentPlayer([me])
+                            setPlayersList(data.players.filter(p => p.user.id !== currentUser.id))
+                        }
+                    }
+                    
+                    const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
+                    if (movedPlayer) {
+                        await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${jwt}`,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                matchId: matchId,
+                                userId: currentUser.id,
+                                actionPoints: movedPlayer.actionPoints
+                            })
+                        }).catch(err => console.error('Error notifying action points:', err));
+                        
+                        setActionPoints(movedPlayer.actionPoints);
+                    }
+                    
+                    setMoveToRoomWithWord(false)
+                }
+
+                else if (!response.ok) {
+                    setMoveToRoomWithWord(false)
+                    toast.error(response.statusText)
+                }
+            } catch (error) {
+                console.log('error', error)
+            }
+            return;
+        }
+        
         if (moveToAdyacentRoom===false) return ;
         if (moveToAdyacentRoom === true){
             try {
@@ -950,6 +1096,157 @@ export default function Match(){
 
                 else if (!response.ok) {
                     setMoveToAdyacentRoom(false)
+                    toast.error(response.statusText)
+                }
+            } catch (error) {
+                console.log('error', error)
+            }
+        }
+    }
+
+    const moveWithWords = async (roomId) => {
+        if (moveToRoomWithWord===false) return ;
+        if (moveToRoomWithWord === true){
+            try {
+
+                const isSafeArea = roomId === 37;
+                
+                const targetRoomNormalized = normalizeRoomId(roomId);
+                const otherPlayer = match?.players?.find(p => {
+                    const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
+                    return p.user?.id !== currentUser?.id && normalizeRoomId(playerRoomId) === targetRoomNormalized;
+                });
+
+                if (otherPlayer && !isSafeArea) {
+                    setPendingTargetRoom(roomId);
+                    setFightDefender(otherPlayer);
+                    setIsFightModalOpen(true);
+                    moveToRoomWithWord(false);
+                    
+                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${jwt}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            matchId: matchId,
+                            attackerId: currentUser.id,
+                            attackerUsername: currentUser.username,
+                            defenderId: otherPlayer.user.id,
+                            defenderUsername: otherPlayer.user.username,
+                            roomId: roomId,
+                            action: 'START'
+                        })
+                    });
+                    
+                    return;
+                }
+
+                // Detectar NPCs en la habitación de destino
+                console.log('Buscando NPCs. match?.npcs:', match?.npcs);
+                console.log('targetRoomNormalized:', targetRoomNormalized);
+                const botInRoom = match?.npcs?.find(npc => {
+                    const npcRoomId = npc.room?.id;
+                    console.log('NPC:', npc, 'npcRoomId:', npcRoomId, 'normalizado:', normalizeRoomId(npcRoomId));
+                    return npcRoomId && normalizeRoomId(npcRoomId) === targetRoomNormalized;
+                });
+
+                console.log('botInRoom encontrado:', botInRoom);
+                if (botInRoom && !isSafeArea) {
+                    const currentPlayerData = currentPlayer?.[0];
+                    setPendingTargetRoom(roomId);
+                    setFightDefender(botInRoom);
+                    setFightAttacker(currentPlayerData);
+                    setIsFightModalOpen(true);
+                    moveToRoomWithWord(false);
+
+                    // Consumir 1 punto de acción por el intento de movimiento, incluso si luego se pierde la batalla
+                    try {
+                        const consumeResponse = await fetch(`/api/v1/matches/${matchId}/consume-action-point/${currentUser.id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${jwt}`,
+                                'Content-Type': 'application/json',
+                            },
+                        });
+                        if (consumeResponse.ok) {
+                            setActionPoints(prev => Math.max(0, prev - 1));
+                        }
+                    } catch (err) {
+                        console.error('Error consuming action point on NPC fight start:', err);
+                    }
+                    
+                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${jwt}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            matchId: matchId,
+                            attackerId: currentUser.id,
+                            attackerUsername: currentUser.username,
+                            defenderId: botInRoom.id,
+                            defenderUsername: `Bot ${botInRoom.id}`,
+                            roomId: roomId,
+                            action: 'START',
+                            isBot: true
+                        })
+                    });
+                    
+                    return;
+                }
+
+                {console.log(roomId)}
+                const response = await fetch (`/api/v1/matches/${matchId}/moveByLetters`, {
+                method: "PUT",
+                headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                }, body: JSON.stringify({
+                    userId: currentUser.id,
+                    roomId: roomId
+                }) 
+
+                })
+
+                if (response.ok){
+                    const data = await response.json()
+                    setMatch(data)
+                    if (data.players) {
+                        setPlayer(data.players)
+                        const me = data.players.find(p => p.user.id === currentUser.id)
+                        if (me) {
+                            setCurrentPlayer([me])
+                            setPlayersList(data.players.filter(p => p.user.id !== currentUser.id))
+                        }
+                    }
+                    
+                    const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
+                    if (movedPlayer) {
+                        await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${jwt}`,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                matchId: matchId,
+                                userId: currentUser.id,
+                                actionPoints: movedPlayer.actionPoints
+                            })
+                        }).catch(err => console.error('Error notifying action points:', err));
+                        
+                        setActionPoints(movedPlayer.actionPoints);
+                    }
+                    
+                    setMoveToRoomWithWord(false)
+                }
+
+                else if (!response.ok) {
+                    setMoveToRoomWithWord(false)
                     toast.error(response.statusText)
                 }
             } catch (error) {
@@ -1531,6 +1828,7 @@ return (
                 isOpen={isActionsModalOpen}
                 onClose={() => setIsActionsModalOpen(false)}
                 moveToAdyacent={() => setMoveToAdyacentRoom(true) }
+                moveToRoomWithWord={() => setMoveToRoomWithWord(true) }
                 onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
             />
         </div>
