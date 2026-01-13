@@ -1091,6 +1091,33 @@ export default function Match(){
         }
     };
 
+    const leaveMatch = async () => {
+        if (!window.confirm("¿Seguro que quieres abandonar la partida?")) return;
+        try {
+            const response = await fetch(`/api/v1/matches/${matchId}/leaveMatch`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(currentUser?.id)
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('Error leaving match:', response.status, text);
+                alert('No se pudo abandonar la partida');
+                return;
+            }
+
+            // On success, navigate back to home
+            navigate('/');
+        } catch (err) {
+            console.error('Error leaving match:', err);
+            alert('Error al abandonar la partida');
+        }
+    };
+
     const currentPlayerTurn = match?.players?.find(p => p.user.id === match.currentTurnUserId);
 
     const canDraw = match?.currentTurnUserId === currentUser?.id &&
@@ -1533,6 +1560,15 @@ return (
                 moveToAdyacent={() => setMoveToAdyacentRoom(true) }
                 onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
             />
+
+            <button
+                className="leave-match-button"
+                onClick={leaveMatch}
+                style={{ marginLeft: '15px', background: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
+            >
+                Leave Match
+            </button>
+
         </div>
 
     <FightModal
