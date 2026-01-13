@@ -11,7 +11,6 @@ public class MoveToRoomDTO {
 
     private Integer roomId; 
 
-
     public MoveToRoomDTO(){
     }
 

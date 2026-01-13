@@ -381,6 +381,33 @@ public class MatchController {
         return ResponseEntity.ok(new MatchDTO(match)); 
     }
 
+    @PutMapping("/{matchId}/moveByLetters")
+    public ResponseEntity<MatchDTO> moveByFormingRoomName(@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data) {
+        ms.movePlayerByFormingRoomName(matchId, data.getUserId(), data.getRoomId());
+        Match match = ms.getMatchById(matchId);
+        
+        Player movedPlayer = match.getPlayers().stream()
+            .filter(p -> p.getUser().getId().equals(data.getUserId()))
+            .findFirst()
+            .orElse(null);
+        
+        if (movedPlayer != null) {
+            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);
+            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
+            
+            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
+                movedPlayer.getId(),
+                movedPlayer.getUser().getId(),
+                movedPlayer.getUser().getUsername(),
+                movedPlayer.getActionPoints(),
+                System.currentTimeMillis()
+            );
+            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+        }
+        
+        return ResponseEntity.ok(new MatchDTO(match));
+    }
+
     @GetMapping("/{matchId}/{playerId}/actionPoints")
     public ResponseEntity<Integer> getActionPoints(@PathVariable Integer matchId, @PathVariable Integer playerId) {
         Integer actionPoints = playerService.getPlayerActionPoints(matchId, playerId); 
