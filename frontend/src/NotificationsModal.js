@@ -58,14 +58,22 @@ export default function NotificationsModal({ isOpen, onClose }) {
       headers: { Authorization: `Bearer ${jwt}` },
     });
     if (res.ok) {
-      // Obtener el matchId de la notificación aceptada
-      const notif = notifications.find(notif => notif.id === id);
-      setNotifications(n => n.filter(notif => notif.id !== id));
-      setError(null);
+      // Intentar leer el body con la notificación aceptada
+      let acceptedNotif = null;
+      try { acceptedNotif = await res.json(); } catch (e) { acceptedNotif = null; }
+
+      // Obtener el matchId de la notificación (respuesta o estado previo)
+      const notif = acceptedNotif || notifications.find(notif => notif.id === id);
+
       // Compatibilidad máxima: buscar cualquier campo de id de lobby
       const lobbyId = notif?.matchId || notif?.lobbyId || notif?.idLobby || notif?.match?.id;
       console.log('Notificación aceptada:', notif);
       console.log('Id de lobby detectado:', lobbyId);
+
+      // Actualizar lista en estado (quitar la invitación atendida)
+      setNotifications(n => n.filter(notif => notif.id !== id));
+      setError(null);
+
       if (lobbyId) {
         window.location.href = `/lobby/${lobbyId}`;
       } else {

@@ -100,7 +100,6 @@ public class ChatServiceTests {
     }
 
 
-// =========================================
     @Test
     public void createChatMessageNoUserThrows() {
         when(userService.findCurrentUser()).thenReturn(null);

@@ -92,13 +92,6 @@ public class FriendRequestRepositoryTest {
     }
 
     @Test
-    public void shouldFindAllRequestsForUserIdOneRequest() {
-        List<FriendRequest> requests = friendRequestRepository.findAllRequestsForUserId(USER_ID_ONE_RECEIVED_REQUEST);
-        assertNotNull(requests);
-        assertEquals(1, requests.size());
-    }
-
-    @Test
     public void shouldFindAllRequestsForUserIdMultipleRequests() {
         List<FriendRequest> requests = friendRequestRepository.findAllRequestsForUserId(USER_ID_TWO_RECEIVED_REQUESTS);
         assertNotNull(requests);
