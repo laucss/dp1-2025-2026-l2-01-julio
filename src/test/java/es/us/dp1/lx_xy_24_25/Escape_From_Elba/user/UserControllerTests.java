@@ -62,6 +62,15 @@ class UserControllerTests {
 	@MockBean
 	private AuthoritiesService authService;
 
+	@MockBean
+	private es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.jwt.JwtUtils jwtUtils;
+
+	@MockBean
+	private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+	@MockBean
+	private org.springframework.boot.web.client.RestTemplateBuilder restTemplateBuilder;
+
 	@Autowired
 	private ObjectMapper objectMapper;
 
