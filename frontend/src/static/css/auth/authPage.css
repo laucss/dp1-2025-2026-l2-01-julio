@@ -1,18 +1,28 @@
 .auth-page-container {
-  height: 100%;
+  height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: column;
-  margin-top: 10rem;
+  margin-top: 0;
   justify-content: space-evenly;
   align-items: center;
+  background-image: url("../../images/menuBackGround.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .auth-form-container{
-    max-height: 800px;
-    max-width: 500px;
+  background-color: rgb(101, 194, 247);
+  padding: 5vh;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+    max-height: auto;
+    max-width: 650px;
+    margin-top: 30vh;
+    margin-bottom: 30vh;
     height: 90%;
     width: 90%;
+    border-radius: 25px;
 }
 
 .auth-page-container h1 {
