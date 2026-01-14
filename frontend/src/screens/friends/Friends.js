@@ -67,7 +67,7 @@ export default function Friends() {
 
   const currentUsername = tokenService.getUser?.()?.username;
   if (inviteUsername.trim().toLowerCase() === currentUsername?.toLowerCase()) {
-    setInviteError("No puedes enviar una invitación a ti mismo.");
+    setInviteError("You can not send an invitation to yourself.");
     setInviteLoading(false);
     return;
   }
@@ -95,22 +95,21 @@ export default function Friends() {
 
         if (response.status === 404) {
           if (errorMessage.includes("User not found")) {
-            throw new Error("El usuario no existe.");
+            throw new Error("User does not exist.");
           }
           throw new Error(errorMessage);
         }
 
         if (response.status === 400) {
-          throw new Error(errorMessage || "El usuario especificado no existe o la solicitud es inválida.");
+          throw new Error(errorMessage || "The specified user does not exist or the request is invalid.");
         }
 
         if (errObj && errObj.message?.includes("Entity Friend request already created.")) {
-          let customError = "Ya existe una solicitud con este usuario.";
-
+          let customError = "A request with this user already exists.";
           if (errObj.status === "ACCEPTED") {
-            customError = "La solicitud ya fue aceptada.";
+            customError = "The request has already been accepted.";
           } else if (errObj.status === "PENDING") {
-            customError = "La solicitud ya está pendiente.";
+            customError = "The request is already pending.";
           }
           throw new Error(customError);
         } else {
@@ -120,7 +119,7 @@ export default function Friends() {
       return response.json();
     })
     .then((json) => {
-      setInviteSuccess(json.message || "Invitación enviada correctamente.");
+      setInviteSuccess(json.message || "Invitation sent successfully.");
       getAndSetSentRequests(tokenService.getUser()?.id);
       setInviteUsername("");
     })
@@ -245,7 +244,7 @@ export default function Friends() {
     const subscription = stompClient.subscribe(
       `/topic/user.${userId}.friendRequests`,
       (message) => {
-        console.log('Nueva solicitud de amistad recibida:', message.body);
+        console.log('New friend request received:', message.body);
         getAndSetReceivedRequests(userId);
       }
     );
@@ -263,7 +262,7 @@ export default function Friends() {
     const subscription = stompClient.subscribe(
       `/topic/user.${userId}.friendRequests.update`,
       (message) => {
-        console.log('Solicitud de amistad actualizada:', message.body);
+        console.log('Friend request updated:', message.body);
         getAndSetReceivedRequests(userId);
       }
     );
@@ -281,7 +280,7 @@ export default function Friends() {
     const subscription = stompClient.subscribe(
       `/topic/user.${userId}.friendRequests.accepted`,
       (message) => {
-        console.log('Tu solicitud fue aceptada:', message.body);
+        console.log('Your request was accepted:', message.body);
         getAndSetAllFriends(userId);
         getAndSetSentRequests(userId);
       }
@@ -300,7 +299,7 @@ export default function Friends() {
     const subscription = stompClient.subscribe(
       `/topic/user.${userId}.friendRequests.rejected`,
       (message) => {
-        console.log('Tu solicitud fue rechazada:', message.body);
+        console.log('Your request was rejected:', message.body);
         getAndSetSentRequests(userId);
       }
     );
@@ -318,7 +317,7 @@ export default function Friends() {
     const subscription = stompClient.subscribe(
       `/topic/user.${userId}.friendRequests.deleted`,
       (message) => {
-        console.log('Una amistad fue eliminada:', message.body);
+        console.log('A friendship was deleted:', message.body);
         getAndSetAllFriends(userId);
         getAndSetReceivedRequests(userId);
         getAndSetSentRequests(userId);
@@ -369,11 +368,11 @@ export default function Friends() {
 
       <div className="friends-container">
 
-      <h1>Amigos</h1>
+      <h1>Friends</h1>
 
       <div className="friends-buttons">
         <button className="main-button" onClick={openInviteModal}>
-          Enviar invitación
+          Send Invitation
         </button>
         <button
           className="main-button"
@@ -382,7 +381,7 @@ export default function Friends() {
             getAndSetReceivedRequests(tokenService.getUser?.()?.id);
           }}
         >
-          Invitaciones
+          Invitations
         </button>
       </div>
 
@@ -390,7 +389,7 @@ export default function Friends() {
         <FaSearch className="search-icon" />
         <input
           type="text"
-          placeholder="Buscar por nombre de usuario"
+          placeholder="Search by username ..."
           className="search-input"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -399,13 +398,13 @@ export default function Friends() {
 
       <div className="friends-list">
         <div className="friends-header">
-          <h2>Lista de Amigos</h2>
+          <h2>Friends List</h2>
         </div>
 
         <div className="friends-scroll">
           {(!allFriends || allFriends.length === 0) ? (
             <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-              No tienes amigos ;(
+              You have no friends :(
             </div>
           ) : (() => {
             const currentUserId = tokenService.getUser?.()?.id;
@@ -420,7 +419,7 @@ export default function Friends() {
             if (filtered.length === 0) {
               return (
                 <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                  No se han encontrado amigos que coincidan
+                  No friends found matching your search
                 </div>
               );
             }
@@ -455,7 +454,7 @@ export default function Friends() {
                               navigate(`/match/${otherUser.match.id}`, { state: { spectator: true } });
                             }}
                           >
-                            <FaEye style={{ marginRight: 4 }} /> Visualizar
+                            <FaEye style={{ marginRight: 4 }} /> Spectate
                           </button>
                         );
                       }
@@ -464,7 +463,7 @@ export default function Friends() {
                   })()}
                   {friend.status === 'ONLINE' && (
                     <button className="play-btn" title="Jugar">
-                      <FaGamepad style={{ marginRight: 4 }} /> Jugar
+                      <FaGamepad style={{ marginRight: 4 }} /> Play
                     </button>
                   )}
                   <button
@@ -472,7 +471,7 @@ export default function Friends() {
                     onClick={() => openDeleteModal(friend)}
                     title="Eliminar amigo"
                   >
-                    <FaTrash style={{ marginRight: 4 }} /> Eliminar
+                    <FaTrash style={{ marginRight: 4 }} /> Delete
                   </button>
                 </div>
               </div>
@@ -486,11 +485,11 @@ export default function Friends() {
       {showInviteModal && (
         <div className="modal-overlay">
           <div className="modal-card">
-            <h3>Enviar invitación</h3>
+            <h3>Send Invitation</h3>
 
             <input
               type="text"
-              placeholder="Nombre de usuario"
+              placeholder="Username"
               value={inviteUsername}
               onChange={(e) => setInviteUsername(e.target.value)}
               className="modal-input"
@@ -501,10 +500,10 @@ export default function Friends() {
 
             <div className="modal-buttons">
               <button onClick={handleSubmit} disabled={inviteLoading} className="modal-send">
-                {inviteLoading ? 'Enviando...' : 'Enviar'}
+                {inviteLoading ? 'Sending...' : 'Send'}
               </button>
               <button onClick={closeInviteModal} className="modal-cancel">
-                Cancelar
+                Cancel
               </button>
             </div>
           </div>
@@ -514,7 +513,7 @@ export default function Friends() {
       {showReceivedModal && (
         <div className="modal-overlay">
           <div className="modal-card">
-            <h3>Solicitudes Pendientes</h3>
+            <h3>Pending Requests</h3>
 
             <div className="friends-scroll" style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '16px' }}>
               {(allReceived || []).map(request => (
@@ -526,11 +525,11 @@ export default function Friends() {
 
                   <div className="request-actions">
                     <button className="request-btn request-accept" onClick={() => handleAccept(request.id)}>
-                      Aceptar
+                      Accept
                     </button>
 
                     <button className="request-btn request-reject" onClick={() => handleReject(request.id)}>
-                      Rechazar
+                      Reject
                     </button>
                   </div>
                 </div>
@@ -538,14 +537,14 @@ export default function Friends() {
 
               {(!allReceived || allReceived.length === 0) && (
                 <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                  No tienes solicitudes pendientes
+                  No pending requests
                 </div>
               )}
             </div>
 
             <div className="modal-buttons">
               <button onClick={() => setShowReceivedModal(false)} className="modal-cancel">
-                Cerrar
+                Close
               </button>
             </div>
           </div>
@@ -557,15 +556,15 @@ export default function Friends() {
           <div className="modal-card">
 
             <p className="modal-confirm-text">
-              ¿Estás seguro de que quieres eliminar a "{deleteTarget?.name}" como amigo?
+              Are you sure you want to delete "{deleteTarget?.name}" as a friend?
             </p>
 
             <div className="modal-buttons">
               <button onClick={confirmDelete} className="modal-delete">
-                Eliminar
+                Delete
               </button>
               <button onClick={closeDeleteModal} className="modal-cancel">
-                Cancelar
+                Cancel
               </button>
             </div>
           </div>
