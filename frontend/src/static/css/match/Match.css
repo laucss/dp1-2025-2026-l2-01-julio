@@ -1,6 +1,12 @@
 .match-container {
     width: 100%;
-    margin-top: 20px;
+    margin-top: 0;
+    min-height: 100vh;
+    background-image: url('../../images/menuBackGround.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 .card{
@@ -64,7 +70,7 @@
     border-style: solid;
     border-color: #6c757d;
     border-radius: 10px;
-    
+    background-color: white;
 
 }
 .player-info-row {
@@ -316,6 +322,7 @@
     padding: 10px;
     border-style: solid;
     border-radius: 10px;
+    background-color: white;
 
 }
 
@@ -353,7 +360,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #999
+    color: #999;
+    background-color: white;
 }
 
 /* ------------------------ DICE SECTION ------------------------*/
@@ -464,6 +472,31 @@
     max-width: 500px;
     min-width: 230px;
     cursor: pointer
+}
+
+/* Ocultar elementos en modo espectador */
+.spectator-hidden {
+    display: none !important;
+}
+
+/* Layout tweaks only for spectator mode */
+.spectator-mode .player-and-decks-section {
+    margin-top: 200px;
+}
+
+.spectator-mode .chat-button {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%);
+    margin-top: 0;
+}
+
+.spectator-mode .leave-match-button {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    margin-top: 0;
 }
 
 .end-match-button{

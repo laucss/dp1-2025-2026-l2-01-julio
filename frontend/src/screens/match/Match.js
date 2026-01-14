@@ -1093,6 +1093,13 @@ export default function Match(){
 
     const leaveMatch = async () => {
         if (!window.confirm("¿Seguro que quieres abandonar la partida?")) return;
+
+        // En modo espectador no hay backend que eliminar; solo volver a la home
+        if (isSpectator) {
+            navigate('/');
+            return;
+        }
+
         try {
             const response = await fetch(`/api/v1/matches/${matchId}/leaveMatch`, {
                 method: 'PUT',
@@ -1179,7 +1186,7 @@ if (!match) {
 console.log('handCards', handCards)
 
 return (
-        <div className="match-container">
+    <div className={`match-container ${isSpectator ? 'spectator-mode' : ''}`}>
 
             {/*Modal donde se tiran los dados nada más empezar la partida para elegir el orden de los turnos*/}
             <StartDiceModal 
@@ -1191,7 +1198,7 @@ return (
             
             <div className="match-board" style={{ position: 'relative' }}>
                 <div className="player-and-decks-section"> 
-                    <div className="current-player"> 
+                    <div className={`current-player ${isSpectator ? 'spectator-hidden' : ''}`}>
                         <div className="current-player-info"> 
                             <div style={{
                                     borderRadius: '50%',
@@ -1512,7 +1519,7 @@ return (
                 </table>
             </div>
             */}
-            <div className="player-section">
+            <div className={`player-section ${isSpectator ? 'spectator-hidden' : ''}`}>
                 <div className="player-hand">
                     <div className="hand-cards"> 
                         {Array.isArray(handCards) && handCards.map((carta) => (
@@ -1535,7 +1542,7 @@ return (
 
             <div>
 
-            <button className="bag-button"
+            <button className={`bag-button ${isSpectator ? 'spectator-hidden' : ''}`}
                 onClick={() => setDiscardPhaseOpen(true)}
                 disabled={
                 match.currentTurnUserId !== currentUser.id }
@@ -1544,7 +1551,7 @@ return (
             >
                 Discard and bag
             </button>
-            <button className="bag-button"
+            <button className={`bag-button ${isSpectator ? 'spectator-hidden' : ''}`}
                 title="Discard cards from hand"
                 onClick={() => setIsActionsModalOpen(true) }
                 disabled={
@@ -1564,7 +1571,7 @@ return (
             <button
                 className="leave-match-button"
                 onClick={leaveMatch}
-                style={{ marginLeft: '15px', background: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                style={{ marginLeft: '15px', background: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', marginTop: isSpectator ? '20px' : undefined }}
             >
                 Leave Match
             </button>
@@ -1900,6 +1907,7 @@ return (
                 <button
                     className="end-match-button"
                     onClick={endMatch}
+                    style={{ display: isSpectator ? 'none' : 'block' }}
                 >
                     Finalizar partida
                 </button>
@@ -1944,7 +1952,7 @@ return (
         />
 
       
-            <div className="match-chat-icon">
+            <div className={`match-chat-icon ${isSpectator ? 'spectator-hidden' : ''}`}>
                 <div className="chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
                     <FaComments size={30} color="white" />
                 </div>
@@ -1953,8 +1961,9 @@ return (
             {chatOpen && <ChatBox matchId={matchId} />}
 
             {/* Mensaje de turno */}
-            <div className="chat-button"
-            >
+              <div className="chat-button"
+                  style={{ marginTop: isSpectator ? '20px' : undefined }}
+              >
                 {!match?.currentTurnUserId
                 ? "Esperando..."
                 : match.currentTurnUserId === currentUser?.id
