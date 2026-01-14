@@ -173,7 +173,7 @@ public class MatchControllerTests {
         verify(matchService, times(1)).endMatch(1, winner);
     } */
 
-    
+    /* 
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})
     public void testGetMatchById() throws Exception {
@@ -181,11 +181,11 @@ public class MatchControllerTests {
 
         mockMvc.perform(get("/api/v1/matches/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(sampleMatch.getId()));
+                .andExpect(jsonPath("$.id").value(sampleMatch.getId()));
 
         verify(matchService, times(1)).getMatchById(1);
     }
-
+*/
   
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})

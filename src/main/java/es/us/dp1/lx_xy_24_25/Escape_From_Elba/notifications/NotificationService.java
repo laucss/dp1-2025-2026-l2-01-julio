@@ -13,7 +13,16 @@ public class NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    public Notification sendInvite(User sender, User receiver, Match match) {
+    public Notification sendInvite(User sender, User receiver, Match match) throws IllegalArgumentException {
+        // Verificar si ya existe una invitación pendiente entre estos dos jugadores específicos
+        Optional<Notification> existingInvite = notificationRepository.findBySenderIdAndReceiverIdAndStatus(
+            sender.getId(), receiver.getId(), NotificationStatus.PENDING
+        );
+        
+        if (existingInvite.isPresent()) {
+            throw new IllegalArgumentException("Ya existe una invitación pendiente entre estos jugadores");
+        }
+        
         Notification notification = new Notification();
         notification.setSender(sender);
         notification.setReceiver(receiver);
@@ -28,6 +37,10 @@ public class NotificationService {
         return notificationRepository.findByReceiverIdAndStatus(receiverId, NotificationStatus.PENDING);
     }
 
+    public Optional<Notification> getNotificationBetweenUsers(Integer senderId, Integer receiverId, Integer matchId) {
+        return notificationRepository.findBySenderIdAndReceiverIdAndMatchIdAndStatus(senderId, receiverId, matchId, NotificationStatus.PENDING);
+    }
+
     public Optional<Notification> getNotification(Integer id) {
         return notificationRepository.findById(id);
     }
@@ -40,5 +53,19 @@ public class NotificationService {
     public Notification rejectInvite(Notification notification) {
         notification.setStatus(NotificationStatus.REJECTED);
         return notificationRepository.save(notification);
+    }
+
+    public void rejectOtherInvitesForMatch(Integer receiverId, Integer matchId, Integer acceptedNotificationId) {
+        // Obtener todas las invitaciones pendientes para este receiver en esta partida
+        List<Notification> pendingInvites = notificationRepository.findByReceiverIdAndMatchIdAndStatus(
+            receiverId, matchId, NotificationStatus.PENDING
+        );
+        
+        // Rechazar todas excepto la que acabamos de aceptar
+        for (Notification invite : pendingInvites) {
+            if (!invite.getId().equals(acceptedNotificationId)) {
+                rejectInvite(invite);
+            }
+        }
     }
 }

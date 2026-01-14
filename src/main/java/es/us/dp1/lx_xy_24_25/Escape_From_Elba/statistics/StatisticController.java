@@ -37,6 +37,8 @@ public class StatisticController {
     dto.setTotalTimePlayed(statisticService.getTotalTimePlayedByUserFOR(userId));
     Integer actionPoints = statisticService.getTotalAccionPointsByUser(userId);
     dto.setTotalActionPoints(actionPoints != null ? actionPoints : 0);
+    dto.setBattlesWon(statisticService.getBattlesWonByUser(userId));
+    dto.setRoomsVisited(statisticService.getTotalRoomsVisitedByUser(userId));
     return ResponseEntity.ok(dto);
 }
 
@@ -46,6 +48,8 @@ public class StatisticController {
         GeneralStatisticsDTO Gdto = new GeneralStatisticsDTO();
         Gdto.setAveragePlayersPerMatch(statisticService.getAveragePlayersPerMatch());
         Gdto.setTotalMatchesPlayed(statisticService.getTotalMatchesPlayed());
+        Gdto.setTotalBattlesDisputed(statisticService.getTotalBattlesDisputed());
+        Gdto.setAverageRoomsVisitedPerMatch(statisticService.getAverageRoomsVisitedPerMatch());
         return ResponseEntity.ok(Gdto);
     }
     

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import '../../static/css/match/NpcLossDiscardModal.css';
 
 export default function NpcLossDiscardModal({
   isOpen,
@@ -35,24 +36,17 @@ export default function NpcLossDiscardModal({
   };
 
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.6)', zIndex: 2100,
-      display: 'flex', alignItems: 'center', justifyContent: 'center'
-    }}>
-      <div style={{
-        background: '#ffffff', borderRadius: 10, padding: 20,
-        width: 640, maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 10px 30px rgba(0,0,0,0.25)'
-      }}>
+    <div className="npc-loss-discard-modal-overlay">
+      <div className="npc-loss-discard-modal-content">
         {step === 'choose' && (
           <div>
-            <h3 style={{ margin: 0, marginBottom: 12 }}>Has perdido contra un NPC</h3>
-            <p style={{ marginTop: 0 }}>Elige desde dónde descartar una carta:</p>
-            <div style={{ display: 'flex', gap: 12 }}>
+            <h3 style={{ margin: 0, marginBottom: 12,color: '#000000'}}>You have lost against a NPC</h3>
+            <p style={{ marginTop: 0, color: '#000000' }}>Choose from where to discard a card:</p>
+            <div className="npc-loss-discard-modal-button-group">
               <button
                 onClick={() => handleChoose('hand')}
                 disabled={!hasHand}
-                style={{ padding: '10px 16px', cursor: hasHand ? 'pointer' : 'not-allowed' }}
+                className="npc-loss-discard-button"
               >
                 Hand
               </button>
@@ -60,13 +54,14 @@ export default function NpcLossDiscardModal({
                 onClick={() => handleChoose('bag')}
                 disabled={!hasBag}
                 style={{ padding: '10px 16px', cursor: hasBag ? 'pointer' : 'not-allowed' }}
+                className="npc-loss-discard-button"
               >
                 Bag
               </button>
             </div>
             {!hasHand && !hasBag && (
               <p style={{ color: '#c0392b', marginTop: 12 }}>
-                No tienes cartas para descartar.
+                You have no cards to discard.
               </p>
             )}
           </div>
@@ -74,7 +69,6 @@ export default function NpcLossDiscardModal({
 
         {step === 'select' && (
           <div>
-            <h4 style={{ margin: 0, marginBottom: 12 }}>Selecciona una carta de tu {source}</h4>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
               {(source === 'hand' ? safeHand : safeBag).map((card, idx) => (
                 <div
@@ -92,11 +86,6 @@ export default function NpcLossDiscardModal({
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 16 }}>
-              <button onClick={() => { setStep('choose'); setSource(null); }} style={{ padding: '8px 12px' }}>
-                Volver
-              </button>
-            </div>
           </div>
         )}
 
@@ -106,7 +95,7 @@ export default function NpcLossDiscardModal({
               Cerrar
             </button>
           ) : (
-            <span style={{ color: '#555', fontSize: 14 }}>Selecciona una carta para continuar.</span>
+            null
           )}
         </div>
       </div>

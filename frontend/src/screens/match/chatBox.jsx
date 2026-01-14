@@ -65,12 +65,12 @@ export default function ChatBox({ matchId }) {
       
       <div className="chat-messages">
         {messages.length === 0 && (
-          <div className="chat-empty">No hay mensajes aún</div>
+          <div className="chat-empty">There is no messages yet</div>
         )}
 
         {messages.map((msg, i) => (
           <div key={msg.id || i} className="chat-message">
-            <b>{msg.playerUsername ?? "Jugador"}:</b> {msg.message}
+            <b>{msg.playerUsername ?? "Player"}:</b> {msg.message}
             <span className="chat-time">
               {msg.time
                 ? ` ${new Date(msg.time).toLocaleTimeString([], {
@@ -91,12 +91,12 @@ export default function ChatBox({ matchId }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Escribe un mensaje..."
+        placeholder="Write a message..."
         className="chat-input"
       />
 
       <button onClick={sendMessage} className="chat-send-button">
-        Enviar
+        Send
       </button>
     </div>
   );

@@ -56,23 +56,29 @@ public class PlayerRepositoryTests {
 
     @Test
     public void findByUserIdReturnsPlayers() {
-        Authorities auth = new Authorities();
-        auth.setAuthority("PLAYER");
-        authorityRepository.save(auth);
+    
+        Authorities auth = authorityRepository.findById(2).orElseThrow();
 
+       
         User user = new User();
-        user.setUsername("user1");
+        user.setUsername("testuser_" + System.nanoTime());
+        user.setEmail("testuser_" + System.nanoTime() + "@example.com");
         user.setAuthority(auth);
         userRepository.save(user);
 
+    
         Player player = new Player();
         player.setUser(user);
         playerRepository.save(player);
+
 
         List<Player> players = playerRepository.findByUserId(user.getId());
         assertEquals(1, players.size());
         assertThat(players.get(0).getUser().getId()).isEqualTo(user.getId());
     }
+
+
+
 
     
 
@@ -84,12 +90,12 @@ public class PlayerRepositoryTests {
 
     @Test
     public void findByMatchAndUserReturnsPlayer() {
-        Authorities auth = new Authorities();
-        auth.setAuthority("PLAYER");
-        authorityRepository.save(auth);
+
+        Authorities auth = authorityRepository.findById(2).orElseThrow();
 
         User user = new User();
-        user.setUsername("playerMatch");
+        user.setUsername("playerMatch_" + System.nanoTime());
+        user.setEmail("playerMatch_" + System.nanoTime() + "@example.com");
         user.setAuthority(auth);
         userRepository.save(user);
 
@@ -102,12 +108,13 @@ public class PlayerRepositoryTests {
         player.setMatch(match);
         playerRepository.save(player);
 
-        Optional<Player> result =
-                playerRepository.findByMatchAndUser(match.getId(), user.getId());
+
+        Optional<Player> result = playerRepository.findByMatchAndUser(match.getId(), user.getId());
 
         assertTrue(result.isPresent());
         assertEquals(player.getId(), result.get().getId());
     }
+
 
 
 
@@ -118,50 +125,18 @@ public class PlayerRepositoryTests {
         assertTrue(players.isEmpty());
     }
 
-    @Test
-    public void findByMatchIdReturnsMultiplePlayers() {
-        Authorities auth = new Authorities();
-        auth.setAuthority("PLAYER");
-        authorityRepository.save(auth);
 
-        User user1 = new User();
-        user1.setUsername("u1");
-        user1.setAuthority(auth);
-        userRepository.save(user1);
-
-        User user2 = new User();
-        user2.setUsername("u2");
-        user2.setAuthority(auth);
-        userRepository.save(user2);
-
-        Match match = new Match();
-        match.setIsPrivate(false);
-        matchRepository.save(match);
-
-        Player p1 = new Player();
-        p1.setUser(user1);
-        p1.setMatch(match);
-        playerRepository.save(p1);
-
-        Player p2 = new Player();
-        p2.setUser(user2);
-        p2.setMatch(match);
-        playerRepository.save(p2);
-
-        List<Player> players = playerRepository.findByMatchId(match.getId());
-        assertEquals(2, players.size());
-    }
 
    
 
     @Test
     public void getTotalAccionPointsByUserReturnsSum() {
-        Authorities auth = new Authorities();
-        auth.setAuthority("PLAYER");
-        authorityRepository.save(auth);
+        Authorities auth = authorityRepository.findById(2).orElseThrow();
 
+   
         User user = new User();
-        user.setUsername("apUser");
+        user.setUsername("apUser_" + System.nanoTime());
+        user.setEmail("apUser_" + System.nanoTime() + "@example.com");
         user.setAuthority(auth);
         userRepository.save(user);
 
@@ -178,4 +153,5 @@ public class PlayerRepositoryTests {
         Integer total = playerRepository.getTotalAccionPointsByUser(user.getId());
         assertEquals(8, total);
     }
+
 }

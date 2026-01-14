@@ -47,12 +47,12 @@ public class ChatRepositoryTests {
 
     @Test
     public void findByMatchIdNoChatsReturnsEmptyList() {
-        List<ChatMessage> chats = chatRepository.findByMatchId(999); // matchId que no existe
+        List<ChatMessage> chats = chatRepository.findByMatchId(999); 
         assertTrue(chats.isEmpty());
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 10, 11, 12 }) // IDs de matches sin chats
+    @ValueSource(ints = { 10, 11, 12 }) 
     public void findByMatchIdNoChatsParameterized(int matchId) {
         List<ChatMessage> chats = chatRepository.findByMatchId(matchId);
         assertTrue(chats.isEmpty());
@@ -60,28 +60,25 @@ public class ChatRepositoryTests {
 
     @Test
     public void findByMatchIdSingleChatReturnsOneMessage() {
-        // Crear authority
         Authorities auth = new Authorities();
-        auth.setAuthority("PLAYER"); // el String que quieras
-        authorityRepository.save(auth); // necesitas inyectar authorityRepository en el test
+        auth.setAuthority("PLAYER"); 
+        authorityRepository.save(auth); 
 
-        // Crear usuario
+  
         User user = new User();
         user.setUsername("Jugador1");
-        user.setAuthority(auth); // <-- asignar el objeto Authorities
+        user.setAuthority(auth); 
         userRepository.save(user);
 
-        // Creamos el jugador y le asignamos el usuario
+
         Player player = new Player();
         player.setUser(user);
         playerRepository.save(player);
 
-        // Creamos y persistimos el match
         Match match = new Match();
         match.setIsPrivate(false);
         matchRepository.save(match);
 
-        // Creamos el chat
         ChatMessage chat = new ChatMessage();
         chat.setMatch(match);
         chat.setPlayer(player);
@@ -89,7 +86,6 @@ public class ChatRepositoryTests {
         chat.setTime(java.time.LocalDateTime.now());
         chatRepository.save(chat);
 
-        // Buscamos chats
         List<ChatMessage> chats = chatRepository.findByMatchId(match.getId());
         assertEquals(1, chats.size());
         assertTrue(chats.contains(chat));
@@ -99,7 +95,7 @@ public class ChatRepositoryTests {
 
     @Test
     public void findByMatchIdMultipleChatsReturnsAllMessages() {
-        // Authorities
+
         Authorities auth1 = new Authorities();
         auth1.setAuthority("PLAYER");
         authorityRepository.save(auth1);
@@ -108,9 +104,8 @@ public class ChatRepositoryTests {
         auth2.setAuthority("PLAYER");
         authorityRepository.save(auth2);
 
-        // Usuario y player 1
         User user1 = new User();
-        user1.setUsername("Jugador1");
+        user1.setUsername("Jugador1_" + System.nanoTime()); 
         user1.setAuthority(auth1);
         userRepository.save(user1);
 
@@ -118,9 +113,8 @@ public class ChatRepositoryTests {
         player1.setUser(user1);
         playerRepository.save(player1);
 
-        // Usuario y player 2
         User user2 = new User();
-        user2.setUsername("Jugador2");
+        user2.setUsername("Jugador2_" + System.nanoTime()); 
         user2.setAuthority(auth2);
         userRepository.save(user2);
 
@@ -128,12 +122,12 @@ public class ChatRepositoryTests {
         player2.setUser(user2);
         playerRepository.save(player2);
 
-        // Crear match
+
         Match match = new Match();
         match.setIsPrivate(false);
         matchRepository.save(match);
 
-        // Primer chat
+
         ChatMessage chat1 = new ChatMessage();
         chat1.setMatch(match);
         chat1.setPlayer(player1);
@@ -141,7 +135,6 @@ public class ChatRepositoryTests {
         chat1.setTime(LocalDateTime.now().minusMinutes(1));
         chatRepository.save(chat1);
 
-        // Segundo chat
         ChatMessage chat2 = new ChatMessage();
         chat2.setMatch(match);
         chat2.setPlayer(player2);
@@ -149,10 +142,10 @@ public class ChatRepositoryTests {
         chat2.setTime(LocalDateTime.now());
         chatRepository.save(chat2);
 
-        // Verificar
         List<ChatMessage> chats = chatRepository.findByMatchId(match.getId());
         assertEquals(2, chats.size());
         assertTrue(chats.contains(chat1));
         assertTrue(chats.contains(chat2));
     }
+
 }

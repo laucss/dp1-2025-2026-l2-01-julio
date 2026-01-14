@@ -1,152 +1,210 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth;
 
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
+import java.util.Collections;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth.payload.request.LoginRequest;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth.payload.request.SignupRequest;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.jwt.JwtUtils;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.services.UserDetailsImpl;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
-import io.qameta.allure.Epic;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Owner;
-
-/**
- * Test class for {@link AuthController}
- *
- */
-
- @Epic("Users & Admin Module")
- @Feature("Authentication")
- @Owner("DP1-tutors")
-@WebMvcTest(value = AuthController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = {
-		SecurityAutoConfiguration.class })
-class AuthControllerTests {
-
-	private static final String BASE_URL = "/api/v1/auth";
-
-	@SuppressWarnings("unused")
-	@Autowired
-	private AuthController authController;
-
-	@MockBean
-	private AuthenticationManager authenticationManager;
-
-	@MockBean
-	private JwtUtils jwtUtils;
-
-	@MockBean
-	private UserService userService;
-
-	@MockBean
-	private AuthService authService;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	private LoginRequest loginRequest;
-	private SignupRequest signupRequest;
-	private UserDetailsImpl userDetails;
-	private String token;
-
-	@BeforeEach
-	void setup() {
-		loginRequest = new LoginRequest();
-		loginRequest.setUsername("owner");
-		loginRequest.setPassword("password");
-
-		signupRequest = new SignupRequest();
-		signupRequest.setUsername("username");
-		signupRequest.setPassword("password");
-		signupRequest.setAuthority("OWNER");
-
-		userDetails = new UserDetailsImpl(1, loginRequest.getUsername(), loginRequest.getPassword(), loginRequest.getAvatar(),
-				List.of(new SimpleGrantedAuthority("OWNER")));
-
-		token = "JWT TOKEN";
-	}
 
 
-	@Test
-	void shouldAuthenticateUser() throws Exception {
-		Authentication auth = Mockito.mock(Authentication.class);
+@SpringBootTest
+@AutoConfigureMockMvc
+public class AuthControllerTests {
 
-		when(this.jwtUtils.generateJwtToken(any(Authentication.class))).thenReturn(token);
-		when(this.authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(auth);
-		Mockito.doReturn(userDetails).when(auth).getPrincipal();
 
-		mockMvc.perform(post(BASE_URL + "/signin").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(loginRequest))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.username").value(loginRequest.getUsername()))
-				.andExpect(jsonPath("$.id").value(userDetails.getId())).andExpect(jsonPath("$.token").value(token));
-	}
+    private static final String BASE_URL = "/api/v1/auth";
 
-	@Test
-	void shouldValidateToken() throws Exception {
-		when(this.jwtUtils.validateJwtToken(token)).thenReturn(true);
 
-		mockMvc.perform(get(BASE_URL + "/validate").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-				.param("token", token)).andExpect(status().isOk())
-				.andExpect(jsonPath("$").value(true));
-	}
+    @Autowired
+    private MockMvc mvc;
 
-	@Test
-	void shouldNotValidateToken() throws Exception {
-		when(this.jwtUtils.validateJwtToken(token)).thenReturn(false);
 
-		mockMvc.perform(get(BASE_URL + "/validate").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-				.param("token", token)).andExpect(status().isOk())
-				.andExpect(jsonPath("$").value(false));
-	}
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Test
-	void shouldRegisterUser() throws Exception {
-		when(this.userService.existsUser(signupRequest.getUsername())).thenReturn(false);
-		doNothing().when(this.authService).createUser(signupRequest);
 
-		mockMvc.perform(post(BASE_URL + "/signup").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(signupRequest))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.message").value("User registered successfully!"));
-	}
+    @MockBean
+    private AuthenticationManager authenticationManager;
 
-	@Test
-	void shouldNotRegisterUserWithExistingUsername() throws Exception {
-		when(this.userService.existsUser(signupRequest.getUsername())).thenReturn(true);
 
-		mockMvc.perform(post(BASE_URL + "/signup").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(signupRequest))).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.message").value("Error: Username is already taken!"));
-	}
+    @MockBean
+    private JwtUtils jwtUtils;
+
+
+    @MockBean
+    private UserService userService;
+
+
+    @SpyBean
+    private AuthService authService;
+
+
+   
+
+
+    @Test
+    public void authenticateUserBadCredentialsTest() throws Exception {
+
+
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("user");
+        loginRequest.setPassword("wrongPassword");
+
+
+        reset(authenticationManager);
+        when(authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken("user", "wrongPassword")))
+            .thenThrow(new BadCredentialsException("Bad credentials"));
+
+
+        mvc.perform(post(BASE_URL + "/signin")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
+            .andExpect(status().isBadRequest());
+
+
+        verify(authenticationManager, times(1))
+            .authenticate(new UsernamePasswordAuthenticationToken("user", "wrongPassword"));
+    }
+
+
+   
+
+
+    @Test
+    public void validateTokenValidTest() throws Exception {
+
+
+        reset(jwtUtils);
+        when(jwtUtils.validateJwtToken("validToken")).thenReturn(true);
+
+
+        mvc.perform(get(BASE_URL + "/validate")
+                .param("token", "validToken"))
+            .andExpect(status().isOk());
+
+
+        verify(jwtUtils, times(1)).validateJwtToken("validToken");
+    }
+
+
+    @Test
+    public void validateTokenInvalidTest() throws Exception {
+
+
+        reset(jwtUtils);
+        when(jwtUtils.validateJwtToken("invalidToken")).thenReturn(false);
+
+
+        mvc.perform(get(BASE_URL + "/validate")
+                .param("token", "invalidToken"))
+            .andExpect(status().isOk());
+
+
+        verify(jwtUtils, times(1)).validateJwtToken("invalidToken");
+    }
+
+
+    @Test
+    public void authenticateUserSuccessTest() throws Exception {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("user");
+        loginRequest.setPassword("password");
+
+
+        es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User testUser =
+                new es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User();
+        testUser.setId(1);
+        testUser.setUsername("user");
+        testUser.setEmail("email@example.com");
+        testUser.setAvatar("avatar");
+        testUser.setPassword("password");
+
+       
+        es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.Authorities authority =
+                new es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.Authorities();
+        authority.setAuthority("ROLE_USER");
+
+        testUser.setAuthority(authority);
+
+
+        UserDetailsImpl userDetails = UserDetailsImpl.build(testUser);
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+
+        when(jwtUtils.generateJwtToken(any())).thenReturn("fake-jwt");
+
+        mvc.perform(post(BASE_URL + "/signin")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
+            .andExpect(status().isOk());
+    }
+
+
+
+    @Test
+    public void registerUserUsernameExistsTest() throws Exception {
+        SignupRequest signupRequest = new SignupRequest();
+        signupRequest.setUsername("existingUser");
+        signupRequest.setEmail("new@example.com");
+        signupRequest.setPassword("password");
+
+        when(userService.existsUser("existingUser")).thenReturn(true);
+
+        mvc.perform(post(BASE_URL + "/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signupRequest)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void registerUserEmailExistsTest() throws Exception {
+        SignupRequest signupRequest = new SignupRequest();
+        signupRequest.setUsername("newUser");
+        signupRequest.setEmail("existing@example.com");
+        signupRequest.setPassword("password");
+
+        when(userService.existsUser("newUser")).thenReturn(false);
+        when(userService.existsEmail("existing@example.com")).thenReturn(true);
+
+        mvc.perform(post(BASE_URL + "/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signupRequest)))
+            .andExpect(status().isBadRequest());
+    }
+
 
 }

@@ -68,7 +68,7 @@ export default function AchievementUserList() {
     return ( 
         <div className="achievement-user-container"> 
             <div className="achievement-header">
-                <h1>Logros</h1>
+                <h1>Achievements</h1>
             </div>
             <div style={{ textAlign: "center", margin: "10px 0" }}>
                 <Button color="success" >
