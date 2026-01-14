@@ -56,13 +56,7 @@ public class RoomService {
         roomRepository.save(room);
     }
 
-    public List<RoomDTO> initializeRoomsForMatch(Match match) {
-        List<Room> rooms = roomRepository.findAll();
-        Room safeZone = roomRepository.findById(37).orElseThrow(() -> 
-        new IllegalStateException("Safe zone (ID 37) not found")); //La safe zone es la habitacion con id 37
-        List<Room> availableRooms = new ArrayList<>(rooms);
-        availableRooms.remove(safeZone); //Quitamos la safe zone de las habitaciones disponibles
-        Random rand = new Random();
+    public List<Room> getAllTowers(){
         Room torre1 = roomRepository.findById(1).orElseThrow(() -> 
         new IllegalStateException("Torre 1 (ID 1) not found"));
         Room torre2 = roomRepository.findById(31).orElseThrow(() -> 
@@ -71,11 +65,45 @@ public class RoomService {
         new IllegalStateException("Torre 3 (ID 6) not found"));
         Room torre4 = roomRepository.findById(36).orElseThrow(() -> 
         new IllegalStateException("Torre 4 (ID 36) not found"));
-        //Para que las torres no se asignen
-        availableRooms.remove(torre1);
-        availableRooms.remove(torre2);
-        availableRooms.remove(torre3);
-        availableRooms.remove(torre4);
+        List<Room> towers = new ArrayList<>();
+        towers.add(torre1);
+        towers.add(torre2);
+        towers.add(torre3);
+        towers.add(torre4);
+        return towers;
+
+    }
+
+    public String getWordOfEscapeFromTower (Integer towerId){
+        return switch (towerId) {
+            case 1 -> "ESCAPE";
+            case 31 -> "ELBA";
+            case 6 -> "FROM";
+            case 36 -> "PEACE";
+            default -> null;
+        };
+    }
+
+    public Room getRandomRoom(){
+        List<Room> rooms = roomRepository.findAll();
+        //Quitamos las torres de las habitaciones disponibles
+        List<Room> towers = getAllTowers();
+        rooms.removeAll(towers);
+        Random rand = new Random();
+        return rooms.get(rand.nextInt(rooms.size()));
+    }
+
+    public List<RoomDTO> initializeRoomsForMatch(Match match) {
+        List<Room> rooms = roomRepository.findAll();
+        Room safeZone = roomRepository.findById(37).orElseThrow(() -> 
+        new IllegalStateException("Safe zone (ID 37) not found")); //La safe zone es la habitacion con id 37
+        List<Room> availableRooms = new ArrayList<>(rooms);
+        availableRooms.remove(safeZone); //Quitamos la safe zone de las habitaciones disponibles
+        Random rand = new Random();
+
+        //Quitamos las torres de las habitaciones disponibles
+        List<Room> towers = getAllTowers();
+        availableRooms.removeAll(towers);
 
         //Asignamos habitaciones aleatoriamente a los NPCs
         //Niall Campbell debe de ir en la safe zone

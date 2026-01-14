@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import tokenService from "../../services/token.service";
-import useFetchState from "../../util/useFetchState";
 import '../../static/css/match/listingLobbies.css';
 import { Button, ButtonGroup, Table, Modal, ModalHeader, ModalBody, ModalFooter, Input } from "reactstrap";
 
@@ -10,13 +9,9 @@ const jwt = tokenService.getLocalAccessToken();
 export default function JoinMatch() {
   const [message, setMessage] = useState(null);
   const [visible, setVisible] = useState(false);
-  const [lobbies, setLobbies] = useFetchState(
-    [],
-    `/api/v1/matches/lobbies`,
-    jwt,
-    setMessage,
-    setVisible
-  );
+  const [lobbies, setLobbies] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const [showModal, setShowModal] = useState(false);  
   const [privateCode, setPrivateCode] = useState("");
@@ -24,6 +19,27 @@ export default function JoinMatch() {
   const [showStartedMatchModal, setShowStartedMatchModal] = useState(false);
 
   const navigate = useNavigate();
+
+  const fetchLobbies = async (currentPage = 0) => {
+    try {
+      const response = await fetch(`/api/v1/matches/lobbies?page=${currentPage}&size=10`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || 'Error loading lobbies');
+      }
+
+      const data = await response.json();
+      // Expecting a Page response with `content` and `totalPages`
+      setLobbies(Array.isArray(data.content) ? data.content : []);
+      setTotalPages(typeof data.totalPages === 'number' ? data.totalPages : 0);
+    } catch (error) {
+      setMessage(error.message || 'Failed to fetch lobbies');
+      setVisible(true);
+    }
+  };
 
 
   const handleJoin = async (match) => {
@@ -118,6 +134,10 @@ export default function JoinMatch() {
     </tr>
   ));
 
+  useEffect(() => {
+    fetchLobbies(page);
+  }, [page]);
+
   return (
   <div className="admin-page-container">
     <div className="lobbies-overlay">
@@ -143,6 +163,14 @@ export default function JoinMatch() {
         </thead>
         <tbody>{lobbiesList}</tbody>
       </Table>
+
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
+        <ButtonGroup>
+          <Button disabled={page === 0} onClick={() => setPage(page - 1)}>◀</Button>
+          <Button disabled>{page + 1} / {totalPages}</Button>
+          <Button disabled={page >= Math.max(0, totalPages - 1)} onClick={() => setPage(page + 1)}>▶</Button>
+        </ButtonGroup>
+      </div>
 
       <Button
         className="join-private-btn"

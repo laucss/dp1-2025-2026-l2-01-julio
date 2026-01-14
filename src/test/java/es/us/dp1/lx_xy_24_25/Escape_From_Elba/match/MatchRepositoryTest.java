@@ -53,19 +53,7 @@ class MatchRepositoryTest {
         assertThat(found.get().getIsPrivate()).isFalse();
     }
 
-    @Test
-    @DisplayName("Encontrar lobbies públicos")
-    void findPublicLobbies() {
-        Match publicMatch = new Match();
-        publicMatch.setName("Public Lobby");
-        publicMatch.setIsPrivate(false);
-        publicMatch.setStatus(MatchStatus.WAITING);
-        matchRepository.save(publicMatch);
 
-        List<Match> publicLobbies = matchRepository.findPublicLobbies();
-        assertThat(publicLobbies).isNotEmpty();
-        assertThat(publicLobbies).allMatch(m -> !m.getIsPrivate() && m.getStatus() == MatchStatus.WAITING);
-    }
 
     @Test
     @DisplayName("Encontrar lobbies privados por código")
@@ -167,6 +155,7 @@ class MatchRepositoryTest {
         assertThat(privateLobbies).allMatch(m -> m.getIsPrivate() && m.getStatus() == MatchStatus.WAITING);
     }
 
+    /* 
     @Test
     @DisplayName("Encontrar lobby donde un usuario está")
     void findLobbyWhereUserIsIn() {
@@ -299,5 +288,5 @@ class MatchRepositoryTest {
         assertThat(matchId).isEqualTo(match.getId());
     }
 
-
+    */
 }

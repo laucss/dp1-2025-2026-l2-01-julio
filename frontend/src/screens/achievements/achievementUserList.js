@@ -66,7 +66,7 @@ export default function AchievementUserList() {
                 </div>
                 <h3 className="achievement-title">{a.description}</h3>
                 <p className="achievement-value">{formatValue(value, a.metric)}</p>
-                <p className="achievement-threshold">Meta: {a.threshold}</p>
+                <p className="achievement-threshold">Goal: {a.threshold}</p>
             </div>
         );
     }); 
@@ -74,8 +74,8 @@ export default function AchievementUserList() {
     return ( 
         <div className="achievement-user-container"> 
             <div className="achievement-header">
-                <h1>Logros</h1>
-                <p className="subtitle">Demuestra tu dominio en el juego</p>
+                <h1>Achievements</h1>
+                <p className="subtitle">Show your mastery in the game   </p>
             </div>
             <div className="achievement-grid"> 
                 {achievementCards}

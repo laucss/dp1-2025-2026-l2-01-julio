@@ -5,11 +5,15 @@ import { Button, ButtonGroup } from "reactstrap";
 
 const jwt = tokenService.getLocalAccessToken();
 
+const AQUA = "#22a8b7";
+const AQUA_GLOW = "rgba(9, 141, 123, 0.6)";
+const COLOR ="#ebfdff";
+
 export default function MatchList() {
   const [message, setMessage] = useState(null);
   const [visible, setVisible] = useState(false);
   const [matches, setMatches] = useState([]);
-  const [filter, setFilter] = useState("all"); // all | inProgress | finished
+  const [filter, setFilter] = useState("all");
   const [openFilter, setOpenFilter] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -53,25 +57,29 @@ export default function MatchList() {
 
   const avatar = (user, size = 36) =>
     user && (
-      <img
-        src={user.avatar || "/Avatar_default.png"}
-        alt={user.username}
-        title={user.username}
-        style={{
-          width: size,
-          height: size,
-          borderRadius: "50%",
-          objectFit: "cover",
-        }}
-      />
+      <span title={user.username} style={{ display: "inline-block", lineHeight: 0 }}>
+        <img
+          src={user.avatar || "/Avatar_default.png"}
+          alt={user.username}
+          style={{
+            width: size,
+            height: size,
+            borderRadius: "50%",
+            objectFit: "cover",
+            border: `3px solid ${AQUA}`,
+            boxShadow: `0 0 8px ${AQUA_GLOW}`,
+            cursor: "default",
+          }}
+        />
+      </span>
     );
 
   const optionStyle = (active) => ({
     padding: "8px 12px",
     borderRadius: "6px",
     cursor: "pointer",
-    background: active ? "#3b82f6" : "transparent",
-    color: active ? "#fff" : "#000",
+    background: active ? AQUA : "white",
+    color: active ? "#003b3a" : "#000",
     marginBottom: "4px",
   });
 
@@ -79,154 +87,136 @@ export default function MatchList() {
 
   return (
     <div className="admin-page-container">
-      <h1 className="text-center mb-4">Historial</h1>
-      {modal}
-
-      {/* LAYOUT PRINCIPAL */}
-      <div
+      {/* TÍTULO */}
+      <h1
         style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          paddingLeft: "20px",
+          textAlign: "center",
+          margin: "24px 0 40px",
+          color: COLOR,
+          fontSize: "55px",
+          fontWeight: 700,
+          textShadow: ` 0 0 18px ${AQUA_GLOW}`,
         }}
       >
-        {/* COLUMNA IZQUIERDA – FILTRO */}
-        <div style={{ width: "220px", marginRight: "40px" }}>
-          <div style={{ position: "relative" }}>
-            <Button
-              color="secondary"
-              style={{ width: "100%" }}
-              onClick={() => setOpenFilter(!openFilter)}
-            >
-              Filtrar por ▾
-            </Button>
+        Historial
+      </h1>
 
-            {openFilter && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "110%",
-                  left: 0,
-                  background: "#fff",
-                  border: "2px solid #3b82f6",
-                  borderRadius: "10px",
-                  padding: "8px",
-                  width: "100%",
-                  zIndex: 10,
-                }}
-              >
-                <div
-                  style={optionStyle(filter === "all")}
-                  onClick={() => {
-                    setFilter("all");
-                    setPage(0);
-                    setOpenFilter(false);
-                  }}
-                >
-                  Todas
-                </div>
+      {modal}
 
-                <div
-                  style={optionStyle(filter === "inProgress")}
-                  onClick={() => {
-                    setFilter("inProgress");
-                    setPage(0);
-                    setOpenFilter(false);
-                  }}
-                >
-                  Partidas en curso
-                </div>
+      {/* FILTRO A LA IZQUIERDA */}
+      <div
+        style={{
+          position: "absolute",
+          top: "160px",
+          left: "24px",
+          width: "220px",
+          zIndex: 100,
+        }}
+      >
+        <Button
+          style={{
+            width: "100%",
+            backgroundColor: AQUA,
+            border: "none",
+            color: "#ffffff",
+            fontWeight: "bold",
+          }}
+          onClick={() => setOpenFilter(!openFilter)}
+        >
+          Filtrar por ▾
+        </Button>
 
-                <div
-                  style={optionStyle(filter === "finished")}
-                  onClick={() => {
-                    setFilter("finished");
-                    setPage(0);
-                    setOpenFilter(false);
-                  }}
-                >
-                  Partidas finalizadas
-                </div>
-              </div>
-            )}
+        {openFilter && (
+          <div style={{ marginTop: "8px" }}>
+            <div style={optionStyle(filter === "all")} onClick={() => { setFilter("all"); setPage(0); setOpenFilter(false); }}>
+              Todas
+            </div>
+            <div style={optionStyle(filter === "inProgress")} onClick={() => { setFilter("inProgress"); setPage(0); setOpenFilter(false); }}>
+              Partidas en curso
+            </div>
+            <div style={optionStyle(filter === "finished")} onClick={() => { setFilter("finished"); setPage(0); setOpenFilter(false); }}>
+              Partidas finalizadas
+            </div>
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* COLUMNA CENTRAL – LISTADO */}
-        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+      {/* LISTADO */}
+      <div
+        style={{
+          position: "relative",
+          left: "50%",
+          transform: "translateX(-70%)",
+          maxWidth: "1040px",
+          width: "95%",
+          display: "flex",
+          flexDirection: "column",
+          gap: "28px",
+        }}
+      >
+        {matches.map(match => (
           <div
+            key={match.id}
             style={{
-              maxWidth: "1000px",
-              width: "100%",
+              borderRadius: "22px",
+              padding: "32px",
               display: "flex",
-              flexDirection: "column",
-              gap: "16px",
+              justifyContent: "space-between",
+              background: "#ebfdff",
+              border: `3px solid ${AQUA}`,
+              boxShadow: `0 0 20px ${AQUA_GLOW}`,
             }}
           >
-            {matches.map(match => (
-              <div
-                key={match.id}
-                style={{
-                  border: "1px solid #ddd",
-                  borderRadius: "16px",
-                  padding: "16px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  background: "#fff",
-                }}
-              >
-                <div>
-                  <strong>Nombre: {match.name}</strong>
-                  <div style={{ marginTop: "8px" }}>
-                    Jugadores:
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "6px",
-                        marginTop: "4px",
-                      }}
-                    >
-                      {match.players?.map(p => avatar(p.user))}
-                    </div>
-                  </div>
-                </div>
+            <div>
+              <strong style={{ fontSize: "1.2rem" }}>
+                Nombre: {match.name}
+              </strong>
 
-                <div style={{ textAlign: "right" }}>
-                  <div>Duración: {formatDuration(match.duration)}</div>
-                  <div style={{ marginTop: "6px" }}>
-                    Creador: {avatar(match.creator?.user, 28)}
-                  </div>
-                  <div style={{ marginTop: "6px" }}>
-                    Ganador:{" "}
-                    {match.winner ? avatar(match.winner.user, 28) : "—"}
-                  </div>
+              <div style={{ marginTop: "16px" }}>
+                Jugadores:
+                <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                  {match.players?.map(p => avatar(p.user))}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* COLUMNA DERECHA FANTASMA (para centrar) */}
-        <div style={{ width: "220px" }} />
+            <div style={{ textAlign: "right" }}>
+              <div>Duración: {formatDuration(match.duration)}</div>
+              <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: 8 }}>
+                <strong style={{ marginRight: 4 }}>Creador:</strong>
+                {match.creator?.user ? (
+                  <>
+                    {avatar(match.creator.user, 34)}
+                    <span style={{ marginLeft: 8 }}>{match.creator.user.username}</span>
+                  </>
+                ) : (
+                  "—"
+                )}
+              </div>
+
+              <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: 8 }}>
+                <strong style={{ marginRight: 4 }}>Ganador:</strong>
+                {match.winner?.user ? (
+                  <>
+                    {avatar(match.winner.user, 34)}
+                    <span style={{ marginLeft: 8 }}>{match.winner.user.username}</span>
+                  </>
+                ) : (
+                  "—"
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* PAGINACIÓN */}
       {totalPages > 1 && (
-        <div className="text-center mt-4">
+        <div className="text-center mt-5">
           <ButtonGroup>
-            <Button disabled={page === 0} onClick={() => setPage(page - 1)}>
-              ◀
-            </Button>
-            <Button disabled>
-              {page + 1} / {totalPages}
-            </Button>
-            <Button
-              disabled={page >= totalPages - 1}
-              onClick={() => setPage(page + 1)}
-            >
-              ▶
-            </Button>
+            <Button style={{ backgroundColor: AQUA, border: "none", color: "#003b3a" }} disabled={page === 0} onClick={() => setPage(page - 1)}>◀</Button>
+            <Button style={{ backgroundColor: AQUA, border: "none", color: "#003b3a" }} disabled>{page + 1} / {totalPages}</Button>
+            <Button style={{ backgroundColor: AQUA, border: "none", color: "#003b3a" }} disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>▶</Button>
           </ButtonGroup>
         </div>
       )}

@@ -149,10 +149,10 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
     };
 
 
-    const handleDragEnd = (event) => {
+const handleDragEnd = (event) => {
         const { active, over } = event
 
-        setActiveCard(null)
+       setActiveCard(null)
 
         if (!over) return
 

@@ -104,7 +104,7 @@ public class ChatControllerTests {
             throws JsonProcessingException, Exception {
 
         ChatMessageDTO dto = new ChatMessageDTO();
-        dto.setMessage(""); // @NotBlank
+        dto.setMessage(""); 
 
         ObjectMapper mapper = new ObjectMapper();
 

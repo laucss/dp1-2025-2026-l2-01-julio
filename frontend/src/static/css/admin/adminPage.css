@@ -1,14 +1,46 @@
 .admin-page-container {
-  height: 100%;
+  height: 1500px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: center
+
+
+}
+
+
+/* CAPA OSCURA */
+.admin-page-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35); /* ⬅ ajusta la oscuridad aquí */
+  z-index: 0;
+}
+
+.admin-page-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+.admin-page-container .card {
+  transform: none !important;
+  transition: none !important;
+}
+
+.admin-page-container .card:hover {
+  transform: none !important;
 }
 
 .custom-form-input {
   position: relative;
+}
+
+.admin-users-list{
+  width: 600px;
+  height: auto;
+  border: 1px solid #000;
+  border-radius: 15px 15px 0px 0px;
 }
 
 .custom-form-input-label {

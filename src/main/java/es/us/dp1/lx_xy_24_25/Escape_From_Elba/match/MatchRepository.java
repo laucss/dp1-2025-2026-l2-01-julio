@@ -21,7 +21,7 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
        //Devuelve todos los lobbies para unirse publicos
        @Query( "SELECT m FROM Match m WHERE m.isPrivate=false and m.status= 'WAITING'")
-       List<Match> findPublicLobbies(); // El page es para poder poner paginas 
+       Page<Match> findPublicLobbies(Pageable page); // El page es para poder poner paginas 
 
        //Devuelve todos los lobbies privados
        @Query( "SELECT m FROM Match m WHERE m.isPrivate=true and m.status= 'WAITING'")
@@ -66,16 +66,15 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
        //Devuelves todas las partidas jugadas por un usuario 
        @Query("SELECT m FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NOT NULL")
-       List<Match> findMatchesPlayedByUser(Integer userId);
+       Page<Match> findMatchesPlayedByUser(Integer userId, Pageable pageable);
 
        //Devuelves todas las partidas jugadas por un usuario y creadas por él
        @Query("SELECT m FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NOT NULL AND m.creatorId = :userId")
-       List<Match> findMatchesPlayedAndCreatedByUser( Integer userId);
+       Page<Match> findMatchesPlayedAndCreatedByUser( Integer userId, Pageable pageable);
 
        //Devuelve todas las partidas ganadas por un usuario
        @Query("SELECT m FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NOT NULL AND m.winner = p")
-       List<Match> findMatchesWonByUser( Integer userId);
-
+       Page<Match> findMatchesWonByUser( Integer userId, Pageable pageable);
 
 
 
