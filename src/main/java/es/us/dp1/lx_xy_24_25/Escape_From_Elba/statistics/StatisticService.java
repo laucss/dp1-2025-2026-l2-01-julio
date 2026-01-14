@@ -80,4 +80,37 @@ public class StatisticService {
         List<Match> matches = matchService.getAllMatchs();
         return matches.size();
     }
+
+    // batallas ganadas por un usuario
+    public Integer getBattlesWonByUser(Integer currentUserId) {
+        return playerRepository.getBattlesWonByUser(currentUserId);
+    }
+
+    // total de batallas disputadas (suma de batallas jugadas por todos los jugadores)
+    public Integer getTotalBattlesDisputed() {
+        return playerRepository.getTotalBattlesDisputed();
+    }
+
+    // habitaciones visitadas por un usuario
+    public Integer getTotalRoomsVisitedByUser(Integer currentUserId) {
+        Integer total = playerRepository.getTotalRoomsVisitedByUser(currentUserId);
+        return total != null ? total : 0;
+    }
+
+    // media de habitaciones visitadas por partida
+    public Double getAverageRoomsVisitedPerMatch() {
+        List<Match> matches = matchService.getAllMatchs();
+        if (matches.isEmpty()) {
+            return 0.0;
+        }
+        Double totalRoomsVisited = 0.0;
+        for (Match m : matches) {
+            for (Player p : m.getPlayers()) {
+                if (p.getRoomsVisited() != null) {
+                    totalRoomsVisited += p.getRoomsVisited();
+                }
+            }
+        }
+        return totalRoomsVisited / matches.size();
+    }
 }

@@ -514,7 +514,7 @@ public class MatchService {
     public void playerDrawsCardFromAnotherPlayerBag(Card card, Integer matchId, Integer winnerId, Integer loserId, String fromWhere, Integer currentTurnUserId){
         // checkeamos que ambos jugadores existen en la partida
         Player loser = playerService.findById(loserId); 
-        playerService.findById(winnerId);
+        Player winner = playerService.findById(winnerId);
 
         // quitamos la carta de la mano o bolsa del perdedor y se la añadimos a la mano del ganador
 
@@ -536,7 +536,17 @@ public class MatchService {
         } else {
             throw new IllegalArgumentException("fromWhere must be 'hand' or 'bag'");
         }
-        
+        // Actualizar estadísticas de batallas
+        int winnerBattlesWon = Optional.ofNullable(winner.getBattlesWon()).orElse(0);
+        int winnerBattlesPlayed = Optional.ofNullable(winner.getBattlesPlayed()).orElse(0);
+        int loserBattlesPlayed = Optional.ofNullable(loser.getBattlesPlayed()).orElse(0);
+
+        winner.setBattlesWon(winnerBattlesWon + 1);
+        winner.setBattlesPlayed(winnerBattlesPlayed + 1);
+        loser.setBattlesPlayed(loserBattlesPlayed + 1);
+
+        playerRepo.save(winner);
+        playerRepo.save(loser);
     }
 
 
@@ -692,6 +702,10 @@ public class MatchService {
             throw new RuntimeException("Movimiento no permitido: la sala destino no es adyacente");
         }
         //Actualizar la sala del jugador y sus puntos de acción
+        if (!targetRoom.getId().equals(currentRoom.getId())) {
+            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);
+            player.setRoomsVisited(visited + 1);
+        }
         player.setRoom(targetRoom);
         if (player.getActionPoints() > 0) {
             player.setActionPoints(player.getActionPoints() - 1);
@@ -765,6 +779,11 @@ public class MatchService {
         Room targetRoom = roomRepository.findById(targetRoomId)
             .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
         //Actualizar la sala y fuerza del jugador
+        Room currentRoom = player.getRoom();
+        if (currentRoom == null || !targetRoom.getId().equals(currentRoom.getId())) {
+            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);
+            player.setRoomsVisited(visited + 1);
+        }
         player.setRoom(targetRoom);
         player.setStrength(player.getStrength() + 1);
         
@@ -837,6 +856,11 @@ public class MatchService {
         }
 
         // Si llegamos aquí, el movimiento es válido
+        Room currentRoom = player.getRoom();
+        if (currentRoom == null || !targetRoom.getId().equals(currentRoom.getId())) {
+            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);
+            player.setRoomsVisited(visited + 1);
+        }
         player.setRoom(targetRoom);
         if (player.getActionPoints() > 0) {
             player.setActionPoints(player.getActionPoints() - 1);

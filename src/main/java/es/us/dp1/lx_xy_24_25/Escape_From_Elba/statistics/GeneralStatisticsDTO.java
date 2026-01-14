@@ -9,5 +9,7 @@ import lombok.Setter;
 public class GeneralStatisticsDTO extends BaseEntity {
     private Double averagePlayersPerMatch;
     private Integer totalMatchesPlayed;
+    private Integer totalBattlesDisputed;
+    private Double averageRoomsVisitedPerMatch;
     // getters y setters
 }
