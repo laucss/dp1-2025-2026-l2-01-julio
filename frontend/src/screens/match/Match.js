@@ -76,6 +76,8 @@ export default function Match(){
     const [isStealModalOpen, setIsStealModalOpen] = useState(false);
     const [stealLoserPlayerId, setStealLoserPlayerId] = useState(null);
     const [isNpcLossModalOpen, setIsNpcLossModalOpen] = useState(false);
+    const [npcLossModalTitle, setNpcLossModalTitle] = useState();
+    const [npcLossModalSubtitle, setNpcLossModalSubtitle] = useState();
     
     // Determinar si el usuario actual es un espectador
     const isSpectator = !currentUser || !match?.players?.some(p => p.user.id === currentUser.id);
@@ -1466,7 +1468,10 @@ export default function Match(){
             <div className="match-ended">
                 <div className="end-overlay">
                     <div className="end-text-box">
-                        <h2>La partida ha finalizado!!!!!</h2>
+                        <h2>La partida ha finalizado</h2>
+                        {match?.winner?.user ? (
+                            <p style={{ fontWeight: 700, margin: '8px 0' }}>Ganador: {match.winner.user.username}</p>
+                        ) : null}
                         <p>Gracias por jugar.</p>
                         <button className="return-menu-button" onClick={() => navigate(`/`)}>Return to main menu</button>
                     </div>
@@ -1507,6 +1512,8 @@ return (
                     try {
                         await fetchMatchAndPlayers();
                         if (!result.success && result.discardRequired) {
+                            setNpcLossModalTitle('Tu intento de escape ha fallado');
+                            setNpcLossModalSubtitle('Elige de donde descartar una carta');
                             setIsNpcLossModalOpen(true);
                         }
                     } catch (err) {
@@ -2274,7 +2281,9 @@ return (
             isOpen={isNpcLossModalOpen}
             handCards={handCards}
             bagCards={bagCards}
-            onClose={() => setIsNpcLossModalOpen(false)}
+            onClose={() => { setIsNpcLossModalOpen(false); setNpcLossModalTitle(); setNpcLossModalSubtitle(); }}
+            title={npcLossModalTitle}
+            subtitle={npcLossModalSubtitle}
             onDiscard={handleNpcLossDiscard}
         />
 

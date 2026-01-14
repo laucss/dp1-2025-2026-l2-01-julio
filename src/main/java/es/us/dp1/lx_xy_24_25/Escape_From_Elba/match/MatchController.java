@@ -127,8 +127,8 @@ public class MatchController {
 
     @GetMapping("/lobbies")
     @Operation(summary = "Get public matches", description = "Get all public matches available to join.")
-    public List<Match> getPublicGames(){
-        return ls.getAllPublicLobbies();
+    public Page<Match> getPublicGames(@ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
+        return ls.getAllPublicLobbies(page,size);
     }
 
     @GetMapping("/all-Matches")

@@ -9,14 +9,11 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
   const matchId = getIdFromUrl(2);
 
   const [whiteDice, setWhiteDice] = useState('1');
-  const [blackDice, setBlackDice] = useState('1');
   const [diceRolled, setDiceRolled] = useState(false);
   const [isRolling, setIsRolling] = useState(false);
 
   const rollDice = () => {
-    const rollWhite = Math.floor(Math.random() * 6) + 1;
-    const rollBlack = Math.floor(Math.random() * 6) + 1;
-    return [rollWhite, rollBlack];
+    return Math.floor(Math.random() * 6) + 1;
   };
 
   const submitEscapeAttempt = async (totalRoll) => {
@@ -49,19 +46,16 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
 
     const animationInterval = setInterval(() => {
       const randomWhite = Math.floor(Math.random() * 6) + 1;
-      const randomBlack = Math.floor(Math.random() * 6) + 1;
       setWhiteDice(randomWhite.toString());
-      setBlackDice(randomBlack.toString());
     }, 100);
 
     setTimeout(() => {
       clearInterval(animationInterval);
-      const [white, black] = rollDice();
+      const white = rollDice();
       setWhiteDice(white.toString());
-      setBlackDice(black.toString());
       setDiceRolled(true);
       setIsRolling(false);
-      submitEscapeAttempt(white + black);
+      submitEscapeAttempt(white);
     }, 1500);
   };
 
@@ -74,10 +68,7 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
 
         <div className="start-dice-container">
           <div className="dice-wrapper">
-            <img src={`/Dice/B${whiteDice}.png`} alt="White Die" className={`start-dice white-dice ${isRolling ? 'rolling' : ''}`} />
-          </div>
-          <div className="dice-wrapper">
-            <img src={`/Dice/N${blackDice}.png`} alt="Black Die" className={`start-dice black-dice ${isRolling ? 'rolling' : ''}`} />
+            <img src={`/Dice/B${whiteDice}.png`} alt="Die" className={`start-dice white-dice ${isRolling ? 'rolling' : ''}`} />
           </div>
         </div>
 
@@ -86,10 +77,9 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
         </button>
 
         {diceRolled && (
-          <p className="dice-result-text">Resultado: {parseInt(whiteDice) + parseInt(blackDice)}</p>
+          <p className="dice-result-text">Resultado: {parseInt(whiteDice)}</p>
         )}
 
-        <button onClick={() => { onClose(); }} style={{ marginTop: 12 }}>Cancelar</button>
       </div>
     </div>
   );
