@@ -143,6 +143,25 @@ public class MatchController {
         return finishedMatches.map(MatchHistorialDTO::new);
     }
 
+    @GetMapping("/all-Matches/{userId}")
+    public Page<MatchHistorialDTO> getAllMatchesByUser(@PathVariable("userId") Integer userId, @ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
+        Page<Match> userMatches = ms.getMatchesPlayedByUser(userId, page, size);
+        return userMatches.map(MatchHistorialDTO::new);
+    }
+
+
+    @GetMapping("matches-created/{userId}")
+    public Page<MatchHistorialDTO> getAllMatchesCreatedByUser(@PathVariable("userId") Integer userId, @ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
+        Page<Match> matchesCreated = ms.getMatchesPlayedAndCreatedByUser(userId, page, size);
+        return matchesCreated.map(MatchHistorialDTO::new);
+    }
+
+    @GetMapping("matches-won/{userId}")
+    public Page<MatchHistorialDTO> getAllMatchesWonByUser(@PathVariable("userId") Integer userId, @ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
+        Page<Match> matchesWon = ms.getMatchesWonByUser(userId, page, size);
+        return matchesWon.map(MatchHistorialDTO::new);
+    }
+
     @GetMapping("/lobbies/privates")
     public List<Match> getPrivateLobbies(){
         return ls.getAllPrivateLobbies();
