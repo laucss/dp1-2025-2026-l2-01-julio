@@ -7,6 +7,7 @@ export default function NpcLossDiscardModal({
   bagCards = [],
   onDiscard,
   onClose
+  , title = 'You have lost against a NPC', subtitle = 'Choose from where to discard a card:'
 }) {
   const [step, setStep] = useState('choose'); // 'choose' | 'select'
   const [source, setSource] = useState(null); // 'hand' | 'bag'
@@ -40,8 +41,8 @@ export default function NpcLossDiscardModal({
       <div className="npc-loss-discard-modal-content">
         {step === 'choose' && (
           <div>
-            <h3 style={{ margin: 0, marginBottom: 12,color: '#000000'}}>You have lost against a NPC</h3>
-            <p style={{ marginTop: 0, color: '#000000' }}>Choose from where to discard a card:</p>
+            <h3 style={{ margin: 0, marginBottom: 12,color: '#000000'}}>{title}</h3>
+            <p style={{ marginTop: 0, color: '#000000' }}>{subtitle}</p>
             <div className="npc-loss-discard-modal-button-group">
               <button
                 onClick={() => handleChoose('hand')}

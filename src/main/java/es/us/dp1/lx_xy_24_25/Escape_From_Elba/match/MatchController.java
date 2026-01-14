@@ -37,6 +37,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.DiceTotalsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightDiceUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightResolvedDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightUpdateDTO;
@@ -126,8 +127,8 @@ public class MatchController {
 
     @GetMapping("/lobbies")
     @Operation(summary = "Get public matches", description = "Get all public matches available to join.")
-    public List<Match> getPublicGames(){
-        return ls.getAllPublicLobbies();
+    public Page<Match> getPublicGames(@ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
+        return ls.getAllPublicLobbies(page,size);
     }
 
     @GetMapping("/all-Matches")
@@ -232,14 +233,14 @@ public class MatchController {
     @PutMapping("/{matchId}/end")
     public ResponseEntity<MatchDTO> endMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer winnerId) {
         Player winner = playerService.findById(winnerId);
-        Match ended = ms.endMatch(matchId,winner);
-        return ResponseEntity.ok(new MatchDTO(ended));
+        MatchDTO ended = ms.endMatch(matchId,winner);
+        return ResponseEntity.ok(ended);
     }
 
     @PutMapping("/{matchId}/leaveMatch")
     public ResponseEntity<MatchDTO> leaveMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer userId) {
-        Match match = ms.leaveMatch(matchId, userId);
-        return ResponseEntity.ok(new MatchDTO(match));
+        MatchDTO match = ms.leaveMatch(matchId, userId);
+        return ResponseEntity.ok(match);
     }
 
 
@@ -660,6 +661,13 @@ public class MatchController {
         matchWebsocketController.notifyNpcLocationUpdate(matchId, locationUpdate);
         
         return ResponseEntity.ok(new MatchDTO(match));
+    }
+
+
+    @PostMapping("/{matchId}/escape-attempt")
+    public ResponseEntity<EscapeAttemptResultDTO> attemptEscape(@PathVariable Integer matchId, @RequestParam Integer userId, @RequestParam Integer rollDice){
+        EscapeAttemptResultDTO result = ms.escapeAttempt(matchId, userId, rollDice);
+        return ResponseEntity.ok(result);
     }
 
 }
