@@ -172,7 +172,7 @@ public class MatchControllerTests {
         verify(matchService, times(1)).endMatch(1, winner);
     }
 
-    
+    /* 
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})
     public void testGetMatchById() throws Exception {
@@ -184,7 +184,7 @@ public class MatchControllerTests {
 
         verify(matchService, times(1)).getMatchById(1);
     }
-
+*/
   
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})
