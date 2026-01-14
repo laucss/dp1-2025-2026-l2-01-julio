@@ -79,7 +79,7 @@ export default function MatchList() {
 
   return (
     <div className="admin-page-container">
-      <h1 className="text-center mb-4">Historial</h1>
+      <h1 className="text-center mb-4">History</h1>
       {modal}
 
       {/* LAYOUT PRINCIPAL */}
@@ -91,7 +91,7 @@ export default function MatchList() {
           paddingLeft: "20px",
         }}
       >
-        {/* COLUMNA IZQUIERDA – FILTRO */}
+        {/* LEFT COLUMN – FILTER */}
         <div style={{ width: "220px", marginRight: "40px" }}>
           <div style={{ position: "relative" }}>
             <Button
@@ -99,9 +99,8 @@ export default function MatchList() {
               style={{ width: "100%" }}
               onClick={() => setOpenFilter(!openFilter)}
             >
-              Filtrar por ▾
+              Filter by ▾
             </Button>
-
             {openFilter && (
               <div
                 style={{
@@ -135,7 +134,7 @@ export default function MatchList() {
                     setOpenFilter(false);
                   }}
                 >
-                  Partidas en curso
+                  Matches in progress
                 </div>
 
                 <div
@@ -146,14 +145,14 @@ export default function MatchList() {
                     setOpenFilter(false);
                   }}
                 >
-                  Partidas finalizadas
+                  Finished matches
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* COLUMNA CENTRAL – LISTADO */}
+        {/* CENTRAL COLUMN – LIST */}
         <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
           <div
             style={{
@@ -177,9 +176,9 @@ export default function MatchList() {
                 }}
               >
                 <div>
-                  <strong>Nombre: {match.name}</strong>
+                  <strong>Name: {match.name}</strong>
                   <div style={{ marginTop: "8px" }}>
-                    Jugadores:
+                    Players:
                     <div
                       style={{
                         display: "flex",
@@ -193,12 +192,12 @@ export default function MatchList() {
                 </div>
 
                 <div style={{ textAlign: "right" }}>
-                  <div>Duración: {formatDuration(match.duration)}</div>
+                  <div>Duration: {formatDuration(match.duration)}</div>
                   <div style={{ marginTop: "6px" }}>
-                    Creador: {avatar(match.creator?.user, 28)}
+                    Creator: {avatar(match.creator?.user, 28)}
                   </div>
                   <div style={{ marginTop: "6px" }}>
-                    Ganador:{" "}
+                    Winner:{" "}
                     {match.winner ? avatar(match.winner.user, 28) : "—"}
                   </div>
                 </div>
@@ -207,11 +206,11 @@ export default function MatchList() {
           </div>
         </div>
 
-        {/* COLUMNA DERECHA FANTASMA (para centrar) */}
+        {/* RIGHT COLUMN GHOST (for centering) */}
         <div style={{ width: "220px" }} />
       </div>
 
-      {/* PAGINACIÓN */}
+      {/* PAGINATION */}
       {totalPages > 1 && (
         <div className="text-center mt-4">
           <ButtonGroup>
