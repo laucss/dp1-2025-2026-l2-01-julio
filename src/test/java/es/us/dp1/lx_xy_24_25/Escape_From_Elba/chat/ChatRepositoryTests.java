@@ -47,12 +47,12 @@ public class ChatRepositoryTests {
 
     @Test
     public void findByMatchIdNoChatsReturnsEmptyList() {
-        List<ChatMessage> chats = chatRepository.findByMatchId(999); // matchId que no existe
+        List<ChatMessage> chats = chatRepository.findByMatchId(999); 
         assertTrue(chats.isEmpty());
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 10, 11, 12 }) // IDs de matches sin chats
+    @ValueSource(ints = { 10, 11, 12 }) 
     public void findByMatchIdNoChatsParameterized(int matchId) {
         List<ChatMessage> chats = chatRepository.findByMatchId(matchId);
         assertTrue(chats.isEmpty());
