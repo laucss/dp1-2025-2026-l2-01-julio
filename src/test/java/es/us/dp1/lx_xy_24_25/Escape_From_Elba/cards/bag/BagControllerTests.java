@@ -24,8 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -62,7 +61,7 @@ public class BagControllerTests {
         ObjectMapper mapper = new ObjectMapper();
 
         reset(bagService);
-        when(bagService.isValidWeapon(any()))
+        when(bagService.isWeaponOnTheList(any()))
             .thenReturn(true);
 
         mvc.perform(post(BASE_URL)
@@ -72,7 +71,7 @@ public class BagControllerTests {
             .andExpect(status().isOk());
 
         verify(bagService, times(1))
-            .isValidWeapon(any());
+            .isWeaponOnTheList(any());
     }
 
     @Test
@@ -90,7 +89,7 @@ public class BagControllerTests {
         ObjectMapper mapper = new ObjectMapper();
 
         reset(bagService);
-        when(bagService.isValidWeapon(any()))
+        when(bagService.isWeaponOnTheList(any()))
             .thenReturn(false);
 
         mvc.perform(post(BASE_URL)
@@ -100,7 +99,7 @@ public class BagControllerTests {
             .andExpect(status().isOk());
 
         verify(bagService, times(1))
-            .isValidWeapon(any());
+            .isWeaponOnTheList(any());
     }
 
     @Test
@@ -120,6 +119,6 @@ public class BagControllerTests {
             .andExpect(status().isBadRequest());
 
         verify(bagService, never())
-            .isValidWeapon(any());
+            .isWeaponOnTheList(any());
     }
 }

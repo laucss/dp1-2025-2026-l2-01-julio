@@ -26,6 +26,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.BagNotValidException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsDrawnException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsInHand;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
@@ -220,8 +221,8 @@ public class MatchService {
             player.setOrderInMatch(null);
             player.setActionPoints(0);
             player.setStrength(1);
-
-
+            player.setCardsDrawnInTurn(0);
+            
         }
 
         
@@ -264,7 +265,7 @@ public class MatchService {
  
         //Comprobamos que el jugador no haya tirado el dado
         if (player.getDiceOrder() != null) {
-            throw new IllegalArgumentException("Jugador ya ha tirado el dado");
+            throw new IllegalArgumentException("The player has already rolled the dice.");
         }
 
 
@@ -314,7 +315,7 @@ public class MatchService {
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = MoreThan7CardsInHand.class)
     public Match nextTurn(Integer matchId) {
         Match m = matchRepo.findById(matchId)
                 .orElseThrow(() -> new IllegalArgumentException("Match not found"));
@@ -326,9 +327,13 @@ public class MatchService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Player not found"));
 
-        // checkeamos que tenga menos de 7 cartas en su mano, pues si no tiene que descartar
+        // checkeamos que tenga menos de 7 cartas en su mano, pues sino tiene que descartar
         HandInGame currentPlayerHand = handService.findPlayerHand(matchId, currentPlayerTurn.getId()); 
         checkers.checkNoMoreThan7CardsInHand(new HandInGameDTO(currentPlayerHand));
+
+        // si todo está correcto, le reseteamos el número de cartas robadas en el turno a cero
+        currentPlayerTurn.setCardsDrawnInTurn(0); 
+        playerRepo.save(currentPlayerTurn);
 
         //Obtenemos el indice de orden del jugador actual
         Integer currentIndx = currentPlayerTurn.getOrderInMatch();
@@ -343,7 +348,7 @@ public class MatchService {
         m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());
         m.setCurrentTurnPhase(TurnPhase.DRAW);
 
-        // actualizamos sus puntos de acción por si acaso 
+        // actualizamos sus puntos de acción por si acaso (del jugador que empieza el turno)
         playerService.getPlayerActionPoints(matchId, nextPlayerTurn.getId()); 
 
         // actualizamos el estado de la partida 
@@ -459,15 +464,25 @@ public class MatchService {
     /*
      * Jugador roba una carta del mazo de robar
      */
-    @Transactional
+    @Transactional(rollbackFor = MoreThan7CardsDrawnException.class)
     public DrawCardResultDTO playerDrawsCardFromDeck(Integer matchId, Integer playerId){
+
+        // buscamos al jugador para checkear sus cartas robadas en el turno
+        Player player = playerRepo.findById(playerId).orElse(null); 
+        
+        // checkeamos que no haya robado más de 7 cartas 
+        checkers.checkCardsDrawnInTurn(player);
+
+        // si no es el caso, procedemos a robar la carta
         Card stolenCard =deckService.drawCard(matchId); 
         DeckInGame deck = deckService.findDeckById(matchId); 
 
         HandInGame hand = handService.addCardToPlayerHand(stolenCard, matchId, playerId);
-        // actualimos el valor de los puntos de acción del jugador en la bd 
-        playerService.removePlayerActionPoint(matchId, playerId);
-
+        // actualimos el valor de los puntos de acción del jugador en la bd y de sus cartas robadas en el turno
+        player.setCardsDrawnInTurn(player.getCardsDrawnInTurn() + 1);
+        player.setActionPoints(player.getActionPoints() - 1);
+        playerRepo.save(player);
+        
         // Notificar cambios de cartas por WebSocket
         AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
         CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
@@ -532,7 +547,7 @@ public class MatchService {
 
     }
 
-    @Transactional
+    @Transactional(rollbackFor = {BagNotValidException.class, MoreThan7CardsInHand.class})
     public Integer confirmDiscardPhase(Integer matchId, AllCardsStatusDTO data ) {
         // vemos si la palabra es válida 
         Boolean validBag = bagService.checkBagIsValid(data.getBag().getCards()); 

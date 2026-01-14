@@ -10,6 +10,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.*;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 
@@ -27,6 +28,8 @@ public class Checkers {
         this.playerRepository = playerRepository;
         this.cardRepository = cardRepository; 
     }
+
+    private static final Integer TOTAL_CARDS_TO_DRAW = 7; // máximo número de cartas que puedes robar por turno 
 
 
     public void checkGameStatus(Match match, String status){
@@ -79,6 +82,15 @@ public class Checkers {
         if (!isValid){
             throw new BagNotValidException("The word of the bag is not valid"); 
         }
+    }
+
+    public void checkCardsDrawnInTurn(Player player){
+        if (player != null && player.getCardsDrawnInTurn() >= TOTAL_CARDS_TO_DRAW){
+            throw new MoreThan7CardsDrawnException("You cannot draw more than " + TOTAL_CARDS_TO_DRAW + " cards in your turn"); 
+        }
+
+         
+
     }
      
 

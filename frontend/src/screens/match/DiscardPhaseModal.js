@@ -152,7 +152,7 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
 const handleDragEnd = (event) => {
         const { active, over } = event
 
-        setActiveCard(null)
+       setActiveCard(null)
 
         if (!over) return
 
@@ -201,7 +201,7 @@ const handleDragEnd = (event) => {
                             sensors={sensors}
                             onDragStart={handleDragStart} 
                             onDragEnd={handleDragEnd}
-                             collisionDetection={closestCenter}>
+                            collisionDetection={closestCenter}>
 
                             <div className="hand-and-bag-container">
                                 
