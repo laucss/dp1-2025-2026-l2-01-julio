@@ -46,6 +46,14 @@ public class Player extends BaseEntity {
     private Integer strength; //vamos a guarda la fuerza gastada
 
     private Integer actionPoints;
+
+	// Estadísticas de batallas
+	private Integer battlesWon = 0;
+
+	private Integer battlesPlayed = 0;
+
+	// Estadística de habitaciones visitadas
+	private Integer roomsVisited = 0;
 	
 
 	private Integer orderInMatch; // Indica el orden de turno del jugador en la partida

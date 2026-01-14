@@ -11,5 +11,7 @@ public class UserStatisticsDTO extends BaseEntity {
     private Integer matchesPlayed = 0;
     private Integer totalTimePlayed = 0;
     private Integer totalActionPoints = 0;
+    private Integer battlesWon = 0;
+    private Integer roomsVisited = 0;
     // getters y setters
 }
