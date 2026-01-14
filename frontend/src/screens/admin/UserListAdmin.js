@@ -73,9 +73,9 @@ export default function UserListAdmin() {
   const modal = getErrorModal(setVisible, visible, message);
 
   return (
-    <div className="admin-page-container" style={{marginTop: '50px'}}>
-      <Card style={{ width: "600px", height: "375px", border: "1px solid #000"}}> 
-        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px'}}>
+    <div className="admin-page-container" style={{borderRadius:'15px'}}>
+      <div className="admin-users-list"> 
+        <div style={{background:'#f8f9fa', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px', borderRadius: '15px 15px 0 0'}}>
           <h1 >Users</h1>
           <Button color="success" tag={Link} to="/users/new" >
             Add User
@@ -83,9 +83,9 @@ export default function UserListAdmin() {
         </div> 
       {alerts.map((a) => a.alert)}
       {modal}
-        <Table style={{marginBottom: 0, width: '100%', tableLayout: 'fixed'}} borderless>
+        <Table style={{marginBottom: 0, width: '100%', tableLayout: 'fixed', background: '#fff' }}>
           <thead style={{borderBottom: '1px solid #000'}}> 
-            <tr>
+            <tr style={{background:'#f8f9fa'}}>
               <th>Username</th>
               <th>Authority</th>
               <th>Actions</th>
@@ -93,7 +93,7 @@ export default function UserListAdmin() {
           </thead>
           <tbody>{userList}</tbody>
         </Table>
-      </Card>
+      </div>
     <div className="pagination-buttons" style={{marginTop: '25px'}}>
         <Button
           disabled={currentPage === 1}
