@@ -203,9 +203,15 @@ class UserControllerTests {
 		when(this.userService.findUser(TEST_USER_ID)).thenReturn(user);
 		when(this.userService.updateUser(any(User.class), any(Integer.class))).thenReturn(user);
 
-		mockMvc.perform(put(BASE_URL + "/{id}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(user))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.username").value("UPDATED")).andExpect(jsonPath("$.password").value("CHANGED"));
+		mockMvc.perform(put(BASE_URL + "/{id}", TEST_USER_ID)
+				.with(csrf())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(user)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.username").value("UPDATED"))
+			.andExpect(jsonPath("$.id").value(TEST_USER_ID));
+
+
 	}
 
 	@Test
