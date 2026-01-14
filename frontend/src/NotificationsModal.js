@@ -67,8 +67,8 @@ export default function NotificationsModal({ isOpen, onClose }) {
 
       // Compatibilidad máxima: buscar cualquier campo de id de lobby
       const lobbyId = notif?.matchId || notif?.lobbyId || notif?.idLobby || notif?.match?.id;
-      console.log('Notificación aceptada:', notif);
-      console.log('Id de lobby detectado:', lobbyId);
+      console.log('Notification accepted:', notif);
+      console.log('Detected lobby id:', lobbyId);
 
       // Actualizar lista en estado (quitar la invitación atendida)
       setNotifications(n => n.filter(notif => notif.id !== id));
@@ -77,8 +77,8 @@ export default function NotificationsModal({ isOpen, onClose }) {
       if (lobbyId) {
         window.location.href = `/lobby/${lobbyId}`;
       } else {
-        setError('No se encontró el id de la partida en la invitación.');
-        setErrorModalMessage('No se encontró el id de la partida en la invitación.');
+        setError('Lobby ID not found in the invitation.');
+        setErrorModalMessage('Lobby ID not found in the invitation.');
         setShowErrorModal(true);
       }
     } else {
@@ -86,10 +86,10 @@ export default function NotificationsModal({ isOpen, onClose }) {
       try { text = await res.text(); } catch {}
       const lower = (text || "").toLowerCase();
       const message = lower.includes("comenzado") || lower.includes("empezado")
-        ? "La partida a la que te quieres unir ya ha comenzado."
+        ? "The match you want to join has already started."
         : lower.includes("llena") || lower.includes("full")
-          ? "La partida a la que quieres unirte está llena."
-          : "No se pudo aceptar la invitación";
+          ? "The match you want to join is full."
+          : "Could not accept the invitation";
       setError(message);
       setErrorModalMessage(message);
       setShowErrorModal(true);
@@ -116,9 +116,9 @@ export default function NotificationsModal({ isOpen, onClose }) {
     return (
       <div className="notifications-modal-overlay">
         <div className="notifications-modal-card">
-          <h2>Notificaciones</h2>
-          <p className="notif-error">Debes iniciar sesión para ver tus notificaciones.</p>
-          <button className="notif-close-btn" onClick={onClose}>Cerrar</button>
+          <h2>Notifications</h2>
+          <p className="notif-error">You must be logged in to view your notifications.</p>
+          <button className="notif-close-btn" onClick={onClose}>Close</button>
         </div>
       </div>
     );
@@ -127,26 +127,26 @@ export default function NotificationsModal({ isOpen, onClose }) {
   return (
     <div className="notifications-modal-overlay">
       <div className="notifications-modal-card">
-        <h2>Notificaciones</h2>
+        <h2>Notifications</h2>
         {/* No mostrar mensaje de cargando */}
         {/* Mensaje de error oculto intencionadamente */}
         <div className="notifications-list-scroll">
           {notifications.length === 0 ? (
-            <p>No tienes invitaciones pendientes</p>
+            <p>You have no pending invitations</p>
           ) : (
             notifications.map(n => (
               <div key={n.id} className="notification-item">
-                <span>El jugador <b>{n.sender.username}</b> te ha invitado a jugar una partida.</span>
+                <span>Player <b>{n.sender.username}</b> has invited you to play a match.</span>
                 <div className="notif-actions">
-                  <button className="notif-accept" onClick={() => handleAccept(n.id)}>Aceptar</button>
-                  <button className="notif-reject" onClick={() => handleReject(n.id)}>Rechazar</button>
+                  <button className="notif-accept" onClick={() => handleAccept(n.id)}>Accept</button>
+                  <button className="notif-reject" onClick={() => handleReject(n.id)}>Reject</button>
                 </div>
               </div>
             ))
           )}
         </div>
         <div className="notif-close-btn-container">
-          <button className="notif-close-btn" onClick={onClose}>Cerrar</button>
+          <button className="notif-close-btn" onClick={onClose}>Close</button>
         </div>
       </div>
 
@@ -154,7 +154,7 @@ export default function NotificationsModal({ isOpen, onClose }) {
         <div className="notif-error-overlay">
           <div className="notif-error-card">
             <p>{errorModalMessage}</p>
-            <button className="notif-error-close" onClick={() => setShowErrorModal(false)}>Cerrar</button>
+            <button className="notif-error-close" onClick={() => setShowErrorModal(false)}>Close</button>
           </div>
         </div>
       )}

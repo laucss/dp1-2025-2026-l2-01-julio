@@ -94,63 +94,66 @@ const Profile = ({ }) => {
 
   return (
     <div className="profile-container">
-    <div className="profile-card">
-      <h2>Edit Profile</h2>
-      <div className="profile-info">
-        <img src={selectedAvatarUrl} alt="User Avatar" className="user-avatar" onClick={toggleModal} />
-      </div>
-      {modalOpen && (
-          <div className="modal-backdrop" onClick={toggleModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h2 className="modal-text">Edit avatar</h2>
-              <SimpleImageList onImageSelect={handleImageSelect} />
-            </div>
-          </div>
-        )}
-      <Form onSubmit={handleSubmit}>
+      <div className="profile-card">
+        <h2>Edit Profile</h2>
+        <div className="profile-info">
+          <img src={selectedAvatarUrl} alt="User Avatar" className="user-avatar-profile" onClick={toggleModal} />
+        </div>
+        <Form onSubmit={handleSubmit}>
           <div className="custom-form-input">
             <FormGroup row className="mb-3">
-          <Label for="username" sm={3} className="custom-form-label">
-            Username:
-          </Label>
-            <Input
-              type="text"
-              required
-              name="username"
-              id="username"
-              value={user.username || ""}
-              onChange={handleChange}
-              className="custom-input-text"
-            />
-        </FormGroup>
-          </div>
-          <div className="custom-form-input">
-            <FormGroup row className="mb-3">
-            <Label for="password" sm={3} className="custom-form-label">
-              Password:
-            </Label>
-            <Input
-              type="password"
-              name="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="custom-input-text"
-            />
+              <Label for="username" sm={3} className="custom-form-label">
+                Username:
+              </Label>
+              <Input
+                type="text"
+                required
+                name="username"
+                id="username"
+                value={user.username || ""}
+                onChange={handleChange}
+                className="custom-input-text"
+              />
             </FormGroup>
           </div>
-        
-
-        <div className="profile-actions">
-          <Button className="play-btn">
-            Save Changes
-          </Button>
-          <Button className="remove-btn" tag={Link} to="/">
-            Cancel
-          </Button>
+          <div className="custom-form-input">
+            <FormGroup row className="mb-3">
+              <Label for="password" sm={3} className="custom-form-label">
+                Password:
+              </Label>
+              <Input
+                type="password"
+                name="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="custom-input-text"
+              />
+            </FormGroup>
+          </div>
+          
+          <div className="profile-actions">
+            <Button className="play-btn">
+              Save Changes
+            </Button>
+            <Button className="remove-btn" tag={Link} to="/">
+              Cancel
+            </Button>
+          </div>
+        </Form>
+      </div>
+      
+      {modalOpen && (
+        <div className="modal-backdrop" onClick={toggleModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2 className="modal-text" style={{color: "white"}}>Edit avatar</h2>
+            <SimpleImageList onImageSelect={handleImageSelect} />
+            <button className="modal-close-btn" onClick={toggleModal}>
+              Close
+            </button>
+          </div>
         </div>
-      </Form>
-    </div>
+      )}
     </div>
   );
 };
