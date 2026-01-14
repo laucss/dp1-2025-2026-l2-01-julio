@@ -1590,6 +1590,7 @@ return (
             attacker={fightAttacker}
             stompClient={stompClient}
             bagCards={bagCards}
+            matchData={match}
             onResolve={async (currentUserWon) => {
                 try {
                     console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightDefender=', fightDefender, 'fightAttacker=', fightAttacker);

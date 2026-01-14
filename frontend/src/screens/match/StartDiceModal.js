@@ -51,7 +51,7 @@ export default function StartDiceModal({ isOpen, onClose, onDiceRolled, matchDat
             const playersWithDiceRolls = updatedMatch.diceRolls ? Object.keys(updatedMatch.diceRolls).length : 0;
             
             // Solo cerrar el modal si todos los jugadores han lanzado
-            if (playersWithDiceRolls >= totalPlayers && totalPlayers > 0) {
+            if (allPlayersRolled) { // CAMBIÉ ESTO -----------------------------------------------------------------------------------------------------
                 setTimeout(() => {
                     onClose();
                 }, 10000); 

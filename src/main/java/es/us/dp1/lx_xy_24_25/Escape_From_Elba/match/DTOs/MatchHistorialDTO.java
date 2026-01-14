@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import lombok.Getter;
 import lombok.Setter;

@@ -5,7 +5,7 @@ import tokenService from '../../services/token.service';
 import getIdFromUrl from '../../util/getIdFromUrl';
 import WeaponModal from './WeaponModal';
 
-export default function FightModal({ isOpen, onClose, defender, attacker, onResolve, stompClient, bagCards = [] }) {
+export default function FightModal({ isOpen, onClose, defender, attacker, onResolve, stompClient, bagCards = [], matchData }) {
     const currentUser = tokenService.getUser();
     const jwt = tokenService.getLocalAccessToken();
     const matchId = getIdFromUrl(2);
@@ -476,6 +476,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                 }}
                 player={currentWeaponUser === 'ATTACKER' ? attacker : defender}
                 onWeaponSelected={handleWeaponSelected}
+                matchData={matchData}
             />
         </div>
     );

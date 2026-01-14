@@ -1,20 +1,25 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag;
 
-import lombok.AllArgsConstructor;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class WeaponValidationDTO {
-    private Boolean isValid;
+    private String weapon; 
+    
     private Integer bonusValue;
-    private String message;
 
-    public WeaponValidationDTO(Boolean isValid, Integer bonusValue) {
-        this.isValid = isValid;
+    @Enumerated(EnumType.STRING)
+    private ValidationWeaponStatus status;
+
+    public WeaponValidationDTO(String weapon, Integer bonusValue, ValidationWeaponStatus status) {
+        this.weapon = weapon;
         this.bonusValue = bonusValue;
-        this.message = isValid ? "Valid weapon" : "Invalid weapon";
+        this.status = status;
     }
+
+    public WeaponValidationDTO(){}
 }

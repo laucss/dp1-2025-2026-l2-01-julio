@@ -27,7 +27,9 @@ ball
 balls
 bar
 bare
+barrel
 barb 
+bass
 beam 
 bola 
 bomb 
@@ -47,11 +49,14 @@ boar
 boa
 boas
 broom
+brace
+braces
 boss
 
 cafe
 caesar
 cabs
+cable
 crabs 
 clap 
 claps 
@@ -62,10 +67,16 @@ calms
 came
 cane
 canes
+cap
+capable
+capo
+capos
 capes
 car
+carafe
 care
 career
+careers
 cares
 cars
 case
@@ -75,6 +86,7 @@ cease
 cell
 cells
 cellar
+coal
 cobs
 come
 comes
@@ -100,9 +112,9 @@ color
 colors
 common
 compare
-complete
 cross
 coral 
+copper
 
 ebola
 elba 
@@ -185,6 +197,7 @@ off
 offer 
 offers 
 opal 
+orb
 
 paper
 pass 
@@ -225,6 +238,7 @@ roller
 race 
 races 
 real 
+rebar
 refer 
 release 
 releases 

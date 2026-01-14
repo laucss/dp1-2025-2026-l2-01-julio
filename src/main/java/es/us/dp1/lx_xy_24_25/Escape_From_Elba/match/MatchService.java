@@ -261,7 +261,7 @@ public class MatchService {
  
         //Comprobamos que el jugador no haya tirado el dado
         if (player.getDiceOrder() != null) {
-            throw new IllegalArgumentException("Jugador ya ha tirado el dado");
+            throw new IllegalArgumentException("The player has already rolled the dice.");
         }
 
 
