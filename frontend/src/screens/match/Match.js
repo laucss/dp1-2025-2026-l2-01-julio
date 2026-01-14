@@ -14,6 +14,7 @@ import FightModal from "./FightModal";
 import StartDiceModal from "./StartDiceModal";
 import StealCardModal from "./StealCardModal";
 import NpcLossDiscardModal from "./NpcLossDiscardModal";
+import EscapeDiceModal from "./EscapeDiceModal";
 
 // para alerta de errores
 import { toast } from "react-toastify";
@@ -66,6 +67,7 @@ export default function Match(){
 
     const [isDiceModalOpen, setIsDiceModalOpen] = useState(true);
     const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+    const [isEscapeModalOpen, setIsEscapeModalOpen] = useState(false);
     const [isFightModalOpen, setIsFightModalOpen] = useState(false);
     const [fightDefender, setFightDefender] = useState(null);
     const [fightAttacker, setFightAttacker] = useState(null);
@@ -1110,7 +1112,7 @@ export default function Match(){
                 return;
             }
 
-            // On success, navigate back to home
+            // Volver al inicio
             navigate('/');
         } catch (err) {
             console.error('Error leaving match:', err);
@@ -1187,6 +1189,20 @@ return (
                 onClose={() => setIsDiceModalOpen(false)}
                 onDiceRolled={handleDiceRolled}
                 matchData={match}
+            />
+            <EscapeDiceModal
+                isOpen={isEscapeModalOpen}
+                onClose={() => setIsEscapeModalOpen(false)}
+                onResult={async (result) => {
+                    try {
+                        await fetchMatchAndPlayers();
+                        if (!result.success && result.discardRequired) {
+                            setIsNpcLossModalOpen(true);
+                        }
+                    } catch (err) {
+                        console.error('Error handling escape result:', err);
+                    }
+                }}
             />
             
             <div className="match-board" style={{ position: 'relative' }}>
@@ -1559,6 +1575,7 @@ return (
                 onClose={() => setIsActionsModalOpen(false)}
                 moveToAdyacent={() => setMoveToAdyacentRoom(true) }
                 onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
+                onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
             />
 
             <button

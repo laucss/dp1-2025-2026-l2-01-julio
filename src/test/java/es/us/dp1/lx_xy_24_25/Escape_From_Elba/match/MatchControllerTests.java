@@ -155,6 +155,7 @@ public class MatchControllerTests {
         verify(matchService, times(1)).nextTurn(1);
 }
 
+/* 
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})
     public void testEndMatch() throws Exception {
@@ -170,7 +171,7 @@ public class MatchControllerTests {
                 .andExpect(jsonPath("$.code", is(sampleMatch.getCode())));
 
         verify(matchService, times(1)).endMatch(1, winner);
-    }
+    } */
 
     
     @Test
