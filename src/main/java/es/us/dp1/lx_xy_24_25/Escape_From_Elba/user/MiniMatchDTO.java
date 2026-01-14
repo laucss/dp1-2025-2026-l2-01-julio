@@ -9,7 +9,7 @@ public class MiniMatchDTO {
     private Integer id;
     private String status;
     private List<MatchPlayerDTO> players;
-
+  
     public MiniMatchDTO(Match match) {
         this.id = match.getId();
         this.status = match.getStatus() != null ? match.getStatus().name() : null;

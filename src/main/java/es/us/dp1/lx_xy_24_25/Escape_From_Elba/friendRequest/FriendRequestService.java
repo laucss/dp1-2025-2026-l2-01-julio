@@ -19,11 +19,13 @@ public class FriendRequestService {
 
     FriendRequestRepository friendRequestRepository;
     UserRepository userRepository;
+    FriendWebsocketController friendWebsocketController;
 
     @Autowired
-    public FriendRequestService(FriendRequestRepository friendRequestRepository, UserRepository userRepository) {
+    public FriendRequestService(FriendRequestRepository friendRequestRepository, UserRepository userRepository, FriendWebsocketController friendWebsocketController) {
         this.friendRequestRepository = friendRequestRepository;
         this.userRepository = userRepository;
+        this.friendWebsocketController = friendWebsocketController;
     }
 
     @Transactional(readOnly = true)
@@ -99,6 +101,10 @@ public class FriendRequestService {
         FriendRequest savedFriendRequest = friendRequestRepository.save(newFriendRequest);
 
         log.info("Friend request created successfully: requestId={}, senderId={}, receiverId={}", savedFriendRequest.getId(), senderId, receiverId);
+        
+        // Notificar al receptor sobre la nueva solicitud de amistad
+        friendWebsocketController.notifyNewFriendRequest(receiverId, savedFriendRequest);
+        
         return newFriendRequest;
     }
 
@@ -108,6 +114,12 @@ public class FriendRequestService {
         toUpdate.setStatus(StatusType.ACCEPTED);
         friendRequestRepository.save(toUpdate);
         log.info("Friend request accepted: requestId={}", toUpdate.getId());
+        
+        // Notificar al remitente que su solicitud fue aceptada
+        friendWebsocketController.notifyRequestAccepted(toUpdate.getSender().getId(), toUpdate);
+        // Notificar al receptor de la actualización
+        friendWebsocketController.notifyFriendRequestUpdate(toUpdate.getReceiver().getId(), toUpdate);
+        
         return toUpdate;
     }
 
@@ -117,11 +129,25 @@ public class FriendRequestService {
         toUpdate.setStatus(StatusType.REJECTED);
         friendRequestRepository.save(toUpdate);
         log.info("Friend request rejected: requestId={}", toUpdate.getId());
+        
+        // Notificar al remitente que su solicitud fue rechazada
+        friendWebsocketController.notifyRequestRejected(toUpdate.getSender().getId(), toUpdate);
+        // Notificar al receptor de la actualización
+        friendWebsocketController.notifyFriendRequestUpdate(toUpdate.getReceiver().getId(), toUpdate);
+        
         return toUpdate;
     }
 
     @Transactional
     public void deleteFriend(FriendRequest toDelete) {
-        friendRequestRepository.deleteById(toDelete.getId());
+        Integer user1Id = toDelete.getSender().getId();
+        Integer user2Id = toDelete.getReceiver().getId();
+        Integer friendRequestId = toDelete.getId();
+        
+        friendRequestRepository.deleteById(friendRequestId);
+        
+        // Notificar a ambos usuarios que la amistad fue eliminada
+        friendWebsocketController.notifyFriendRequestDeleted(user1Id, user2Id, friendRequestId);
     }
+    
 }

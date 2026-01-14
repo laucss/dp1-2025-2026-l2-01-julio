@@ -1,75 +1,107 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Collection;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth.payload.request.SignupRequest;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.Authorities;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.AuthoritiesService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
-import io.qameta.allure.Epic;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Owner;
 
-@Epic("Users & Admin Module")
-@Feature("Authentication")
-@Owner("DP1-tutors")
-@SpringBootTest
+
+@ExtendWith(MockitoExtension.class)
 public class AuthServiceTests {
 
-	@Autowired
-	protected AuthService authService;
-	@Autowired
-	protected UserService userService;
-	@Autowired
-	protected AuthoritiesService authoritiesService;
 
-	@Test
-	@Transactional
-	public void shouldCreateAdminUser() {
-		SignupRequest request = createRequest("ADMIN", "admin2");
-		int userFirstCount = ((Collection<User>) this.userService.findAll()).size();
-		this.authService.createUser(request);
-		int userLastCount = ((Collection<User>) this.userService.findAll()).size();
-		assertEquals(userFirstCount + 1, userLastCount);
-	}
+    private AuthService authService;
 
 
+    @Mock
+    private UserService userService;
 
-	@Test
-	@Transactional
-	public void shouldCreatePlayerUser() {
-		SignupRequest request = createRequest("PLAYER", "playertest");
-		int userFirstCount = ((Collection<User>) this.userService.findAll()).size();
-		//int playerFirstCount = ((Collection<Player>) this.playerService.findAll()).size();
-		this.authService.createUser(request);
-		int userLastCount = ((Collection<User>) this.userService.findAll()).size();
-		//int playerLastCount = ((Collection<Player>) this.playerService.findAll()).size();
-		assertEquals(userFirstCount + 1, userLastCount);
-		//assertEquals(playFirstCount + 1, playerLastCount);
-	}
 
-	private SignupRequest createRequest(String auth, String username) {
-		SignupRequest request = new SignupRequest();
-		request.setAuthority(auth);
-		request.setPassword("prueba");
-		request.setUsername(username);
+    @Mock
+    private AuthoritiesService authoritiesService;
 
-		if(auth == "PLAYER") {
-			User playerUser = new User();
-			playerUser.setUsername("clinicOwnerTest");
-			playerUser.setPassword("clinicOwnerTest");
-			playerUser.setAuthority(authoritiesService.findByAuthority("PLAYER"));
-			userService.saveUser(playerUser);
-		}
 
-		return request;
-	}
+    @Mock
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
+
+    @BeforeEach
+    public void setup() {
+        authService = new AuthService(passwordEncoder, authoritiesService, userService);
+    }
+
+
+    @Test
+    public void createUserWithAdminRoleSavesUser() {
+        SignupRequest request = new SignupRequest();
+        request.setUsername("adminUser");
+        request.setPassword("password123");
+        request.setEmail("admin@example.com");
+        request.setAge(30);
+        request.setAuthority("admin");
+
+
+        Authorities adminRole = new Authorities();
+        adminRole.setAuthority("ADMIN");
+
+
+        when(authoritiesService.findByAuthority("ADMIN")).thenReturn(adminRole);
+        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
+
+
+        authService.createUser(request);
+
+
+        verify(userService).saveUser(argThat(user ->
+            user.getUsername().equals("adminUser") &&
+            user.getPassword().equals("encodedPassword") &&
+            user.getEmail().equals("admin@example.com") &&
+            user.getAge() == 30 &&
+            user.getAuthority().getAuthority().equals("ADMIN")
+        ));
+    }
+
+
+    @Test
+    public void createUserWithDefaultRoleSavesUserAsPlayer() {
+        SignupRequest request = new SignupRequest();
+        request.setUsername("playerUser");
+        request.setPassword("pass123");
+        request.setEmail("player@example.com");
+        request.setAge(25);
+        request.setAuthority("anythingElse");
+
+
+        Authorities playerRole = new Authorities();
+        playerRole.setAuthority("PLAYER");
+
+
+        when(authoritiesService.findByAuthority("PLAYER")).thenReturn(playerRole);
+        when(passwordEncoder.encode("pass123")).thenReturn("encodedPass");
+
+
+        authService.createUser(request);
+
+
+        verify(userService).saveUser(argThat(user ->
+            user.getUsername().equals("playerUser") &&
+            user.getPassword().equals("encodedPass") &&
+            user.getEmail().equals("player@example.com") &&
+            user.getAge() == 25 &&
+            user.getAuthority().getAuthority().equals("PLAYER")
+        ));
+    }
 }

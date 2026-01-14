@@ -185,8 +185,7 @@ public class MatchService {
 
 
 
-    //Función para inicializar un match 
-    //TODO: Hay que hacer que esto devuelva un MatchDTO
+    //Función para inicializar un match
     @Transactional
     public Match startMatch(Integer matchId) {
         Match m = matchRepo.findById(matchId).orElseThrow(() -> new IllegalArgumentException("Match not found"));
@@ -259,6 +258,7 @@ public class MatchService {
         Player player = playerRepo.findByMatchAndUser(matchId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
  
+        //Comprobamos que el jugador no haya tirado el dado
         if (player.getDiceOrder() != null) {
             throw new IllegalArgumentException("Jugador ya ha tirado el dado");
         }
@@ -271,6 +271,7 @@ public class MatchService {
         boolean allRolled = match.getPlayers().stream()
                 .allMatch(p -> p.getDiceOrder() != null);
 
+        //Cuando todos los jugadores hayan tirado el dado, asignamos el orden de turno
         if (allRolled) {
             //  Asignar orden de turno
             List<Player> ordered = match.getPlayers().stream()
@@ -384,6 +385,56 @@ public class MatchService {
         matchRepo.save(m);
 
         return m;
+    }
+
+
+    @Transactional 
+    public Match leaveMatch(Integer matchId, Integer userId){
+        Match m = matchRepo.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match not found"));
+        Player p = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
+        
+        
+        //Guardamos el orden del turno del jugador que se va
+        Integer leavingPlayerOrder = p.getOrderInMatch();
+        //Guardamos si el jugador que se va tiene el turno actual
+        Boolean isLeavingPlayerCurrentTurn = m.getCurrentTurnUserId().equals(userId);
+
+        m.getPlayers().remove(p);
+
+        if (isLeavingPlayerCurrentTurn){
+            Integer nextIndx = (leavingPlayerOrder + 1) % m.getPlayers().size();
+            Player nextPlayerTurn = m.getPlayers().stream()
+                .filter(pl -> pl.getOrderInMatch().equals(nextIndx))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Player not found"));
+            //Actualizamos el id del jugador que tiene el turno actualmente en la partida
+            m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());
+            m.setCurrentTurnPhase(TurnPhase.DRAW);
+        }
+
+        
+
+        //Actualizamos el orden de los jugadores que quedan en la partida 
+        for (Player player : m.getPlayers()){
+            //Todos los jugadores que iban después del que se va adelantan una posición
+            if (player.getOrderInMatch() > leavingPlayerOrder){
+                player.setOrderInMatch(player.getOrderInMatch() - 1);
+                playerRepo.save(player);
+            }
+        }
+
+        //Si no se llega al minimo de jugadores, se termina la partida
+        if (m.getPlayers().size() < m.getMinPlayers()){
+            endMatch(matchId, null);
+        } else {
+            matchRepo.save(m);
+        }
+
+        return m;
+
+
     }
 
 
