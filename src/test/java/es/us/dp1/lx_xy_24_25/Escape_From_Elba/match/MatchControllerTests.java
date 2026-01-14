@@ -180,7 +180,7 @@ public class MatchControllerTests {
 
         mockMvc.perform(get("/api/v1/matches/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(sampleMatch.getId()));
+                .andExpect(jsonPath("$.id").value(sampleMatch.getId()));
 
         verify(matchService, times(1)).getMatchById(1);
     }

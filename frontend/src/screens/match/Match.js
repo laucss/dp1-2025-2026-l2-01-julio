@@ -28,7 +28,7 @@ export default function Match(){
     const matchId = getIdFromUrl(2);
     const navigate = useNavigate();
     const [currentPlayer, setCurrentPlayer] = useState({}) // el jugador asociado al usuario que está "viendo" la pantalla
-    console.log('jugador', currentPlayer)
+    //console.log('jugador', currentPlayer)
     const [player, setPlayer] = useState([])
     const [playersList, setPlayersList] = useState([])
     const [match, setMatch] = useState(null)
@@ -146,7 +146,7 @@ export default function Match(){
     useEffect(() => {
         fetchMatchAndPlayers()
     }, [matchId])
-    console.log('match', match)
+    //console.log('match', match)
 
     
     
@@ -532,7 +532,7 @@ export default function Match(){
             }
     }
 
-    console.log('deck', deck)
+    //console.log('deck', deck)
     // Mover el ganador a la habitación objetivo
     const movePlayerToRoom = async (userId, roomId) => {
         try {
@@ -640,7 +640,7 @@ export default function Match(){
     console.log('bag' , bagCards)
     */
     //console.log('deck' , deck)
-    console.log('match', match)
+    //console.log('match', match)
     
 
     // FUNCION ROBAR CARTA
@@ -1254,6 +1254,12 @@ export default function Match(){
             }
         }
     }
+    // Normaliza habitaciones corridor: 10 -> 9 (corridor 2), 28 -> 27 (corridor 9)
+    const normalizeCorridorRoomId = (roomId) => {
+        if (roomId === 10) return 9;
+        if (roomId === 28) return 27;
+        return roomId;
+    };
 
     const moveLoserToRandomRoom = async (userId, roomId) => {
         try {
@@ -1388,6 +1394,33 @@ export default function Match(){
         }
     };
 
+    const leaveMatch = async () => {
+        if (!window.confirm("¿Seguro que quieres abandonar la partida?")) return;
+        try {
+            const response = await fetch(`/api/v1/matches/${matchId}/leaveMatch`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(currentUser?.id)
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('Error leaving match:', response.status, text);
+                alert('No se pudo abandonar la partida');
+                return;
+            }
+
+            // On success, navigate back to home
+            navigate('/');
+        } catch (err) {
+            console.error('Error leaving match:', err);
+            alert('Error al abandonar la partida');
+        }
+    };
+
     const currentPlayerTurn = match?.players?.find(p => p.user.id === match.currentTurnUserId);
 
     const canDraw = match?.currentTurnUserId === currentUser?.id &&
@@ -1446,7 +1479,7 @@ if (!match) {
         return Array.isArray(neighbors) && neighbors.includes(toId);
     };
 
-console.log('handCards', handCards)
+    //console.log('handCards', handCards)
 
 return (
         <div className="match-container">
@@ -1831,6 +1864,15 @@ return (
                 moveToRoomWithWord={() => setMoveToRoomWithWord(true) }
                 onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
             />
+
+            <button
+                className="leave-match-button"
+                onClick={leaveMatch}
+                style={{ marginLeft: '15px', background: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
+            >
+                Leave Match
+            </button>
+
         </div>
 
     <FightModal
@@ -1927,6 +1969,9 @@ return (
                                     botRandomRoomId = fallback[Math.floor(Math.random() * fallback.length)];
                                 }
                                 
+                                // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
+                                botRandomRoomId = normalizeCorridorRoomId(botRandomRoomId);
+                                
                                 console.log('Moving NPC loser to random room:', botRandomRoomId);
                                 await fetch(`/api/v1/matches/${matchId}/npc/location`, {
                                     method: 'PUT',
@@ -1987,6 +2032,9 @@ return (
                                     const fallback = allRoomIds.filter(r => r !== playerRoomId);
                                     randomRoomIdPlayer = fallback[Math.floor(Math.random() * fallback.length)];
                                 }
+                                
+                                // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
+                                randomRoomIdPlayer = normalizeCorridorRoomId(randomRoomIdPlayer);
                                 
                                 console.log('Moving player loser to random room:', randomRoomIdPlayer);
                                 await moveLoserToRandomRoom(currentUser.id, randomRoomIdPlayer);

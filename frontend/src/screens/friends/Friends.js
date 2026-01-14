@@ -5,6 +5,7 @@ import { FaSearch, FaUser, FaEye, FaGamepad, FaTrash } from 'react-icons/fa';
 import UserStatusIndicator from '../../components/UserStatusIndicator';
 import tokenService from '../../services/token.service';
 import useRequestStates from '../../hooks/useRequestStates';
+import { Client } from '@stomp/stompjs';
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -12,6 +13,7 @@ export default function Friends() {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [stompClient, setStompClient] = useState(null);
   
   const {
     allFriends,
@@ -32,6 +34,18 @@ export default function Friends() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Conectar a WebSocket al montar el componente
+  useEffect(() => {
+    const client = new Client({
+      brokerURL: 'ws://localhost:8080/ws',
+      connectHeaders: { 'Authorization': `Bearer ${jwt}` },
+      onConnect: () => setStompClient(client),
+    });
+
+    client.activate();
+    return () => client.active && client.deactivate();
+  }, [jwt]);
 
   const openInviteModal = () => {
     setInviteUsername('');
@@ -221,6 +235,100 @@ export default function Friends() {
     }
   }, [errorMessage]);
 
+  // Suscripción a nuevas solicitudes recibidas
+  useEffect(() => {
+    if (!stompClient || !stompClient.active) return;
+
+    const userId = tokenService.getUser?.()?.id;
+    if (!userId) return;
+
+    const subscription = stompClient.subscribe(
+      `/topic/user.${userId}.friendRequests`,
+      (message) => {
+        console.log('Nueva solicitud de amistad recibida:', message.body);
+        getAndSetReceivedRequests(userId);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [stompClient]);
+
+  // Suscripción a actualizaciones de solicitudes
+  useEffect(() => {
+    if (!stompClient || !stompClient.active) return;
+
+    const userId = tokenService.getUser?.()?.id;
+    if (!userId) return;
+
+    const subscription = stompClient.subscribe(
+      `/topic/user.${userId}.friendRequests.update`,
+      (message) => {
+        console.log('Solicitud de amistad actualizada:', message.body);
+        getAndSetReceivedRequests(userId);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [stompClient]);
+
+  // Suscripción a aceptaciones de solicitudes
+  useEffect(() => {
+    if (!stompClient || !stompClient.active) return;
+
+    const userId = tokenService.getUser?.()?.id;
+    if (!userId) return;
+
+    const subscription = stompClient.subscribe(
+      `/topic/user.${userId}.friendRequests.accepted`,
+      (message) => {
+        console.log('Tu solicitud fue aceptada:', message.body);
+        getAndSetAllFriends(userId);
+        getAndSetSentRequests(userId);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [stompClient]);
+
+  // Suscripción a rechazos de solicitudes
+  useEffect(() => {
+    if (!stompClient || !stompClient.active) return;
+
+    const userId = tokenService.getUser?.()?.id;
+    if (!userId) return;
+
+    const subscription = stompClient.subscribe(
+      `/topic/user.${userId}.friendRequests.rejected`,
+      (message) => {
+        console.log('Tu solicitud fue rechazada:', message.body);
+        getAndSetSentRequests(userId);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [stompClient]);
+
+  // Suscripción a eliminación de amigos
+  useEffect(() => {
+    if (!stompClient || !stompClient.active) return;
+
+    const userId = tokenService.getUser?.()?.id;
+    if (!userId) return;
+
+    const subscription = stompClient.subscribe(
+      `/topic/user.${userId}.friendRequests.deleted`,
+      (message) => {
+        console.log('Una amistad fue eliminada:', message.body);
+        getAndSetAllFriends(userId);
+        getAndSetReceivedRequests(userId);
+        getAndSetSentRequests(userId);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [stompClient]);
+
+  // Cargar datos iniciales
   useEffect(() => {
     const userId = tokenService.getUser?.()?.id;
     if (userId) {

@@ -236,6 +236,12 @@ public class MatchController {
         return ResponseEntity.ok(new MatchDTO(ended));
     }
 
+    @PutMapping("/{matchId}/leaveMatch")
+    public ResponseEntity<MatchDTO> leaveMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer userId) {
+        Match match = ms.leaveMatch(matchId, userId);
+        return ResponseEntity.ok(new MatchDTO(match));
+    }
+
 
 
     @PostMapping()
