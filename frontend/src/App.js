@@ -27,6 +27,7 @@ import MatchList from "./screens/prueba";
 import WaitingLobby from "./screens/match/waitingLobby";
 import Match from "./screens/match/Match";
 import Ranking from "./screens/statistics/Ranking";
+import History from "./screens/history/history";
 
 import { ToastContainer } from "react-toastify";
 
@@ -131,6 +132,7 @@ function App() {
         <Route path="/matchs/new" element={<PrivateRoute><CreateMatch/></PrivateRoute>}></Route>
         <Route path="/lobbies" element={<PrivateRoute><JoinMatch/></PrivateRoute>}></Route>
         <Route path="/lobby/:matchId" element={<PrivateRoute><WaitingLobby /></PrivateRoute>} />
+        <Route path="/history/:userId" element={<PrivateRoute><History /></PrivateRoute>} />
       </>
     )
   }

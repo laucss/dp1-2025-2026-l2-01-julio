@@ -170,20 +170,20 @@ public class MatchService {
 
     //Para devolver el listado de partidas jugadas por un usuario
     @Transactional(readOnly = true)
-    public List<Match> getMatchesPlayedByUser(Integer userId) {
-        return matchRepo.findMatchesPlayedByUser(userId);
+    public Page<Match> getMatchesPlayedByUser(Integer userId, Integer page, Integer size) {
+        return matchRepo.findMatchesPlayedByUser(userId, PageRequest.of(page, size));
     }
 
     //Para devolver el listado de partidas creadas por un usuario 
     @Transactional(readOnly = true)
-    public List<Match> getMatchesPlayedAndCreatedByUser(Integer userId) {
-        return matchRepo.findMatchesPlayedAndCreatedByUser(userId);
+    public Page<Match> getMatchesPlayedAndCreatedByUser(Integer userId, Integer page, Integer size) {
+        return matchRepo.findMatchesPlayedAndCreatedByUser(userId, PageRequest.of(page, size));
     }
 
     //Para devolver el listado de partidas ganadas por un usuario 
     @Transactional(readOnly = true)
-    public List<Match> getMatchesWonByUser(Integer userId) {
-        return matchRepo.findMatchesWonByUser(userId);
+    public Page<Match> getMatchesWonByUser(Integer userId, Integer page, Integer size) {
+        return matchRepo.findMatchesWonByUser(userId, PageRequest.of(page, size));
     }
 
 
