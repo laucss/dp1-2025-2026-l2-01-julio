@@ -7,6 +7,15 @@
   align-items: center;
 }
 
+.admin-page-container .card {
+  transform: none !important;
+  transition: none !important;
+}
+
+.admin-page-container .card:hover {
+  transform: none !important;
+}
+
 .custom-form-input {
   position: relative;
 }
