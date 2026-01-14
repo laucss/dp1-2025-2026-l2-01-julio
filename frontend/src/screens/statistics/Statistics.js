@@ -41,13 +41,13 @@ export default function Statistics(){
                         className={`stats-button ${activeTab === 'personal' ? 'active' : ''}`}
                         onClick={() => setActiveTab('personal')}
                     >
-                        Mis Estadísticas
+                        My statistics
                     </button>
                     <button 
                         className={`stats-button ${activeTab === 'general' ? 'active' : ''}`}
                         onClick={() => setActiveTab('general')}
                     >
-                        Estadísticas Generales
+                        General statistics
                     </button>
                 </div>
                 
@@ -55,25 +55,25 @@ export default function Statistics(){
                 <div className="statistics-container">
                     <div className="stat-card">
                         <div className="stat-icon">🏆</div>
-                        <h2>Victorias</h2>
+                        <h2>Victories</h2>
                         <p className="stat-value">{data.totalVictories}</p>
                     </div>
 
                     <div className="stat-card">
                         <div className="stat-icon">🎮</div>
-                        <h2>Partidas Jugadas</h2>
+                        <h2>Matches Played</h2>
                         <p className="stat-value">{data.matchesPlayed}</p>
                     </div>
 
                     <div className="stat-card">
                         <div className="stat-icon">⏱️</div>
-                        <h2>Tiempo Total Jugado</h2>
+                        <h2>Total Time Played</h2>
                         <p className="stat-value">{data.totalTimePlayed} min</p>
                     </div>
 
                     <div className="stat-card">
                         <div className="stat-icon">⚡</div>
-                        <h2>Puntos de Acción</h2>
+                        <h2>Action Points</h2>
                         <p className="stat-value">{data.totalActionPoints}</p>
                     </div>
                 </div>
@@ -81,12 +81,12 @@ export default function Statistics(){
                 <div className="statistics-container">
                     <div className="stat-card">
                         <div className="stat-icon">👥</div>
-                        <h2>Promedio Jugadores/Partida</h2>
+                        <h2>Average Players/Match</h2>
                         <p className="stat-value">{parseFloat(data.averagePlayersPerMatch).toFixed(2)}</p>
                     </div>
                     <div className="stat-card">
                         <div className="stat-icon">🎮</div>
-                        <h2>Total partidas Jugadas</h2>
+                        <h2>Total Matches Played</h2>
                         <p className="stat-value">{data.totalMatchesPlayed}</p>
                     </div>
                 </div>

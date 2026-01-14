@@ -111,15 +111,15 @@ export default function Ranking() {
                         wordBreak: 'normal'
                     }}
                 >
-                    Ranking de Usuarios
+                    Users Ranking
                 </h2>
                 <Table className="ranking-table">
                     <thead>
                         <tr>
-                            <th>Posición</th>
+                            <th>Position</th>
                             <th>Avatar</th>
-                            <th>Usuario</th>
-                            <th>Victorias</th>
+                            <th>Username</th>
+                            <th>Victories</th>
                         </tr>
                     </thead>
                     <tbody>{userList}</tbody>
@@ -130,17 +130,17 @@ export default function Ranking() {
                         disabled={isEmpty || currentPage === 1}
                         onClick={() => setCurrentPage(currentPage - 1)}
                     >
-                        <FaArrowLeft /> Anterior
+                        <FaArrowLeft /> Previous
                     </Button>
                     <span className="pagination-info">
-                        Página {isEmpty ? 0 : currentPage} de {isEmpty ? 0 : totalPages}
+                        Page {isEmpty ? 0 : currentPage} of {isEmpty ? 0 : totalPages}
                     </span>
                     <Button
                         color="primary"
                         disabled={isEmpty || currentPage === totalPages}
                         onClick={() => setCurrentPage(currentPage + 1)}
                     >
-                        Siguiente <FaArrowRight />
+                        Next <FaArrowRight />
                     </Button>
                 </div>
             </Card>
