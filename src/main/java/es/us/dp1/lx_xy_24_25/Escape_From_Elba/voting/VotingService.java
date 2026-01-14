@@ -33,21 +33,13 @@ public class VotingService {
         return voting;
     }
 
+    // ESTO ERA PARA HACER COMPROBACIONES probablemente luego no lo use
     public List<VotingDTO> getVotingsByMatchId(Integer matchId){
         List<Voting> votings = votingRepository.findByMatchId(matchId); 
         if (votings.isEmpty()){
             throw new ResourceNotFoundException("The is no voting in the match with id: " + matchId);
         }
         return votings.stream().map(voting -> new VotingDTO(voting)).toList();
-    }
-    
-    @Transactional
-    public Voting saveVoting(Voting voting){
-        Voting oldVoting = getVotingById(voting.getId());
-        if (oldVoting == null){
-            throw new ResourceNotFoundException("This voting does not exits."); 
-        }
-        return votingRepository.save(voting); 
     }
 
     @Transactional(rollbackFor = ResourceNotFoundException.class)

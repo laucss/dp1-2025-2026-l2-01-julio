@@ -17,6 +17,7 @@ public interface VotingRepository extends CrudRepository<Voting, Integer> {
     @Query("SELECT v FROM Voting v WHERE v.matchId = ?1 AND v.status = 'PENDING'")
     Optional<Voting> findPendingVotingByMatchId(Integer matchId);
 
+    // ESTO ERA PARA HACER COMPROBACIONES probablemente luego no lo use
     @Query("SELECT v FROM Voting v WHERE v.matchId = ?1")
     List<Voting> findByMatchId(Integer matchId);
 

@@ -45,14 +45,22 @@ public class Player extends BaseEntity {
 	@JoinColumn(name = "room_id")
 	private Room room;
 
+	@Min(0)
+	//@Max(7)
+	private Integer cardsDrawnInTurn; 
 
     private Integer strength; 
 
     private Integer actionPoints;
 
-	@Min(0)
-	//@Max(7)
-	private Integer cardsDrawnInTurn = 0 ; 
+	// Estadísticas de batallas
+	private Integer battlesWon = 0;
+
+	private Integer battlesPlayed = 0;
+
+	// Estadística de habitaciones visitadas
+	private Integer roomsVisited = 0;
+	
 
 	private Integer orderInMatch; // Indica el orden de turno del jugador en la partida
 
