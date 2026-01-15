@@ -1892,14 +1892,23 @@ return (
                 Actions
             </button>
 
-            <ActionsModal
-                isOpen={isActionsModalOpen}
-                onClose={() => setIsActionsModalOpen(false)}
-                moveToAdyacent={() => setMoveToAdyacentRoom(true) }
-                moveToRoomWithWord={() => setMoveToRoomWithWord(true) }
-                onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
-                onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
-            />
+            {
+                (() => {
+                    const currentRoomId = currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id);
+                    const canAttemptEscape = [1,6,31,36].includes(normalizeRoomId(currentRoomId));
+                    return (
+                        <ActionsModal
+                            isOpen={isActionsModalOpen}
+                            onClose={() => setIsActionsModalOpen(false)}
+                            moveToAdyacent={() => setMoveToAdyacentRoom(true) }
+                            moveToRoomWithWord={() => setMoveToRoomWithWord(true) }
+                            onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
+                            onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
+                            canAttemptEscape={canAttemptEscape}
+                        />
+                    )
+                })()
+            }
 
             <button
                 className="leave-match-button"
