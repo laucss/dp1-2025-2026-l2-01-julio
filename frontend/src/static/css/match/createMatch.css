@@ -13,7 +13,7 @@
 
 /* === CONTENEDOR PRINCIPAL DEL FORMULARIO === */
 .lobby-creation-content {
-    background-color: #ffffff;
+    background-color: transparent;
     border-radius: 15px;
     padding: 2rem 2rem;
     box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15);
@@ -23,7 +23,7 @@
 /* === TÍTULO === */
 .lobby-creation-content h1 {
     font-size: 3rem;
-    color: #000000;
+    color: #b0f2ff;
     margin-bottom: 2rem;
 }
 
@@ -41,7 +41,7 @@
     width: 100%;
     padding: 8px;
     border-radius: 6px;
-    border: 1px solid #150050;
+    border: 1px solid #008388;
     font-size: 1rem;
     margin-bottom: 1rem;
 }
@@ -56,20 +56,20 @@
 }
 
 .player-count-container button {
-    background-color: #170072;
+    background-color: #008388;
     color: #fff;
-    border: 2px solid #140086;
+    border: 2px solid #d8fffb;
     border-radius: 10px;
     width: 45px;
     height: 45px;
     font-size: 1.3rem;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .player-count-container button:hover {
-    background-color: #2e00c2;
+    background-color: #0f9b8f;
 }
 
 .player-count-container span {
@@ -89,31 +89,76 @@
 }
 
 .npc-count-container button {
-    background-color: #170072;
+    background-color: #008388;
     color: #fff;
-    border: 2px solid #140086;
+    border: 2px solid #d8fffb;
     border-radius: 50%; /* hace el botón circular */
     width: 50px;
     height: 50px;
     font-size: 1.5rem;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .npc-count-container button:hover {
-    background-color: #2e00c2;
+    background-color: #0f9b8f;
+}
+
+/* Reusable circular button (for player +/-, npc +/-, etc.) */
+.circle-btn {
+    background-color: #008388;
+    color: #fff;
+    border: 2px solid #d8fffb;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.circle-btn:hover { background-color: #0f9b8f; }
+
+
+.player-count-container .circle-btn {
+    border-radius: 50% !important;
+    width: 50px !important;
+    height: 50px !important;
+    padding: 0 !important;
 }
 
 .npc-count-container span {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #000;
+        color: #003b3a;
     width: 50px;
     text-align: center;
+}
+
+
+.back-arrow-btn {
+    color: #fff;
+    border: 2px solid #075e54;
+    border-radius: 8px;
+    width: 42px;
+    height: 36px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-arrow-btn:hover {
+    background-color: #0f9b8f;
 }
 
 /* === CHECKBOX === */
@@ -125,13 +170,13 @@
 
 /* === BOTÓN CREAR === */
 .lobby-creation-content button[type="submit"] {
-    background-color: #3711d1;
+    background-color: #008388;
     color: #fff;
-    border: 3px solid #ffffff;
+    border: 3px solid#d8fffb;
+;
     border-radius: 10px;
     padding: 0.8rem 0;  /* más ancho sin hacerlo más alto */
     font-size: 1.2rem;
-    font-family: 'Poppins', sans-serif;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -146,7 +191,6 @@
     border-radius: 10px;
     padding: 0.8rem ;  /* más ancho sin hacerlo más alto */
     font-size: 1.2rem;
-    font-family: 'Poppins', sans-serif;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -156,11 +200,11 @@
 }
 
 .lobby-creation-content button[type="submit"]:hover {
-    background-color: #2e00c2;
+    background-color: #0f9b8f;
 }
 
 .lobby-creation-content button[type="cancel"] :hover {
-    background-color: #f1bfbf;
+    background-color: #9d0000;
 }
 
 /* === MENSAJE FINAL === */
@@ -172,17 +216,26 @@
 }
 
 .creation-box {
-  background-color: rgb(8, 20, 194); /* blanco semitransparente */
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  width: 70%;
-  max-width: 900px;
-  text-align: center;
+    background: #ebfdff;
+    border: 6px solid #22a8b7;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 0 20px rgba(9, 141, 123, 0.6);
+    width: 70%;
+    max-width: 900px;
+    text-align: center;
+}
+
+.lobby-creation-content {
+    color: #003b3a;
+}
+
+.lobby-creation-content h1 {
+    color: #003b3a;
 }
 
 .lobbies-overlay {
-  background-color: rgba(0, 0, 0, 0.4); /* oscurece ligeramente la imagen */
+  background-color: rgba(0, 0, 0, 0.4); /* oscurece para que  la imagen se vea un poco más oscura */
   height: 100%;
   width: 100%;
   display: flex;
