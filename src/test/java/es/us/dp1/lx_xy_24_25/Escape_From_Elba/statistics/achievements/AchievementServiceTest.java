@@ -236,4 +236,243 @@ class AchievementServiceTest {
         
         assertFalse(result);
     }
+
+    @Test
+    @DisplayName("Get all achievements when empty")
+    void testGetAchievementsEmpty() {
+        when(achievementRepository.findAll()).thenReturn(new ArrayList<>());
+        
+        List<Achievement> result = achievementService.getAchievements();
+        
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    @DisplayName("Get multiple achievements")
+    void testGetMultipleAchievements() {
+        List<Achievement> achievements = new ArrayList<>();
+        
+        Achievement a1 = new Achievement();
+        a1.setId(1);
+        Achievement a2 = new Achievement();
+        a2.setId(2);
+        Achievement a3 = new Achievement();
+        a3.setId(3);
+        
+        achievements.add(a1);
+        achievements.add(a2);
+        achievements.add(a3);
+        
+        when(achievementRepository.findAll()).thenReturn(achievements);
+        
+        List<Achievement> result = achievementService.getAchievements();
+        
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    @DisplayName("Save multiple achievements")
+    void testSaveMultipleAchievements() {
+        Achievement a1 = new Achievement();
+        a1.setId(1);
+        Achievement a2 = new Achievement();
+        a2.setId(2);
+        
+        when(achievementRepository.save(any(Achievement.class))).thenReturn(a1).thenReturn(a2);
+        
+        Achievement result1 = achievementService.saveAchievement(a1);
+        Achievement result2 = achievementService.saveAchievement(a2);
+        
+        assertNotNull(result1);
+        assertNotNull(result2);
+        verify(achievementRepository, times(2)).save(any(Achievement.class));
+    }
+
+    @Test
+    @DisplayName("Delete multiple achievements")
+    void testDeleteMultipleAchievements() {
+        achievementService.deleteAchievementById(1);
+        achievementService.deleteAchievementById(2);
+        achievementService.deleteAchievementById(3);
+        
+        verify(achievementRepository, times(1)).deleteById(1);
+        verify(achievementRepository, times(1)).deleteById(2);
+        verify(achievementRepository, times(1)).deleteById(3);
+    }
+
+    @Test
+    @DisplayName("Achievement not unlocked for rooms visited metric")
+    void testIsAchievementNotUnlockedRoomsVisited() {
+        testAchievement.setMetric(Metric.ROOMS_VISITED);
+        testAchievement.setThreshold(100.0);
+        
+        when(statisticService.getTotalRoomsVisitedByUser(1)).thenReturn(50);
+        
+        boolean result = achievementService.isAchievementUnlocked(testAchievement, testUser);
+        
+        assertFalse(result);
+    }
+
+    @Test
+    @DisplayName("Achievement unlocked for rooms visited metric")
+    void testIsAchievementUnlockedRoomsVisited() {
+        testAchievement.setMetric(Metric.ROOMS_VISITED);
+        testAchievement.setThreshold(50.0);
+        
+        when(statisticService.getTotalRoomsVisitedByUser(1)).thenReturn(100);
+        
+        boolean result = achievementService.isAchievementUnlocked(testAchievement, testUser);
+        
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("Achievement unlocked for battles won metric")
+    void testIsAchievementUnlockedBattlesWon() {
+        testAchievement.setMetric(Metric.BATTLES_WON);
+        testAchievement.setThreshold(10.0);
+        
+        when(statisticService.getBattlesWonByUser(1)).thenReturn(15);
+        
+        boolean result = achievementService.isAchievementUnlocked(testAchievement, testUser);
+        
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("Achievement not unlocked for battles won metric")
+    void testIsAchievementNotUnlockedBattlesWon() {
+        testAchievement.setMetric(Metric.BATTLES_WON);
+        testAchievement.setThreshold(20.0);
+        
+        when(statisticService.getBattlesWonByUser(1)).thenReturn(15);
+        
+        boolean result = achievementService.isAchievementUnlocked(testAchievement, testUser);
+        
+        assertFalse(result);
+    }
+
+    @Test
+    @DisplayName("Achievement with zero threshold")
+    void testIsAchievementUnlockedZeroThreshold() {
+        testAchievement.setMetric(Metric.VICTORIES);
+        testAchievement.setThreshold(0.0);
+        
+        when(statisticService.getTotalVictoriesByUser(1)).thenReturn(0);
+        
+        boolean result = achievementService.isAchievementUnlocked(testAchievement, testUser);
+        
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("Achievement with very high threshold")
+    void testIsAchievementNotUnlockedVeryHighThreshold() {
+        testAchievement.setMetric(Metric.VICTORIES);
+        testAchievement.setThreshold(1000.0);
+        
+        when(statisticService.getTotalVictoriesByUser(1)).thenReturn(10);
+        
+        boolean result = achievementService.isAchievementUnlocked(testAchievement, testUser);
+        
+        assertFalse(result);
+    }
+
+    @Test
+    @DisplayName("Get achievements by tier with multiple tiers")
+    void testGetAchievementsByMultipleTiers() {
+        List<Achievement> facilList = new ArrayList<>();
+        facilList.add(testAchievement);
+        
+        List<Achievement> intermedioList = new ArrayList<>();
+        Achievement intermedio = new Achievement();
+        intermedio.setTier(TierType.INTERMEDIO);
+        intermedioList.add(intermedio);
+        
+        when(achievementRepository.findByTier(TierType.FACIL)).thenReturn(facilList);
+        when(achievementRepository.findByTier(TierType.INTERMEDIO)).thenReturn(intermedioList);
+        
+        List<Achievement> facilResult = achievementService.getAchievementsByTier(TierType.FACIL);
+        List<Achievement> intermedioResult = achievementService.getAchievementsByTier(TierType.INTERMEDIO);
+        
+        assertEquals(1, facilResult.size());
+        assertEquals(1, intermedioResult.size());
+    }
+
+    @Test
+    @DisplayName("Save achievement and verify fields")
+    void testSaveAchievementVerifyFields() {
+        testAchievement.setDescription("New Description");
+        testAchievement.setMetric(Metric.GAMES_PLAYED);
+        testAchievement.setThreshold(15.0);
+        testAchievement.setTier(TierType.INTERMEDIO);
+        
+        when(achievementRepository.save(testAchievement)).thenReturn(testAchievement);
+        
+        Achievement result = achievementService.saveAchievement(testAchievement);
+        
+        assertEquals("New Description", result.getDescription());
+        assertEquals(Metric.GAMES_PLAYED, result.getMetric());
+        assertEquals(15.0, result.getThreshold());
+        assertEquals(TierType.INTERMEDIO, result.getTier());
+    }
+
+    @Test
+    @DisplayName("Achievement unlocked at exact threshold for total play time")
+    void testIsAchievementUnlockedExactThresholdPlayTime() {
+        testAchievement.setMetric(Metric.TOTAL_PLAY_TIME);
+        testAchievement.setThreshold(100.0);
+        
+        when(statisticService.getTotalTimePlayedByUserFOR(1)).thenReturn(100);
+        
+        boolean result = achievementService.isAchievementUnlocked(testAchievement, testUser);
+        
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("Achievement not unlocked below threshold for action points")
+    void testIsAchievementNotUnlockedActionPoints() {
+        testAchievement.setMetric(Metric.ACTION_POINTS_EARNED);
+        testAchievement.setThreshold(100.0);
+        
+        when(statisticService.getTotalAccionPointsByUser(1)).thenReturn(99);
+        
+        boolean result = achievementService.isAchievementUnlocked(testAchievement, testUser);
+        
+        assertFalse(result);
+    }
+
+    @Test
+    @DisplayName("Get achievement by id with different ids")
+    void testGetByIdMultipleIds() {
+        Achievement a1 = new Achievement();
+        a1.setId(1);
+        Achievement a2 = new Achievement();
+        a2.setId(2);
+        
+        when(achievementRepository.findById(1)).thenReturn(Optional.of(a1));
+        when(achievementRepository.findById(2)).thenReturn(Optional.of(a2));
+        
+        Achievement result1 = achievementService.getById(1);
+        Achievement result2 = achievementService.getById(2);
+        
+        assertNotNull(result1);
+        assertNotNull(result2);
+        assertEquals(1, result1.getId());
+        assertEquals(2, result2.getId());
+    }
+
+    @Test
+    @DisplayName("Achievement not unlocked for games played at boundary")
+    void testIsAchievementNotUnlockedGamesPlayedBoundary() {
+        testAchievement.setMetric(Metric.GAMES_PLAYED);
+        testAchievement.setThreshold(10.0);
+        
+        when(statisticService.getMatchesPlayedByUser(1)).thenReturn(9);
+        
+        boolean result = achievementService.isAchievementUnlocked(testAchievement, testUser);
+        
+        assertFalse(result);
+    }
 }

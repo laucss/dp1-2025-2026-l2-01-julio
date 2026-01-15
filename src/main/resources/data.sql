@@ -15,6 +15,13 @@ INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (10,'If you accumulate 50 action points',50.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','FACIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (11,'If you accumulate 100 action points',100.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','INTERMEDIO');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (12,'If you accumulate 200 action points',200.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','DIFICIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (13,'If you win 10 battles',10.0,'https://cdn-icons-png.flaticon.com/512/1732/1732476.png','BATTLES_WON','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (14,'If you win 25 battles',25.0,'https://cdn-icons-png.flaticon.com/512/1732/1732476.png','BATTLES_WON','INTERMEDIO');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (15,'If you win 50 battles',50.0,'https://cdn-icons-png.flaticon.com/512/1732/1732476.png','BATTLES_WON','DIFICIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (16,'If you visit 10 rooms',10.0,'https://cdn-icons-png.flaticon.com/512/11117/11117864.png','ROOMS_VISITED','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (17,'If you visit 30 rooms',30.0,'https://cdn-icons-png.flaticon.com/512/11117/11117864.png','ROOMS_VISITED','INTERMEDIO');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (18,'If you visit 60 rooms',60.0,'https://cdn-icons-png.flaticon.com/512/11117/11117864.png','ROOMS_VISITED','DIFICIL');
+
 
 -- Ten player users, named player1 with passwor 0wn3r
 INSERT INTO authorities(id,authority) VALUES (2,'PLAYER');
