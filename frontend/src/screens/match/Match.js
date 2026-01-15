@@ -198,40 +198,31 @@ export default function Match(){
                     
                     if (response.ok) {
                         const freshMatch = await response.json();
-                        console.log('✅ Fresh match data:', freshMatch);
                         setMatch(freshMatch);
                         
                         // Identificar al atacante (quien inicia la batalla)
                         const attacker = freshMatch.players?.find(p => p.user.id === fightUpdate.attackerId);
-                        console.log('👊 Attacker found:', attacker);
                         
                         // Identificar al defensor (puede ser jugador o NPC)
                         let defender = null;
                         
-                        console.log('🔍 Is defender an NPC (isBot):', fightUpdate.isBot);
-                        
                         if (fightUpdate.isBot) {
-                            console.log('🤖 Buscando NPC con ID:', fightUpdate.defenderId);
-                            console.log('🤖 NPCs disponibles:', freshMatch.npcs?.map(n => ({ id: n.id, name: n.isNiallCampbell ? 'NiallCampbell' : 'NPC' })));
                             defender = freshMatch.npcs?.find(n => n.id === fightUpdate.defenderId);
-                            console.log('🛡️ Defensor NPC encontrado:', defender);
                         } else {
                             defender = freshMatch.players?.find(p => p.user.id === fightUpdate.defenderId);
-                            console.log('🛡️ Defensor Jugador encontrado:', defender);
                         }
                         
                         if (attacker && defender) {
-                            console.log('✅ Opening fight modal with:', { attacker, defender });
                             setFightAttacker(attacker);
                             setFightDefender(defender);
                             setPendingTargetRoom(fightUpdate.roomId || fightUpdate.roomName);
                             setIsFightModalOpen(true);
                         } else {
-                            console.error('❌ Could not find attacker or defender:', { attacker, defender, fightUpdate });
+                            console.error('Could not find attacker or defender:', { attacker, defender, fightUpdate });
                         }
                     }
                 } catch (error) {
-                    console.error('❌ Error fetching fresh match data for fight:', error);
+                    console.error('Error fetching fresh match data for fight:', error);
                 }
             } else if (fightUpdate.action === 'RESOLVE') {
                 const winnerId = fightUpdate.winnerId;
@@ -1262,12 +1253,6 @@ export default function Match(){
             }
         }
     }
-    // Normaliza habitaciones corridor: 10 -> 9 (corridor 2), 28 -> 27 (corridor 9)
-    const normalizeCorridorRoomId = (roomId) => {
-        if (roomId === 10) return 9;
-        if (roomId === 28) return 27;
-        return roomId;
-    };
 
     const moveLoserToRandomRoom = async (userId, roomId) => {
         try {
@@ -2007,7 +1992,7 @@ return (
                                 }
                                 
                                 // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
-                                botRandomRoomId = normalizeCorridorRoomId(botRandomRoomId);
+                                botRandomRoomId = normalizeRoomId(botRandomRoomId);
                                 
                                 console.log('Moving NPC loser to random room:', botRandomRoomId);
                                 await fetch(`/api/v1/matches/${matchId}/npc/location`, {
@@ -2071,7 +2056,7 @@ return (
                                 }
                                 
                                 // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
-                                randomRoomIdPlayer = normalizeCorridorRoomId(randomRoomIdPlayer);
+                                randomRoomIdPlayer = normalizeRoomId(randomRoomIdPlayer);
                                 
                                 console.log('Moving player loser to random room:', randomRoomIdPlayer);
                                 await moveLoserToRandomRoom(currentUser.id, randomRoomIdPlayer);
