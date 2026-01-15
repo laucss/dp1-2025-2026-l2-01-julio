@@ -507,49 +507,20 @@ public class MatchController {
 
     @PostMapping("/{matchId}/{winnerId}/steal-card-from/{loserId}")
     @Operation(summary = "Steal card from another player", description = "Winner steals a card from loser, either from hand (random/selected) or bag (selected). Returns updated card states for both players.")
-    public ResponseEntity<Map<String, AllCardsStatusDTO>> stealCardFromPlayer(
-            @PathVariable Integer matchId,
-            @PathVariable Integer winnerId,
-            @PathVariable Integer loserId,
-            @Valid @RequestBody StealCardRequestDTO request) {
+    public ResponseEntity<Map<String, AllCardsStatusDTO>> stealCardFromPlayer(@PathVariable Integer matchId, @PathVariable Integer winnerId,@PathVariable Integer loserId, @Valid @RequestBody StealCardRequestDTO request) {
 
         try {
-            // Basic validation of source
-            String fromWhere = request.getFromWhere();
-            if (fromWhere == null || (!fromWhere.equals("hand") && !fromWhere.equals("bag"))) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            // Build a Card reference using the complete card object when provided; null means random for 'hand'
-            es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card cardRef = null;
-            if (request.getCardId() != null && fromWhere.equals("bag")) {
-                // Para robo de bolsa, buscar la carta completa por ID
-                BagInGame loserBag = bagService.findPlayerBag(matchId, loserId);
-                
-                Integer cardId = request.getCardId();
-                final Integer finalCardId = cardId;
-                cardRef = loserBag.getCards().stream()
-                    .filter(c -> c.getId() != null && c.getId().equals(finalCardId))
-                    .findFirst()
-                    .orElse(null);
-                
-                if (cardRef == null) {
-                    return ResponseEntity.badRequest().body(null);
-                }
-            }
-
-            // Execute steal in service layer
-            Integer currentTurnUserId = ms.getMatchById(matchId).getCurrentTurnUserId();
-            ms.playerDrawsCardFromAnotherPlayerBag(cardRef, matchId, winnerId, loserId, fromWhere, currentTurnUserId);
-
-            // Return updated card states for winner and loser and notify via WS
-            AllCardsStatusDTO winnerCards = ms.getAllCards(matchId, winnerId);
-            AllCardsStatusDTO loserCards = ms.getAllCards(matchId, loserId);
-
+            Map<String, AllCardsStatusDTO> cardsStatus = ms.stealCardFromPlayer(matchId, winnerId, loserId, request);
+            
+            AllCardsStatusDTO winnerCards = cardsStatus.get("winner");
+            AllCardsStatusDTO loserCards = cardsStatus.get("loser");
+            
             CardsUpdateDTO update = new CardsUpdateDTO(matchId, winnerCards, loserCards);
             matchWebsocketController.notifyCardsUpdate(matchId, update);
-
-            return ResponseEntity.ok(Map.of("winner", winnerCards, "loser", loserCards));
+            
+            return ResponseEntity.ok(cardsStatus);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             System.err.println("Error al robar carta: " + e.getMessage());
             e.printStackTrace();
@@ -559,48 +530,14 @@ public class MatchController {
 
     @PostMapping("/{matchId}/{playerId}/lose-against-npc")
     @Operation(summary = "Player loses against NPC", description = "Player chooses a card to discard after losing to an NPC.")
-    public ResponseEntity<AllCardsStatusDTO> playerLosesAgainstNpc(
-            @PathVariable Integer matchId,
-            @PathVariable Integer playerId,
-            @Valid @RequestBody LoseAgainstNpcRequestDTO request) {
+    public ResponseEntity<AllCardsStatusDTO> playerLosesAgainstNpc(@PathVariable Integer matchId, @PathVariable Integer playerId, @Valid @RequestBody LoseAgainstNpcRequestDTO request) {
         try {
-            String fromWhere = request.getFromWhere();
-            Integer cardId = request.getCardId();
-
-            if (fromWhere == null || (!"hand".equals(fromWhere) && !"bag".equals(fromWhere))) {
-                return ResponseEntity.badRequest().build();
-            }
-            if (cardId == null) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            Card cardRef = null;
-            if ("hand".equals(fromWhere)) {
-                HandInGame hand = handService.findPlayerHand(matchId, playerId);
-                cardRef = hand.getCards().stream()
-                    .filter(c -> c.getId() != null && c.getId().equals(cardId))
-                    .findFirst()
-                    .orElse(null);
-            } else {
-                BagInGame bag = bagService.findPlayerBag(matchId, playerId);
-                cardRef = bag.getCards().stream()
-                    .filter(c -> c.getId() != null && c.getId().equals(cardId))
-                    .findFirst()
-                    .orElse(null);
-            }
-
-            if (cardRef == null) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            Integer currentTurnUserId = ms.getMatchById(matchId).getCurrentTurnUserId();
-            ms.playerLosesAgaintsNonPlayer(cardRef, matchId, playerId, currentTurnUserId, fromWhere);
-
-            AllCardsStatusDTO updatedCards = ms.getAllCards(matchId, playerId);
+            AllCardsStatusDTO updatedCards = ms.playerLosesAgainstNpc(matchId, playerId, request);
             CardsUpdateDTO update = new CardsUpdateDTO(matchId, updatedCards, updatedCards);
             matchWebsocketController.notifyCardsUpdate(matchId, update);
-
             return ResponseEntity.ok(updatedCards);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             System.err.println("Error al descartar carta tras perder contra NPC: " + e.getMessage());
             e.printStackTrace();

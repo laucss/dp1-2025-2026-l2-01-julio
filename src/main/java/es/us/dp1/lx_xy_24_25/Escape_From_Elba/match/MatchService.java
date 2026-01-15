@@ -34,7 +34,9 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundExcepti
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.LoseAgainstNpcRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
@@ -615,13 +617,48 @@ public class MatchService {
         playerRepo.save(loser);
     }
 
-
-
     /*
-     * JUGADOR GANA A NO-JUGADOR 
-     * Contexto: un jugador activo vence a un npc (no jugador) en una pelea
-     * Resultado: el jugador roba una carta del mazo, el npc suma un punto a su fuerza
+     * Método que valida y procesa el robo de una carta de un jugador perdedor
+     * Valida los parámetros, encuentra la carta especificada si es necesario y ejecuta el robo
      */
+    @Transactional
+    public java.util.Map<String, AllCardsStatusDTO> stealCardFromPlayer(Integer matchId, Integer winnerId, Integer loserId, StealCardRequestDTO request){
+        String fromWhere = request.getFromWhere();
+        
+        // Validar parámetro fromWhere
+        if (fromWhere == null || (!fromWhere.equals("hand") && !fromWhere.equals("bag"))) {
+            throw new IllegalArgumentException("fromWhere must be 'hand' or 'bag'");
+        }
+
+        // Buscar la carta si es necesario (solo para robo de bolsa)
+        Card cardRef = null;
+        if (request.getCardId() != null && fromWhere.equals("bag")) {
+            BagInGame loserBag = bagService.findPlayerBag(matchId, loserId);
+            Integer cardId = request.getCardId();
+            
+            cardRef = loserBag.getCards().stream()
+                .filter(c -> c.getId() != null && c.getId().equals(cardId))
+                .findFirst()
+                .orElse(null);
+            
+            if (cardRef == null) {
+                throw new IllegalArgumentException("Card not found in bag");
+            }
+        }
+
+        // Obtener el usuario actual del turno y ejecutar el robo
+        Integer currentTurnUserId = getMatchById(matchId).getCurrentTurnUserId();
+        playerDrawsCardFromAnotherPlayerBag(cardRef, matchId, winnerId, loserId, fromWhere, currentTurnUserId);
+
+        // Retornar el estado actualizado de cartas para ganador y perdedor
+        AllCardsStatusDTO winnerCards = getAllCards(matchId, winnerId);
+        AllCardsStatusDTO loserCards = getAllCards(matchId, loserId);
+        
+        return java.util.Map.of("winner", winnerCards, "loser", loserCards);
+    }
+
+
+
 
     @Transactional
     public Card playerBeatsNonPlayer(Integer matchId, Integer playerId, Integer npcId){
@@ -685,17 +722,6 @@ public class MatchService {
 
     @Transactional
     public void playerLosesAgaintsNonPlayer(Card card, Integer matchId, Integer playerId, Integer currentTurnUserId, String fromWhere){
-        //actualizar puntos de acción del jugador, pierde todos sus puntos de acción
-        //Hay que añadir que se vaya a una habitación aleatoria 
-        /* 
-        Player player = playerService.findById(playerId);
-        //Realmente hace falta esto? ya que podemos mover un npc y que otro jugador tenga una pelea con el aunque no sea su turno
-      //if (player.getUser().getId() == currentTurnUserId){
-        player.setActionPoints(0);  
-        playerService.save(player); */
-        
-         
-
         // Poner a cero los puntos de acción del jugador que ha perdido
         Player player = playerService.findById(playerId);
         player.setActionPoints(0);
@@ -716,7 +742,51 @@ public class MatchService {
         AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
         CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
         matchWebsocketController.notifyCardsUpdate(matchId, update);
-            
+    }
+
+    /*
+     * Método que valida y procesa la pérdida de un jugador contra un NPC
+     * Valida los parámetros, encuentra la carta especificada y llama a playerLosesAgaintsNonPlayer
+     */
+    @Transactional
+    public AllCardsStatusDTO playerLosesAgainstNpc(Integer matchId, Integer playerId, LoseAgainstNpcRequestDTO request){
+        String fromWhere = request.getFromWhere();
+        Integer cardId = request.getCardId();
+
+        // Validar parámetros
+        if (fromWhere == null || (!"hand".equals(fromWhere) && !"bag".equals(fromWhere))) {
+            throw new IllegalArgumentException("fromWhere must be 'hand' or 'bag'");
+        }
+        if (cardId == null) {
+            throw new IllegalArgumentException("cardId cannot be null");
+        }
+
+        // Buscar la carta en mano o bolsa según corresponda
+        Card cardRef = null;
+        if ("hand".equals(fromWhere)) {
+            HandInGame hand = handService.findPlayerHand(matchId, playerId);
+            cardRef = hand.getCards().stream()
+                .filter(c -> c.getId() != null && c.getId().equals(cardId))
+                .findFirst()
+                .orElse(null);
+        } else {
+            BagInGame bag = bagService.findPlayerBag(matchId, playerId);
+            cardRef = bag.getCards().stream()
+                .filter(c -> c.getId() != null && c.getId().equals(cardId))
+                .findFirst()
+                .orElse(null);
+        }
+
+        if (cardRef == null) {
+            throw new IllegalArgumentException("Card not found in " + fromWhere);
+        }
+
+        // Obtener el usuario actual del turno y procesar la pérdida
+        Integer currentTurnUserId = getMatchById(matchId).getCurrentTurnUserId();
+        playerLosesAgaintsNonPlayer(cardRef, matchId, playerId, currentTurnUserId, fromWhere);
+
+        // Retornar el estado actualizado de cartas
+        return getAllCards(matchId, playerId);
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------
