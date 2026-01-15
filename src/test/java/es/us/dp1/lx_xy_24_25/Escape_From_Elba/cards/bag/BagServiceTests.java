@@ -27,6 +27,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DictionaryService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.EmptyWeaponException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
@@ -163,54 +164,40 @@ public class BagServiceTests {
         assertEquals("CAT", word);
     }
 
-    /*
+    // validación de palabras 
     @Test
-    void isValidWordForBagShortWordIsAlwaysValid() {
-        Boolean result = bagService.isValidWordForBag("hi");
-        assertTrue(result);
-    }
-    */
-
-    // ESTA TAMBIÉN ME DABA ERROR: CORREGIDA?
-    @Test
-    void isValidWordForBagWordInLocalDictionary() {
+    void doesWordExistsLocalDictionary() {
         when(dictionaryService.containsWord("cat")).thenReturn(true);
-
-        Boolean result = bagService.doesWordExists("cat");
-
+        boolean result = bagService.doesWordExists("cat");
         assertTrue(result);
     }
 
+
     // ESTA TAMBIÉN ME DABA ERROR: CORREGIDA?
     @Test
-    void isValidWordForBagWordFoundInExternalApi() {
+    void doesWordExistsExternalApiSuccess() {
         when(dictionaryService.containsWord("dog")).thenReturn(false);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), eq(String.class)))
             .thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
 
-        Boolean result = bagService.doesWordExists("dog");
-
+        boolean result = bagService.doesWordExists("dog");
         assertTrue(result);
     }
 
-    // ESTA TAMBIÉN ME DABA ERROR: CORREGIDA?
-    @Test
-    void isValidWordForBagWordNotFoundAnywhere() {
+    
+    void doesWordExistsExternalApiNotFound() {
         when(dictionaryService.containsWord("zzz")).thenReturn(false);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), eq(String.class)))
             .thenThrow(HttpClientErrorException.NotFound.class);
 
-        Boolean result = bagService.doesWordExists("zzz");
-
+        boolean result = bagService.doesWordExists("zzz");
         assertFalse(result);
     }
 
     
-
-    
     @Test
     void checkBagIsValidEmptyBagReturnsTrue() {
-        Boolean result = bagService.checkBagIsValid(new ArrayList<>());
+        boolean result = bagService.checkBagIsValid(new ArrayList<>());
         assertTrue(result);
     }
 
@@ -230,26 +217,119 @@ public class BagServiceTests {
         assertTrue(result);
     }
 
-    /* 
-    
+    // VALIDACIÓN DE ARMAS
     @Test
-    void isValidWeaponReturnsTrueIfWeapon() {
-        when(dictionaryService.isWeapon("SWORD")).thenReturn(true);
+    void validateWeaponEmptyThrows() {
+        BagInGameDTO bag = new BagInGameDTO();
+        bag.setCards(new ArrayList<>());
+        bag.setPlayerId(10);
 
-        CardDTO c1 = new CardDTO();
-        c1.setLetter("S");
-        CardDTO c2 = new CardDTO();
-        c2.setLetter("W");
-        CardDTO c3 = new CardDTO();
-        c3.setLetter("O");
-        CardDTO c4 = new CardDTO();
-        c4.setLetter("R");
-        CardDTO c5 = new CardDTO();
-        c5.setLetter("D");
+        assertThrows(EmptyWeaponException.class, () -> bagService.validateWeapon(bag, 1));
+    }
 
-        Boolean result = bagService.isValidWeapon(List.of(c1, c2, c3, c4, c5));
+    @Test
+    void isWeaponOnListReturnsTrue() {
+        when(dictionaryService.isWeapon("BAR")).thenReturn(true);
+        boolean result = bagService.isWeaponOnTheList("BAR");
+        assertTrue(result);
+    }
+
+    @Test
+    void validateWeaponThrowsIfEmpty() {
+        BagInGameDTO emptyBag = new BagInGameDTO();
+        emptyBag.setCards(new ArrayList<>());
+
+        assertThrows(EmptyWeaponException.class, () -> bagService.validateWeapon(emptyBag, 1));
+    }
+
+    @Test
+    void validateWeaponValidWeaponOnList() {
+        BagInGameDTO bag = new BagInGameDTO();
+        CardDTO c1 = new CardDTO(); c1.setLetter("B");
+        CardDTO c2 = new CardDTO(); c2.setLetter("A");
+        CardDTO c3 = new CardDTO(); c3.setLetter("R");
+        bag.setCards(List.of(c1, c2, c3));
+
+        when(dictionaryService.isWeapon("BAR")).thenReturn(true);
+
+        WeaponValidationDTO result = bagService.validateWeapon(bag, 1);
+
+        assertEquals(ValidationWeaponStatus.VALID, result.getStatus());
+        assertEquals(1, result.getBonusValue());
+        assertEquals("BAR", result.getWeapon());
+    }
+
+    @Test
+    void validateWeaponRequiresVotingIfNotOnListButExists() {
+        BagInGameDTO bag = new BagInGameDTO();
+        CardDTO c1 = new CardDTO(); c1.setLetter("C");
+        CardDTO c2 = new CardDTO(); c2.setLetter("A");
+        bag.setCards(List.of(c1, c2));
+        bag.setPlayerId(10);
+
+        when(dictionaryService.isWeapon("CA")).thenReturn(false);
+        when(dictionaryService.containsWord("CA")).thenReturn(true);
+
+        WeaponValidationDTO result = bagService.validateWeapon(bag, 1);
+
+        assertEquals(ValidationWeaponStatus.REQUIRES_VOTING, result.getStatus());
+        assertEquals(0, result.getBonusValue());
+        verify(votingService, times(1)).startVoting(1, "CA", 10);
+    }
+
+    @Test
+    void validateWeaponInvalidIfNotOnListAndDoesNotExist() {
+        BagInGameDTO bag = new BagInGameDTO();
+        CardDTO c1 = new CardDTO(); c1.setLetter("X");
+        CardDTO c2 = new CardDTO(); c2.setLetter("Y");
+        bag.setCards(List.of(c1, c2));
+
+        when(dictionaryService.isWeapon("XY")).thenReturn(false);
+        when(dictionaryService.containsWord("XY")).thenReturn(false);
+
+        WeaponValidationDTO result = bagService.validateWeapon(bag, 1);
+
+        assertEquals(ValidationWeaponStatus.INVALID, result.getStatus());
+        assertEquals(0, result.getBonusValue());
+        assertEquals("XY", result.getWeapon());
+    }
+
+    @Test
+    void checkProposedWeaponExistsReturnsTrueIfWordExists() {
+        CardDTO c1 = new CardDTO(); c1.setLetter("S");
+        CardDTO c2 = new CardDTO(); c2.setLetter("W");
+        when(dictionaryService.containsWord("SW")).thenReturn(true);
+
+        boolean result = bagService.checkProposedWeaponExists(List.of(c1, c2));
 
         assertTrue(result);
     }
-        */
+
+    @Test
+    void checkProposedWeaponExistsReturnsFalseIfWordDoesNotExist() {
+        CardDTO c1 = new CardDTO(); c1.setLetter("X");
+        CardDTO c2 = new CardDTO(); c2.setLetter("Y");
+        when(dictionaryService.containsWord("XY")).thenReturn(false);
+
+        boolean result = bagService.checkProposedWeaponExists(List.of(c1, c2));
+
+        assertFalse(result);
+    }
+
+    // DEL UPDATE
+    @Test
+    void updateStoresNewBagInActivesBags() {
+        // Preparamos activesBags para un match y jugador
+        bagService.getActivesBags().put(1, new java.util.HashMap<>());
+
+        CardDTO c1 = new CardDTO(); c1.setLetter("A");
+        BagInGameDTO dto = new BagInGameDTO();
+        dto.setCards(List.of(c1));
+
+        bagService.update(dto, 1, 10);
+
+        assertTrue(bagService.getActivesBags().get(1).containsKey(10));
+        assertEquals("A", bagService.getActivesBags().get(1).get(10).getCards().get(0).getLetter());
+    }
+
 }

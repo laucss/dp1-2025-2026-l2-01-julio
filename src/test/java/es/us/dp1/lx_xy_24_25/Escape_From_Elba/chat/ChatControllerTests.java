@@ -54,6 +54,7 @@ public class ChatControllerTests {
     private MockMvc mvc;
 
     private static final String BASE_URL = "/api/v1/match/{matchId}/chat";
+    
 
 
     @Test
