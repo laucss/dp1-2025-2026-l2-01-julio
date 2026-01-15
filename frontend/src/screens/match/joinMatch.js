@@ -164,20 +164,20 @@ export default function JoinMatch() {
         <tbody>{lobbiesList}</tbody>
       </Table>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
-        <ButtonGroup>
-          <Button disabled={page === 0} onClick={() => setPage(page - 1)}>◀</Button>
-          <Button disabled>{page + 1} / {totalPages}</Button>
-          <Button disabled={page >= Math.max(0, totalPages - 1)} onClick={() => setPage(page + 1)}>▶</Button>
-        </ButtonGroup>
-      </div>
-
       <Button
         className="join-private-btn"
         onClick={() => setShowModal(true)}
       >
         Join Private Lobby
       </Button>
+
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
+        <ButtonGroup className="pagination-group">
+          <Button disabled={page === 0} onClick={() => setPage(page - 1)}>◀</Button>
+          <Button disabled>{page + 1} / {totalPages}</Button>
+          <Button disabled={page >= Math.max(0, totalPages - 1)} onClick={() => setPage(page + 1)}>▶</Button>
+        </ButtonGroup>
+      </div>
     </div>
 
     {/* Modal para lobby privado */}

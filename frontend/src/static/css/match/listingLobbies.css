@@ -41,19 +41,22 @@
 
 /* Cuadro del listado */
 .lobbies-box {
-  background-color: rgba(0, 15, 83, 0.9); /* blanco semitransparente */
+  
+  background: #ebfdff;
+  border: 6px solid #22a8b7;
   border-radius: 20px;
-  padding: 2rem 3rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  padding: 2rem 2.5rem;
+  box-shadow: 0 0 20px rgba(9, 141, 123, 0.25);
   width: 70%;
   max-width: 900px;
   text-align: center;
+  color: #003b3a;
 }
 
 /* Título */
 .lobbies-box h1 {
   margin-bottom: 1.5rem;
-  color: #ffffff;
+  color: #003844;
   font-weight: 700;
 }
 
@@ -61,22 +64,26 @@
 .lobbies-box table {
   width: 100%;
   border-collapse: collapse;
-  background-color:  #b7a5ff;
+  background: #ffffff; /* tono claro como en waitingLobby */
   border-radius: 10px;
   overflow: hidden;
+  border: 1px solid #e6e6e6; /* borde sutil como avatar */
 }
 
 .lobbies-box th {
-  background-color: #ffffff;
-  color: rgb(0, 0, 0);
+  background: transparent;
+  color: #555555; /* mismo tono de texto que waitingLobby */
   text-align: center;
   padding: 0.75rem;
+  font-weight: 700;
 }
 
 .lobbies-box td {
   text-align: center;
   padding: 0.75rem;
-  border-bottom: 1px solid #bcadff;
+  background: #ffffff; /* fondo blanco para mantener el tono neutro */
+  color: #555555; /* texto en gris medio como en waitingLobby */
+  border-bottom: 1px solid #e6e6e6; /* línea sutil similar al borde del avatar */
 }
 
 .lobbies-box tr:last-child td {
@@ -85,21 +92,76 @@
 
 /* Botón de lobby privado */
 .join-private-btn {
-  margin-top: 1.5rem;
-  background-color: #1e52fd;
+  margin: 16px auto 1.5rem;
+  display: block;
+  background-color: #008388;
   color: white;
   border: none;
   border-radius: 8px;
   padding: 0.7rem 1.5rem;
   font-weight: bold;
-  transition: 0.3s;
+  transition: 0.18s ease;
 }
 
 .join-private-btn:hover {
-  background-color: #3b24a1;
-  transform: scale(1.05);
+  background-color: #008388;
+  transform: translateY(-2px);
 }
-/* Estilos para el modal de partida llena */
+
+
+.btn.join-private-btn,
+.lobbies-box .join-private-btn {
+  background-color: #22a8b7 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+.btn.join-private-btn:hover,
+.lobbies-box .join-private-btn:hover {
+  background-color: #1aa0ae !important;
+}
+
+.pagination-group .btn {
+  background-color: #008695;
+  color: #ffffff;
+  border: none;
+  margin: 0 4px;
+  min-width: 48px;
+}
+.pagination-group .btn:hover:not(:disabled) {
+  background-color: #1aa0ae;
+  transform: translateY(-2px);
+}
+.pagination-group .btn:disabled {
+  background-color: rgba(34,168,183,0.3);
+  color: rgba(255,255,255,0.7);
+}
+
+.lobbies-box .btn.btn-success,
+.lobbies-box button.btn-success {
+  background-color: #22a8b7 !important;
+  border-color: #22a8b7 !important;
+  color: #ffffff !important;
+}
+.lobbies-box .btn.btn-success:hover,
+.lobbies-box button.btn-success:hover {
+  background-color: #1aa0ae !important;
+  border-color: #1aa0ae !important;
+}
+.lobbies-box .btn.btn-success:disabled,
+.lobbies-box button.btn-success:disabled {
+  background-color: rgba(34,168,183,0.35) !important;
+  border-color: rgba(34,168,183,0.35) !important;
+  color: rgba(255,255,255,0.8) !important;
+}
+
+
+.lobbies-box .btn.btn-danger,
+.lobbies-box button.btn-danger {
+  background-color: #d9534f !important;
+  border-color: #d9534f !important;
+  color: #ffffff !important;
+}
+
 .modal-content {
   background-color: rgba(15, 35, 95, 0.95);
   border-radius: 15px;
