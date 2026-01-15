@@ -12,7 +12,7 @@ export default function StartDiceModal({ isOpen, onClose, userProposingWeapon, w
     const currentUser = tokenService.getUser()
     const currentPlayer = matchData?.players?.find(p => p.userId === currentUser.id)
     const matchId = getIdFromUrl(2)
-
+    
     const [answer, setAnswer] = useState(false)
     const [votes, setVotes] = useState(0)
 
@@ -100,6 +100,10 @@ export default function StartDiceModal({ isOpen, onClose, userProposingWeapon, w
                     : null
 
                 }
+
+                {currentUser.id === userProposingWeapon.id ? (
+                    <h1> Waiting for the voting to finished</h1>
+                ) : null }
 
             </div>
 
