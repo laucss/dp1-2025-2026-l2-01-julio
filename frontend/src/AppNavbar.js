@@ -36,19 +36,7 @@ function AppNavbar() {
 
     roles.forEach((role) => {
         if (role === "ADMIN") {
-            adminLinks = (
-                <>                    
-                    <NavItem>
-                        <NavLink style={{ color: "white" }} tag={Link} to="/users">Users</NavLink>
-                    </NavItem>
-                    <NavItem>
-                        <NavLink style={{ color: "white" }} tag={Link} to="/achievements">Achievements</NavLink>
-                    </NavItem>   
-                    <NavItem>
-                        <NavLink style={{ color: "white" }} tag={Link} to="/matches">Matches</NavLink>
-                    </NavItem>
-                </>
-            )
+        
             profileLinks = (
                 <>
                     <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
@@ -62,11 +50,6 @@ function AppNavbar() {
     })
         roles.forEach((role) => {
         if (role === "PLAYER") {
-            ownerLinks = (
-                <> 
-       
-                </>
-            )
             profileLinks = (
                 <>
                     <NavItem>
@@ -98,8 +81,12 @@ function AppNavbar() {
 
     return (
         <div>
-            <Navbar expand="md" dark color="dark">
-                <NavbarBrand href="/">
+            <Navbar
+                expand="md"
+                dark
+                style={{ backgroundColor: '#ed9734', borderBottom: '4px solid #c75a00' }}
+            >
+                <NavbarBrand href="/" style={{ color: '#ffd9b7', fontWeight: 700 }}>
                     Escape From Elba
                 </NavbarBrand>
                 <NavbarToggler onClick={toggleNavbar} className="ms-2" />

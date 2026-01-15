@@ -10,24 +10,32 @@
   font-family: 'Segoe UI', sans-serif;
 }
 
+/* Center the main container vertically and horizontally */
+.friends-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Centered container that wraps the main friends controls */
 .friends-container {
-  max-width: 1100px;
-  margin: 0 auto 2rem auto;
-  background: rgba(255,255,255,0.94);
-  border-radius: 16px;
+  max-width: 1200px;
+  width: 95%;
+  margin: auto;
+  background: #ebfdff;
+  border-radius: 12px;
   padding: 1.25rem 1.5rem;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.18);
-  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 6px 14px rgba(9,141,123,0.06);
+  border: 3px solid rgba(34,168,183,0.36);
   color: #555;
-  max-height: 75vh;
+  max-height: 85vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
 .friends-page h1 {
-  color: #555;
+  color: #003844;
   margin-bottom: 0.8rem;
 }
 
@@ -41,29 +49,28 @@
   flex: 1;
   padding: 0.75rem;
   border: none;
-  background: rgba(255,255,255,0.88);
-  color: #555;
+  background: #22a8b7; /* main accent */
+  color: #ffffff;
   font-size: 1rem;
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.18s, transform 0.12s;
-  border: 1px solid rgba(0,0,0,0.06);
-  backdrop-filter: blur(6px);
+  border: none;
 }
 
 .main-button:hover {
-  background: rgba(255,255,255,0.95);
+  background: #1aa0ae;
   transform: translateY(-2px);
 }
 
 .friends-search {
   display: flex;
   align-items: center;
-  background: rgba(255,255,255,0.86);
+  background: #ffffff;
   border-radius: 10px;
   padding: 0.6rem 1rem;
   margin-bottom: 1rem;
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(34,168,183,0.12);
   backdrop-filter: blur(6px);
 }
 
@@ -84,8 +91,8 @@
   background: rgba(255,255,255,0.9);
   border-radius: 14px;
   padding: 1rem;
-  border: 1px solid rgba(0,0,0,0.06);
-  color: #555;
+  border: 1px solid rgba(34,168,183,0.06);
+  color: #003b3a;
   backdrop-filter: blur(4px);
   flex: 1;
   display: flex;
@@ -109,11 +116,11 @@
 .friend-card {
   display: flex;
   align-items: center;
-  background: rgba(255,255,255,0.95);
+  background: #ebfdff;
   border-radius: 10px;
   padding: 0.75rem;
   margin-bottom: 0.6rem;
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(34,168,183,0.06);
 }
 
 .friend-avatar {
@@ -123,7 +130,7 @@
 
 .friend-name {
   flex: 1;
-  color: #555;
+  color: #003b3a;
   font-weight: 600;
 }
 
@@ -142,13 +149,12 @@
 }
 
 .play-btn {
-  background: #4caf50;
+  background: #22a8b7;
   color: white;
-  border: none;
 }
 
 .play-btn:hover {
-  background: #66bb6a;
+  background: #1aa0ae;
   transform: translateY(-2px);
 }
 
@@ -246,9 +252,9 @@
 }
 
 .modal-send {
-  background: #3a7bd5;
+  background: rgba(58,123,213,0.72);
   color: white;
-  box-shadow: 0 4px 15px rgba(58, 123, 213, 0.3);
+  box-shadow: 0 4px 15px rgba(58, 123, 213, 0.18);
 }
 
 .modal-send:disabled {
@@ -259,7 +265,7 @@
 }
 
 .modal-send:not(:disabled):hover {
-  background: #4a8be5;
+  background: rgba(74,139,229,0.86);
   transform: translateY(-2px);
 }
 
@@ -298,11 +304,6 @@
   color: #888;
 }
 
-.request-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
 .request-btn {
   border: none;
   border-radius: 8px;
@@ -311,27 +312,27 @@
   cursor: pointer;
   transition: background 0.2s, transform 0.2s;
 }
-
-.request-btn:hover {
+.play-btn:hover {
+  background: #1aa0ae;
   transform: translateY(-2px);
 }
 
 .request-accept {
-  background-color: #23c483;
+  background-color: rgba(35,196,131,0.72);
   color: #0d3e2b;
 }
 
 .request-accept:hover {
-  background-color: #2fd69a;
+  background-color: rgba(47,214,154,0.86);
 }
 
 .request-reject {
-  background-color: #e53935;
+  background-color: rgba(229,57,53,0.72);
   color: #4a0000;
 }
 
 .request-reject:hover {
-  background-color: #ef5350;
+  background-color: rgba(239,83,80,0.86);
 }
 
 /* Scroll interno del modal de solicitudes */
