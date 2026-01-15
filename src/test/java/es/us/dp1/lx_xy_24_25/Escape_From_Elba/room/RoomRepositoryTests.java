@@ -94,5 +94,23 @@ public class RoomRepositoryTests {
         assertTrue(found.isPresent());
         assertEquals("SalaID", found.get().getName());
     }
+
+    @Test
+    public void deleteAllRemovesSavedRooms() {
+        roomRepository.findAll().forEach(r -> r.setAdjacencyList(new ArrayList<>()));
+        roomRepository.deleteAll();
+
+        Room a = new Room("TmpA", 1, 1, new ArrayList<>());
+        Room b = new Room("TmpB", 2, 2, new ArrayList<>());
+        roomRepository.save(a);
+        roomRepository.save(b);
+
+        List<Room> before = roomRepository.findAll();
+        assertTrue(before.size() >= 2);
+
+        roomRepository.deleteAll();
+        List<Room> after = roomRepository.findAll();
+        assertTrue(after.isEmpty());
+    }
 }
 

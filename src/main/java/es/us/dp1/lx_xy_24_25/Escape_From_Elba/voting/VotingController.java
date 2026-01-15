@@ -34,7 +34,7 @@ public class VotingController {
     public ResponseEntity<?> submitVote (@PathVariable Integer matchId, @RequestBody VoteDTO vote){
         VotingDTO voting = votingService.submitVote(matchId, vote);
         // Si la votación ha terminado, incluir más información
-        if (voting.getStatus().equals("FINISHED")) {
+        if (voting != null && "FINISHED".equals(voting.getStatus())) {
             VotingResultDTO result = new VotingResultDTO(
                 "FINISHED",
                 voting.getResult().toString(),
