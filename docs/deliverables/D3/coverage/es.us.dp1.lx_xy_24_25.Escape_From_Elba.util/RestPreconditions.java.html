@@ -41,11 +41,11 @@ public final class RestPreconditions {
 //    }
     
     public static &lt;T&gt; T checkNotNull(final T resource,String resourceName, String fieldName, Object fieldValue) {
-<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (resource == null) {</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (resource == null) {</span>
 <span class="nc" id="L45">            throw new ResourceNotFoundException(resourceName, fieldName, fieldValue);</span>
         }
 
-<span class="nc" id="L48">        return resource;</span>
+<span class="fc" id="L48">        return resource;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

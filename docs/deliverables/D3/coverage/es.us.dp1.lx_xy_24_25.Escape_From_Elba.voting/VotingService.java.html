@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VotingService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting</a> &gt; <span class="el_source">VotingService.java</span></div><h1>VotingService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.AlreadyVotedException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreVotesThanPlayersException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchWebsocketController;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+
+@Service
+public class VotingService {
+
+<span class="fc" id="L21">    private static final Integer BONUS_WEAPONS = 1; // la bonificación que te llevas al formar un arma válida </span>
+
+    VotingRepository votingRepository; 
+    MatchRepository matchRepository;
+    MatchWebsocketController matchWebsocketController; 
+    
+    @Autowired
+<span class="fc" id="L28">    public VotingService(VotingRepository votingRepository, MatchRepository matchRepository, MatchWebsocketController matchWebsocketController){</span>
+<span class="fc" id="L29">        this.votingRepository = votingRepository;</span>
+<span class="fc" id="L30">        this.matchRepository = matchRepository;</span>
+<span class="fc" id="L31">        this.matchWebsocketController = matchWebsocketController;</span>
+<span class="fc" id="L32">    }</span>
+
+    // ESTO ERA PARA HACER COMPROBACIONES probablemente luego no lo use
+    public List&lt;VotingDTO&gt; getVotingsByMatchId(Integer matchId){
+<span class="fc" id="L36">        List&lt;Voting&gt; votings = votingRepository.findByMatchId(matchId); </span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (votings.isEmpty()){</span>
+<span class="fc" id="L38">            throw new ResourceNotFoundException(&quot;The is no voting in the match with id: &quot; + matchId);</span>
+        }
+<span class="fc" id="L40">        return votings.stream().map(voting -&gt; new VotingDTO(voting)).toList();</span>
+    }
+
+    @Transactional(rollbackFor = ResourceNotFoundException.class)
+    public VotingDTO startVoting(Integer matchId, String weaponProposed, Integer proposingPlayerId){
+        // buscamos la partida y checkeamos además que exista
+<span class="fc" id="L46">        Match match = matchRepository.findById(matchId).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Match not found with id: &quot; + matchId));</span>
+        
+        // buscamos la lista de jugadores excluyendo a quien propone el arma 
+<span class="fc" id="L49">        List&lt;Player&gt; playersInVoting = match.getPlayers().stream()</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">            .filter(player -&gt; !player.getId().equals(proposingPlayerId)).toList();</span>
+        
+            // creamos la votación
+<span class="fc" id="L53">        Voting voting = new Voting(matchId, weaponProposed, playersInVoting); </span>
+        
+        // cambiamos el estado de la partida a voting y el numero de jugadores que van a participar en la votación
+<span class="fc" id="L56">        match.setStatus(MatchStatus.VOTING);</span>
+        
+<span class="fc" id="L58">        voting.setStatus(VotingStatus.PENDING);</span>
+<span class="fc" id="L59">        voting.setVotesInFavor(0);</span>
+<span class="fc" id="L60">        voting.setVotesAgainst(0);</span>
+        
+        // guardamos ambos
+<span class="fc" id="L63">        matchRepository.save(match);</span>
+<span class="fc" id="L64">        Voting savedVoting = votingRepository.save(voting);</span>
+
+        // notifcamos con websocket 
+        
+
+<span class="fc" id="L69">        return new VotingDTO(savedVoting);</span>
+    }
+
+
+    @Transactional(rollbackFor = {ResourceNotFoundException.class, MoreVotesThanPlayersException.class, AlreadyVotedException.class})
+    public VotingDTO submitVote(Integer matchId, VoteDTO vote){
+        // buscamos la votación de la partida pasada y que esté en estado pendiente (solo debe haber una)
+<span class="fc" id="L76">        Voting voting = votingRepository.findPendingVotingByMatchId(matchId).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;The is no pending voting in match with id: &quot; + matchId));</span>
+        
+        // buscamos el voto del jugador que ha votado
+<span class="fc" id="L79">        Vote voteInBd = voting.getVotes().stream()</span>
+<span class="fc" id="L80">            .filter(v -&gt; v.getPlayerId().equals(vote.getPlayerId()))</span>
+<span class="fc" id="L81">            .findFirst().orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Player is not part of this voting&quot;));</span>
+
+        // checkeamos que el jugador no haya votado ya
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (voteInBd.getInFavor() != null){</span>
+<span class="fc" id="L85">            throw new AlreadyVotedException(&quot;You have already voted in this voting.&quot;);</span>
+        }
+
+        // si no ha votado ya, guardamos el voto y lo añadimos según si está a favor o en contra
+<span class="fc" id="L89">        voteInBd.setInFavor(vote.getInFavor());</span>
+        
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if (vote.getInFavor().equals(VoteValue.YES)){</span>
+<span class="fc" id="L92">            voting.setVotesInFavor(voting.getVotesInFavor() + 1);</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        } if (vote.getInFavor().equals(VoteValue.NO)){</span>
+<span class="nc" id="L94">            voting.setVotesAgainst(voting.getVotesAgainst() + 1);</span>
+        }
+
+        // calculamos cuantos votos llevamos 
+<span class="fc" id="L98">        Integer currentTotalVotes = voting.getVotesInFavor() + voting.getVotesAgainst();</span>
+
+        // checkeamos por si acaso que puedan haber más votos que jugadores participantes en la votación 
+<span class="fc bfc" id="L101" title="All 2 branches covered.">        if (currentTotalVotes &gt; voting.getNumPlayers()){</span>
+<span class="fc" id="L102">            throw new MoreVotesThanPlayersException(&quot;There are more votes than players in the match.&quot;);</span>
+        }
+
+        // comprobamos si ya han votado todos los jugadores
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (currentTotalVotes.equals(voting.getNumPlayers())){</span>
+            // si han votado todos, calculamos el resultado y notificamos
+<span class="fc" id="L108">            Voting finishedVoting = finishedVoting(voting, matchId);</span>
+<span class="fc" id="L109">            return new VotingDTO(finishedVoting);</span>
+        }
+        
+        // guardamos la votación
+<span class="nc" id="L113">        votingRepository.save(voting);</span>
+        
+<span class="nc" id="L115">        return new VotingDTO(voting);</span>
+    }
+
+
+    public Voting finishedVoting(Voting voting, Integer matchId){
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if (voting.getVotesInFavor() &gt; voting.getVotesAgainst()){ // hay más votos a favor, se lleva la bonificación</span>
+<span class="fc" id="L121">            voting.setResult(VotingResult.ACCEPTED);</span>
+<span class="fc" id="L122">            voting.setFinalBonus(BONUS_WEAPONS);</span>
+        } 
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">        if (voting.getVotesInFavor() &lt;= voting.getVotesAgainst()){ // en caso de empate, no se lleva nada </span>
+<span class="nc" id="L125">            voting.setResult(VotingResult.REJECTED); // (esto no viene especificado en las reglas así que se decidido por consenso en el grupo)</span>
+<span class="nc" id="L126">            voting.setFinalBonus(0);</span>
+        }
+<span class="fc" id="L128">        voting.setStatus(VotingStatus.FINISHED);</span>
+
+        // si la votación ha terminado, cambiamos el estado de la partida a playing y guardamos 
+<span class="pc" id="L131">        Match match = matchRepository.findById(matchId).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Match not found with id: &quot; + matchId));</span>
+<span class="fc" id="L132">        match.setStatus(MatchStatus.PLAYING);</span>
+<span class="fc" id="L133">        matchRepository.save(match);</span>
+        
+<span class="fc" id="L135">        Voting savedVoting = votingRepository.save(voting);</span>
+        
+        // Notificar a todos los jugadores del resultado de la votación
+<span class="fc" id="L138">        matchWebsocketController.notifyWeaponVotingResult(matchId, new VotingResultDTO(</span>
+            &quot;FINISHED&quot;,
+<span class="fc" id="L140">            savedVoting.getResult().toString(),</span>
+<span class="fc" id="L141">            savedVoting.getWeaponProposed(),</span>
+<span class="fc" id="L142">            savedVoting.getFinalBonus()</span>
+        ));
+        
+<span class="fc" id="L145">        return savedVoting;</span>
+    }
+
+    @Transactional
+    public void deleteVotingsByMatchId(Integer matchId){
+<span class="nc" id="L150">        votingRepository.deleteByMatchId(matchId);</span>
+<span class="nc" id="L151">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -4,16 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
-import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
+
 @Getter
 @Setter
-public class DeckInGame extends BaseEntity{
+public class DeckInGame{
 
     /*
      * Vamos a usar DeckInGame para guardar las cartas de la baraja de la partida en memoria y no en la base de datos por:  
@@ -27,20 +25,22 @@ public class DeckInGame extends BaseEntity{
     @OneToMany
     private List&lt;Card&gt; discardedCards; 
 
-<span class="nc" id="L30">    public DeckInGame (List&lt;Card&gt; cards) {</span>
-<span class="nc bnc" id="L31" title="All 2 branches missed.">        if (cards ==null){</span>
-<span class="nc" id="L32">            this.notDiscardedCards = new ArrayList&lt;&gt;();</span>
-
-<span class="nc" id="L34">            this.discardedCards = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L28">    public DeckInGame (List&lt;Card&gt; cards) {</span>
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if (cards ==null){</span>
+<span class="nc" id="L30">            this.notDiscardedCards = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L31">            this.discardedCards = new ArrayList&lt;&gt;();</span>
 
         } else {
-<span class="nc" id="L37">            this.notDiscardedCards = new ArrayList&lt;&gt;(cards);</span>
-
-<span class="nc" id="L39">        this.discardedCards = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L34">            this.notDiscardedCards = new ArrayList&lt;&gt;(cards);</span>
+<span class="fc" id="L35">            this.discardedCards = new ArrayList&lt;&gt;();</span>
         }
 
-<span class="nc" id="L42">    }</span>
-<span class="fc" id="L43">    public DeckInGame(){}</span>
+<span class="fc" id="L38">    }</span>
+    
+<span class="fc" id="L40">    public DeckInGame(){</span>
+<span class="fc" id="L41">        this.notDiscardedCards = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L42">        this.discardedCards = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L43">    }</span>
     
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

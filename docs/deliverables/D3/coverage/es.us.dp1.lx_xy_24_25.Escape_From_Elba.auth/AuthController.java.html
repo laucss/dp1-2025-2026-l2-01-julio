@@ -63,8 +63,8 @@ public class AuthController {
 <span class="fc" id="L63">				.collect(Collectors.toList());</span>
 
 <span class="fc" id="L65">			return ResponseEntity.ok().body(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getAvatar(), roles));</span>
-<span class="nc" id="L66">		}catch(BadCredentialsException exception){</span>
-<span class="nc" id="L67">			return ResponseEntity.badRequest().body(&quot;Bad Credentials!&quot;);</span>
+<span class="fc" id="L66">		}catch(BadCredentialsException exception){</span>
+<span class="fc" id="L67">			return ResponseEntity.badRequest().body(&quot;Bad Credentials!&quot;);</span>
 		}
 	}
 
