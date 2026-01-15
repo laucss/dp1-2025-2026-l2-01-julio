@@ -9,20 +9,21 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 import jakarta.persistence.EntityManager;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.Authorities;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 
@@ -33,96 +34,114 @@ public class LobbyService {
     public UserService userService;
     public Checkers checkers;
     public PlayerService playerService;
+    public LobbyWebsocketController lobbyWebsocketController;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-<span class="fc" id="L41">    public LobbyService(MatchRepository mrepo, Checkers checkers, UserService userService, PlayerService playerService) {</span>
-<span class="fc" id="L42">        this.mrepo = mrepo;</span>
-<span class="fc" id="L43">        this.checkers = checkers;</span>
-<span class="fc" id="L44">        this.userService = userService;</span>
-<span class="fc" id="L45">        this.playerService = playerService;</span>
-<span class="fc" id="L46">    }</span>
+<span class="fc" id="L43">    public LobbyService(MatchRepository mrepo, Checkers checkers, UserService userService, PlayerService playerService, LobbyWebsocketController lobbyWebsocketController) {</span>
+<span class="fc" id="L44">        this.mrepo = mrepo;</span>
+<span class="fc" id="L45">        this.checkers = checkers;</span>
+<span class="fc" id="L46">        this.userService = userService;</span>
+<span class="fc" id="L47">        this.playerService = playerService;</span>
+<span class="fc" id="L48">        this.lobbyWebsocketController = lobbyWebsocketController;</span>
+<span class="fc" id="L49">    }</span>
 
     
     public void save(Match m) {
-<span class="nc" id="L50">        mrepo.save(m);</span>
-<span class="nc" id="L51">    }</span>
+<span class="nc" id="L53">        mrepo.save(m);</span>
+<span class="nc" id="L54">    }</span>
 
     @Transactional(readOnly = true)
-    public List&lt;Match&gt; getAllPublicLobbies() {
-<span class="nc" id="L55">        return mrepo.findPublicLobbies();</span>
+    public Page&lt;Match&gt; getAllPublicLobbies(Integer page, Integer size) {
+<span class="fc" id="L58">        return mrepo.findPublicLobbies(PageRequest.of(page,size));</span>
     }
 
         @Transactional(readOnly = true)
     public List&lt;Match&gt; getAllPrivateLobbies() {
-<span class="nc" id="L60">        return mrepo.findPrivateLobbies();</span>
+<span class="nc" id="L63">        return mrepo.findPrivateLobbies();</span>
     }
 
     @Transactional(readOnly = true)
     public Optional&lt;Match&gt; getPrivateLobby(String codeLobby) {
-<span class="nc" id="L65">        return mrepo.findPrivateLobbyByCode(codeLobby);</span>
+<span class="fc" id="L68">        return mrepo.findPrivateLobbyByCode(codeLobby);</span>
     }
 
     @Transactional(readOnly = true)
     public Optional&lt;Match&gt; getById(Integer id) {
-<span class="nc" id="L70">        return mrepo.findById(id);</span>
+<span class="nc" id="L73">        return mrepo.findById(id);</span>
     }
 
     
     //Crear metodo para unirse a una partida publica
     @Transactional
     public Match joinLobby(Integer lobbyId) {
-<span class="nc" id="L77">        Match m = mrepo.findById(lobbyId).orElseThrow(() -&gt; new LobbyNotFound(&quot;Lobby not found&quot;)); </span>
-<span class="nc" id="L78">        checkers.checkNumberOfPlayers(m);</span>
-<span class="nc" id="L79">        User currentUser = userService.findCurrentUser(); </span>
-<span class="nc" id="L80">        checkers.checkPlayerAlreadyInALobby(currentUser);</span>
-<span class="nc" id="L81">        Player player = new Player(); </span>
-<span class="nc" id="L82">        player.setUser(currentUser);     </span>
-<span class="nc" id="L83">        player.setMatch(m);</span>
-<span class="nc" id="L84">        m.getPlayers().add(player);</span>
-<span class="nc" id="L85">        mrepo.save(m); </span>
-<span class="nc" id="L86">        return m;</span>
+<span class="pc" id="L80">        Match m = mrepo.findById(lobbyId).orElseThrow(() -&gt; new LobbyNotFound(&quot;Lobby not found&quot;)); </span>
+<span class="nc" id="L81">        checkers.checkNumberOfPlayers(m);</span>
+<span class="nc" id="L82">        User currentUser = userService.findCurrentUser(); </span>
+<span class="nc" id="L83">        checkers.checkPlayerAlreadyInALobby(currentUser);</span>
+<span class="nc" id="L84">        Player player = new Player(); </span>
+<span class="nc" id="L85">        player.setUser(currentUser);     </span>
+<span class="nc" id="L86">        player.setMatch(m);</span>
+<span class="nc" id="L87">        m.getPlayers().add(player);</span>
+<span class="nc" id="L88">        Match savedMatch = mrepo.save(m);</span>
+        
+        // Notificar a todos en el lobby que alguien se unió
+<span class="nc" id="L91">        LobbyUpdateDTO update = createLobbyUpdate(savedMatch, &quot;JOIN&quot;, currentUser.getUsername());</span>
+<span class="nc" id="L92">        lobbyWebsocketController.notifyPlayerJoined(lobbyId, update);</span>
+        
+<span class="nc" id="L94">        return savedMatch;</span>
 }
 
 
     @Transactional
     public Match joinPrivateLobby(String code){
-<span class="nc" id="L92">        Match m = mrepo.findPrivateLobbyByCode(code).orElseThrow(() -&gt; new LobbyNotFound(&quot;Lobby not found&quot;));</span>
-<span class="nc" id="L93">        User currentUser = userService.findCurrentUser(); </span>
-<span class="nc" id="L94">        checkers.checkNumberOfPlayers(m);</span>
-<span class="nc" id="L95">        checkers.checkPlayerAlreadyInALobby(currentUser);</span>
-<span class="nc" id="L96">        Player player = new Player(); </span>
-<span class="nc" id="L97">        player.setUser(currentUser);</span>
-<span class="nc" id="L98">        player.setMatch(m);</span>
-<span class="nc" id="L99">        m.getPlayers().add(player);</span>
-<span class="nc" id="L100">        mrepo.save(m); </span>
-<span class="nc" id="L101">        return m;</span>
+<span class="nc" id="L100">        Match m = mrepo.findPrivateLobbyByCode(code).orElseThrow(() -&gt; new LobbyNotFound(&quot;Lobby not found&quot;));</span>
+<span class="nc" id="L101">        User currentUser = userService.findCurrentUser(); </span>
+<span class="nc" id="L102">        checkers.checkNumberOfPlayers(m);</span>
+<span class="nc" id="L103">        checkers.checkPlayerAlreadyInALobby(currentUser);</span>
+<span class="nc" id="L104">        Player player = new Player(); </span>
+<span class="nc" id="L105">        player.setUser(currentUser);</span>
+<span class="nc" id="L106">        player.setMatch(m);</span>
+<span class="nc" id="L107">        m.getPlayers().add(player);</span>
+<span class="nc" id="L108">        Match savedMatch = mrepo.save(m);</span>
+        
+        // Notificar a todos en el lobby que alguien se unió
+<span class="nc" id="L111">        LobbyUpdateDTO update = createLobbyUpdate(savedMatch, &quot;JOIN&quot;, currentUser.getUsername());</span>
+<span class="nc" id="L112">        lobbyWebsocketController.notifyPlayerJoined(m.getId(), update);</span>
+        
+<span class="nc" id="L114">        return savedMatch;</span>
 
     }
         
     
     //Funcion para crear un lobby
     @Transactional
-    public  Match createLobby(Match game, Boolean isPrivate, String name, Integer maxPlayers) {
-<span class="nc" id="L109">        User currentUser = userService.findCurrentUser(); </span>
-<span class="nc" id="L110">        Player player = new Player(); </span>
-<span class="nc" id="L111">        player.setUser(currentUser);</span>
-<span class="nc" id="L112">        player.setMatch(game);</span>
-<span class="nc" id="L113">        checkers.checkPlayerAlreadyInALobby(currentUser);</span>
-<span class="nc" id="L114">        game.setStatus(MatchStatus.WAITING);</span>
-<span class="nc" id="L115">        game.setPlayers(new ArrayList&lt;&gt;(List.of(player)));</span>
-<span class="nc" id="L116">        game.setName(name);</span>
-<span class="nc" id="L117">        game.setMaxPlayers(maxPlayers);</span>
-<span class="nc" id="L118">        game.setCreatorId(currentUser.getId());</span>
-<span class="nc" id="L119">        game.setIsPrivate(isPrivate);</span>
-<span class="nc bnc" id="L120" title="All 2 branches missed.">        if(game.getIsPrivate()){</span>
-<span class="nc" id="L121">            String code=game.generateCodeLobby();</span>
-<span class="nc" id="L122">            game.setCode(code);</span>
+    public  Match createLobby(Boolean isPrivate, String name, Integer maxPlayers, Integer numNpcs) {
+<span class="fc" id="L122">        User currentUser = userService.findCurrentUser(); </span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">            if (currentUser == null) {</span>
+<span class="fc" id="L124">                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,&quot;Usuario no autenticado&quot;);</span>
+            }
+<span class="fc" id="L126">        Match game = new Match();</span>
+<span class="fc" id="L127">        Player player = new Player(); </span>
+<span class="fc" id="L128">        player.setUser(currentUser);</span>
+<span class="fc" id="L129">        checkers.checkPlayerAlreadyInALobby(currentUser);</span>
+<span class="fc" id="L130">        game.setStatus(MatchStatus.WAITING);</span>
+<span class="fc" id="L131">        game.setPlayers(new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L132">        game.getPlayers().add(player);</span>
+<span class="fc" id="L133">        player.setMatch(game);</span>
+<span class="fc" id="L134">        game.setName(name);</span>
+<span class="fc" id="L135">        game.setMaxPlayers(maxPlayers);</span>
+<span class="fc" id="L136">        game.setNumNpcs(numNpcs);</span>
+<span class="fc" id="L137">        game.setCreatorId(currentUser.getId());</span>
+<span class="fc" id="L138">        game.setIsPrivate(isPrivate);</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if(game.getIsPrivate()){</span>
+<span class="fc" id="L140">            String code=game.generateCodeLobby();</span>
+<span class="fc" id="L141">            game.setCode(code);</span>
         }
-<span class="nc" id="L124">        mrepo.save(game);</span>
-<span class="nc" id="L125">        return game;</span>
+<span class="fc" id="L143">        mrepo.save(game);</span>
+<span class="fc" id="L144">        return game;</span>
     }
 
 
@@ -131,15 +150,45 @@ public class LobbyService {
     @Transactional
     public Match leaveLobby(Integer matchId) {
 
-<span class="nc" id="L134">        Match m = mrepo.findById(matchId).orElseThrow(() -&gt; new LobbyNotFound(&quot;Lobby no encontrado&quot;));</span>
-<span class="nc" id="L135">        User currentUser = userService.findCurrentUser();</span>
-<span class="nc" id="L136">        Player player = playerService.findByMatchIdAndUserId(m.getId(), currentUser.getId())</span>
-<span class="nc" id="L137">                .orElseThrow(() -&gt; new PlayerNotInTheGame(&quot;El jugador no está en este lobby&quot;));</span>
-<span class="nc" id="L138">        m.getPlayers().remove(player);</span>
-<span class="nc" id="L139">        return mrepo.save(m);</span>
+<span class="nc" id="L153">        Match m = mrepo.findById(matchId).orElseThrow(() -&gt; new LobbyNotFound(&quot;Lobby no encontrado&quot;));</span>
+<span class="nc" id="L154">        User currentUser = userService.findCurrentUser();</span>
+<span class="nc" id="L155">        Player player = playerService.findByMatchIdAndUserId(m.getId(), currentUser.getId())</span>
+<span class="nc" id="L156">                .orElseThrow(() -&gt; new PlayerNotInTheGame(&quot;El jugador no está en este lobby&quot;));</span>
+        
+       
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (m.getCreatorId().equals(currentUser.getId())) {</span>
+            
+<span class="nc" id="L161">            LobbyUpdateDTO update = createLobbyUpdate(m, &quot;DELETED&quot;, currentUser.getUsername());</span>
+<span class="nc" id="L162">            lobbyWebsocketController.notifyPlayerLeft(matchId, update);</span>
+            
+            
+<span class="nc" id="L165">            mrepo.delete(m);</span>
+<span class="nc" id="L166">            return null;</span>
+        }
+        
+        
+<span class="nc" id="L170">        m.getPlayers().remove(player);</span>
+<span class="nc" id="L171">        Match savedMatch = mrepo.save(m);</span>
+        
+        // Notificar a todos en el lobby que alguien se fue
+<span class="nc" id="L174">        LobbyUpdateDTO update = createLobbyUpdate(savedMatch, &quot;LEAVE&quot;, currentUser.getUsername());</span>
+<span class="nc" id="L175">        lobbyWebsocketController.notifyPlayerLeft(matchId, update);</span>
+        
+<span class="nc" id="L177">        return savedMatch;</span>
 
-    } 
-
+    }
+    
+    private LobbyUpdateDTO createLobbyUpdate(Match match, String action, String username) {
+<span class="nc" id="L182">        List&lt;LobbyUpdateDTO.PlayerLobbyDTO&gt; players = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        for (Player p : match.getPlayers()) {</span>
+<span class="nc" id="L184">            players.add(new LobbyUpdateDTO.PlayerLobbyDTO(</span>
+<span class="nc" id="L185">                p.getUser().getId(),</span>
+<span class="nc" id="L186">                p.getUser().getUsername(),</span>
+<span class="nc" id="L187">                p.getUser().getAvatar()</span>
+            ));
+<span class="nc" id="L189">        }</span>
+<span class="nc" id="L190">        return new LobbyUpdateDTO(match.getId(), players, action, username);</span>
+    }
 
 
     

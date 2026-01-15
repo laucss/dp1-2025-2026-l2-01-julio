@@ -93,11 +93,6 @@ public class MatchService {
         return matchRepo.findAll();
     }
 
-    /*@Transactional(readOnly = true)  El metodo esta en LobbyService por ahora
-    public Page<Match> getAllPublicLobbies(Pageable pageable) {
-        return matchRepo.findPublicLobbies(pageable);
-    }*/
-
     @Transactional(readOnly = true)
     public List<Match> getMatchsByName(String name) {
         return matchRepo.findByName(name);
@@ -629,9 +624,30 @@ public class MatchService {
 
     @Transactional
     public Card playerBeatsNonPlayer(Integer matchId, Integer playerId, Integer npcId){
+        // Obtener el jugador y el NPC
+        Player player = playerService.findById(playerId);
+        Npc npc = npcRepository.findById(npcId)
+                .orElseThrow(() -> new IllegalArgumentException("NPC not found"));
 
-        Card stolenCard =deckService.drawCard(matchId);
+        // Robar carta del mazo y añadirla a la mano del jugador
+        Card stolenCard = deckService.drawCard(matchId);
         handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+
+        // Actualizar la fuerza del NPC
+        npc.setStrength(npc.getStrength() + 1);
+        npcRepository.save(npc);
+
+        // Actualizar estadísticas de batallas del jugador
+        int battlesWon = Optional.ofNullable(player.getBattlesWon()).orElse(0);
+        int battlesPlayed = Optional.ofNullable(player.getBattlesPlayed()).orElse(0);
+        player.setBattlesWon(battlesWon + 1);
+        player.setBattlesPlayed(battlesPlayed + 1);
+        playerRepo.save(player);
+
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
 
         return stolenCard;
     
@@ -670,14 +686,19 @@ public class MatchService {
     public void playerLosesAgaintsNonPlayer(Card card, Integer matchId, Integer playerId, Integer currentTurnUserId, String fromWhere){
         //actualizar puntos de acción del jugador, pierde todos sus puntos de acción
         //Hay que añadir que se vaya a una habitación aleatoria 
-        
+        /* 
         Player player = playerService.findById(playerId);
         //Realmente hace falta esto? ya que podemos mover un npc y que otro jugador tenga una pelea con el aunque no sea su turno
       //if (player.getUser().getId() == currentTurnUserId){
         player.setActionPoints(0);  
-        playerService.save(player);
+        playerService.save(player); */
         
          
+
+        // Poner a cero los puntos de acción del jugador que ha perdido
+        Player player = playerService.findById(playerId);
+        player.setActionPoints(0);
+        playerService.save(player);
 
         if (fromWhere.equals("hand")){
             handService.removeCardFromPlayerHand(card, matchId, playerId);
@@ -689,6 +710,11 @@ public class MatchService {
 
         // añadimos la carta seleccionada al mazo de descartes
         deckService.addCardToDiscardedPile(matchId, card);
+        
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
             
     }
 
@@ -1002,7 +1028,11 @@ public class MatchService {
 
         } else {
             //El intento de escape falla y ocurre lo mismo que si un jugador pierde contra un npc en una pelea
-            Room randomRoom = roomService.getRandomRoom();
+            List<Room> availableRooms = getAvailableRoomsForPlayer(matchId);
+            if (availableRooms.isEmpty()) {
+                throw new IllegalStateException("No available rooms for escape");
+            }
+            Room randomRoom = availableRooms.get(new Random().nextInt(availableRooms.size()));
             consumeAllActionPointForUser(matchId, userId);
             moveLoserPlayer(matchId, userId, randomRoom.getId());
 
@@ -1010,6 +1040,32 @@ public class MatchService {
             resultado.setDiscardRequired(true);
             return resultado;
         }
-    }
+        }
 
+
+
+        @Transactional
+        List<Room> getAvailableRoomsForPlayer(Integer matchId) {
+        List<Player> players = getMatchById(matchId).getPlayers();
+        List<Npc> npcs = getMatchById(matchId).getNpcs();
+        List<Room> roomsOcupied = new ArrayList<>();
+        for (Player p: players){
+            if (!roomsOcupied.contains(p.getRoom())){
+                roomsOcupied.add(p.getRoom());
+            }
+        }
+        for (Npc n: npcs){
+            if (!roomsOcupied.contains(n.getRoom())){
+                roomsOcupied.add(n.getRoom());
+            }
+        }
+        List<Room> rooms = roomRepository.findAll();
+        List<Room> towers = roomService.getAllTowers();
+        rooms.removeAll(towers);
+        rooms.removeAll(roomsOcupied);
+        return rooms;
+
+    } 
 }
+
+

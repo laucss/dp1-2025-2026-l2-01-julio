@@ -1,32 +1,117 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatisticService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics</a> &gt; <span class="el_source">StatisticService.java</span></div><h1>StatisticService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 
 @Service
 public class StatisticService {
+
     
-    @Autowired
-    private StatisticRepository statisticRepository;
-    @Autowired    
     private PlayerRepository playerRepository;
+    private MatchService matchService;
+
     @Autowired
-    private MatchRepository matchRepository;
+<span class="fc" id="L23">    public StatisticService( PlayerRepository playerRepository, MatchService matchService) {</span>
+<span class="fc" id="L24">        this.playerRepository = playerRepository;</span>
+<span class="fc" id="L25">        this.matchService = matchService;</span>
+<span class="fc" id="L26">    }</span>
 
+    //puntos de accion totales de un usuario
+    public Integer getTotalAccionPointsByUser(Integer currentUserId) {
+<span class="fc" id="L30">        return playerRepository.getTotalAccionPointsByUser(currentUserId);</span>
+    }
 
-<span class="fc" id="L25">    public StatisticService(StatisticRepository statisticRepository, PlayerRepository playerRepository, MatchRepository matchRepository) {</span>
-<span class="fc" id="L26">        this.statisticRepository = statisticRepository;</span>
-<span class="fc" id="L27">        this.playerRepository = playerRepository;</span>
-<span class="fc" id="L28">        this.matchRepository = matchRepository;</span>
-<span class="fc" id="L29">    }</span>
+    //Todas las victorias de un usuario
+    public Integer getTotalVictoriesByUser(Integer currentUserId) {
+<span class="fc" id="L35">        List&lt;Player&gt; players = playerRepository.findByUserId(currentUserId);</span>
+<span class="fc" id="L36">        int victories = 0;</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        for (Player player : players) {</span>
+<span class="pc bpc" id="L38" title="1 of 4 branches missed.">            if (player.getMatch() != null &amp;&amp; player.getMatch().getWinner() != null) {</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">                if (player.getId().equals(player.getMatch().getWinner().getId())) {</span>
+<span class="fc" id="L40">                    victories++;</span>
+                }
+            }
+<span class="fc" id="L43">        }</span>
+<span class="fc" id="L44">        return victories;</span>
+    }
 
+    //partidas jugadas por un usuario
+    public Integer getMatchesPlayedByUser(Integer currentUserId) {
+<span class="fc" id="L49">        List&lt;Player&gt; players = playerRepository.findByUserId(currentUserId);</span>
+<span class="fc" id="L50">        return players.size();</span>
+    }
+
+    //total tiempo jugado por un usuario
+    public Integer getTotalTimePlayedByUserFOR(Integer currentUserId) {
+<span class="fc" id="L55">        List&lt;Player&gt; players = playerRepository.findByUserId(currentUserId);</span>
+<span class="fc" id="L56">        int totalTime = 0;</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (Player player : players) {</span>
+<span class="pc bpc" id="L58" title="5 of 6 branches missed.">            if (player.getMatch() != null &amp;&amp; player.getMatch().getStartTime() != null &amp;&amp; player.getMatch().getEndTime() != null) {</span>
+<span class="nc" id="L59">                totalTime += java.time.Duration.between(player.getMatch().getStartTime(), player.getMatch().getEndTime()).toMinutes();</span>
+            }
+<span class="fc" id="L61">        }</span>
+<span class="fc" id="L62">        return totalTime;</span>
+    }
+
+    //media de jugadores por partida
+    public Double getAveragePlayersPerMatch() {
+<span class="fc" id="L67">        List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (matches.isEmpty()) {</span>
+<span class="fc" id="L69">            return 0.0;</span>
+        }
+<span class="fc" id="L71">        Double numPlayers = 0.0;</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        for (Match m : matches) {</span>
+<span class="fc" id="L73">            numPlayers += m.getMaxPlayers();</span>
+<span class="fc" id="L74">        }</span>
+<span class="fc" id="L75">        return numPlayers / matches.size();</span>
+    }
+
+    //total de partidas jugadas
+    public Integer getTotalMatchesPlayed() {
+<span class="fc" id="L80">        List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
+<span class="fc" id="L81">        return matches.size();</span>
+    }
+
+    // batallas ganadas por un usuario
+    public Integer getBattlesWonByUser(Integer currentUserId) {
+<span class="fc" id="L86">        return playerRepository.getBattlesWonByUser(currentUserId);</span>
+    }
+
+    // total de batallas disputadas (suma de batallas jugadas por todos los jugadores)
+    public Integer getTotalBattlesDisputed() {
+<span class="fc" id="L91">        return playerRepository.getTotalBattlesDisputed();</span>
+    }
+
+    // habitaciones visitadas por un usuario
+    public Integer getTotalRoomsVisitedByUser(Integer currentUserId) {
+<span class="fc" id="L96">        Integer total = playerRepository.getTotalRoomsVisitedByUser(currentUserId);</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        return total != null ? total : 0;</span>
+    }
+
+    // media de habitaciones visitadas por partida
+    public Double getAverageRoomsVisitedPerMatch() {
+<span class="fc" id="L102">        List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (matches.isEmpty()) {</span>
+<span class="nc" id="L104">            return 0.0;</span>
+        }
+<span class="fc" id="L106">        Double totalRoomsVisited = 0.0;</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (Match m : matches) {</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            for (Player p : m.getPlayers()) {</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">                if (p.getRoomsVisited() != null) {</span>
+<span class="fc" id="L110">                    totalRoomsVisited += p.getRoomsVisited();</span>
+                }
+<span class="fc" id="L112">            }</span>
+<span class="fc" id="L113">        }</span>
+<span class="fc" id="L114">        return totalRoomsVisited / matches.size();</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

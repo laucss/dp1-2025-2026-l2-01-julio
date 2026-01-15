@@ -375,6 +375,21 @@ public class MatchServiceTests {
         when(deckService.drawCard(matchId)).thenReturn(card);
         when(handService.addCardToPlayerHand(card, matchId, playerId)).thenReturn(new HandInGame());
 
+        // ensure NPC and player exist for the interaction
+        Player player = new Player(); player.setId(playerId);
+        when(playerService.findById(playerId)).thenReturn(player);
+        Npc npc = new Npc(); npc.setId(99); npc.setStrength(0);
+        when(npcRepository.findById(Integer.valueOf(99))).thenReturn(Optional.of(npc));
+        // ensure card/hand/deck/bag objects exist for getAllCards
+        DeckInGame deck = new DeckInGame();
+        deck.setNotDiscardedCards(new java.util.ArrayList<>());
+        when(deckService.findDeckById(matchId)).thenReturn(deck);
+        HandInGame hand = new HandInGame();
+        hand.setCards(new java.util.ArrayList<>());
+        when(handService.findPlayerHand(matchId, playerId)).thenReturn(hand);
+        BagInGame bag = new BagInGame(new java.util.ArrayList<>());
+        when(bagService.findPlayerBag(matchId, playerId)).thenReturn(bag);
+
         Card result = matchService.playerBeatsNonPlayer(matchId, playerId, 99);
 
         assertEquals(card, result);
@@ -432,6 +447,9 @@ public class MatchServiceTests {
 
         when(playerService.findById(playerId)).thenReturn(p);
         when(handService.removeCardFromPlayerHand(card, matchId, playerId)).thenReturn(card);
+        when(deckService.findDeckById(matchId)).thenReturn(new DeckInGame());
+        when(handService.findPlayerHand(matchId, playerId)).thenReturn(new HandInGame());
+        when(bagService.findPlayerBag(matchId, playerId)).thenReturn(new BagInGame());
         doNothing().when(deckService).addCardToDiscardedPile(matchId, card);
         when(playerService.save(any(Player.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -440,6 +458,7 @@ public class MatchServiceTests {
         assertEquals(0, p.getActionPoints());
         verify(handService).removeCardFromPlayerHand(card, matchId, playerId);
         verify(deckService).addCardToDiscardedPile(matchId, card);
+        verify(playerService).save(p);
     }
 
     @Test
@@ -576,7 +595,8 @@ public class MatchServiceTests {
 
         // failure: rolldiceResult >= strength
         Room randomRoom = new Room(); randomRoom.setId(600);
-        when(roomService.getRandomRoom()).thenReturn(randomRoom);
+        // make repository return both the tower and the random room; the service will remove towers and occupied rooms
+        when(roomRepo.findAll()).thenReturn(new java.util.ArrayList<>(List.of(tower, randomRoom)));
         when(roomRepo.findById(Integer.valueOf(randomRoom.getId()))).thenReturn(Optional.of(randomRoom));
         p.setActionPoints(2);
         when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.of(p));
@@ -585,5 +605,36 @@ public class MatchServiceTests {
         EscapeAttemptResultDTO r2 = matchService.escapeAttempt(matchId, userId, 10);
         assertFalse(r2.isSuccess());
         assertTrue(r2.isDiscardRequired());
+        verify(roomRepo).findAll();
+        verify(playerRepo, times(2)).save(p);
+    }
+
+    @Test
+    void submitDiceAndAssignOrderThrowsWhenPlayerNotFound() {
+        int matchId = 201; int userId = 202; int diceRoll = 4;
+
+        Match m = new Match(); m.setId(matchId);
+        when(matchRepo.findById(Integer.valueOf(matchId))).thenReturn(Optional.of(m));
+        when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> matchService.submitDiceAndAssignOrder(matchId, userId, diceRoll));
+    }
+
+    @Test
+    void consumeActionPointForUserThrowsWhenPlayerNotFound() {
+        int matchId = 301; int userId = 302;
+
+        when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> matchService.consumeActionPointForUser(matchId, userId));
+    }
+
+    @Test
+    void getMatchWinnerThrowsWhenMatchNotFinished() {
+        int matchId = 401;
+        Match m = new Match(); m.setId(matchId); m.setStatus(MatchStatus.PLAYING);
+        when(matchRepo.findById(Integer.valueOf(matchId))).thenReturn(Optional.of(m));
+
+        assertThrows(IllegalStateException.class, () -> matchService.getMatchWinner(matchId));
     }
 }

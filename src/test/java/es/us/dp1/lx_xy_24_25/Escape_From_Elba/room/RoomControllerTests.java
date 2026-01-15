@@ -81,5 +81,31 @@ public class RoomControllerTests {
         assertEquals("DiceRoom", dto.getName());
     }
 
+    @Test
+    public void adjacencyIsReflectedInDto() {
+        roomRepository.findAll().forEach(r -> r.setAdjacencyList(new ArrayList<>()));
+        roomRepository.deleteAll();
+
+        Room r1 = new Room();
+        r1.setName("AdjA");
+        r1.setBlackDice(1);
+        r1.setWhiteDice(1);
+        r1.setAdjacencyList(new ArrayList<>());
+
+        Room r2 = new Room();
+        r2.setName("AdjB");
+        r2.setBlackDice(2);
+        r2.setWhiteDice(2);
+        r2.setAdjacencyList(new ArrayList<>());
+
+        roomRepository.save(r2);
+        r1.getAdjacencyList().add(r2);
+        roomRepository.save(r1);
+
+        RoomDTO dto = roomController.getRoomById(r1.getId());
+        assertEquals(1, dto.getAdjacencyList().size());
+        assertEquals("AdjB", dto.getAdjacencyList().get(0).getName());
+    }
+
 
 }

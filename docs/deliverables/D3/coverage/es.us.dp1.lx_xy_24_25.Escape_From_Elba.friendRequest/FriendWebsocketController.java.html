@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FriendWebsocketController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest</a> &gt; <span class="el_source">FriendWebsocketController.java</span></div><h1>FriendWebsocketController.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+
+@Controller
+<span class="fc" id="L8">public class FriendWebsocketController {</span>
+    
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    /**
+     * Notifica a un usuario sobre una nueva solicitud de amistad recibida
+     * @param receiverId ID del usuario que recibe la solicitud
+     * @param friendRequest La solicitud de amistad
+     */
+    public void notifyNewFriendRequest(Integer receiverId, FriendRequest friendRequest) {
+<span class="nc" id="L19">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/user.&quot; + receiverId + &quot;.friendRequests&quot;,
+            friendRequest
+        );
+<span class="nc" id="L23">    }</span>
+
+    /**
+     * Notifica a un usuario sobre un cambio en sus solicitudes de amistad (aceptada/rechazada)
+     * @param userId ID del usuario afectado
+     * @param friendRequest La solicitud de amistad actualizada
+     */
+    public void notifyFriendRequestUpdate(Integer userId, FriendRequest friendRequest) {
+<span class="nc" id="L31">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/user.&quot; + userId + &quot;.friendRequests.update&quot;,
+            friendRequest
+        );
+<span class="nc" id="L35">    }</span>
+
+    /**
+     * Notifica al remitente que su solicitud fue aceptada
+     * @param senderId ID del usuario que envió la solicitud
+     * @param friendRequest La solicitud de amistad aceptada
+     */
+    public void notifyRequestAccepted(Integer senderId, FriendRequest friendRequest) {
+<span class="nc" id="L43">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/user.&quot; + senderId + &quot;.friendRequests.accepted&quot;,
+            friendRequest
+        );
+<span class="nc" id="L47">    }</span>
+
+    /**
+     * Notifica al remitente que su solicitud fue rechazada
+     * @param senderId ID del usuario que envió la solicitud
+     * @param friendRequest La solicitud de amistad rechazada
+     */
+    public void notifyRequestRejected(Integer senderId, FriendRequest friendRequest) {
+<span class="nc" id="L55">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/user.&quot; + senderId + &quot;.friendRequests.rejected&quot;,
+            friendRequest
+        );
+<span class="nc" id="L59">    }</span>
+
+    /**
+     * Notifica a ambos usuarios que una amistad fue eliminada
+     * @param user1Id ID del primer usuario
+     * @param user2Id ID del segundo usuario
+     * @param friendRequestId ID de la solicitud de amistad eliminada
+     */
+    public void notifyFriendRequestDeleted(Integer user1Id, Integer user2Id, Integer friendRequestId) {
+<span class="nc" id="L68">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/user.&quot; + user1Id + &quot;.friendRequests.deleted&quot;,
+            friendRequestId
+        );
+<span class="nc" id="L72">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/user.&quot; + user2Id + &quot;.friendRequests.deleted&quot;,
+            friendRequestId
+        );
+<span class="nc" id="L76">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

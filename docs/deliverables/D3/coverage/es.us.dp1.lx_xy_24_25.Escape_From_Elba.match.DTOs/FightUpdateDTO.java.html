@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FightUpdateDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs</a> &gt; <span class="el_source">FightUpdateDTO.java</span></div><h1>FightUpdateDTO.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs;
+
+public class FightUpdateDTO {
+    private Integer matchId;
+    private Integer attackerId;
+    private String attackerUsername;
+    private Integer defenderId;
+    private String defenderUsername;
+    private String roomName;
+    private Integer roomId;
+    private String action; // &quot;START&quot;, &quot;END&quot;
+    private Boolean isBot;
+
+<span class="nc" id="L14">    public FightUpdateDTO() {}</span>
+
+    public FightUpdateDTO(Integer matchId, Integer attackerId, String attackerUsername, 
+<span class="nc" id="L17">                          Integer defenderId, String defenderUsername, String roomName, String action) {</span>
+<span class="nc" id="L18">        this.matchId = matchId;</span>
+<span class="nc" id="L19">        this.attackerId = attackerId;</span>
+<span class="nc" id="L20">        this.attackerUsername = attackerUsername;</span>
+<span class="nc" id="L21">        this.defenderId = defenderId;</span>
+<span class="nc" id="L22">        this.defenderUsername = defenderUsername;</span>
+<span class="nc" id="L23">        this.roomName = roomName;</span>
+<span class="nc" id="L24">        this.action = action;</span>
+<span class="nc" id="L25">    }</span>
+
+<span class="nc" id="L27">    public Integer getMatchId() { return matchId; }</span>
+<span class="nc" id="L28">    public void setMatchId(Integer matchId) { this.matchId = matchId; }</span>
+
+<span class="nc" id="L30">    public Integer getAttackerId() { return attackerId; }</span>
+<span class="nc" id="L31">    public void setAttackerId(Integer attackerId) { this.attackerId = attackerId; }</span>
+
+<span class="nc" id="L33">    public String getAttackerUsername() { return attackerUsername; }</span>
+<span class="nc" id="L34">    public void setAttackerUsername(String attackerUsername) { this.attackerUsername = attackerUsername; }</span>
+
+<span class="nc" id="L36">    public Integer getDefenderId() { return defenderId; }</span>
+<span class="nc" id="L37">    public void setDefenderId(Integer defenderId) { this.defenderId = defenderId; }</span>
+
+<span class="nc" id="L39">    public String getDefenderUsername() { return defenderUsername; }</span>
+<span class="nc" id="L40">    public void setDefenderUsername(String defenderUsername) { this.defenderUsername = defenderUsername; }</span>
+
+<span class="nc" id="L42">    public String getRoomName() { return roomName; }</span>
+<span class="nc" id="L43">    public void setRoomName(String roomName) { this.roomName = roomName; }</span>
+
+<span class="nc" id="L45">    public Integer getRoomId() { return roomId; }</span>
+<span class="nc" id="L46">    public void setRoomId(Integer roomId) { this.roomId = roomId; }</span>
+
+<span class="nc" id="L48">    public String getAction() { return action; }</span>
+<span class="nc" id="L49">    public void setAction(String action) { this.action = action; }</span>
+
+<span class="nc" id="L51">    public Boolean getIsBot() { return isBot; }</span>
+<span class="nc" id="L52">    public void setIsBot(Boolean isBot) { this.isBot = isBot; }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L56">        return &quot;FightUpdateDTO{&quot; +</span>
+                &quot;matchId=&quot; + matchId +
+                &quot;, attackerId=&quot; + attackerId +
+                &quot;, attackerUsername='&quot; + attackerUsername + '\'' +
+                &quot;, defenderId=&quot; + defenderId +
+                &quot;, defenderUsername='&quot; + defenderUsername + '\'' +
+                &quot;, roomName='&quot; + roomName + '\'' +
+                &quot;, roomId=&quot; + roomId +
+                &quot;, action='&quot; + action + '\'' +
+                &quot;, isBot=&quot; + isBot +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

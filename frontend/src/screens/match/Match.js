@@ -15,6 +15,7 @@ import StartDiceModal from "./StartDiceModal";
 import StealCardModal from "./StealCardModal";
 import NpcLossDiscardModal from "./NpcLossDiscardModal";
 import EscapeDiceModal from "./EscapeDiceModal";
+import VotingModal from "./VotingModal";
 
 // para alerta de errores
 import { toast } from "react-toastify";
@@ -78,6 +79,11 @@ export default function Match(){
     const [isNpcLossModalOpen, setIsNpcLossModalOpen] = useState(false);
     const [npcLossModalTitle, setNpcLossModalTitle] = useState();
     const [npcLossModalSubtitle, setNpcLossModalSubtitle] = useState();
+    const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+    const [weaponProposed, setWeaponProposed] = useState('');
+    const [proposingUserId, setProposingUserId] = useState(null);
+    const [proposingUsername, setProposingUsername] = useState('');
+    const [votingResult, setVotingResult] = useState(null);
     
     // Determinar si el usuario actual es un espectador
     const isSpectator = !currentUser || !match?.players?.some(p => p.user.id === currentUser.id);
@@ -184,10 +190,8 @@ export default function Match(){
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, async (msg) => {
             const fightUpdate = JSON.parse(msg.body);
-            console.log('🔔 Fight notification received:', fightUpdate);
             
             if (fightUpdate.action === 'START') {
-                console.log('🥊 Starting fight...');
                 // Actualizar el match primero para tener datos frescos
                 try {
                     const response = await fetch(`/api/v1/matches/${matchId}`, {
@@ -198,40 +202,31 @@ export default function Match(){
                     
                     if (response.ok) {
                         const freshMatch = await response.json();
-                        console.log('✅ Fresh match data:', freshMatch);
                         setMatch(freshMatch);
                         
                         // Identificar al atacante (quien inicia la batalla)
                         const attacker = freshMatch.players?.find(p => p.user.id === fightUpdate.attackerId);
-                        console.log('👊 Attacker found:', attacker);
                         
                         // Identificar al defensor (puede ser jugador o NPC)
                         let defender = null;
                         
-                        console.log('🔍 Is defender an NPC (isBot):', fightUpdate.isBot);
-                        
                         if (fightUpdate.isBot) {
-                            console.log('🤖 Buscando NPC con ID:', fightUpdate.defenderId);
-                            console.log('🤖 NPCs disponibles:', freshMatch.npcs?.map(n => ({ id: n.id, name: n.isNiallCampbell ? 'NiallCampbell' : 'NPC' })));
                             defender = freshMatch.npcs?.find(n => n.id === fightUpdate.defenderId);
-                            console.log('🛡️ Defensor NPC encontrado:', defender);
                         } else {
                             defender = freshMatch.players?.find(p => p.user.id === fightUpdate.defenderId);
-                            console.log('🛡️ Defensor Jugador encontrado:', defender);
                         }
                         
                         if (attacker && defender) {
-                            console.log('✅ Opening fight modal with:', { attacker, defender });
                             setFightAttacker(attacker);
                             setFightDefender(defender);
                             setPendingTargetRoom(fightUpdate.roomId || fightUpdate.roomName);
                             setIsFightModalOpen(true);
                         } else {
-                            console.error('❌ Could not find attacker or defender:', { attacker, defender, fightUpdate });
+                            console.error('Could not find attacker or defender:', { attacker, defender, fightUpdate });
                         }
                     }
                 } catch (error) {
-                    console.error('❌ Error fetching fresh match data for fight:', error);
+                    console.error('Error fetching fresh match data for fight:', error);
                 }
             } else if (fightUpdate.action === 'RESOLVE') {
                 const winnerId = fightUpdate.winnerId;
@@ -271,6 +266,43 @@ export default function Match(){
                     })
                 };
             });
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
+
+    // websocket para recibir notificaciones de votación de armas
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.weapon.voting`, (msg) => {
+            const votingData = JSON.parse(msg.body);
+            setIsVotingModalOpen(true);
+            setWeaponProposed(votingData.weapon);
+            setProposingUserId(votingData.proposingUserId);
+            setProposingUsername(votingData.proposingUsername);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
+
+    // websocket para recibir resultado de votación de armas
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.weapon.voting.result`, (msg) => {
+            const result = JSON.parse(msg.body);
+            if (result.status === 'FINISHED') {
+                setVotingResult(result); // Guardar el resultado para que FightModal lo procese
+                setIsVotingModalOpen(false);
+                
+                // Mostrar mensaje del resultado
+                if (result.result === 'ACCEPTED') {
+                    toast.success(`"${result.proposedWeapon}" was accepted! Bonus: +${result.finalBonus}`);
+                } else {
+                    toast.error(`"${result.proposedWeapon}" was rejected. No bonus awarded.`);
+                }
+            }
         });
 
         return () => subscription.unsubscribe();
@@ -462,9 +494,29 @@ export default function Match(){
         return () => clearInterval(intervalId);
     }, [isDiceModalOpen, match?.currentTurnPhase, matchId]);
 
-    
+    // Función para limpiar los estados de votación
+    const cleanVotingStates = async () => {
+        setVotingResult(null);
+        setIsVotingModalOpen(false);
+        setWeaponProposed('');
+        setProposingUserId(null);
+        setProposingUsername('');
+        
+        // Eliminar las votaciones de la base de datos
+        try {
+            await fetch(`/api/v1/voting/${matchId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (error) {
+            console.error('Error al eliminar votaciones:', error);
+        }
+    };
 
-    // console.log('currentPlayer', currentPlayer)
+        // console.log('currentPlayer', currentPlayer)
     const fetchActionPoints = async () => {
         try {
             const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/actionPoints`, {
@@ -1262,12 +1314,6 @@ export default function Match(){
             }
         }
     }
-    // Normaliza habitaciones corridor: 10 -> 9 (corridor 2), 28 -> 27 (corridor 9)
-    const normalizeCorridorRoomId = (roomId) => {
-        if (roomId === 10) return 9;
-        if (roomId === 28) return 27;
-        return roomId;
-    };
 
     const moveLoserToRandomRoom = async (userId, roomId) => {
         try {
@@ -1318,13 +1364,13 @@ export default function Match(){
     }
 
     const handleNpcLossDiscard = async ({ cardId, fromWhere }) => {
-        if (!cardId || !fromWhere || !currentPlayer[0]?.id) {
+        if (!cardId || !fromWhere || !currentPlayer?.id) {
             setIsNpcLossModalOpen(false);
             return;
         }
 
         try {
-            const res = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/lose-against-npc`, {
+            const res = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/lose-against-npc`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${jwt}`,
@@ -1892,14 +1938,23 @@ return (
                 Actions
             </button>
 
-            <ActionsModal
-                isOpen={isActionsModalOpen}
-                onClose={() => setIsActionsModalOpen(false)}
-                moveToAdyacent={() => setMoveToAdyacentRoom(true) }
-                moveToRoomWithWord={() => setMoveToRoomWithWord(true) }
-                onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
-                onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
-            />
+            {
+                (() => {
+                    const currentRoomId = currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id);
+                    const canAttemptEscape = [1,6,31,36].includes(normalizeRoomId(currentRoomId));
+                    return (
+                        <ActionsModal
+                            isOpen={isActionsModalOpen}
+                            onClose={() => setIsActionsModalOpen(false)}
+                            moveToAdyacent={() => setMoveToAdyacentRoom(true) }
+                            moveToRoomWithWord={() => setMoveToRoomWithWord(true) }
+                            onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
+                            onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
+                            canAttemptEscape={canAttemptEscape}
+                        />
+                    )
+                })()
+            }
 
             <button
                 className="leave-match-button"
@@ -1913,12 +1968,20 @@ return (
 
     <FightModal
             isOpen={isFightModalOpen}
-            onClose={() => { setIsFightModalOpen(false); setFightDefender(null); setFightAttacker(null); }}
+            onClose={() => { 
+                setIsFightModalOpen(false); 
+                setFightDefender(null); 
+                setFightAttacker(null); 
+                cleanVotingStates();
+            }}
             defender={fightDefender}
             attacker={fightAttacker}
             stompClient={stompClient}
             bagCards={bagCards}
             matchData={match}
+            votingResult={votingResult}
+            proposingUserId={proposingUserId}
+            onVotingResultProcessed={() => setVotingResult(null)}
             onResolve={async (currentUserWon) => {
                 try {
                     console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightDefender=', fightDefender, 'fightAttacker=', fightAttacker);
@@ -1931,6 +1994,7 @@ return (
                         setFightDefender(null);
                         setFightAttacker(null);
                         setPendingTargetRoom(null);
+                        cleanVotingStates();
                         return;
                     }
 
@@ -1955,7 +2019,7 @@ return (
                                 // Si es NiallCampbell, roba de la pila de descarte
                                 if (fightDefender?.isNiallCampbell) {
                                     console.log('Drawing from discard pile for beating Niall Campbell...');
-                                    await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0]?.id}/playerWinsNiallCampbell`, {
+                                    await fetch(`/api/v1/matches/${matchId}/${fightAttacker?.id}/playerWinsNiallCampbell`, {
                                         method: "POST",
                                         headers: {
                                             Authorization: `Bearer ${jwt}`,
@@ -1969,8 +2033,8 @@ return (
                                 } else {
                                     // Si es un NPC normal, roba 2 cartas de recompensa
                                     console.log('Drawing 2 reward cards for beating regular NPC...');
-                                    await drawCardForWinner(currentPlayer?.[0]?.id);
-                                    await drawCardForWinner(currentPlayer?.[0]?.id);
+                                    await drawCardForWinner(fightAttacker?.id);
+                                    await drawCardForWinner(fightAttacker?.id);
                                 }
                                 
                                 // Mover al jugador ganador a la habitación donde estaba el bot
@@ -2007,7 +2071,7 @@ return (
                                 }
                                 
                                 // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
-                                botRandomRoomId = normalizeCorridorRoomId(botRandomRoomId);
+                                botRandomRoomId = normalizeRoomId(botRandomRoomId);
                                 
                                 console.log('Moving NPC loser to random room:', botRandomRoomId);
                                 await fetch(`/api/v1/matches/${matchId}/npc/location`, {
@@ -2071,7 +2135,7 @@ return (
                                 }
                                 
                                 // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
-                                randomRoomIdPlayer = normalizeCorridorRoomId(randomRoomIdPlayer);
+                                randomRoomIdPlayer = normalizeRoomId(randomRoomIdPlayer);
                                 
                                 console.log('Moving player loser to random room:', randomRoomIdPlayer);
                                 await moveLoserToRandomRoom(currentUser.id, randomRoomIdPlayer);
@@ -2101,6 +2165,7 @@ return (
                         setFightDefender(null);
                         setFightAttacker(null);
                         setPendingTargetRoom(null);
+                        cleanVotingStates();
                         return;
                     }
 
@@ -2110,6 +2175,7 @@ return (
                         setFightDefender(null);
                         setFightAttacker(null);
                         setPendingTargetRoom(null);
+                        cleanVotingStates();
                         return;
                     }
                     const allRoomIds = [
@@ -2240,6 +2306,7 @@ return (
                     setFightDefender(null);
                     setFightAttacker(null);
                     setPendingTargetRoom(null);
+                    cleanVotingStates();
                 }
             }}
     />
@@ -2291,6 +2358,19 @@ return (
             title={npcLossModalTitle}
             subtitle={npcLossModalSubtitle}
             onDiscard={handleNpcLossDiscard}
+        />
+
+        <VotingModal
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+            weaponProposed={weaponProposed}
+            userProposingWeapon={match?.players?.find(p => p.user?.id === proposingUserId)?.user}
+            proposingUserId={proposingUserId}
+            matchData={match}
+            stompClient={stompClient}
+            onSubmit={(voting) => {
+                setIsVotingModalOpen(false);
+            }}
         />
 
       

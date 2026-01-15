@@ -34,7 +34,7 @@ export default function CreateLobby() {
         throw new Error("Error al crear la partida: " + response.status);
       }
 
-      // Si tu endpoint devuelve el objeto del lobby creado
+      
       const newLobby = await response.json();
 
       // Redirige al lobby recién creado
@@ -50,16 +50,9 @@ export default function CreateLobby() {
     <div className="lobbies-overlay">
   <div className="creation-box">
 
- {/* Flecha de volver al inicio */}
-     <button 
-            className="back-arrow-btn"
-            onClick={() => navigate('/')}
-          >
-            ￩
-      </button>
 
   <div className="lobby-creation-content">
-    <h1 style={{color:"black"}}>Crear Partida</h1>
+    <h1>Crear Partida</h1>
 
     <form onSubmit={handleCreate}>
       <div>
@@ -76,18 +69,18 @@ export default function CreateLobby() {
       <div>
         <label>Número de jugadores</label>
         <div className="player-count-container">
-          <button type="button" onClick={() => setMaxPlayers((prev) => Math.max(3, prev - 1))}>↓</button>
+          <button className="circle-btn" type="button" onClick={() => setMaxPlayers((prev) => Math.max(3, prev - 1))}>-</button>
           <span>{maxPlayers}</span>
-          <button type="button" onClick={() => setMaxPlayers((prev) => Math.min(6, prev + 1))}>↑</button>
+          <button className="circle-btn" type="button" onClick={() => setMaxPlayers((prev) => Math.min(6, prev + 1))}>+</button>
         </div>
       </div>
 
       <div>
         <label>Número de NPCs</label>
-        <div className="npc-count-container">
-          <button type="button" onClick={() => setNumNpcs(prev => Math.max(3, prev - 1))}>-</button>
+        <div className="player-count-container">
+          <button className="circle-btn" type="button" onClick={() => setNumNpcs(prev => Math.max(3, prev - 1))}>-</button>
           <span>{numNpcs}</span>
-          <button type="button" onClick={() => setNumNpcs(prev => Math.min(8,prev + 1))}>+</button>
+          <button className= "circle-btn" type="button" onClick={() => setNumNpcs(prev => Math.min(8,prev + 1))}>+</button>
         </div>
       </div>
 

@@ -11,6 +11,7 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
   const [whiteDice, setWhiteDice] = useState('1');
   const [diceRolled, setDiceRolled] = useState(false);
   const [isRolling, setIsRolling] = useState(false);
+  const [totalRoll, setTotalRoll] = useState(null);
 
   const rollDice = () => {
     return Math.floor(Math.random() * 6) + 1;
@@ -53,9 +54,10 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
       clearInterval(animationInterval);
       const white = rollDice();
       setWhiteDice(white.toString());
+      setTotalRoll(white);
       setDiceRolled(true);
       setIsRolling(false);
-      submitEscapeAttempt(white);
+      // Wait for user confirmation before submitting
     }, 1500);
   };
 
@@ -73,11 +75,23 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
         </div>
 
         <button onClick={throwDice} className={`throw-dice-button ${diceRolled || isRolling ? 'disabled' : ''}`} disabled={diceRolled || isRolling}>
-          {isRolling ? 'Throwing...' : diceRolled ? 'thrown dice' : 'Roll the dice'}
+          {isRolling ? 'Tirando...' : diceRolled ? 'Dado lanzado' : 'Lanzar dado'}
         </button>
 
         {diceRolled && (
-          <p className="dice-result-text">Resultado: {parseInt(whiteDice)}</p>
+          <>
+            <p className="dice-result-text">Resultado: {parseInt(whiteDice)}</p>
+            <button
+              className="confirm-dice-button"
+              onClick={() => {
+                if (totalRoll != null && !isRolling) {
+                  submitEscapeAttempt(totalRoll);
+                }
+              }}
+            >
+              Confirmar
+            </button>
+          </>
         )}
 
       </div>

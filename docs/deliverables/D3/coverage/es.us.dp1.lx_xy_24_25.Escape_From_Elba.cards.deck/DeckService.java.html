@@ -7,13 +7,11 @@ import java.util.Map;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardRepository;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 
 
@@ -24,19 +22,19 @@ public class DeckService {
      * Variable que vamos a usar a modo de &quot;almacenamiento&quot; del estado de la baraja, de los mazos. Es decir, vamos a usar un map
      * en el que la clave sea el Id de la partida y el valor, la baraja en sí -&gt; DeckInGame (guardada en memoria)
      */
-<span class="fc" id="L27">    private final Map&lt;Integer, DeckInGame&gt; activesDecks = new HashMap&lt;&gt;(); </span>
+<span class="fc" id="L25">    private final Map&lt;Integer, DeckInGame&gt; activesDecks = new HashMap&lt;&gt;(); </span>
 
     public CardRepository cardRepository;
     public Checkers checkers;
 
     @Autowired
-<span class="fc" id="L33">    public DeckService(CardRepository cardRepository, @Lazy Checkers checkers) {</span>
-<span class="fc" id="L34">        this.cardRepository = cardRepository;</span>
-<span class="fc" id="L35">        this.checkers = checkers; </span>
-<span class="fc" id="L36">    }</span>
+<span class="fc" id="L31">    public DeckService(CardRepository cardRepository, Checkers checkers) {</span>
+<span class="fc" id="L32">        this.cardRepository = cardRepository;</span>
+<span class="fc" id="L33">        this.checkers = checkers; </span>
+<span class="fc" id="L34">    }</span>
 
     // VARIABLES DE LOGICA DE NEGOCIO 
-<span class="fc" id="L39">    private static final Integer numberOfInitialCards = 3; </span>
+<span class="fc" id="L37">    private static final Integer numberOfInitialCards = 3; </span>
 
     /*
      * Método para hacer una copia de la baraja original de la base de datos y barajarla para iniciar el mazo al empezar una partida
@@ -45,21 +43,25 @@ public class DeckService {
     @Transactional(readOnly = true)
     public DeckInGame initializeDeck(Integer macthId) {
         // TODO: revisar si debería checkear que el match exista, creo que no pq no da tiempo pero bueno
-<span class="nc" id="L48">        List&lt;Card&gt; originalsCards = cardRepository.findAll();</span>
+<span class="fc" id="L46">        List&lt;Card&gt; originalsCards = cardRepository.findAll();</span>
 
         /*
          * lo creo que de esta manera, con el new ArrayList antes para que se cree una lista mutable
          * y se pueda hacer el shuffle. Si no le pongo eso delante, da error porque lo trata como una lista inmutable
          */
-<span class="nc" id="L54">        List&lt;Card&gt; copiedCards = new ArrayList&lt;&gt;(</span>
-<span class="nc" id="L55">                originalsCards.stream().map(Card::getClone).toList());</span>
+<span class="fc" id="L52">        List&lt;Card&gt; copiedCards = new ArrayList&lt;&gt;(</span>
+<span class="fc" id="L53">                originalsCards.stream().map(Card::getClone).toList());</span>
         
-<span class="nc" id="L57">        Collections.shuffle(copiedCards); </span>
+<span class="fc" id="L55">        Collections.shuffle(copiedCards); </span>
 
-<span class="nc" id="L59">        DeckInGame newDeck = new DeckInGame(copiedCards); </span>
-<span class="nc" id="L60">        activesDecks.put(macthId, newDeck); </span>
-<span class="nc" id="L61">        return newDeck; </span>
+<span class="fc" id="L57">        DeckInGame newDeck = new DeckInGame(copiedCards); </span>
+<span class="fc" id="L58">        activesDecks.put(macthId, newDeck); </span>
+<span class="fc" id="L59">        return newDeck; </span>
 
+    }
+
+    public Map&lt;Integer, DeckInGame&gt; getActivesDecks() {
+<span class="fc" id="L64">        return activesDecks;</span>
     }
 
     /*
@@ -69,8 +71,8 @@ public class DeckService {
     @Transactional
     public void deleteDeckInGame(Integer matchId){ 
         // TODO: revisar si tengo que checkear que match exista
-<span class="nc" id="L72">        activesDecks.remove(matchId); </span>
-<span class="nc" id="L73">    }</span>
+<span class="fc" id="L74">        activesDecks.remove(matchId); </span>
+<span class="fc" id="L75">    }</span>
 
     /* 
      * Método para buscar el mazo por su id 
@@ -79,34 +81,35 @@ public class DeckService {
 
     @Transactional(readOnly = true)
     public DeckInGame findDeckById(Integer macthId) {
-<span class="nc" id="L82">        DeckInGame deck = activesDecks.get(macthId); </span>
-<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (deck==null)</span>
-<span class="nc" id="L84">            throw new ResourceNotFoundException(&quot;This deck does not exist or is not found&quot;); </span>
-<span class="nc" id="L85">        return deck;   </span>
+<span class="fc" id="L84">        DeckInGame deck = activesDecks.get(macthId); </span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if (deck == null){</span>
+<span class="fc" id="L86">            return new DeckInGame(); </span>
+        }
+<span class="fc" id="L88">        return deck;   </span>
     }
 
      
    
 
     /*
-     * Método para una vez, acabadas las cartas para robar, coja las descartadas, las baraje de nuevo y las devuelva al mazo de robar
+     * Método que una vez, acabadas las cartas para robar, coge las descartadas, las baraja de nuevo y las devuelve al mazo de robar
+     * No hemos puesto que se quede al menos una carta en la pila de descarte pues el juego no lo contempla.  
      */
 
     
     @Transactional
-    public DeckInGame shuffleAndDicardedToNotDiscarded(Integer macthId){
-        // checkear si quedan menos de x cartas en vez de cero 
+    public DeckInGame shuffleAndDicardedToNotDiscarded(DeckInGame deck){
+        // checkear si quedan menos de x cartas en vez de cero?
 
-<span class="nc" id="L100">        DeckInGame deck = findDeckById(macthId);</span>
 
-<span class="nc" id="L102">        List&lt;Card&gt; discardedCards = deck.getDiscardedCards();</span>
-<span class="nc" id="L103">        Collections.shuffle(discardedCards);</span>
+<span class="nc" id="L105">        List&lt;Card&gt; discardedCards = deck.getDiscardedCards();</span>
+<span class="nc" id="L106">        Collections.shuffle(discardedCards);</span>
 
-<span class="nc" id="L105">        deck.setNotDiscardedCards(discardedCards);</span>
+<span class="nc" id="L108">        deck.setNotDiscardedCards(discardedCards);</span>
 
-<span class="nc" id="L107">        deck.setDiscardedCards(new ArrayList&lt;Card&gt;()); </span>
-
-<span class="nc" id="L109">        return deck; </span>
+<span class="nc" id="L110">        deck.setDiscardedCards(new ArrayList&lt;Card&gt;()); </span>
+        
+<span class="nc" id="L112">        return deck; </span>
     }
     
     /*
@@ -115,14 +118,15 @@ public class DeckService {
 
     @Transactional
     public Card drawCard(Integer matchId){
-<span class="nc" id="L118">        DeckInGame deck = findDeckById(matchId); </span>
-<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (deck.getNotDiscardedCards().isEmpty()) {</span>
-<span class="nc" id="L120">            throw new RuntimeException(&quot;No hay cartas para robar&quot;);</span>
+<span class="fc" id="L121">        DeckInGame deck = findDeckById(matchId); </span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if (deck.getNotDiscardedCards().isEmpty()) {</span>
+<span class="nc" id="L123">            deck = shuffleAndDicardedToNotDiscarded(deck); </span>
 }
 
-<span class="nc" id="L123">        Card card = deck.getNotDiscardedCards().getLast();</span>
-<span class="nc" id="L124">        deck.getNotDiscardedCards().removeLast(); </span>
-<span class="nc" id="L125">        return card; </span>
+<span class="fc" id="L126">        Card card = deck.getNotDiscardedCards().getLast();</span>
+<span class="fc" id="L127">        deck.getNotDiscardedCards().removeLast(); </span>
+<span class="fc" id="L128">        activesDecks.put(matchId, deck); // actualizo la baraja </span>
+<span class="fc" id="L129">        return card; </span>
         
     }
 
@@ -133,38 +137,15 @@ public class DeckService {
     @Transactional
     public void addCardToDiscardedPile (Integer macthId, Card card){
     
-<span class="nc" id="L136">        DeckInGame deck = findDeckById(macthId);</span>
+<span class="fc" id="L140">        DeckInGame deck = findDeckById(macthId);</span>
 
-<span class="nc" id="L138">        List&lt;Card&gt; discardedCards = deck.getDiscardedCards();</span>
+<span class="fc" id="L142">        List&lt;Card&gt; discardedCards = deck.getDiscardedCards();</span>
 
-<span class="nc" id="L140">        checkers.checkCardExists(card);</span>
+<span class="fc" id="L144">        checkers.checkCardExists(card);</span>
         
-<span class="nc" id="L142">        discardedCards.add(card); </span>
-<span class="nc" id="L143">    }</span>
+<span class="fc" id="L146">        discardedCards.add(card); </span>
+<span class="fc" id="L147">    }</span>
 
-
-    
-
-    /*
-     * Método que añade VARIAS cartas al mazo de descartes
-     */
-
-     /*
-
-    public void addFewCardsToDiscardedPile (Integer macthId, List&lt;Card&gt; cards){
-    
-        DeckInGame deck = findDeckById(macthId);
- 
-        List&lt;Card&gt; discardedCards = deck.getDiscardedCards();
-
-        for (const card in cards){
-            checkers.checkCardExists(card);
-            discardedCards.add(card);
-        } 
-         
-    }
-
-    */
 
     /*
      * Método que devuelve (y quita del mazo de descarte) la última carta que haya sido descartada
@@ -174,11 +155,15 @@ public class DeckService {
     @Transactional
     public Card getAndRemoveLastDiscardedCard (Integer macthId){
 
-<span class="nc" id="L177">        DeckInGame deck = findDeckById(macthId);</span>
+<span class="fc" id="L158">        DeckInGame deck = findDeckById(macthId);</span>
 
-<span class="nc" id="L179">        List&lt;Card&gt; discardedCards = deck.getDiscardedCards();</span>
-
-<span class="nc" id="L181">        return discardedCards.remove(-1); </span>
+<span class="fc" id="L160">        List&lt;Card&gt; discardedCards = deck.getDiscardedCards();</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        if (discardedCards.isEmpty()){</span>
+<span class="fc" id="L162">            return null; </span>
+        } else {
+<span class="fc" id="L164">            return discardedCards.removeLast(); </span>
+        }
+        
     }
      
     
@@ -189,8 +174,8 @@ public class DeckService {
 
     @Transactional(readOnly = true)
     public Boolean isEmpty (Integer macthId) { // (Integer deckId)
-<span class="nc" id="L192">        DeckInGame deck = findDeckById(macthId);</span>
-<span class="nc" id="L193">        return deck.getNotDiscardedCards().isEmpty();  </span>
+<span class="fc" id="L177">        DeckInGame deck = findDeckById(macthId);</span>
+<span class="fc" id="L178">        return deck.getNotDiscardedCards().isEmpty();  </span>
     }
 
     /*
@@ -200,20 +185,42 @@ public class DeckService {
 
     @Transactional
     public List&lt;Card&gt; drawInitialCardsFromDeck (Integer matchId){
-<span class="nc" id="L203">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;(); </span>
-<span class="nc" id="L204">        DeckInGame deck = findDeckById(matchId); </span>
+<span class="fc" id="L188">        List&lt;Card&gt; cards = new ArrayList&lt;&gt;(); </span>
+<span class="fc" id="L189">        DeckInGame deck = findDeckById(matchId); </span>
         // TODO: REVISAR SI ES MEJOR HACER UNA COPIA DE DECK 
 
-<span class="nc bnc" id="L207" title="All 2 branches missed.">        for (int i = 0; i&lt;numberOfInitialCards; i++) {</span>
-<span class="nc" id="L208">            cards.add(deck.getNotDiscardedCards().getLast()); </span>
-<span class="nc" id="L209">            deck.getNotDiscardedCards().removeLast(); </span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        for (int i = 0; i&lt;numberOfInitialCards; i++) {</span>
+<span class="fc" id="L193">            cards.add(deck.getNotDiscardedCards().getLast()); </span>
+<span class="fc" id="L194">            deck.getNotDiscardedCards().removeLast(); </span>
         }
         
         // actualizamos la baraja en memoria 
-<span class="nc" id="L213">        activesDecks.replace(matchId, deck); </span>
+<span class="fc" id="L198">        activesDecks.replace(matchId, deck); </span>
 
-<span class="nc" id="L215">        return cards;  </span>
+<span class="fc" id="L200">        return cards;  </span>
     }
+
+
+
+    public void update(DeckInGameDTO deck, Integer matchId){
+
+        //checkear que exista el player y tal 
+
+<span class="nc" id="L209">        DeckInGame newDeck = activesDecks.get(matchId); </span>
+
+        // tengo que hacer lo de newArrayList&lt;&gt;(deck...) dentro del set porque si no se hace así ç
+        // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
+<span class="nc" id="L213">        newDeck.setDiscardedCards(new ArrayList&lt;&gt;(deck.getDiscardedCards().stream()</span>
+<span class="nc" id="L214">            .map(dto -&gt; new Card(dto.getId(), dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));</span>
+        
+<span class="nc" id="L216">        newDeck.setNotDiscardedCards(new ArrayList&lt;&gt;(deck.getNotDiscardedCards().stream()</span>
+<span class="nc" id="L217">            .map(dto -&gt; new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));</span>
+
+<span class="nc" id="L219">        DeckInGame d = findDeckById(matchId); </span>
+<span class="nc" id="L220">        System.out.println(d);</span>
+
+
+<span class="nc" id="L223">    }</span>
 }
 
 
