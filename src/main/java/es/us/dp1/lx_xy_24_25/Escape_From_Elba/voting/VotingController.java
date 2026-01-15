@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,11 +31,26 @@ public class VotingController {
 
     
     @PostMapping("/vote/{matchId}")
-    public ResponseEntity<VotingDTO> submitVote (@PathVariable Integer matchId, @RequestBody VoteDTO vote){
+    public ResponseEntity<?> submitVote (@PathVariable Integer matchId, @RequestBody VoteDTO vote){
         VotingDTO voting = votingService.submitVote(matchId, vote);
+        // Si la votación ha terminado, incluir más información
+        if (voting.getStatus().equals("FINISHED")) {
+            VotingResultDTO result = new VotingResultDTO(
+                "FINISHED",
+                voting.getResult().toString(),
+                voting.getWeaponProposed(),
+                voting.getFinalBonus()
+            );
+            return ResponseEntity.ok(result);
+        }
         return ResponseEntity.ok(voting);
     }
 
+    @DeleteMapping("/{matchId}")
+    public ResponseEntity<Void> deleteVotingsByMatchId(@PathVariable Integer matchId){
+        votingService.deleteVotingsByMatchId(matchId);
+        return ResponseEntity.noContent().build();
+    }
 
     
 }

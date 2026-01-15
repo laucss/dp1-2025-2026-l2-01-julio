@@ -14,6 +14,7 @@ public class VotingDTO {
     private VotingResult result;
     private Integer votesInFavor;
     private Integer votesAgainst;
+    private Integer finalBonus;
     private List<VoteDTO> votes;
 
     public VotingDTO(Voting voting){
@@ -23,6 +24,7 @@ public class VotingDTO {
         this.result = voting.getResult();
         this.votesInFavor = voting.getVotesInFavor();
         this.votesAgainst = voting.getVotesAgainst();
+        this.finalBonus = voting.getFinalBonus();
         this.votes = voting.getVotes().stream().map(vote -> new VoteDTO(vote)).toList();
     }
 

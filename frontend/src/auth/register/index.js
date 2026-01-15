@@ -75,7 +75,7 @@ export default function Register() {
   if (type) {
     return (
       <div className="auth-page-container">
-        <h1>Register</h1>
+        <h1 style={{marginBottom: '-200px'}}>Register</h1>
         <div className="auth-form-container">
           <FormGenerator
             ref={registerFormRef}
