@@ -16,8 +16,9 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.user;
 //cambio para merge en FSS8078
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.validation.Valid;
-
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ public class UserService {
 	private UserRepository userRepository;
 	private PlayerRepository playerRepository;
 
+	@PersistenceContext
+	private EntityManager entityManager;
+
 	@Autowired
 	public UserService(UserRepository userRepository, PlayerRepository playerRepository) {
 		this.userRepository = userRepository;
@@ -45,6 +49,14 @@ public class UserService {
 
 	@Transactional
 	public User saveUser(User user) throws DataAccessException {
+		// Ensure no previously loaded entities remain in the persistence context
+		// to avoid NonUniqueObjectException in tests that previously loaded many users.
+		try {
+			entityManager.flush();
+		} catch (Exception e) {
+			// ignore flush failures here; continue to clear
+		}
+		entityManager.clear();
 		userRepository.save(user);
 		return user;
 	}
