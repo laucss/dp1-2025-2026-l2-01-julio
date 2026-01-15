@@ -41,23 +41,21 @@
 /* -------------------- parte de la info de los otros jugadores -------------------- */
 
 .other-players-section{
-    max-height: 450px;
+    max-height: 400px;
     min-height: 150px;
-    overflow: hidden;
-    overflow-x: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /*background-color: rgb(13, 0, 200);*/
+    padding: 10px;
+
+    scrollbar-width:auto;          /* Firefox */
+    scrollbar-color: #a3a3a3 rgba(0,0,0,0.1); /* Firefox */
 }
 .players-avatars-section {
     display: flex;
-    justify-content: center;
     gap: 20px;
-    padding: 10px;
-    /*background-color: rgba(184, 0, 0, 0.05);*/
-    flex-wrap: wrap;
     flex-direction: column;
 
-    flex:1; 
-    overflow-y: hidden;
-    overflow-x: auto;
 }
 
 .player-avatar-card {
@@ -71,8 +69,24 @@
     border-color: #6c757d;
     border-radius: 10px;
     background-color: white;
-
 }
+
+/* Esto es solo para poner más bonita la barra de scrollear*/
+/* Para Chrome, Edge, Safari */
+.other-players-section::-webkit-scrollbar {
+    width: 8px;                     /* grosor */
+}
+
+.other-players-section::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+    border-radius: 4px;
+}
+
+.other-players-section::-webkit-scrollbar-thumb {
+    background-color: #fc8282;
+    border-radius: 4px;
+}
+
 .player-info-row {
     display: flex;
     flex-direction: column;
@@ -159,13 +173,24 @@
 /* -------------------- parte de las cartas del jugador -------------------- */
 .player-section{
     display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    background-color: rgb(237, 39, 39);
+    margin-bottom: 15px;
+    height: 295px;
+
+}
+
+.cards-section{
+    display: flex;
     flex-direction: row;
     justify-content: center;
     gap: 20px;
     padding: 10px;
-    background-color: rgb(249, 0, 0);
+    /*background-color: rgb(21, 249, 0);*/
     flex-wrap: wrap;
-    margin-bottom: 15px;
+    
 }
 
 .player-hand{
@@ -175,14 +200,11 @@
     gap: 20px;
     padding: 10px;
     background-color: rgb(253, 70, 70);
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-    width: 40%;
-    max-height: 200px;
-    min-height: 150px;
+    width: 48%;
+    height: 160px;
     border-radius: 10px;
     overflow: hidden;
-    overflow-x: auto;
+    overflow-y: auto;
 }
 
 .hand-cards{
@@ -191,17 +213,19 @@
 
   display: flex;
   flex-wrap: wrap;
+  flex-direction: row;
   gap: 20px;
   justify-content: center;
   align-content: flex-start;
 
-  overflow-y: auto;
-  overflow-x: hidden;
+  flex-wrap: nowrap; 
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 /* Esto es solo para poner más bonita la barra de scrollear*/
 .hand-cards::-webkit-scrollbar {
-  width: 8px;
+  height: 8px;
 }
 
 .hand-cards::-webkit-scrollbar-track {
@@ -222,14 +246,12 @@
     gap: 20px;
     padding: 10px;
     background-color: rgb(246, 135, 135);
-    margin-bottom: 15px;
     flex-wrap: wrap;
-    width: 40%;
-    max-height: 200px;
-    min-height: 150px;
+    width: 48%;
+    height: 160px;
     border-radius: 10px;
     overflow: hidden;
-    overflow-x: auto;
+    overflow-y: auto;
 }
 
 
@@ -238,18 +260,19 @@
   padding: 10px;
 
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: row;
   gap: 20px;
   justify-content: center;
   align-content: flex-start;
 
-  overflow-y: auto;
-  overflow-x: hidden;
+  flex-wrap: nowrap; 
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 /* Esto es solo para poner más bonita la barra de scrollear*/
 .bag-cards::-webkit-scrollbar {
-  width: 8px;
+  height: 8px;
 }
 
 .bag-cards::-webkit-scrollbar-track {
@@ -258,7 +281,7 @@
 }
 
 .bag-cards::-webkit-scrollbar-thumb {
-  background-color: #f86868;
+  background-color: #fbd4d4;
   border-radius: 4px;
 }
 
@@ -322,7 +345,7 @@
     padding: 10px;
     border-style: solid;
     border-radius: 10px;
-    background-color: white;
+    /*background-color: white;*/
 
 }
 
@@ -510,20 +533,91 @@
     cursor: pointer
 }
 
-.chat-button{
-    margin-left: 050px;
-    position: absolute;
-    left: 10%;                 
-    transform: translateX(90%);
-    margin-top: -80px;
-    padding: 15px 35px; 
-    font-size: 22px;
-    background: #c0392b;
-    color: white;
-    border: none;
+
+.buttons-section {
+    /*background: #eaff04;*/
+    min-height: 80px;      /* Un poco más de altura para que respiren los botones */
+    display: flex;
+    justify-content: center; /* Centra los botones de acción perfectamente */
+    align-items: center;
+    position: relative;      /* Referencia para el chat absoluto */
+    padding: 0 80px;         /* Espacio en los lados para que no choquen con el chat */
+    gap: 15px;               /* Espacio uniforme entre botones */
+}
+
+/* Forzamos que todos los botones de esta sección tengan el mismo tamaño */
+.buttons-section button {
+    margin: 0 !important;
+    min-width: 160px;       /* Ajusta este ancho según prefieras */
+    height: 45px;
+    font-size: 16px;
+    font-weight: 600;
     border-radius: 8px;
-    max-width: 500px;
-    min-width: 230px;
-    cursor: pointer
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+
+.buttons-section button:hover {
+    transform: scale(1.05);
+}
+
+/* Posicionamiento fijo del icono de chat a la derecha */
+.match-chat-icon {
+    position: absolute;
+    right: 20px;
+    transform: translateY(-50%);
+    margin: 0 !important;
+    z-index: 10;
+    height: 20px;
+}
+
+.match-chat-icon-button {
+    background: #c0392b;
+    padding: 10px;
+    border-radius: 50%;
+    display: flex;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+
+/* Contenedor del mensaje de turno */
+.turn-banner {
+    width: 100%;
+    display: flex;
+    margin-bottom: 20px; /* Espacio antes del mapa/barajas */
+    margin-left: 20px;
+}
+
+.turn-message {
+    padding: 10px 30px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border: 2px solid white;
+}
+
+/* Colores dinámicos según de quién es el turno */
+.turn-mine {
+    background: #27ae60; /* Verde si es tu turno */
+    color: white;
+    animation: pulse 2s infinite; 
+}
+
+.turn-others {
+    background: #efe253ca; /* Azul oscuro/Gris si es de otro */
+    color: #ecf0f1;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
 }
 
