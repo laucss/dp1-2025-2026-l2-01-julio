@@ -1352,10 +1352,10 @@ export default function Match(){
     }
 
 
-
+console.log('match', match)
     
     const endMatch = () => {
-        if (!window.confirm("¿Seguro que quieres finalizar la partida?")) return; 
+        if (!window.confirm("¿Are you sure you want to end the match?")) return; 
         const body =10;
         console.log('body end match', body)
         fetch(`/api/v1/matches/${matchId}/end`, {
@@ -1367,9 +1367,8 @@ export default function Match(){
             body: JSON.stringify(body)
         })
         .then(res => res.json())
-        //.then(() => window.location.reload())
         .then(updated => {
-            console.log("Match finalizado:", updated)
+            console.log("Match ended:", updated)
             setMatch(updated)
         })
         .catch(err => console.error(err))
@@ -1473,11 +1472,11 @@ export default function Match(){
             <div className="match-ended">
                 <div className="end-overlay">
                     <div className="end-text-box">
-                        <h2>La partida ha finalizado</h2>
+                        <h2>The match has ended</h2>
                         {match?.winner?.user ? (
-                            <p style={{ fontWeight: 700, margin: '8px 0' }}>Ganador: {match.winner.user.username}</p>
+                            <p style={{ fontWeight: 700, margin: '8px 0' }}>Winner: {match.winner.user.username}</p>
                         ) : null}
-                        <p>Gracias por jugar.</p>
+                        <p>Thanks for playing.</p>
                         <button className="return-menu-button" onClick={() => navigate(`/`)}>Return to main menu</button>
                     </div>
                 </div>
@@ -1499,6 +1498,331 @@ if (!match) {
     };
 
     //console.log('handCards', handCards)
+
+    const handleFightResult = async (currentUserWon) => {
+        try {
+                console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightDefender=', fightDefender, 'fightAttacker=', fightAttacker);
+                const isCurrentAttacker = currentUser.id === fightAttacker?.user?.id;
+                const isCurrentDefender = currentUser.id === fightDefender?.user?.id;
+
+                // Solo el atacante orquesta los movimientos para evitar duplicados
+                if (!isCurrentAttacker) {
+                    setIsFightModalOpen(false);
+                    setFightDefender(null);
+                    setFightAttacker(null);
+                    setPendingTargetRoom(null);
+                    return;
+                }
+
+                const defenderRoomId = fightDefender?.currentRoom?.id || fightDefender?.roomId || fightDefender?.room?.id || pendingTargetRoom;
+
+                // currentUserWon aquí representa si el atacante ganó (porque solo el atacante ejecuta esto)
+                const attackerWins = currentUserWon;
+                
+                // Obtener el perdedor (puede ser jugador o NPC)
+                const isDefenderNPC = !fightDefender?.user;
+                const loserUser = attackerWins ? fightDefender?.user : fightAttacker?.user;
+                const loser = attackerWins ? fightDefender : fightAttacker;
+                const winnerUser = attackerWins ? fightAttacker?.user : (fightDefender?.user || fightDefender);
+
+                // Si el defensor es un NPC
+                if (isDefenderNPC) {
+                    try {
+                        if (attackerWins) {
+                            // El jugador ganó contra el bot
+                            console.log('Player won against NPC. Defender is NiallCampbell:', fightDefender?.isNiallCampbell);
+                            
+                            // Si es NiallCampbell, roba de la pila de descarte
+                            if (fightDefender?.isNiallCampbell) {
+                                console.log('Drawing from discard pile for beating Niall Campbell...');
+                                await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0]?.id}/playerWinsNiallCampbell`, {
+                                    method: "POST",
+                                    headers: {
+                                        Authorization: `Bearer ${jwt}`,
+                                        Accept: 'application/json',
+                                        'Content-Type': 'application/json',
+                                    },
+                                }).then(r => r.json()).then(data => {
+                                    // Actualizamos inmediatamente el mazo; la mano se sincroniza por WebSocket
+                                    setDeck(data.deck);
+                                });
+                            } else {
+                                // Si es un NPC normal, roba 2 cartas de recompensa
+                                console.log('Drawing 2 reward cards for beating regular NPC...');
+                                await drawCardForWinner(currentPlayer?.[0]?.id);
+                                await drawCardForWinner(currentPlayer?.[0]?.id);
+                            }
+                            
+                            // Mover al jugador ganador a la habitación donde estaba el bot
+                            if (defenderRoomId) {
+                                console.log('Moving winner to defender room:', defenderRoomId);
+                                await movePlayerToRoom(fightAttacker?.user?.id, defenderRoomId);
+                            }
+                            
+                            // Enviar al bot perdedor a una habitación aleatoria
+                            const allRoomIds = [
+                                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                                21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
+                            ];
+                            
+                            const occupiedRoomIds = new Set();
+                            (match?.players || []).forEach(p => {
+                                const rid = p.currentRoom?.id || p.roomId || p.room?.id;
+                                const normalized = normalizeRoomId(rid);
+                                if (normalized) occupiedRoomIds.add(normalized);
+                            });
+                            (match?.npcs || []).forEach(npc => {
+                                const rid = npc.room?.id;
+                                const normalized = normalizeRoomId(rid);
+                                if (normalized) occupiedRoomIds.add(normalized);
+                            });
+                            
+                            const candidates = allRoomIds.filter(r => !occupiedRoomIds.has(r) && r !== normalizeRoomId(defenderRoomId));
+                            let botRandomRoomId = null;
+                            if (candidates.length > 0) {
+                                botRandomRoomId = candidates[Math.floor(Math.random() * candidates.length)];
+                            } else {
+                                const fallback = allRoomIds.filter(r => r !== normalizeRoomId(defenderRoomId));
+                                botRandomRoomId = fallback[Math.floor(Math.random() * fallback.length)];
+                            }
+                            
+                            // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
+                            botRandomRoomId = normalizeCorridorRoomId(botRandomRoomId);
+                            
+                            console.log('Moving NPC loser to random room:', botRandomRoomId);
+                            await fetch(`/api/v1/matches/${matchId}/npc/location`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `Bearer ${jwt}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    npcId: fightDefender.id,
+                                    roomId: botRandomRoomId
+                                })
+                            });
+                            
+                            // Actualizar el estado del match después de mover al NPC
+                            await fetchMatchAndPlayers();
+                            
+                            // Incrementar fuerza del bot perdedor
+                            await fetch(`/api/v1/matches/${matchId}/npc-strength`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `Bearer ${jwt}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    npcId: fightDefender.id,
+                                    strength: (fightDefender?.strength || 1) + 1
+                                })
+                            });
+                        } else {
+                            // El jugador perdió contra el bot: mover solo al jugador a habitación aleatoria e incrementar fuerza del jugador
+                            console.log('Player lost against NPC. Moving player to random room and increasing player strength...');
+                            
+                            const allRoomIds = [
+                                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                                21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
+                            ];
+                            
+                            const playerRoomId = normalizeRoomId(currentPlayer?.[0]?.currentRoom?.id);
+                            
+                            const occupiedRoomIds = new Set();
+                            (match?.players || []).forEach(p => {
+                                const rid = p.currentRoom?.id || p.roomId || p.room?.id;
+                                const normalized = normalizeRoomId(rid);
+                                if (normalized) occupiedRoomIds.add(normalized);
+                            });
+                            (match?.npcs || []).forEach(npc => {
+                                const rid = npc.room?.id;
+                                const normalized = normalizeRoomId(rid);
+                                if (normalized) occupiedRoomIds.add(normalized);
+                            });
+                            
+                            // Mover al jugador perdedor a una sala aleatoria
+                            const candidatesPlayer = allRoomIds.filter(r => !occupiedRoomIds.has(r) && r !== playerRoomId);
+                            let randomRoomIdPlayer = null;
+                            if (candidatesPlayer.length > 0) {
+                                randomRoomIdPlayer = candidatesPlayer[Math.floor(Math.random() * candidatesPlayer.length)];
+                            } else {
+                                const fallback = allRoomIds.filter(r => r !== playerRoomId);
+                                randomRoomIdPlayer = fallback[Math.floor(Math.random() * fallback.length)];
+                            }
+                            
+                            // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
+                            randomRoomIdPlayer = normalizeCorridorRoomId(randomRoomIdPlayer);
+                            
+                            console.log('Moving player loser to random room:', randomRoomIdPlayer);
+                            await moveLoserToRandomRoom(currentUser.id, randomRoomIdPlayer);
+                            
+                            // Incrementar fuerza del jugador perdedor
+                            await fetch(`/api/v1/matches/${matchId}/player-strength`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `Bearer ${jwt}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    userId: currentUser.id,
+                                    strength: (currentPlayer?.[0]?.strength || 1) + 1
+                                })
+                            });
+
+                            if ((handCards?.length || 0) > 0 || (bagCards?.length || 0) > 0) {
+                                setIsNpcLossModalOpen(true);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error handling NPC fight result:', error);
+                    }
+                    
+                    setIsFightModalOpen(false);
+                    setFightDefender(null);
+                    setFightAttacker(null);
+                    setPendingTargetRoom(null);
+                    return;
+                }
+
+                // Si no hay perdedor identificado, no mover
+                if (!loserUser) {
+                    setIsFightModalOpen(false);
+                    setFightDefender(null);
+                    setFightAttacker(null);
+                    setPendingTargetRoom(null);
+                    return;
+                }
+                const allRoomIds = [
+                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
+                ];
+                const winnerPlayer = match?.players?.find(p => p.user?.id === (winnerUser?.id || winnerUser?.user?.id));
+                const winnerRoomIdRaw = winnerPlayer?.currentRoom?.id || winnerPlayer?.roomId || null;
+                const winnerRoomId = normalizeRoomId(winnerRoomIdRaw);
+
+                const occupiedRoomIds = new Set();
+                (match?.players || []).forEach(p => {
+                    const rid = p.currentRoom?.id || p.roomId || p.room?.id;
+                    const normalized = normalizeRoomId(rid);
+                    if (normalized) occupiedRoomIds.add(normalized);
+                });
+                (match?.npcs || []).forEach(npc => {
+                    const rid = npc.room?.id;
+                    const normalized = normalizeRoomId(rid);
+                    if (normalized) occupiedRoomIds.add(normalized);
+                });
+
+                const candidates = allRoomIds.filter(r => r !== winnerRoomId && !occupiedRoomIds.has(r));
+                if (candidates.length === 0) {
+                    console.warn('No candidate rooms to move loser');
+                    setIsFightModalOpen(false);
+                    setFightDefender(null);
+                    setFightAttacker(null);
+                    return;
+                }
+                let randomRoomId = null;
+                if (candidates.length > 0) {
+                    randomRoomId = candidates[Math.floor(Math.random() * candidates.length)];
+                } else {
+                    const fallback = allRoomIds.filter(r => r !== winnerRoomId);
+                    randomRoomId = fallback[Math.floor(Math.random() * fallback.length)];
+                }
+
+                // TODO: Guardar información de la batalla para usar en estadisticas 
+                //try {
+                //    await fetch(`/api/v1/matches/${matchId}/fight`, {
+                //        method: 'PUT',
+                //        headers: {
+                //            Authorization: `Bearer ${jwt}`,
+                //            'Content-Type': 'application/json'
+                //        },
+                //        body: JSON.stringify({
+                //            attackerId: currentUser?.id,
+                //            defenderId: fightOpponent?.user?.id || fightOpponent?.id,
+                //            winnerId: null // TODO: set the winner id here once resolved by server logic
+                //        })
+                //    });
+                //} catch (e) {
+                //    console.debug('Could not record fight event', e);
+                //}
+                const moveResult = await moveLoserToRandomRoom(loserUser.id, randomRoomId);
+                if (!moveResult) {
+                    console.error('Failed to move loser to', randomRoomId);
+                    alert('No se pudo mover al perdedor. Revisa la consola para más detalles.');
+                } else {
+                    console.log('Loser moved to', randomRoomId, moveResult);
+                    
+                    // Si el perdedor es el jugador del turno actual, quitar todos los puntos de acción
+                    if (loserUser.id === match.currentTurnUserId) {
+                        try {
+                            await fetch(`/api/v1/matches/${matchId}/consume-all-action-points/${loserUser.id}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${jwt}`,
+                                    'Content-Type': 'application/json',
+                                }
+                            });
+                            console.log('All action points consumed for loser:', loserUser.id);
+                        } catch (err) {
+                            console.error('Error consuming all action points for loser:', err);
+                        }
+                    }
+                }
+
+                // Si ganó el atacante, muévelo a la antigua sala del defensor
+                if (attackerWins && defenderRoomId) {
+                    const moveWinner = await movePlayerToRoom(fightAttacker?.user?.id, defenderRoomId);
+                    if (!moveWinner) {
+                        console.error('Failed to move attacker (winner) to defender room', defenderRoomId);
+                    } else {
+                        console.log('Attacker moved to defender room', defenderRoomId, moveWinner);
+
+                    }
+                }
+
+                const winnerPlayerId = attackerWins ? fightAttacker?.id : fightDefender?.id;
+                const loserPlayerId = attackerWins ? fightDefender?.id : fightAttacker?.id;
+                if (winnerPlayerId) {
+                    const drawSuccess = await drawCardForWinner(winnerPlayerId);
+                    if (drawSuccess) {
+                        console.log('Ganador robó una carta');
+                        
+                        // Publicar evento de resolución de pelea para que todos lo reciban
+                        await fetch(`/api/v1/matches/${matchId}/notify-fight-resolved`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${jwt}`,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                matchId: matchId,
+                                winnerId: winnerUser?.id,
+                                winnerPlayerId: winnerPlayerId,
+                                loserPlayerId: loserPlayerId
+                            })
+                        }).catch(e => console.warn('Could not notify fight resolved:', e));
+
+                        // Abrir modal de robo si es el usuario actual el ganador
+                        if (currentUser.id === fightAttacker?.user?.id && attackerWins) {
+                            setStealLoserPlayerId(loserPlayerId);
+                            setIsStealModalOpen(true);
+                        } else if (currentUser.id === fightDefender?.user?.id && !attackerWins) {
+                            setStealLoserPlayerId(loserPlayerId);
+                            setIsStealModalOpen(true);
+                        }
+                    } else {
+                        console.log('No se pudo robar una carta para el ganador');
+                    }
+                }
+
+            } finally {
+                setIsFightModalOpen(false);
+                setFightDefender(null);
+                setFightAttacker(null);
+                setPendingTargetRoom(null);
+            }
+        }
+
 
 return (
     <div className={`match-container ${isSpectator ? 'spectator-mode' : ''}`}>
@@ -1529,6 +1853,7 @@ return (
             
             <div className="match-board" style={{ position: 'relative' }}>
                 <div className="player-and-decks-section"> 
+                    
                     <div className={`current-player ${isSpectator ? 'spectator-hidden' : ''}`}>
                         <div className="current-player-info"> 
                             <div style={{
@@ -1604,9 +1929,24 @@ return (
                             )}
                         </div>
                     </div>
+
+                    <div className="turn-banner">
+                        {match?.currentTurnUserId === currentUser?.id ? (
+                            <div className="turn-message turn-mine">
+                                ¡Es tu turno!
+                            </div>
+                        ) : (
+                            <div className="turn-message turn-others">
+                                Turno de: {match?.players?.find(p => p.user.id === match.currentTurnUserId)?.user.username || "Esperando..."}
+                            </div>
+                        )}
+                    </div>
+
+                    
+
                 </div>
 
-                
+            
 
                 <div className="map-column" style={{ position: 'relative' }}>
                     <map name="Map">
@@ -1721,6 +2061,7 @@ return (
                     })}
                 </div>
                 
+                {/*Sección donde aparacen el resto de jugadores con sus respectivas bolsa*/}
                 <div className="other-players-section"> 
                     <div className="players-avatars-section">
                     {playersList.map((p) => (
@@ -1850,75 +2191,100 @@ return (
                 </table>
             </div>
             */}
-            <div className={`player-section ${isSpectator ? 'spectator-hidden' : ''}`}>
-                <div className="player-hand">
-                    <div className="hand-cards"> 
-                        {Array.isArray(handCards) && handCards.map((carta) => (
-                                        <div key={carta.id} >
-                                            <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                        </div>
-                        ))}
+            <div >
+                <div className={`player-section ${isSpectator ? 'spectator-hidden' : ''}`}>
+                    <div className="cards-section">
+                        <div className="player-hand">
+                            <div className="hand-cards"> 
+                                {Array.isArray(handCards) && handCards.map((carta) => (
+                                                <div key={carta.id} >
+                                                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                                </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="player-bag">
+                            <div className="bag-cards"> 
+                                {Array.isArray(bagCards) && bagCards.map((carta) => (
+                                                <div key={carta.id} >
+                                                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
+                                                </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div className="buttons-section">
+                        
+                        <button className={`leave-match-button${isSpectator ? 'spectator-hidden' : ''}`}
+                            onClick={() => setDiscardPhaseOpen(true)}
+                            disabled={
+                            match.currentTurnUserId !== currentUser.id }
+                            title="Discard cards from hand"
+                        >
+                            Discard and bag
+                        </button>
+                        <button className={`leave-match-button ${isSpectator ? 'spectator-hidden' : ''}`}
+                            title="Discard cards from hand"
+                            onClick={() => setIsActionsModalOpen(true) }
+                            disabled={
+                            match.currentTurnUserId !== currentUser.id || actionPoints === 0 }
+                        >
+                            Actions
+                        </button>
+
+                        {
+                            (() => {
+                                const currentRoomId = currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id);
+                                const canAttemptEscape = [1,6,31,36].includes(normalizeRoomId(currentRoomId));
+                                return (
+                                    <ActionsModal
+                                        isOpen={isActionsModalOpen}
+                                        onClose={() => setIsActionsModalOpen(false)}
+                                        moveToAdyacent={() => setMoveToAdyacentRoom(true) }
+                                        moveToRoomWithWord={() => setMoveToRoomWithWord(true) }
+                                        onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
+                                        onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
+                                        canAttemptEscape={canAttemptEscape}
+                                    />
+                                )
+                            })()
+                        }
+
+                        <button
+                            className="leave-match-button"
+                            onClick={leaveMatch}
+                        >
+                            Leave Match
+                        </button>
+                    
+
+                        <button
+                            className="end-match-button"
+                            onClick={endMatch}
+                            style={{ display: (isSpectator || match?.creatorId !== currentUser?.id) ? 'none' : 'block' }}
+                        >
+                            End match
+                        </button>
+
+                        <div className={`match-chat-icon ${isSpectator ? 'spectator-hidden' : ''}`}>
+                            <div className="match-chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
+                                <FaComments size={30} color="white" />
+                            </div>
+                        </div>
+
+                        {chatOpen && <ChatBox matchId={matchId} />}
+
+                        {/* Mensaje de turno */}
+                        
                     </div>
                 </div>
-                <div className="player-bag">
-                    <div className="bag-cards"> 
-                        {Array.isArray(bagCards) && bagCards.map((carta) => (
-                                        <div key={carta.id} >
-                                            <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                        </div>
-                        ))}
-                    </div>
-                </div>
+            
+            
             </div>
 
-            <div>
-
-            <button className={`bag-button ${isSpectator ? 'spectator-hidden' : ''}`}
-                onClick={() => setDiscardPhaseOpen(true)}
-                disabled={
-                match.currentTurnUserId !== currentUser.id }
-                title="Discard cards from hand"
-                style={{ marginLeft: "10px" }}
-            >
-                Discard and bag
-            </button>
-            <button className={`bag-button ${isSpectator ? 'spectator-hidden' : ''}`}
-                title="Discard cards from hand"
-                onClick={() => setIsActionsModalOpen(true) }
-                disabled={
-                match.currentTurnUserId !== currentUser.id || actionPoints === 0 }
-                style={{ marginLeft: "15px" }}
-            >
-                Actions
-            </button>
-
-            {
-                (() => {
-                    const currentRoomId = currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id);
-                    const canAttemptEscape = [1,6,31,36].includes(normalizeRoomId(currentRoomId));
-                    return (
-                        <ActionsModal
-                            isOpen={isActionsModalOpen}
-                            onClose={() => setIsActionsModalOpen(false)}
-                            moveToAdyacent={() => setMoveToAdyacentRoom(true) }
-                            moveToRoomWithWord={() => setMoveToRoomWithWord(true) }
-                            onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
-                            onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
-                            canAttemptEscape={canAttemptEscape}
-                        />
-                    )
-                })()
-            }
-
-            <button
-                className="leave-match-button"
-                onClick={leaveMatch}
-                style={{ marginLeft: '15px', background: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', marginTop: isSpectator ? '20px' : undefined }}
-            >
-                Leave Match
-            </button>
-
-        </div>
+            
 
     <FightModal
             isOpen={isFightModalOpen}
@@ -1928,339 +2294,8 @@ return (
             stompClient={stompClient}
             bagCards={bagCards}
             matchData={match}
-            onResolve={async (currentUserWon) => {
-                try {
-                    console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightDefender=', fightDefender, 'fightAttacker=', fightAttacker);
-                    const isCurrentAttacker = currentUser.id === fightAttacker?.user?.id;
-                    const isCurrentDefender = currentUser.id === fightDefender?.user?.id;
-
-                    // Solo el atacante orquesta los movimientos para evitar duplicados
-                    if (!isCurrentAttacker) {
-                        setIsFightModalOpen(false);
-                        setFightDefender(null);
-                        setFightAttacker(null);
-                        setPendingTargetRoom(null);
-                        return;
-                    }
-
-                    const defenderRoomId = fightDefender?.currentRoom?.id || fightDefender?.roomId || fightDefender?.room?.id || pendingTargetRoom;
-
-                    // currentUserWon aquí representa si el atacante ganó (porque solo el atacante ejecuta esto)
-                    const attackerWins = currentUserWon;
-                    
-                    // Obtener el perdedor (puede ser jugador o NPC)
-                    const isDefenderNPC = !fightDefender?.user;
-                    const loserUser = attackerWins ? fightDefender?.user : fightAttacker?.user;
-                    const loser = attackerWins ? fightDefender : fightAttacker;
-                    const winnerUser = attackerWins ? fightAttacker?.user : (fightDefender?.user || fightDefender);
-
-                    // Si el defensor es un NPC
-                    if (isDefenderNPC) {
-                        try {
-                            if (attackerWins) {
-                                // El jugador ganó contra el bot
-                                console.log('Player won against NPC. Defender is NiallCampbell:', fightDefender?.isNiallCampbell);
-                                
-                                // Si es NiallCampbell, roba de la pila de descarte
-                                if (fightDefender?.isNiallCampbell) {
-                                    console.log('Drawing from discard pile for beating Niall Campbell...');
-                                    await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0]?.id}/playerWinsNiallCampbell`, {
-                                        method: "POST",
-                                        headers: {
-                                            Authorization: `Bearer ${jwt}`,
-                                            Accept: 'application/json',
-                                            'Content-Type': 'application/json',
-                                        },
-                                    }).then(r => r.json()).then(data => {
-                                        // Actualizamos inmediatamente el mazo; la mano se sincroniza por WebSocket
-                                        setDeck(data.deck);
-                                    });
-                                } else {
-                                    // Si es un NPC normal, roba 2 cartas de recompensa
-                                    console.log('Drawing 2 reward cards for beating regular NPC...');
-                                    await drawCardForWinner(currentPlayer?.[0]?.id);
-                                    await drawCardForWinner(currentPlayer?.[0]?.id);
-                                }
-                                
-                                // Mover al jugador ganador a la habitación donde estaba el bot
-                                if (defenderRoomId) {
-                                    console.log('Moving winner to defender room:', defenderRoomId);
-                                    await movePlayerToRoom(fightAttacker?.user?.id, defenderRoomId);
-                                }
-                                
-                                // Enviar al bot perdedor a una habitación aleatoria
-                                const allRoomIds = [
-                                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                                    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
-                                ];
-                                
-                                const occupiedRoomIds = new Set();
-                                (match?.players || []).forEach(p => {
-                                    const rid = p.currentRoom?.id || p.roomId || p.room?.id;
-                                    const normalized = normalizeRoomId(rid);
-                                    if (normalized) occupiedRoomIds.add(normalized);
-                                });
-                                (match?.npcs || []).forEach(npc => {
-                                    const rid = npc.room?.id;
-                                    const normalized = normalizeRoomId(rid);
-                                    if (normalized) occupiedRoomIds.add(normalized);
-                                });
-                                
-                                const candidates = allRoomIds.filter(r => !occupiedRoomIds.has(r) && r !== normalizeRoomId(defenderRoomId));
-                                let botRandomRoomId = null;
-                                if (candidates.length > 0) {
-                                    botRandomRoomId = candidates[Math.floor(Math.random() * candidates.length)];
-                                } else {
-                                    const fallback = allRoomIds.filter(r => r !== normalizeRoomId(defenderRoomId));
-                                    botRandomRoomId = fallback[Math.floor(Math.random() * fallback.length)];
-                                }
-                                
-                                // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
-                                botRandomRoomId = normalizeCorridorRoomId(botRandomRoomId);
-                                
-                                console.log('Moving NPC loser to random room:', botRandomRoomId);
-                                await fetch(`/api/v1/matches/${matchId}/npc/location`, {
-                                    method: 'PUT',
-                                    headers: {
-                                        'Authorization': `Bearer ${jwt}`,
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        npcId: fightDefender.id,
-                                        roomId: botRandomRoomId
-                                    })
-                                });
-                                
-                                // Actualizar el estado del match después de mover al NPC
-                                await fetchMatchAndPlayers();
-                                
-                                // Incrementar fuerza del bot perdedor
-                                await fetch(`/api/v1/matches/${matchId}/npc-strength`, {
-                                    method: 'PUT',
-                                    headers: {
-                                        'Authorization': `Bearer ${jwt}`,
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        npcId: fightDefender.id,
-                                        strength: (fightDefender?.strength || 1) + 1
-                                    })
-                                });
-                            } else {
-                                // El jugador perdió contra el bot: mover solo al jugador a habitación aleatoria e incrementar fuerza del jugador
-                                console.log('Player lost against NPC. Moving player to random room and increasing player strength...');
-                                
-                                const allRoomIds = [
-                                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                                    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
-                                ];
-                                
-                                const playerRoomId = normalizeRoomId(currentPlayer?.[0]?.currentRoom?.id);
-                                
-                                const occupiedRoomIds = new Set();
-                                (match?.players || []).forEach(p => {
-                                    const rid = p.currentRoom?.id || p.roomId || p.room?.id;
-                                    const normalized = normalizeRoomId(rid);
-                                    if (normalized) occupiedRoomIds.add(normalized);
-                                });
-                                (match?.npcs || []).forEach(npc => {
-                                    const rid = npc.room?.id;
-                                    const normalized = normalizeRoomId(rid);
-                                    if (normalized) occupiedRoomIds.add(normalized);
-                                });
-                                
-                                // Mover al jugador perdedor a una sala aleatoria
-                                const candidatesPlayer = allRoomIds.filter(r => !occupiedRoomIds.has(r) && r !== playerRoomId);
-                                let randomRoomIdPlayer = null;
-                                if (candidatesPlayer.length > 0) {
-                                    randomRoomIdPlayer = candidatesPlayer[Math.floor(Math.random() * candidatesPlayer.length)];
-                                } else {
-                                    const fallback = allRoomIds.filter(r => r !== playerRoomId);
-                                    randomRoomIdPlayer = fallback[Math.floor(Math.random() * fallback.length)];
-                                }
-                                
-                                // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
-                                randomRoomIdPlayer = normalizeCorridorRoomId(randomRoomIdPlayer);
-                                
-                                console.log('Moving player loser to random room:', randomRoomIdPlayer);
-                                await moveLoserToRandomRoom(currentUser.id, randomRoomIdPlayer);
-                                
-                                // Incrementar fuerza del jugador perdedor
-                                await fetch(`/api/v1/matches/${matchId}/player-strength`, {
-                                    method: 'PUT',
-                                    headers: {
-                                        'Authorization': `Bearer ${jwt}`,
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        userId: currentUser.id,
-                                        strength: (currentPlayer?.[0]?.strength || 1) + 1
-                                    })
-                                });
-
-                                if ((handCards?.length || 0) > 0 || (bagCards?.length || 0) > 0) {
-                                    setIsNpcLossModalOpen(true);
-                                }
-                            }
-                        } catch (error) {
-                            console.error('Error handling NPC fight result:', error);
-                        }
-                        
-                        setIsFightModalOpen(false);
-                        setFightDefender(null);
-                        setFightAttacker(null);
-                        setPendingTargetRoom(null);
-                        return;
-                    }
-
-                    // Si no hay perdedor identificado, no mover
-                    if (!loserUser) {
-                        setIsFightModalOpen(false);
-                        setFightDefender(null);
-                        setFightAttacker(null);
-                        setPendingTargetRoom(null);
-                        return;
-                    }
-                    const allRoomIds = [
-                        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                        21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
-                    ];
-                    const winnerPlayer = match?.players?.find(p => p.user?.id === (winnerUser?.id || winnerUser?.user?.id));
-                    const winnerRoomIdRaw = winnerPlayer?.currentRoom?.id || winnerPlayer?.roomId || null;
-                    const winnerRoomId = normalizeRoomId(winnerRoomIdRaw);
-
-                    const occupiedRoomIds = new Set();
-                    (match?.players || []).forEach(p => {
-                        const rid = p.currentRoom?.id || p.roomId || p.room?.id;
-                        const normalized = normalizeRoomId(rid);
-                        if (normalized) occupiedRoomIds.add(normalized);
-                    });
-                    (match?.npcs || []).forEach(npc => {
-                        const rid = npc.room?.id;
-                        const normalized = normalizeRoomId(rid);
-                        if (normalized) occupiedRoomIds.add(normalized);
-                    });
-
-                    const candidates = allRoomIds.filter(r => r !== winnerRoomId && !occupiedRoomIds.has(r));
-                    if (candidates.length === 0) {
-                        console.warn('No candidate rooms to move loser');
-                        setIsFightModalOpen(false);
-                        setFightDefender(null);
-                        setFightAttacker(null);
-                        return;
-                    }
-                    let randomRoomId = null;
-                    if (candidates.length > 0) {
-                        randomRoomId = candidates[Math.floor(Math.random() * candidates.length)];
-                    } else {
-                        const fallback = allRoomIds.filter(r => r !== winnerRoomId);
-                        randomRoomId = fallback[Math.floor(Math.random() * fallback.length)];
-                    }
-
-                    // TODO: Guardar información de la batalla para usar en estadisticas 
-                    //try {
-                    //    await fetch(`/api/v1/matches/${matchId}/fight`, {
-                    //        method: 'PUT',
-                    //        headers: {
-                    //            Authorization: `Bearer ${jwt}`,
-                    //            'Content-Type': 'application/json'
-                    //        },
-                    //        body: JSON.stringify({
-                    //            attackerId: currentUser?.id,
-                    //            defenderId: fightOpponent?.user?.id || fightOpponent?.id,
-                    //            winnerId: null // TODO: set the winner id here once resolved by server logic
-                    //        })
-                    //    });
-                    //} catch (e) {
-                    //    console.debug('Could not record fight event', e);
-                    //}
-                    const moveResult = await moveLoserToRandomRoom(loserUser.id, randomRoomId);
-                    if (!moveResult) {
-                        console.error('Failed to move loser to', randomRoomId);
-                        alert('No se pudo mover al perdedor. Revisa la consola para más detalles.');
-                    } else {
-                        console.log('Loser moved to', randomRoomId, moveResult);
-                        
-                        // Si el perdedor es el jugador del turno actual, quitar todos los puntos de acción
-                        if (loserUser.id === match.currentTurnUserId) {
-                            try {
-                                await fetch(`/api/v1/matches/${matchId}/consume-all-action-points/${loserUser.id}`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Authorization': `Bearer ${jwt}`,
-                                        'Content-Type': 'application/json',
-                                    }
-                                });
-                                console.log('All action points consumed for loser:', loserUser.id);
-                            } catch (err) {
-                                console.error('Error consuming all action points for loser:', err);
-                            }
-                        }
-                    }
-
-                    // Si ganó el atacante, muévelo a la antigua sala del defensor
-                    if (attackerWins && defenderRoomId) {
-                        const moveWinner = await movePlayerToRoom(fightAttacker?.user?.id, defenderRoomId);
-                        if (!moveWinner) {
-                            console.error('Failed to move attacker (winner) to defender room', defenderRoomId);
-                        } else {
-                            console.log('Attacker moved to defender room', defenderRoomId, moveWinner);
-
-                        }
-                    }
-
-                    const winnerPlayerId = attackerWins ? fightAttacker?.id : fightDefender?.id;
-                    const loserPlayerId = attackerWins ? fightDefender?.id : fightAttacker?.id;
-                    if (winnerPlayerId) {
-                        const drawSuccess = await drawCardForWinner(winnerPlayerId);
-                        if (drawSuccess) {
-                            console.log('Ganador robó una carta');
-                            
-                            // Publicar evento de resolución de pelea para que todos lo reciban
-                            await fetch(`/api/v1/matches/${matchId}/notify-fight-resolved`, {
-                                method: 'POST',
-                                headers: {
-                                    'Authorization': `Bearer ${jwt}`,
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    matchId: matchId,
-                                    winnerId: winnerUser?.id,
-                                    winnerPlayerId: winnerPlayerId,
-                                    loserPlayerId: loserPlayerId
-                                })
-                            }).catch(e => console.warn('Could not notify fight resolved:', e));
-
-                            // Abrir modal de robo si es el usuario actual el ganador
-                            if (currentUser.id === fightAttacker?.user?.id && attackerWins) {
-                                setStealLoserPlayerId(loserPlayerId);
-                                setIsStealModalOpen(true);
-                            } else if (currentUser.id === fightDefender?.user?.id && !attackerWins) {
-                                setStealLoserPlayerId(loserPlayerId);
-                                setIsStealModalOpen(true);
-                            }
-                        } else {
-                            console.log('No se pudo robar una carta para el ganador');
-                        }
-                    }
-
-                } finally {
-                    setIsFightModalOpen(false);
-                    setFightDefender(null);
-                    setFightAttacker(null);
-                    setPendingTargetRoom(null);
-                }
-            }}
-    />
-
-                <button
-                    className="end-match-button"
-                    onClick={endMatch}
-                    style={{ display: isSpectator ? 'none' : 'block' }}
-                >
-                    Finalizar partida
-                </button>
-
+            onResolve={async (currentUserWon) => { handleFightResult(currentUserWon)}}
+            />
 
         <DiscardPhaseModal
             isVisible={discardPhaseOpen}
@@ -2303,25 +2338,7 @@ return (
         />
 
       
-            <div className={`match-chat-icon ${isSpectator ? 'spectator-hidden' : ''}`}>
-                <div className="chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
-                    <FaComments size={30} color="white" />
-                </div>
-            </div>
 
-            {chatOpen && <ChatBox matchId={matchId} />}
-
-            {/* Mensaje de turno */}
-              <div className="chat-button"
-                  style={{ marginTop: isSpectator ? '20px' : undefined }}
-              >
-                {!match?.currentTurnUserId
-                ? "Esperando..."
-                : match.currentTurnUserId === currentUser?.id
-                    ? "Tu turno"
-                    : `${match.players.find(p => p.user.id === match.currentTurnUserId)?.user.username} está en su turno`}
-
-            </div>
         </div>
     );
 }
