@@ -12,6 +12,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundExcepti
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 
 @Service
@@ -21,16 +22,13 @@ public class VotingService {
 
     VotingRepository votingRepository; 
     MatchRepository matchRepository;
+    MatchWebsocketController matchWebsocketController; 
     
     @Autowired
-    public VotingService(VotingRepository votingRepository, MatchRepository matchRepository){
-        this.votingRepository=votingRepository;
-        this.matchRepository=matchRepository;
-    }
-
-    public Voting getVotingById(Integer id){
-        Voting voting = votingRepository.findById(id).orElse(null); 
-        return voting;
+    public VotingService(VotingRepository votingRepository, MatchRepository matchRepository, MatchWebsocketController matchWebsocketController){
+        this.votingRepository = votingRepository;
+        this.matchRepository = matchRepository;
+        this.matchWebsocketController = matchWebsocketController;
     }
 
     // ESTO ERA PARA HACER COMPROBACIONES probablemente luego no lo use
@@ -63,7 +61,12 @@ public class VotingService {
         
         // guardamos ambos
         matchRepository.save(match);
-        return new VotingDTO(votingRepository.save(voting));
+        Voting savedVoting = votingRepository.save(voting);
+
+        // notifcamos con websocket 
+        
+
+        return new VotingDTO(savedVoting);
     }
 
 
