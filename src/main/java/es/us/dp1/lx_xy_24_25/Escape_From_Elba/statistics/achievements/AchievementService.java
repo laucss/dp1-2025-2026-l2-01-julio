@@ -67,6 +67,14 @@ public class AchievementService {
             Integer actionPoints=statisticService.getTotalAccionPointsByUser(user.getId());
             unlocked=actionPoints>=achievement.getThreshold();
         }
+        else if(achievement.metric==Metric.BATTLES_WON){
+            Integer battlesWon=statisticService.getBattlesWonByUser(user.getId());
+            unlocked=battlesWon>=achievement.getThreshold();
+        }
+        else if(achievement.metric==Metric.ROOMS_VISITED){
+            Integer roomsVisited=statisticService.getTotalRoomsVisitedByUser(user.getId());
+            unlocked=roomsVisited>=achievement.getThreshold();
+        }
         return unlocked;
     }
 
