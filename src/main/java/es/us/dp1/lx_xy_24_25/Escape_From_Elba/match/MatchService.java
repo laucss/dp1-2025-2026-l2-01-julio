@@ -624,9 +624,30 @@ public class MatchService {
 
     @Transactional
     public Card playerBeatsNonPlayer(Integer matchId, Integer playerId, Integer npcId){
+        // Obtener el jugador y el NPC
+        Player player = playerService.findById(playerId);
+        Npc npc = npcRepository.findById(npcId)
+                .orElseThrow(() -> new IllegalArgumentException("NPC not found"));
 
-        Card stolenCard =deckService.drawCard(matchId);
+        // Robar carta del mazo y añadirla a la mano del jugador
+        Card stolenCard = deckService.drawCard(matchId);
         handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+
+        // Actualizar la fuerza del NPC
+        npc.setStrength(npc.getStrength() + 1);
+        npcRepository.save(npc);
+
+        // Actualizar estadísticas de batallas del jugador
+        int battlesWon = Optional.ofNullable(player.getBattlesWon()).orElse(0);
+        int battlesPlayed = Optional.ofNullable(player.getBattlesPlayed()).orElse(0);
+        player.setBattlesWon(battlesWon + 1);
+        player.setBattlesPlayed(battlesPlayed + 1);
+        playerRepo.save(player);
+
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
 
         return stolenCard;
     

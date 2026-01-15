@@ -190,10 +190,8 @@ export default function Match(){
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, async (msg) => {
             const fightUpdate = JSON.parse(msg.body);
-            console.log('🔔 Fight notification received:', fightUpdate);
             
             if (fightUpdate.action === 'START') {
-                console.log('🥊 Starting fight...');
                 // Actualizar el match primero para tener datos frescos
                 try {
                     const response = await fetch(`/api/v1/matches/${matchId}`, {
@@ -2021,7 +2019,7 @@ return (
                                 // Si es NiallCampbell, roba de la pila de descarte
                                 if (fightDefender?.isNiallCampbell) {
                                     console.log('Drawing from discard pile for beating Niall Campbell...');
-                                    await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0]?.id}/playerWinsNiallCampbell`, {
+                                    await fetch(`/api/v1/matches/${matchId}/${fightAttacker?.id}/playerWinsNiallCampbell`, {
                                         method: "POST",
                                         headers: {
                                             Authorization: `Bearer ${jwt}`,
@@ -2035,8 +2033,8 @@ return (
                                 } else {
                                     // Si es un NPC normal, roba 2 cartas de recompensa
                                     console.log('Drawing 2 reward cards for beating regular NPC...');
-                                    await drawCardForWinner(currentPlayer?.[0]?.id);
-                                    await drawCardForWinner(currentPlayer?.[0]?.id);
+                                    await drawCardForWinner(fightAttacker?.id);
+                                    await drawCardForWinner(fightAttacker?.id);
                                 }
                                 
                                 // Mover al jugador ganador a la habitación donde estaba el bot
