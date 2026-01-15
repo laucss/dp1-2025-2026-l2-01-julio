@@ -98,8 +98,12 @@ function AppNavbar() {
 
     return (
         <div>
-            <Navbar expand="md" dark color="dark">
-                <NavbarBrand href="/">
+            <Navbar
+                expand="md"
+                dark
+                style={{ backgroundColor: '#ed9734', borderBottom: '4px solid #c75a00' }}
+            >
+                <NavbarBrand href="/" style={{ color: '#ffd9b7', fontWeight: 700 }}>
                     Escape From Elba
                 </NavbarBrand>
                 <NavbarToggler onClick={toggleNavbar} className="ms-2" />
