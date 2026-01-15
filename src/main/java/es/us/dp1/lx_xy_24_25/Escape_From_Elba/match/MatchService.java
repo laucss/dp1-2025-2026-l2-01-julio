@@ -710,6 +710,11 @@ public class MatchService {
 
         // añadimos la carta seleccionada al mazo de descartes
         deckService.addCardToDiscardedPile(matchId, card);
+        
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
             
     }
 

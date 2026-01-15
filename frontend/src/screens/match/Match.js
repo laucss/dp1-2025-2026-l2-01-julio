@@ -1364,13 +1364,13 @@ export default function Match(){
     }
 
     const handleNpcLossDiscard = async ({ cardId, fromWhere }) => {
-        if (!cardId || !fromWhere || !currentPlayer[0]?.id) {
+        if (!cardId || !fromWhere || !currentPlayer?.id) {
             setIsNpcLossModalOpen(false);
             return;
         }
 
         try {
-            const res = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/lose-against-npc`, {
+            const res = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/lose-against-npc`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${jwt}`,
