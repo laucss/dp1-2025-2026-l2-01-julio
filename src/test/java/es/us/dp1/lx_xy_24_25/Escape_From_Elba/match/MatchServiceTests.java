@@ -1,10 +1,15 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,10 +32,14 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.InvalidMovementException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
@@ -137,6 +146,30 @@ public class MatchServiceTests {
         assertThrows(IllegalArgumentException.class, () -> matchService.getMatchById(99));
     }
 
+    // tests de operaciones básicas
+
+    @Test
+    public void getMatchByIdThrowsExceptionWhenNotFound() {
+        when(matchRepo.findById(1)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> matchService.getMatchById(1));
+    }
+
+    @Test
+    public void getMatchsByNameReturnsList() {
+        Match m = new Match();
+        m.setName("TestMatch");
+        when(matchRepo.findByName("TestMatch")).thenReturn(List.of(m));
+        List<Match> result = matchService.getMatchsByName("TestMatch");
+        assertEquals(1, result.size());
+        assertEquals("TestMatch", result.get(0).getName());
+    }
+
+    @Test
+    public void deleteInvokesRepository() {
+        matchService.delete(1);
+        verify(matchRepo, times(1)).deleteById(1);
+    }
+
     @Test
     void getFinishedAndInProgressMatchesReturnsPage() {
         List<Match> list = List.of(new Match(), new Match(), new Match());
@@ -172,6 +205,167 @@ public class MatchServiceTests {
 
         assertEquals(1, result.getContent().size());
         verify(matchRepo).findMatchesWonByUser(eq(userId), any(PageRequest.class));
+    }
+
+    // test de startMatch
+
+    // partida not found
+    @Test
+    void startMatchThrowsWhenMatchNotFound() {
+        when(matchRepo.findById(1)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+            () -> matchService.startMatch(1));
+    }
+
+    // caso positivo todo bien
+    @Test
+    void startMatchSetsStatusStartTimeAndSavesMatch() {
+        int matchId = 1;
+
+        Match m = new Match();
+        m.setId(matchId);
+        m.setStatus(MatchStatus.WAITING);
+        m.setNumNpcs(0);
+        m.setPlayers(new ArrayList<>());
+        m.setNpcs(new ArrayList<>());
+
+        when(matchRepo.findById(matchId)).thenReturn(Optional.of(m));
+        when(matchRepo.save(any(Match.class))).thenAnswer(i -> i.getArgument(0));
+
+        when(roomService.initializeRoomsForMatch(m)).thenReturn(new ArrayList<>());
+        doNothing().when(lobbyWebsocketController)
+            .notifyGameStarted(eq(matchId), any());
+
+        Match result = matchService.startMatch(matchId);
+
+        assertEquals(MatchStatus.PLAYING, result.getStatus());
+        assertNotNull(result.getStartTime());
+        assertEquals(0, result.getTurnNumber());
+        assertNull(result.getCurrentTurnUserId());
+
+        verify(matchRepo).save(m);
+    }
+
+    // check npc bien
+    @Test
+    void startMatchCreatesNpcsAndMarksLastAsNiallCampbell() {
+        int matchId = 2;
+
+        Match m = new Match();
+        m.setId(matchId);
+        m.setNumNpcs(3);
+        m.setPlayers(new ArrayList<>());
+        m.setNpcs(new ArrayList<>());
+
+        when(matchRepo.findById(matchId)).thenReturn(Optional.of(m));
+        when(matchRepo.save(any(Match.class))).thenReturn(m);
+        when(roomService.initializeRoomsForMatch(m)).thenReturn(new ArrayList<>());
+        doNothing().when(lobbyWebsocketController)
+            .notifyGameStarted(eq(matchId), any());
+
+        when(npcRepository.save(any(Npc.class)))
+            .thenAnswer(i -> i.getArgument(0));
+
+        matchService.startMatch(matchId);
+
+        assertEquals(3, m.getNpcs().size());
+
+        Npc lastNpc = m.getNpcs().get(2);
+        assertTrue(lastNpc.getIsNiallCampbell());
+
+        for (Npc npc : m.getNpcs()) {
+            assertEquals(1, npc.getStrength());
+            assertEquals(m, npc.getMatch());
+        }
+
+        verify(npcRepository, times(3)).save(any(Npc.class));
+    }
+
+    // incia bien los players
+    @Test
+    void startMatchInitializesPlayersState() {
+        int matchId = 3;
+
+        Player p1 = new Player();
+        Player p2 = new Player();
+
+        Match m = new Match();
+        m.setId(matchId);
+        m.setNumNpcs(0);
+        m.setPlayers(new ArrayList<>(List.of(p1, p2)));
+        m.setNpcs(new ArrayList<>());
+
+        when(matchRepo.findById(matchId)).thenReturn(Optional.of(m));
+        when(matchRepo.save(any(Match.class))).thenReturn(m);
+        when(roomService.initializeRoomsForMatch(m)).thenReturn(new ArrayList<>());
+        doNothing().when(lobbyWebsocketController)
+            .notifyGameStarted(eq(matchId), any());
+
+        matchService.startMatch(matchId);
+
+        for (Player p : m.getPlayers()) {
+            assertNull(p.getDiceOrder());
+            assertNull(p.getOrderInMatch());
+            assertEquals(0, p.getActionPoints());
+            assertEquals(1, p.getStrength());
+            assertEquals(0, p.getCardsDrawnInTurn());
+        }
+    }
+
+    @Test
+    void startMatchInitializesDeckAndRoomsState() {
+        int matchId = 4;
+
+        Match m = new Match();
+        m.setId(matchId);
+        m.setNumNpcs(0);
+        m.setPlayers(new ArrayList<>());
+        m.setNpcs(new ArrayList<>());
+
+        DeckInGame deck = new DeckInGame();
+
+        when(matchRepo.findById(matchId)).thenReturn(Optional.of(m));
+        when(matchRepo.save(any(Match.class))).thenReturn(m);
+        when(roomService.initializeRoomsForMatch(m)).thenReturn(new ArrayList<>());
+        doNothing().when(lobbyWebsocketController)
+            .notifyGameStarted(eq(matchId), any());
+
+        // método interno del servicio
+        doReturn(deck)
+            .when(matchService)
+            .initializePlayerHandCards(matchId, m.getPlayers());
+
+        Match result = matchService.startMatch(matchId);
+
+        assertEquals(deck, result.getDeck());
+        assertNotNull(result.getRoomsState());
+    }
+
+    @Test
+    void startMatchNotifiesLobbyWebsocket() {
+        int matchId = 5;
+
+        Match m = new Match();
+        m.setId(matchId);
+        m.setNumNpcs(0);
+        m.setPlayers(new ArrayList<>());
+        m.setNpcs(new ArrayList<>());
+
+        when(matchRepo.findById(matchId)).thenReturn(Optional.of(m));
+        when(matchRepo.save(any(Match.class))).thenReturn(m);
+        when(roomService.initializeRoomsForMatch(m)).thenReturn(new ArrayList<>());
+        doNothing().when(lobbyWebsocketController)
+            .notifyGameStarted(eq(matchId), any());
+
+        doReturn(new DeckInGame())
+            .when(matchService)
+            .initializePlayerHandCards(anyInt(), anyList());
+
+        matchService.startMatch(matchId);
+
+        verify(lobbyWebsocketController)
+            .notifyGameStarted(eq(matchId), any(LobbyUpdateDTO.class));
     }
 
     @Test
@@ -509,6 +703,158 @@ public class MatchServiceTests {
         assertEquals(1, res.getActionPoints());
     }
 
+    // la partida no existe 
+    @Test
+    void movePlayerToAdyacentRoomThrowsWhenMatchNotFound() {
+        when(matchRepo.findById(anyInt())).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+            () -> matchService.movePlayerToAdyacentRoom(1, 2, 3));
+    }
+
+    // jugador no existe 
+    @Test
+    void movePlayerToAdyacentRoomThrowsWhenPlayerNotFound() {
+        Match match = new Match();
+        match.setId(1);
+        when(matchRepo.findById(1)).thenReturn(Optional.of(match));
+
+        when(playerRepo.findByMatchAndUser(1, 2)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+            () -> matchService.movePlayerToAdyacentRoom(1, 2, 3));
+    }
+
+    // juagdor no tiene sala asignada
+    @Test
+    void movePlayerToAdyacentRoomThrowsWhenPlayerHasNoRoom() {
+        Match match = new Match();
+        match.setId(1);
+        when(matchRepo.findById(1)).thenReturn(Optional.of(match));
+
+        Player player = new Player();
+        player.setRoom(null);
+
+        when(playerRepo.findByMatchAndUser(1, 2)).thenReturn(Optional.of(player));
+
+        assertThrows(RuntimeException.class,
+            () -> matchService.movePlayerToAdyacentRoom(1, 2, 3));
+    }
+
+    // jugador no tiene puntos de accion
+    @Test
+    void movePlayerToAdyacentRoomThrowsWhenNoActionPoints() {
+        int matchId = 1;
+        int userId = 2;
+        int targetRoomId = 3;
+
+        Match match = new Match();
+        match.setId(matchId);
+        match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+
+        when(matchRepo.findById(matchId)).thenReturn(Optional.of(match));
+        when(matchRepo.save(any(Match.class))).thenReturn(match);
+
+        Room room = new Room();
+        room.setId(10);
+        room.setAdjacencyList(List.of());
+
+        Player player = new Player();
+        player.setRoom(room);
+        player.setActionPoints(0);
+
+        when(playerRepo.findByMatchAndUser(matchId, userId))
+            .thenReturn(Optional.of(player));
+
+        assertThrows(NoActionPointsException.class,
+            () -> matchService.movePlayerToAdyacentRoom(matchId, userId, targetRoomId));
+    }
+
+    
+    
+    // sala destiono no existe 
+    @Test
+    void movePlayerToAdyacentRoomThrowsWhenTargetRoomNotFound() {
+        Match match = new Match();
+        match.setId(1);
+        when(matchRepo.findById(1)).thenReturn(Optional.of(match));
+
+        Room currentRoom = new Room();
+        currentRoom.setId(10);
+
+        Player player = new Player();
+        player.setRoom(currentRoom);
+        player.setActionPoints(1);
+
+        when(playerRepo.findByMatchAndUser(1, 2)).thenReturn(Optional.of(player));
+        when(roomRepo.findById(3)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+            () -> matchService.movePlayerToAdyacentRoom(1, 2, 3));
+    }
+
+
+
+    // player intenta moverse a una habitacion que no es adyacente 
+    @Test
+    void movePlayerToAdyacentRoomThrowsIfRoomNotAdjacent() {
+        int matchId = 1;
+        int userId = 2;
+        int targetRoomId = 7;
+
+        Match match = new Match();
+        match.setId(matchId);
+        when(matchRepo.findById(matchId)).thenReturn(Optional.of(match));
+
+        Room currentRoom = new Room();
+        currentRoom.setId(1);
+
+        Room targetRoom = new Room();
+        targetRoom.setId(targetRoomId);
+
+        // NO es adyacente
+        currentRoom.setAdjacencyList(List.of());
+
+        Player player = new Player();
+        player.setRoom(currentRoom);
+        player.setActionPoints(1);
+
+        when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.of(player));
+        when(roomRepo.findById(targetRoomId)).thenReturn(Optional.of(targetRoom));
+
+        assertThrows(InvalidMovementException.class,
+            () -> matchService.movePlayerToAdyacentRoom(matchId, userId, targetRoomId));
+    }
+
+    // si el turno no esta en actions
+    @Test
+    void movePlayerToAdyacentRoomSetsTurnPhaseToActionsIfNotActions() {
+        Match match = new Match();
+        match.setId(1);
+        match.setCurrentTurnPhase(TurnPhase.DRAW);
+        when(matchRepo.findById(1)).thenReturn(Optional.of(match));
+        when(matchRepo.save(any(Match.class))).thenReturn(match);
+
+        Room currentRoom = new Room();
+        Room targetRoom = new Room();
+        targetRoom.setId(3);
+        currentRoom.setAdjacencyList(List.of(targetRoom));
+
+        Player player = new Player();
+        player.setRoom(currentRoom);
+        player.setActionPoints(1);
+
+        when(playerRepo.findByMatchAndUser(1, 2)).thenReturn(Optional.of(player));
+        when(roomRepo.findById(3)).thenReturn(Optional.of(targetRoom));
+        when(playerRepo.save(any(Player.class))).thenAnswer(i -> i.getArgument(0));
+
+        matchService.movePlayerToAdyacentRoom(1, 2, 3);
+
+        assertEquals(TurnPhase.ACTIONS, match.getCurrentTurnPhase());
+        verify(matchRepo).save(match);
+    }
+
+
     @Test
     void moveNpcToAdyacentRoomMovesNpcAndConsumesPlayerActionPoint() {
         int matchId = 71; int npcId = 81; int userId = 82; int targetRoomId = 90;
@@ -533,6 +879,15 @@ public class MatchServiceTests {
 
         assertEquals(target, res.getRoom());
         assertEquals(2, playerRepo.findByMatchAndUser(matchId, userId).get().getActionPoints());
+    }
+
+    
+    @Test
+    void moveNpcToAdyacentRoomThrowsWhenNpcNotFound() {
+        when(npcRepository.findById(1)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+            () -> matchService.moveNpcToAdyacentRoom(1, 1, 2, 3));
     }
 
     @Test

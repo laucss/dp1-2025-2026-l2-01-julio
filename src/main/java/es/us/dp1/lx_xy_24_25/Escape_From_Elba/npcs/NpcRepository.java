@@ -11,7 +11,6 @@ public interface NpcRepository extends CrudRepository<Npc, Integer> {
 
     Optional<Npc> findById(Integer id);
 
-    //save con DTO
-    Npc save(NpcDTO npcDTO);
+    Npc save(Npc npc);
 
 }

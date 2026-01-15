@@ -45,4 +45,6 @@ public class RoomDTO extends BaseEntity {
         this.setNpcsInside(new java.util.ArrayList<>());
         this.setPlayerInside(null);
     }
+
+    public RoomDTO(){}
 }
