@@ -440,6 +440,7 @@ public class MatchServiceTests {
         assertEquals(0, p.getActionPoints());
         verify(handService).removeCardFromPlayerHand(card, matchId, playerId);
         verify(deckService).addCardToDiscardedPile(matchId, card);
+        verify(playerService).save(p);
     }
 
     @Test
@@ -576,7 +577,8 @@ public class MatchServiceTests {
 
         // failure: rolldiceResult >= strength
         Room randomRoom = new Room(); randomRoom.setId(600);
-        when(roomService.getRandomRoom()).thenReturn(randomRoom);
+        // make repository return both the tower and the random room; the service will remove towers and occupied rooms
+        when(roomRepo.findAll()).thenReturn(new java.util.ArrayList<>(List.of(tower, randomRoom)));
         when(roomRepo.findById(Integer.valueOf(randomRoom.getId()))).thenReturn(Optional.of(randomRoom));
         p.setActionPoints(2);
         when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.of(p));
@@ -585,5 +587,7 @@ public class MatchServiceTests {
         EscapeAttemptResultDTO r2 = matchService.escapeAttempt(matchId, userId, 10);
         assertFalse(r2.isSuccess());
         assertTrue(r2.isDiscardRequired());
+        verify(roomRepo).findAll();
+        verify(playerRepo, times(2)).save(p);
     }
 }

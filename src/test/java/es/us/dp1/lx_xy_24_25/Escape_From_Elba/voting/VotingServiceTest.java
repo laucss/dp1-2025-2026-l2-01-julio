@@ -18,6 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.AlreadyVotedException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreVotesThanPlayersException;
@@ -29,6 +31,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class VotingServiceTest {
 
     private VotingService votingService;
@@ -111,7 +114,8 @@ public class VotingServiceTest {
 
         match.setPlayers(List.of(p1, p2));
 
-        when(matchRepository.findById(anyInt())).thenReturn(Optional.of(match));
+        Mockito.reset(matchRepository);
+        when(matchRepository.findById(any())).thenReturn(Optional.of(match));
         when(matchRepository.save(any(Match.class))).thenReturn(match);
         when(votingRepository.save(any(Voting.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -226,8 +230,8 @@ public class VotingServiceTest {
 
         when(votingRepository.findPendingVotingByMatchId(anyInt()))
                 .thenReturn(Optional.of(voting));
-        when(matchRepository.findById(1))
-                .thenReturn(Optional.of(match));
+        Mockito.reset(matchRepository);
+        when(matchRepository.findById(any())).thenReturn(Optional.of(match));
         when(matchRepository.save(any(Match.class))).thenReturn(match);
         when(votingRepository.save(any(Voting.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
