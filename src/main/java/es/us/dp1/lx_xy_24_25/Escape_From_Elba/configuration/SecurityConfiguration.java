@@ -106,8 +106,11 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.POST,"/api/v1/matches/{matchId}/{winnerId}/steal-card-from/{loserId}").hasAnyAuthority(PLAYER, ADMIN)
                 .requestMatchers(HttpMethod.POST,"/api/v1/matches/{matchId}/notify-fight-resolved").hasAnyAuthority(PLAYER, ADMIN)
                 .requestMatchers(HttpMethod.PUT,"/api/v1/matches/{matchId}/move").hasAnyAuthority(PLAYER, ADMIN)
-                .requestMatchers(HttpMethod.POST, "/api/v1/bag/validate-weapon").hasAnyAuthority(PLAYER)
+                .requestMatchers(HttpMethod.POST, "/api/v1/bag/validate-weapon/{matchId}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/voting/**").hasAnyAuthority(PLAYER, ADMIN) //TODO
+                .requestMatchers(HttpMethod.POST, "/api/v1/voting/vote/**").hasAnyAuthority(PLAYER, ADMIN) //TODO
 
 
                 // API restringida para administradores

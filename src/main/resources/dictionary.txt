@@ -1,3 +1,4 @@
+arbor
 ammo
 able
 ace
@@ -15,14 +16,20 @@ apes
 asp
 ass
 appear
+apple
+apples
 area
 arm 
 arms
 armor 
 
+ball
+balls
 bar
 bare
+barrel
 barb 
+bass
 beam 
 bola 
 bomb 
@@ -42,9 +49,14 @@ boar
 boa
 boas
 broom
+brace
+braces
 boss
 
+cafe
+caesar
 cabs
+cable
 crabs 
 clap 
 claps 
@@ -55,10 +67,16 @@ calms
 came
 cane
 canes
+cap
+capable
+capo
+capos
 capes
 car
+carafe
 care
 career
+careers
 cares
 cars
 case
@@ -67,6 +85,8 @@ case
 cease
 cell
 cells
+cellar
+coal
 cobs
 come
 comes
@@ -92,8 +112,9 @@ color
 colors
 common
 compare
-complete
 cross
+coral 
+copper
 
 ebola
 elba 
@@ -133,6 +154,8 @@ former
 free
 from 
 
+lab
+labs
 lamp 
 laser 
 lasso 
@@ -167,15 +190,19 @@ members
 more 
 mop
 mall
+meal 
 
 oar 
 off 
 offer 
 offers 
+opal 
+orb
 
 paper
 pass 
 passes
+parole
 per 
 peel
 pee
@@ -192,6 +219,7 @@ performer
 please 
 pleases
 poor 
+pool 
 pole 
 polearm 
 prefer 
@@ -210,6 +238,7 @@ roller
 race 
 races 
 real 
+rebar
 refer 
 release 
 releases 
@@ -222,6 +251,7 @@ roles
 room 
 rooms
 rope
+roof 
 
 saber 
 sober
@@ -233,6 +263,7 @@ escapes
 spear 
 scrap  
 sale 
+safe 
 same 
 sea 
 seas 
@@ -248,6 +279,7 @@ smaller
 some 
 space 
 spaces 
+spa
 
 
 

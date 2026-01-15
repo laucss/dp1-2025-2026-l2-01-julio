@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react"
-import '../../static/css/match/weaponModal.css';
-import tokenService from "../../services/token.service";
-import getIdFromUrl from "../../util/getIdFromUrl";
+import '../../static/css/match/weaponModal.css'
+import tokenService from "../../services/token.service"
+import getIdFromUrl from "../../util/getIdFromUrl"
+
+import VotingModal from "./VotingModal"
 
 // para mostrar las excepciones
-import { toast } from "react-toastify";
+import { toast } from "react-toastify"
 
 const jwt = tokenService.getLocalAccessToken();
 
-export default function WeaponModal({ isVisible, bagCards, onClose, player, onWeaponSelected }) {
+export default function WeaponModal({ isVisible, bagCards, onClose, player, onWeaponSelected, matchData }) {
     const matchId = getIdFromUrl(2);
+    const currentUser = tokenService.getUser();
+    const currentPlayer = matchData?.players?.find(p => p.userId === currentUser.id)
     const [availableCards, setAvailableCards] = useState([]);
     const [selectedCards, setSelectedCards] = useState([]);
     const [formedWord, setFormedWord] = useState('');
@@ -17,6 +21,9 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
     const [messageType, setMessageType] = useState('error'); // 'error' o 'success'
     const [visible, setVisible] = useState(false);
     const [isValidating, setIsValidating] = useState(false);
+
+    const [isVotingModalOpen, setIsVotingModalOpen] = useState(false)
+    const [weaponProposed, setWeaponProposed] = useState(null)
 
     useEffect(() => {
         setAvailableCards(bagCards || []);
@@ -53,7 +60,7 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
         setIsValidating(true);
         try {
             const wordLowerCase = formedWord.toLowerCase();
-            const response = await fetch(`/api/v1/bag/validate-weapon`, {
+            const response = await fetch(`/api/v1/bag/validate-weapon/${matchId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${jwt}`,
@@ -65,13 +72,14 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
                         frontImage: card.frontImage,
                         backImage: card.backImage,
                         letter: card.letter.toLowerCase()
-                    }))
+                    })),
+                    playerId: currentPlayer.id
                 })
             });
 
             if (response.ok) {
                 const result = await response.json();
-                if (result.isValid) {
+                if (result.status === 'VALID') {
                     setMessage(`"${formedWord}" is a valid weapon! Bonus: +${result.bonusValue || 0}`);
                     setMessageType('success');
                     setVisible(true);
@@ -84,6 +92,10 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
                             cards: selectedCards
                         });
                     }, 500);
+                } if (result.status === 'REQUIRES_VOTE'){
+                    setIsVotingModalOpen(true)
+                    setWeaponProposed(result.word)
+                
                 } else {
                     toast.error(`"${formedWord}" is not a valid weapon. Try another combination.`);
                     //setMessageType('error');
@@ -103,7 +115,7 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
         } finally {
             setIsValidating(false);
         }
-    };
+    }
 
     const handleCancel = () => {
         setAvailableCards(bagCards || []);
@@ -111,7 +123,7 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
         setFormedWord('');
         setMessage(null);
         onClose();
-    };
+    }
 
     return (
         <div className="modal-overlay">
@@ -186,6 +198,30 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
                     </div>
                 </div>
             </div>
+
+            <VotingModal>
+                isOpen={isVotingModalOpen}
+                onClose={() => setIsVotingModalOpen(false)}
+                weaponProposed={weaponProposed}
+                userProposingWeapon={currentUser}
+                matchData={matchData}
+                onSubmit={(voting) => {
+                    if (voting.result === 'ACCEPTED') {
+                        setTimeout(() => {
+                        onWeaponSelected({
+                            word: voting.proposedWeapon.toLowerCase(),
+                            bonus: voting.finalBonus,
+                            cards: selectedCards
+                            });
+                        }, 500);
+                    
+                    } else {
+                        toast.info("The rest of the players have rejected your weapon. Try another combination if you want.");
+                    }
+                    setIsVotingModalOpen(false)
+                }}
+
+            </VotingModal>
         </div>
     );
 }

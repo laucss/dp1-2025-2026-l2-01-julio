@@ -149,49 +149,47 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
     };
 
 
-    const handleDragEnd = (event) => {
-        const { active, over } = event;
+const handleDragEnd = (event) => {
+        const { active, over } = event
 
-        setActiveCard(null);
+       setActiveCard(null)
 
-        if (!over) return;
+        if (!over) return
 
         // active.id -> carta arrastrada
         // over.id   -> zona o carta destino
 
-        const cardFromHand = handCards.find(c => c.id === active.id);
-        const cardFromBag = bagCards.find(c => c.id === active.id);
-        const card = cardFromHand || cardFromBag;
+        const cardFromHand = handCards.find(c => c.id === active.id)
+        const cardFromBag = bagCards.find(c => c.id === active.id)
+        const card = cardFromHand || cardFromBag
 
         // de la mano o bolsa a zona de descarte 
-        if (over.id === 'discard') {
-            const card = handCards.find(c => c.id === active.id);
-
-            setHandCards(prev => prev.filter(c => c.id !== active.id));
-            setBagCards(prev => prev.filter(c => c.id !== active.id));
-            setCardsToDiscard(prev => [...prev, card]);
+        if (over.id === 'discard' && card) { 
+            setHandCards(prev => prev.filter(c => c.id !== active.id))
+            setBagCards(prev => prev.filter(c => c.id !== active.id))
+            setCardsToDiscard(prev => [...prev, card])
             return
         }
 
         // caso 1: de la mano a la bolsa 
         if (over.id === 'bag' && cardFromHand) {
-            const card = handCards.find(c => c.id === active.id);
+            const card = handCards.find(c => c.id === active.id)
 
-            setHandCards(prev => prev.filter(c => c.id !== active.id));
-            setBagCards(prev => [...prev, card]);
+            setHandCards(prev => prev.filter(c => c.id !== active.id))
+            setBagCards(prev => [...prev, card])
         }
 
         // caso 2: reordenar dentro de la bolsa 
         if (cardFromBag && over.id !== 'bag') {
-            const oldIndex = bagCards.findIndex(c => c.id === active.id);
-            const newIndex = bagCards.findIndex(c => c.id === over.id);
+            const oldIndex = bagCards.findIndex(c => c.id === active.id)
+            const newIndex = bagCards.findIndex(c => c.id === over.id)
 
-            setBagCards(arrayMove(bagCards, oldIndex, newIndex));
+            setBagCards(arrayMove(bagCards, oldIndex, newIndex))
         }
 
         
 
-    };
+    }
 
 
     return (
@@ -203,7 +201,7 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
                             sensors={sensors}
                             onDragStart={handleDragStart} 
                             onDragEnd={handleDragEnd}
-                             collisionDetection={closestCenter}>
+                            collisionDetection={closestCenter}>
 
                             <div className="hand-and-bag-container">
                                 

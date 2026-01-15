@@ -13,6 +13,8 @@ import lombok.Setter;
 @Setter
 public class BagInGameDTO  {
 
+    private Integer playerId; 
+
     @NotNull
     private List<CardDTO> cards; 
 
@@ -23,6 +25,16 @@ public class BagInGameDTO  {
             newBag.add(new CardDTO(card)); 
         }
         this.cards=newBag; 
+    }
+
+    public BagInGameDTO(BagInGame bag, Integer playerId){
+        List<Card> cards = bag.getCards(); 
+        List<CardDTO> newBag = new ArrayList<>(); 
+        for (Card card : cards){
+            newBag.add(new CardDTO(card)); 
+        }
+        this.cards=newBag; 
+        this.playerId=playerId;
     }
 
     public BagInGameDTO(){}
