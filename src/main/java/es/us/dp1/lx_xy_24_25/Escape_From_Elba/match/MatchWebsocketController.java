@@ -114,4 +114,18 @@ public class MatchWebsocketController {
             update
         );
     }
+
+    public void notifyWeaponVoting(Integer matchId, String weapon, Integer proposingUserId, String proposingUsername) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".weapon.voting",
+            new WeaponVotingDTO(weapon, proposingUserId, proposingUsername)
+        );
+    }
+
+    public void notifyWeaponVotingResult(Integer matchId, Object votingResult) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".weapon.voting.result",
+            votingResult
+        );
+    }
 }

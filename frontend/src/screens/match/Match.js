@@ -15,6 +15,7 @@ import StartDiceModal from "./StartDiceModal";
 import StealCardModal from "./StealCardModal";
 import NpcLossDiscardModal from "./NpcLossDiscardModal";
 import EscapeDiceModal from "./EscapeDiceModal";
+import VotingModal from "./VotingModal";
 
 // para alerta de errores
 import { toast } from "react-toastify";
@@ -78,6 +79,11 @@ export default function Match(){
     const [isNpcLossModalOpen, setIsNpcLossModalOpen] = useState(false);
     const [npcLossModalTitle, setNpcLossModalTitle] = useState();
     const [npcLossModalSubtitle, setNpcLossModalSubtitle] = useState();
+    const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+    const [weaponProposed, setWeaponProposed] = useState('');
+    const [proposingUserId, setProposingUserId] = useState(null);
+    const [proposingUsername, setProposingUsername] = useState('');
+    const [votingResult, setVotingResult] = useState(null);
     
     // Determinar si el usuario actual es un espectador
     const isSpectator = !currentUser || !match?.players?.some(p => p.user.id === currentUser.id);
@@ -262,6 +268,43 @@ export default function Match(){
                     })
                 };
             });
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
+
+    // websocket para recibir notificaciones de votación de armas
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.weapon.voting`, (msg) => {
+            const votingData = JSON.parse(msg.body);
+            setIsVotingModalOpen(true);
+            setWeaponProposed(votingData.weapon);
+            setProposingUserId(votingData.proposingUserId);
+            setProposingUsername(votingData.proposingUsername);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
+
+    // websocket para recibir resultado de votación de armas
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.weapon.voting.result`, (msg) => {
+            const result = JSON.parse(msg.body);
+            if (result.status === 'FINISHED') {
+                setVotingResult(result); // Guardar el resultado para que FightModal lo procese
+                setIsVotingModalOpen(false);
+                
+                // Mostrar mensaje del resultado
+                if (result.result === 'ACCEPTED') {
+                    toast.success(`"${result.proposedWeapon}" was accepted! Bonus: +${result.finalBonus}`);
+                } else {
+                    toast.error(`"${result.proposedWeapon}" was rejected. No bonus awarded.`);
+                }
+            }
         });
 
         return () => subscription.unsubscribe();
@@ -453,9 +496,29 @@ export default function Match(){
         return () => clearInterval(intervalId);
     }, [isDiceModalOpen, match?.currentTurnPhase, matchId]);
 
-    
+    // Función para limpiar los estados de votación
+    const cleanVotingStates = async () => {
+        setVotingResult(null);
+        setIsVotingModalOpen(false);
+        setWeaponProposed('');
+        setProposingUserId(null);
+        setProposingUsername('');
+        
+        // Eliminar las votaciones de la base de datos
+        try {
+            await fetch(`/api/v1/voting/${matchId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (error) {
+            console.error('Error al eliminar votaciones:', error);
+        }
+    };
 
-    // console.log('currentPlayer', currentPlayer)
+        // console.log('currentPlayer', currentPlayer)
     const fetchActionPoints = async () => {
         try {
             const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/actionPoints`, {
@@ -1898,12 +1961,20 @@ return (
 
     <FightModal
             isOpen={isFightModalOpen}
-            onClose={() => { setIsFightModalOpen(false); setFightDefender(null); setFightAttacker(null); }}
+            onClose={() => { 
+                setIsFightModalOpen(false); 
+                setFightDefender(null); 
+                setFightAttacker(null); 
+                cleanVotingStates();
+            }}
             defender={fightDefender}
             attacker={fightAttacker}
             stompClient={stompClient}
             bagCards={bagCards}
             matchData={match}
+            votingResult={votingResult}
+            proposingUserId={proposingUserId}
+            onVotingResultProcessed={() => setVotingResult(null)}
             onResolve={async (currentUserWon) => {
                 try {
                     console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightDefender=', fightDefender, 'fightAttacker=', fightAttacker);
@@ -1916,6 +1987,7 @@ return (
                         setFightDefender(null);
                         setFightAttacker(null);
                         setPendingTargetRoom(null);
+                        cleanVotingStates();
                         return;
                     }
 
@@ -2086,6 +2158,7 @@ return (
                         setFightDefender(null);
                         setFightAttacker(null);
                         setPendingTargetRoom(null);
+                        cleanVotingStates();
                         return;
                     }
 
@@ -2095,6 +2168,7 @@ return (
                         setFightDefender(null);
                         setFightAttacker(null);
                         setPendingTargetRoom(null);
+                        cleanVotingStates();
                         return;
                     }
                     const allRoomIds = [
@@ -2225,6 +2299,7 @@ return (
                     setFightDefender(null);
                     setFightAttacker(null);
                     setPendingTargetRoom(null);
+                    cleanVotingStates();
                 }
             }}
     />
@@ -2276,6 +2351,19 @@ return (
             title={npcLossModalTitle}
             subtitle={npcLossModalSubtitle}
             onDiscard={handleNpcLossDiscard}
+        />
+
+        <VotingModal
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+            weaponProposed={weaponProposed}
+            userProposingWeapon={match?.players?.find(p => p.user?.id === proposingUserId)?.user}
+            proposingUserId={proposingUserId}
+            matchData={match}
+            stompClient={stompClient}
+            onSubmit={(voting) => {
+                setIsVotingModalOpen(false);
+            }}
         />
 
       

@@ -104,8 +104,9 @@ public class VotingService {
 
         // comprobamos si ya han votado todos los jugadores
         if (currentTotalVotes.equals(voting.getNumPlayers())){
-            // si han votado todos, calculamos el resultado
-            return new VotingDTO(finishedVoting(voting, matchId));
+            // si han votado todos, calculamos el resultado y notificamos
+            Voting finishedVoting = finishedVoting(voting, matchId);
+            return new VotingDTO(finishedVoting);
         }
         
         // guardamos la votación
@@ -131,7 +132,22 @@ public class VotingService {
         match.setStatus(MatchStatus.PLAYING);
         matchRepository.save(match);
         
-        return votingRepository.save(voting);
+        Voting savedVoting = votingRepository.save(voting);
+        
+        // Notificar a todos los jugadores del resultado de la votación
+        matchWebsocketController.notifyWeaponVotingResult(matchId, new VotingResultDTO(
+            "FINISHED",
+            savedVoting.getResult().toString(),
+            savedVoting.getWeaponProposed(),
+            savedVoting.getFinalBonus()
+        ));
+        
+        return savedVoting;
+    }
+
+    @Transactional
+    public void deleteVotingsByMatchId(Integer matchId){
+        votingRepository.deleteByMatchId(matchId);
     }
 
 }
