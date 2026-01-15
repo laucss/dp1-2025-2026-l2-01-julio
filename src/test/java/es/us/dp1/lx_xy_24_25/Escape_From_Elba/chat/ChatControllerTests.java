@@ -54,6 +54,7 @@ public class ChatControllerTests {
     private MockMvc mvc;
 
     private static final String BASE_URL = "/api/v1/match/{matchId}/chat";
+    
 
 
     @Test
@@ -104,7 +105,7 @@ public class ChatControllerTests {
             throws JsonProcessingException, Exception {
 
         ChatMessageDTO dto = new ChatMessageDTO();
-        dto.setMessage(""); // @NotBlank
+        dto.setMessage(""); 
 
         ObjectMapper mapper = new ObjectMapper();
 

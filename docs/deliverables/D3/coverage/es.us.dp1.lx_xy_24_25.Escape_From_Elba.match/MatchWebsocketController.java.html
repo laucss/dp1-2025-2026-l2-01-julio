@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MatchWebsocketController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match</a> &gt; <span class="el_source">MatchWebsocketController.java</span></div><h1>MatchWebsocketController.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.DiceTotalsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightDiceUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightResolvedDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.HandUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ReadyStateUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.WeaponsUpdateDTO;
+
+@Controller
+<span class="fc" id="L22">public class MatchWebsocketController {</span>
+    
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    public void notifyTurnUpdate(Integer matchId, TurnUpdateDTO update) {
+<span class="nc" id="L28">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.turn&quot;,
+            update
+        );
+<span class="nc" id="L32">    }</span>
+
+    public void notifyFightUpdate(Integer matchId, FightUpdateDTO update) {
+<span class="nc" id="L35">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.fight&quot;,
+            update
+        );
+<span class="nc" id="L39">    }</span>
+
+    public void notifyFightDiceUpdate(Integer matchId, FightDiceUpdateDTO update) {
+<span class="nc" id="L42">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.fight.dice&quot;,
+            update
+        );
+<span class="nc" id="L46">    }</span>
+
+    public void notifyPlayerLocationUpdate(Integer matchId, PlayerLocationUpdateDTO update) {
+<span class="fc" id="L49">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.location&quot;,
+            update
+        );
+<span class="fc" id="L53">    }</span>
+
+    public void notifyNpcLocationUpdate(Integer matchId, NpcLocationUpdateDTO update) {
+<span class="nc" id="L56">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.npc.location&quot;,
+            update
+        );
+<span class="nc" id="L60">    }</span>
+
+    public void notifyDiceTotalsUpdate(Integer matchId, DiceTotalsUpdateDTO update) {
+<span class="nc" id="L63">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.fight.totals&quot;,
+            update
+        );
+<span class="nc" id="L67">    }</span>
+
+    public void notifyActionPointsUpdate(Integer matchId, ActionPointsUpdateDTO update) {
+<span class="fc" id="L70">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.actionPoints&quot;,
+            update
+        );
+<span class="fc" id="L74">    }</span>
+
+    public void notifyStrengthUpdate(Integer matchId, StrengthUpdateDTO update) {
+<span class="nc" id="L77">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.strength&quot;,
+            update
+        );
+<span class="nc" id="L81">    }</span>
+
+    public void notifyReadyStateUpdate(Integer matchId, ReadyStateUpdateDTO update) {
+<span class="nc" id="L84">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.fight.ready&quot;,
+            update
+        );
+<span class="nc" id="L88">    }</span>
+
+    public void notifyWeaponsUpdate(Integer matchId, WeaponsUpdateDTO update) {
+<span class="nc" id="L91">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.fight.weapons&quot;,
+            update
+        );
+<span class="nc" id="L95">    }</span>
+
+    public void notifyCardsUpdate(Integer matchId, CardsUpdateDTO update) {
+<span class="nc" id="L98">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.cards&quot;,
+            update
+        );
+<span class="nc" id="L102">    }</span>
+
+    public void notifyFightResolved(Integer matchId, FightResolvedDTO update) {
+<span class="nc" id="L105">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.fight&quot;,
+            update
+        );
+<span class="nc" id="L109">    }</span>
+
+    public void notifyHandUpdate(Integer matchId, Integer playerId, HandUpdateDTO update) {
+<span class="nc" id="L112">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.hand.&quot; + playerId,
+            update
+        );
+<span class="nc" id="L116">    }</span>
+
+    public void notifyWeaponVoting(Integer matchId, String weapon, Integer proposingUserId, String proposingUsername) {
+<span class="nc" id="L119">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.weapon.voting&quot;,
+            new WeaponVotingDTO(weapon, proposingUserId, proposingUsername)
+        );
+<span class="nc" id="L123">    }</span>
+
+    public void notifyWeaponVotingResult(Integer matchId, Object votingResult) {
+<span class="nc" id="L126">        messagingTemplate.convertAndSend(</span>
+            &quot;/topic/match.&quot; + matchId + &quot;.weapon.voting.result&quot;,
+            votingResult
+        );
+<span class="nc" id="L130">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

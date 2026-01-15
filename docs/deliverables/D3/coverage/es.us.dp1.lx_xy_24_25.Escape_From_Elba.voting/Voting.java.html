@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Voting.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting</a> &gt; <span class="el_source">Voting.java</span></div><h1>Voting.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting;
+
+import java.util.List;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Entity
+public class Voting extends BaseEntity {
+
+    private Integer matchId; 
+
+    private String weaponProposed; 
+
+    //private LocalDate createdAt; 
+
+    @Enumerated(EnumType.STRING)
+    private VotingStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private VotingResult result;
+
+    private Integer votesInFavor;
+
+    private Integer votesAgainst;
+
+    private Integer numPlayers; // será el número de jugadores de la partida-1 porque el jugador que propone el arma no cuenta 
+
+    private Integer finalBonus; // es la bonificación que recibe al acabar la votación (1 si es aceptada, 0 si es rechazada)
+    // lo pongo aquí para que la bonificación que se recibe se establezca a nivel de backend, porque si no la tenía que poner en una línea random del frontend. 
+
+    @OneToMany(mappedBy = &quot;voting&quot;, cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private List&lt;Vote&gt; votes;
+
+
+<span class="fc" id="L45">    public Voting(){}</span>
+
+    // List&lt;Player&gt; players = lista de jugadores EXCEPTO quien propone el arma 
+<span class="fc" id="L48">    public Voting(Integer matchId, String weaponProposed, List&lt;Player&gt; players){ </span>
+<span class="fc" id="L49">        this.matchId = matchId;</span>
+<span class="fc" id="L50">        this.weaponProposed = weaponProposed;</span>
+<span class="fc" id="L51">        this.numPlayers = players.size(); </span>
+<span class="fc" id="L52">        this.votes = players.stream().map(player -&gt; new Vote(player.getId(), this)).toList();</span>
+<span class="fc" id="L53">    }</span>
+
+<span class="nc" id="L55">    public Voting(Integer matchId, String weaponProposed){ </span>
+<span class="nc" id="L56">        this.matchId = matchId;</span>
+<span class="nc" id="L57">        this.weaponProposed = weaponProposed;</span>
+<span class="nc" id="L58">    }</span>
+
+    /*@Version
+    private Integer version; ?????????????? */
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -13,10 +14,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,25 +26,24 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 public class BagControllerTests {
 
-    @MockBean
+    @SpyBean
     private BagService bagService;
 
     @Autowired
     private MockMvc mvc;
 
-    private static final String BASE_URL = "/api/v1/bag/validate-weapon";
+    private static final String BASE_URL = "/api/v1/bag/validate-weapon/1";
 
 
 
     @Test
-    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @WithMockUser(username = "player1", roles = {"PLAYER"})
     void validateWeaponValidWeaponReturnsBonus() throws Exception {
 
         CardDTO c1 = new CardDTO();
@@ -62,8 +63,7 @@ public class BagControllerTests {
         ObjectMapper mapper = new ObjectMapper();
 
         reset(bagService);
-        when(bagService.isValidWeapon(any()))
-            .thenReturn(true);
+        doReturn(true).when(bagService).isWeaponOnTheList(any());
 
         mvc.perform(post(BASE_URL)
                 .with(csrf())
@@ -72,11 +72,11 @@ public class BagControllerTests {
             .andExpect(status().isOk());
 
         verify(bagService, times(1))
-            .isValidWeapon(any());
+            .isWeaponOnTheList(any());
     }
 
     @Test
-    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @WithMockUser(username = "player1", roles = {"PLAYER"})
     void validateWeaponInvalidWeaponReturnsNoBonus() throws Exception {
 
         CardDTO c1 = new CardDTO();
@@ -90,8 +90,7 @@ public class BagControllerTests {
         ObjectMapper mapper = new ObjectMapper();
 
         reset(bagService);
-        when(bagService.isValidWeapon(any()))
-            .thenReturn(false);
+        doReturn(false).when(bagService).isWeaponOnTheList(any());
 
         mvc.perform(post(BASE_URL)
                 .with(csrf())
@@ -100,11 +99,11 @@ public class BagControllerTests {
             .andExpect(status().isOk());
 
         verify(bagService, times(1))
-            .isValidWeapon(any());
+            .isWeaponOnTheList(any());
     }
 
     @Test
-    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @WithMockUser(username = "player1", roles = {"PLAYER"})
     void validateWeaponInvalidBodyReturnsBadRequest() throws Exception {
 
         BagInGameDTO dto = new BagInGameDTO();
@@ -120,6 +119,6 @@ public class BagControllerTests {
             .andExpect(status().isBadRequest());
 
         verify(bagService, never())
-            .isValidWeapon(any());
+            .isWeaponOnTheList(any());
     }
 }

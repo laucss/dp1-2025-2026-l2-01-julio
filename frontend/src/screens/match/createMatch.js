@@ -34,7 +34,7 @@ export default function CreateLobby() {
         throw new Error("Error al crear la partida: " + response.status);
       }
 
-      // Si tu endpoint devuelve el objeto del lobby creado
+      
       const newLobby = await response.json();
 
       // Redirige al lobby recién creado
@@ -50,44 +50,37 @@ export default function CreateLobby() {
     <div className="lobbies-overlay">
   <div className="creation-box">
 
- {/* Flecha de volver al inicio */}
-     <button 
-            className="back-arrow-btn"
-            onClick={() => navigate('/')}
-          >
-            ￩
-      </button>
 
   <div className="lobby-creation-content">
-    <h1 style={{color:"black"}}>Crear Partida</h1>
+    <h1>Create Match</h1>
 
     <form onSubmit={handleCreate}>
       <div>
-        <label>Nombre</label>
+        <label>Name</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Nombre de la partida"
+          placeholder="Match name"
           required
         />
       </div>
 
       <div>
-        <label>Número de jugadores</label>
+        <label>Number of Players</label>
         <div className="player-count-container">
-          <button type="button" onClick={() => setMaxPlayers((prev) => Math.max(3, prev - 1))}>↓</button>
+          <button className="circle-btn" type="button" onClick={() => setMaxPlayers((prev) => Math.max(3, prev - 1))}>-</button>
           <span>{maxPlayers}</span>
-          <button type="button" onClick={() => setMaxPlayers((prev) => Math.min(6, prev + 1))}>↑</button>
+          <button className="circle-btn" type="button" onClick={() => setMaxPlayers((prev) => Math.min(6, prev + 1))}>+</button>
         </div>
       </div>
 
       <div>
-        <label>Número de NPCs</label>
-        <div className="npc-count-container">
-          <button type="button" onClick={() => setNumNpcs(prev => Math.max(3, prev - 1))}>-</button>
+        <label>Number of NPCs</label>
+        <div className="player-count-container">
+          <button className="circle-btn" type="button" onClick={() => setNumNpcs(prev => Math.max(3, prev - 1))}>-</button>
           <span>{numNpcs}</span>
-          <button type="button" onClick={() => setNumNpcs(prev => Math.min(8,prev + 1))}>+</button>
+          <button className= "circle-btn" type="button" onClick={() => setNumNpcs(prev => Math.min(8,prev + 1))}>+</button>
         </div>
       </div>
 
@@ -101,13 +94,13 @@ export default function CreateLobby() {
             checked={isPrivate}
             onChange={(e) => setIsPrivate(e.target.checked)}
           />
-          Partida privada
+          Private Match
         </label>
       </div>
 
     <div className="button-row" style={{ display: "flex", justifyContent: "center", gap: "15px", marginTop: "1rem" }}>
-        <button type="submit">Crear</button>
-        <button type="cancel" onClick={() => navigate("/")}>Cancelar</button>
+        <button type="submit">Create</button>
+        <button type="cancel" onClick={() => navigate("/")}>Cancel</button>
     </div>      
     </form>
 

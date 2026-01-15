@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,25 +16,33 @@ import org.springframework.web.client.RestTemplate;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DictionaryService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.EmptyWeaponException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.VotingService;
 
 
 
 @Service
 public class BagService {
-    
+
+    private static final Integer MAX_LETTERS_ALLOWED = 2; // es el número máximo de letras que puedes guardar en tu bolsa sin tener que checkear que la palabra exista
+    private static final Integer BONUS_WEAPONS = 1; // la bonificación que te llevas al formar un arma válida 
+
     RestTemplate restTemplate;
     Checkers checkers;
     PlayerService playerService; 
     DictionaryService dictionaryService;
+    VotingService votingService;
 
-    public BagService(Checkers checkers, PlayerService playerService, DictionaryService dictionaryService, RestTemplate restTemplate){
+    @Autowired
+    public BagService(Checkers checkers, PlayerService playerService, DictionaryService dictionaryService, RestTemplate restTemplate, VotingService votingService){
         this.checkers = checkers; 
         this.playerService = playerService; 
         this.dictionaryService = dictionaryService;
         this.restTemplate=restTemplate; 
+        this.votingService = votingService; 
     }
 
     /*
@@ -42,6 +51,7 @@ public class BagService {
      * Map<MatchId, Map<PlayerId, BagInGame>> 
      */
     private final Map<Integer, Map<Integer, BagInGame>> activesBags = new HashMap<>(); 
+
 
 
     public Map<Integer, Map<Integer, BagInGame>> getActivesBags() {
@@ -158,51 +168,46 @@ public class BagService {
 
 
     /*
-     * Valida si la palabra que forma el usuario es valida para guardarse en la bolsa.
+     * Valida si la palabra que forma el usuario existe en el diccionario y por ende se puede guardar en la bolsa 
      * Primero se va a checkear si la palabra está en el diccionario local (DictionaryService) que hemos añadido con más de 100 palabras y si no está, 
      *          se hará una llamada a la API externa de free dictionary api. 
      * Se ha hecho lo del diccionario local para intentar reducir el número de llamadas a la API externa, 
      *          porque ya nos pasó que la api dejó de funcionar justo el día de la entrega y presentación del sprint. 
-     * Despues, guarda y actualiza la nueva bolsa del juagador
+     * Despues, guarda y actualiza la nueva bolsa del jugador
      */
 
  
     @Transactional 
-    public Boolean isValidWordForBag (String word) {
+    public boolean doesWordExists (String word) {
       
-        // si la palabra tiene 3 o más letras, checkear en el diccionario
-        if (word.length() >= 3){
 
-            // hacer llamada a la api de free dictionary api: 
-            // https://api.dictionaryapi.dev/api/v2/entries/en/<word>
-            // hay otra opción de api que es https://www.wordsapi.com/  aunque creo que es un poco menos completa pero ns 
-            
-            if (dictionaryService.containsWord(word)){
-                return true; 
-
-            } else {
-                String url = "https://api.dictionaryapi.dev/api/v2/entries/en/"+ word; 
-
-                try {
-                    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class); 
-
-                    return response.getStatusCode().is2xxSuccessful(); // devuelve true
-            
-                } catch (HttpClientErrorException e){
-                    return false; 
-                    
-                } catch (Exception e) {
-                    // TODO: handle exception en el validadr bag
-                    return false; 
-                }
-            }
+        // hacer llamada a la api de free dictionary api: 
+        // https://api.dictionaryapi.dev/api/v2/entries/en/<word>
+        // hay otra opción de api que es https://www.wordsapi.com/  aunque creo que es un poco menos completa pero ns 
         
+        if (dictionaryService.containsWord(word)){
+            return true; 
+
+        } else {
+            String url = "https://api.dictionaryapi.dev/api/v2/entries/en/"+ word; 
+
+            try {
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class); 
+
+                return response.getStatusCode().is2xxSuccessful(); // devuelve true
+        
+            } catch (HttpClientErrorException e){
+                return false; 
+                
+            } catch (Exception e) {
+                // TODO: handle exception en el validar bag
+                return false; 
+            }
         }
         
-        // si la palabra tiene menos de 3 letras, es válida automáticamente
-        return true; 
-        
     }
+        
+    
 
     /*
      * Método que realiza la comprobación completa del array de cartas que manda el frontend de la bolsa 
@@ -210,40 +215,94 @@ public class BagService {
      */
 
     @Transactional 
-    public Boolean checkBagIsValid (List<CardDTO> cards){
+    public boolean checkBagIsValid (List<CardDTO> cards){
 
         // si la bolsa no está vacía hacemos la comprobación
         if (!cards.isEmpty()){
-            String word = wordFromCards(cards); 
-            return isValidWordForBag(word); 
+            if (cards.size()> MAX_LETTERS_ALLOWED){ // si tiene más de 2 letras, checkear en el diccionario
+                String word = wordFromCards(cards); 
+                return doesWordExists(word); 
+            } else {
+                return true; // si tiene 2 o menos letras, es válida automáticamente
+            }
         }
-
         // si está vacía devolvemos true para que pueda seguir 
         return true;  
 
     }
 
+    /*
+     * Método al que se llama cuando se forma un arma y se quiere validar. 
+     * Escenarios: 
+     * - que se la palabra esté en la lista de armas dada por el juego -> es válida y se suma 1 punto 
+     * - que no esté en la lista pero que sí exista la palabra en el diccionario -> se inicia una votación con el resto de participantes y se llega a un consenso
+     * - que no exisa la palabra directamente en el diccionario -> petición inválida 
+     */
+
+    public WeaponValidationDTO validateWeapon(BagInGameDTO bag, Integer matchId){
+        if (bag.getCards().isEmpty()){
+            throw new EmptyWeaponException("Try putting a weapon or cancel the operation "); 
+        } else {
+            String word = wordFromCards(bag.getCards()); 
+            boolean isOnTheList = isWeaponOnTheList(word); 
+            if (isOnTheList){
+                return new WeaponValidationDTO(word,BONUS_WEAPONS, ValidationWeaponStatus.VALID);
+            } else {
+                boolean existsInDictionary = doesWordExists(word);
+                if (existsInDictionary){
+                    votingService.startVoting(matchId, word, bag.getPlayerId()); 
+                    return new WeaponValidationDTO(word,0, ValidationWeaponStatus.REQUIRES_VOTING);
+                } else {
+                    return new WeaponValidationDTO(word,0, ValidationWeaponStatus.INVALID);
+                }
+            }
+
+        }
+    }
+
 
     /*
-     * Método que checkea si palabra formada forma parte de la lista de armas ofrecida por el juego 
+     * Método que checkea si palabra formada es parte de la lista de armas ofrecida por el juego 
      */
+
+    @Transactional 
+    public boolean isWeaponOnTheList(String word){ 
+      
+        if (dictionaryService.isWeapon(word)){
+            return true; 
+
+        } else {
+            return false;
+        } 
+    }
+
+
+    /*
+     * Método que checkea que el arma propuesta exista en el diccionario para que se pueda proceder a la votación 
+     */
+    @Transactional 
+    public boolean checkProposedWeaponExists(List<CardDTO> cards){
+        String word = wordFromCards(cards);
+        return doesWordExists(word);
+    }
+
     
     
 
-
-    
+    /*
+     * Método que actualiza la bolsa del jugador dado 
+     */
+    @Transactional 
     public void update(BagInGameDTO bag, Integer matchId, Integer playerId){
 
         //checkear que exista el player y tal 
 
         BagInGame newBag = new BagInGame(); 
 
-        //newBag.setCards(bag.getCards());
-
-
-                // tengo que hacer lo de newArrayList<>(deck...) dentro del set porque si no se hace así ç
-        // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
         Map<Integer, BagInGame> playerMap = activesBags.get(matchId);
+
+            // tengo que hacer lo de newArrayList<>(deck...) dentro del set porque si no se hace así ç
+        // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
         newBag.setCards(new ArrayList<>(bag.getCards().stream()
             .map(dto -> new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));
 
@@ -252,20 +311,7 @@ public class BagService {
 
     }
 
-    // función para checkear si la palabra es un arma, dentro de la lista que da el juego de posibles armas 
+    
 
-    @Transactional 
-    public Boolean isValidWeapon(List<CardDTO> cards){ 
-
-        String word = wordFromCards(cards);
-      
-        if (dictionaryService.isWeapon(word)){
-            return true; 
-
-        } else {
-            return false;
-        }
- 
-        
-    }
+    
 }

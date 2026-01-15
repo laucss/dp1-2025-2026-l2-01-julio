@@ -37,10 +37,10 @@ public class UserDetailsImpl implements UserDetails {
 <span class="fc" id="L37">	}</span>
 
 	public static UserDetailsImpl build(User user) {
-<span class="nc" id="L40">		List&lt;GrantedAuthority&gt; authorities = List.of(new SimpleGrantedAuthority(user.getAuthority().getAuthority()));</span>
+<span class="fc" id="L40">		List&lt;GrantedAuthority&gt; authorities = List.of(new SimpleGrantedAuthority(user.getAuthority().getAuthority()));</span>
 
-<span class="nc" id="L42">		return new UserDetailsImpl(user.getId(), user.getUsername(),</span>
-<span class="nc" id="L43">				user.getPassword(), user.getAvatar(),</span>
+<span class="fc" id="L42">		return new UserDetailsImpl(user.getId(), user.getUsername(),</span>
+<span class="fc" id="L43">				user.getPassword(), user.getAvatar(),</span>
 				authorities);
 	}
 

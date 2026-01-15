@@ -41,13 +41,13 @@ export default function Statistics(){
                         className={`stats-button ${activeTab === 'personal' ? 'active' : ''}`}
                         onClick={() => setActiveTab('personal')}
                     >
-                        My Statistics
+                        My statistics
                     </button>
                     <button 
                         className={`stats-button ${activeTab === 'general' ? 'active' : ''}`}
                         onClick={() => setActiveTab('general')}
                     >
-                        General Statistics
+                        General statistics
                     </button>
                 </div>
                 
@@ -73,7 +73,7 @@ export default function Statistics(){
 
                     <div className="stat-card">
                         <div className="stat-icon">⚡</div>
-                        <h2>Action points</h2>
+                        <h2>Action Points</h2>
                         <p className="stat-value">{data.totalActionPoints}</p>
                     </div>
 

@@ -76,10 +76,13 @@ function Sidebar({ isOpen, toggle, user}) {
           {profileLinks}
           {adminLinks}
           <NavItem>
-            <NavLink tag={Link} to={`/ranking`} onClick={toggle}>
-              Ranking
+            <NavLink tag={Link} to={`/history/${user.id}`} onClick={toggle}>
+              History
             </NavLink>
           </NavItem>
+          <NavLink tag={Link} to={`/ranking`} onClick={toggle}>
+              Ranking
+            </NavLink>
           <NavItem>
             <NavLink tag={Link} to="/rules" onClick={toggle}>
               Rules

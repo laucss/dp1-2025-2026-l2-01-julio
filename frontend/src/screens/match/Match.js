@@ -14,6 +14,8 @@ import FightModal from "./FightModal";
 import StartDiceModal from "./StartDiceModal";
 import StealCardModal from "./StealCardModal";
 import NpcLossDiscardModal from "./NpcLossDiscardModal";
+import EscapeDiceModal from "./EscapeDiceModal";
+import VotingModal from "./VotingModal";
 
 // para alerta de errores
 import { toast } from "react-toastify";
@@ -67,6 +69,7 @@ export default function Match(){
 
     const [isDiceModalOpen, setIsDiceModalOpen] = useState(true);
     const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
+    const [isEscapeModalOpen, setIsEscapeModalOpen] = useState(false);
     const [isFightModalOpen, setIsFightModalOpen] = useState(false);
     const [fightDefender, setFightDefender] = useState(null);
     const [fightAttacker, setFightAttacker] = useState(null);
@@ -74,6 +77,13 @@ export default function Match(){
     const [isStealModalOpen, setIsStealModalOpen] = useState(false);
     const [stealLoserPlayerId, setStealLoserPlayerId] = useState(null);
     const [isNpcLossModalOpen, setIsNpcLossModalOpen] = useState(false);
+    const [npcLossModalTitle, setNpcLossModalTitle] = useState();
+    const [npcLossModalSubtitle, setNpcLossModalSubtitle] = useState();
+    const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+    const [weaponProposed, setWeaponProposed] = useState('');
+    const [proposingUserId, setProposingUserId] = useState(null);
+    const [proposingUsername, setProposingUsername] = useState('');
+    const [votingResult, setVotingResult] = useState(null);
     
     // Determinar si el usuario actual es un espectador
     const isSpectator = !currentUser || !match?.players?.some(p => p.user.id === currentUser.id);
@@ -180,10 +190,8 @@ export default function Match(){
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, async (msg) => {
             const fightUpdate = JSON.parse(msg.body);
-            console.log('🔔 Fight notification received:', fightUpdate);
             
             if (fightUpdate.action === 'START') {
-                console.log('🥊 Starting fight...');
                 // Actualizar el match primero para tener datos frescos
                 try {
                     const response = await fetch(`/api/v1/matches/${matchId}`, {
@@ -194,40 +202,31 @@ export default function Match(){
                     
                     if (response.ok) {
                         const freshMatch = await response.json();
-                        console.log('✅ Fresh match data:', freshMatch);
                         setMatch(freshMatch);
                         
                         // Identificar al atacante (quien inicia la batalla)
                         const attacker = freshMatch.players?.find(p => p.user.id === fightUpdate.attackerId);
-                        console.log('👊 Attacker found:', attacker);
                         
                         // Identificar al defensor (puede ser jugador o NPC)
                         let defender = null;
                         
-                        console.log('🔍 Is defender an NPC (isBot):', fightUpdate.isBot);
-                        
                         if (fightUpdate.isBot) {
-                            console.log('🤖 Buscando NPC con ID:', fightUpdate.defenderId);
-                            console.log('🤖 NPCs disponibles:', freshMatch.npcs?.map(n => ({ id: n.id, name: n.isNiallCampbell ? 'NiallCampbell' : 'NPC' })));
                             defender = freshMatch.npcs?.find(n => n.id === fightUpdate.defenderId);
-                            console.log('🛡️ Defensor NPC encontrado:', defender);
                         } else {
                             defender = freshMatch.players?.find(p => p.user.id === fightUpdate.defenderId);
-                            console.log('🛡️ Defensor Jugador encontrado:', defender);
                         }
                         
                         if (attacker && defender) {
-                            console.log('✅ Opening fight modal with:', { attacker, defender });
                             setFightAttacker(attacker);
                             setFightDefender(defender);
                             setPendingTargetRoom(fightUpdate.roomId || fightUpdate.roomName);
                             setIsFightModalOpen(true);
                         } else {
-                            console.error('❌ Could not find attacker or defender:', { attacker, defender, fightUpdate });
+                            console.error('Could not find attacker or defender:', { attacker, defender, fightUpdate });
                         }
                     }
                 } catch (error) {
-                    console.error('❌ Error fetching fresh match data for fight:', error);
+                    console.error('Error fetching fresh match data for fight:', error);
                 }
             } else if (fightUpdate.action === 'RESOLVE') {
                 const winnerId = fightUpdate.winnerId;
@@ -267,6 +266,43 @@ export default function Match(){
                     })
                 };
             });
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
+
+    // websocket para recibir notificaciones de votación de armas
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.weapon.voting`, (msg) => {
+            const votingData = JSON.parse(msg.body);
+            setIsVotingModalOpen(true);
+            setWeaponProposed(votingData.weapon);
+            setProposingUserId(votingData.proposingUserId);
+            setProposingUsername(votingData.proposingUsername);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
+
+    // websocket para recibir resultado de votación de armas
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.weapon.voting.result`, (msg) => {
+            const result = JSON.parse(msg.body);
+            if (result.status === 'FINISHED') {
+                setVotingResult(result); // Guardar el resultado para que FightModal lo procese
+                setIsVotingModalOpen(false);
+                
+                // Mostrar mensaje del resultado
+                if (result.result === 'ACCEPTED') {
+                    toast.success(`"${result.proposedWeapon}" was accepted! Bonus: +${result.finalBonus}`);
+                } else {
+                    toast.error(`"${result.proposedWeapon}" was rejected. No bonus awarded.`);
+                }
+            }
         });
 
         return () => subscription.unsubscribe();
@@ -458,9 +494,29 @@ export default function Match(){
         return () => clearInterval(intervalId);
     }, [isDiceModalOpen, match?.currentTurnPhase, matchId]);
 
-    
+    // Función para limpiar los estados de votación
+    const cleanVotingStates = async () => {
+        setVotingResult(null);
+        setIsVotingModalOpen(false);
+        setWeaponProposed('');
+        setProposingUserId(null);
+        setProposingUsername('');
+        
+        // Eliminar las votaciones de la base de datos
+        try {
+            await fetch(`/api/v1/voting/${matchId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (error) {
+            console.error('Error al eliminar votaciones:', error);
+        }
+    };
 
-    // console.log('currentPlayer', currentPlayer)
+        // console.log('currentPlayer', currentPlayer)
     const fetchActionPoints = async () => {
         try {
             const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/actionPoints`, {
@@ -656,18 +712,22 @@ export default function Match(){
             })
 
             if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`)
+                const error = await response.json();
+                throw error;
             }
 
-            const data = await response.json()
-            //console.log('carta', data.card)
-            
-            setDeck(data.deck)
-            //setHandCards(prev => [...prev, data.card])
-            setNumCardsDrawn(prev => prev + 1)
+            if (response.ok){
+                const data = await response.json()
+                //console.log('carta', data.card)
+                
+                setDeck(data.deck)
+                //setHandCards(prev => [...prev, data.card])
+                setNumCardsDrawn(prev => prev + 1)
+            }
             
         } catch (error) {
             console.log('error', error)
+            toast.error(error.message)
             
         }    
 
@@ -1254,12 +1314,6 @@ export default function Match(){
             }
         }
     }
-    // Normaliza habitaciones corridor: 10 -> 9 (corridor 2), 28 -> 27 (corridor 9)
-    const normalizeCorridorRoomId = (roomId) => {
-        if (roomId === 10) return 9;
-        if (roomId === 28) return 27;
-        return roomId;
-    };
 
     const moveLoserToRandomRoom = async (userId, roomId) => {
         try {
@@ -1310,13 +1364,13 @@ export default function Match(){
     }
 
     const handleNpcLossDiscard = async ({ cardId, fromWhere }) => {
-        if (!cardId || !fromWhere || !currentPlayer[0]?.id) {
+        if (!cardId || !fromWhere || !currentPlayer?.id) {
             setIsNpcLossModalOpen(false);
             return;
         }
 
         try {
-            const res = await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0].id}/lose-against-npc`, {
+            const res = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/lose-against-npc`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${jwt}`,
@@ -1370,6 +1424,7 @@ export default function Match(){
     const handleEndTurn = async () => {
         if (isEndingTurn) return;
         setIsEndingTurn(true);
+        setNumCardsDrawn(0);
         try {
             const response = await fetch(`/api/v1/matches/${matchId}/next-turn`, {
                 method: 'POST',
@@ -1396,6 +1451,13 @@ export default function Match(){
 
     const leaveMatch = async () => {
         if (!window.confirm("¿Seguro que quieres abandonar la partida?")) return;
+
+        // En modo espectador no hay backend que eliminar; solo volver a la home
+        if (isSpectator) {
+            navigate('/');
+            return;
+        }
+
         try {
             const response = await fetch(`/api/v1/matches/${matchId}/leaveMatch`, {
                 method: 'PUT',
@@ -1413,7 +1475,7 @@ export default function Match(){
                 return;
             }
 
-            // On success, navigate back to home
+            // Volver al inicio
             navigate('/');
         } catch (err) {
             console.error('Error leaving match:', err);
@@ -1457,7 +1519,10 @@ export default function Match(){
             <div className="match-ended">
                 <div className="end-overlay">
                     <div className="end-text-box">
-                        <h2>La partida ha finalizado!!!!!</h2>
+                        <h2>La partida ha finalizado</h2>
+                        {match?.winner?.user ? (
+                            <p style={{ fontWeight: 700, margin: '8px 0' }}>Ganador: {match.winner.user.username}</p>
+                        ) : null}
                         <p>Gracias por jugar.</p>
                         <button className="return-menu-button" onClick={() => navigate(`/`)}>Return to main menu</button>
                     </div>
@@ -1482,7 +1547,7 @@ if (!match) {
     //console.log('handCards', handCards)
 
 return (
-        <div className="match-container">
+    <div className={`match-container ${isSpectator ? 'spectator-mode' : ''}`}>
 
             {/*Modal donde se tiran los dados nada más empezar la partida para elegir el orden de los turnos*/}
             <StartDiceModal 
@@ -1491,10 +1556,26 @@ return (
                 onDiceRolled={handleDiceRolled}
                 matchData={match}
             />
+            <EscapeDiceModal
+                isOpen={isEscapeModalOpen}
+                onClose={() => setIsEscapeModalOpen(false)}
+                onResult={async (result) => {
+                    try {
+                        await fetchMatchAndPlayers();
+                        if (!result.success && result.discardRequired) {
+                            setNpcLossModalTitle('Tu intento de escape ha fallado');
+                            setNpcLossModalSubtitle('Elige de donde descartar una carta');
+                            setIsNpcLossModalOpen(true);
+                        }
+                    } catch (err) {
+                        console.error('Error handling escape result:', err);
+                    }
+                }}
+            />
             
             <div className="match-board" style={{ position: 'relative' }}>
                 <div className="player-and-decks-section"> 
-                    <div className="current-player"> 
+                    <div className={`current-player ${isSpectator ? 'spectator-hidden' : ''}`}>
                         <div className="current-player-info"> 
                             <div style={{
                                     borderRadius: '50%',
@@ -1815,7 +1896,7 @@ return (
                 </table>
             </div>
             */}
-            <div className="player-section">
+            <div className={`player-section ${isSpectator ? 'spectator-hidden' : ''}`}>
                 <div className="player-hand">
                     <div className="hand-cards"> 
                         {Array.isArray(handCards) && handCards.map((carta) => (
@@ -1838,7 +1919,7 @@ return (
 
             <div>
 
-            <button className="bag-button"
+            <button className={`bag-button ${isSpectator ? 'spectator-hidden' : ''}`}
                 onClick={() => setDiscardPhaseOpen(true)}
                 disabled={
                 match.currentTurnUserId !== currentUser.id }
@@ -1847,7 +1928,7 @@ return (
             >
                 Discard and bag
             </button>
-            <button className="bag-button"
+            <button className={`bag-button ${isSpectator ? 'spectator-hidden' : ''}`}
                 title="Discard cards from hand"
                 onClick={() => setIsActionsModalOpen(true) }
                 disabled={
@@ -1857,18 +1938,28 @@ return (
                 Actions
             </button>
 
-            <ActionsModal
-                isOpen={isActionsModalOpen}
-                onClose={() => setIsActionsModalOpen(false)}
-                moveToAdyacent={() => setMoveToAdyacentRoom(true) }
-                moveToRoomWithWord={() => setMoveToRoomWithWord(true) }
-                onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
-            />
+            {
+                (() => {
+                    const currentRoomId = currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id);
+                    const canAttemptEscape = [1,6,31,36].includes(normalizeRoomId(currentRoomId));
+                    return (
+                        <ActionsModal
+                            isOpen={isActionsModalOpen}
+                            onClose={() => setIsActionsModalOpen(false)}
+                            moveToAdyacent={() => setMoveToAdyacentRoom(true) }
+                            moveToRoomWithWord={() => setMoveToRoomWithWord(true) }
+                            onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
+                            onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
+                            canAttemptEscape={canAttemptEscape}
+                        />
+                    )
+                })()
+            }
 
             <button
                 className="leave-match-button"
                 onClick={leaveMatch}
-                style={{ marginLeft: '15px', background: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                style={{ marginLeft: '15px', background: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', marginTop: isSpectator ? '20px' : undefined }}
             >
                 Leave Match
             </button>
@@ -1877,11 +1968,20 @@ return (
 
     <FightModal
             isOpen={isFightModalOpen}
-            onClose={() => { setIsFightModalOpen(false); setFightDefender(null); setFightAttacker(null); }}
+            onClose={() => { 
+                setIsFightModalOpen(false); 
+                setFightDefender(null); 
+                setFightAttacker(null); 
+                cleanVotingStates();
+            }}
             defender={fightDefender}
             attacker={fightAttacker}
             stompClient={stompClient}
             bagCards={bagCards}
+            matchData={match}
+            votingResult={votingResult}
+            proposingUserId={proposingUserId}
+            onVotingResultProcessed={() => setVotingResult(null)}
             onResolve={async (currentUserWon) => {
                 try {
                     console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightDefender=', fightDefender, 'fightAttacker=', fightAttacker);
@@ -1894,6 +1994,7 @@ return (
                         setFightDefender(null);
                         setFightAttacker(null);
                         setPendingTargetRoom(null);
+                        cleanVotingStates();
                         return;
                     }
 
@@ -1918,7 +2019,7 @@ return (
                                 // Si es NiallCampbell, roba de la pila de descarte
                                 if (fightDefender?.isNiallCampbell) {
                                     console.log('Drawing from discard pile for beating Niall Campbell...');
-                                    await fetch(`/api/v1/matches/${matchId}/${currentPlayer[0]?.id}/playerWinsNiallCampbell`, {
+                                    await fetch(`/api/v1/matches/${matchId}/${fightAttacker?.id}/playerWinsNiallCampbell`, {
                                         method: "POST",
                                         headers: {
                                             Authorization: `Bearer ${jwt}`,
@@ -1932,8 +2033,8 @@ return (
                                 } else {
                                     // Si es un NPC normal, roba 2 cartas de recompensa
                                     console.log('Drawing 2 reward cards for beating regular NPC...');
-                                    await drawCardForWinner(currentPlayer?.[0]?.id);
-                                    await drawCardForWinner(currentPlayer?.[0]?.id);
+                                    await drawCardForWinner(fightAttacker?.id);
+                                    await drawCardForWinner(fightAttacker?.id);
                                 }
                                 
                                 // Mover al jugador ganador a la habitación donde estaba el bot
@@ -1970,7 +2071,7 @@ return (
                                 }
                                 
                                 // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
-                                botRandomRoomId = normalizeCorridorRoomId(botRandomRoomId);
+                                botRandomRoomId = normalizeRoomId(botRandomRoomId);
                                 
                                 console.log('Moving NPC loser to random room:', botRandomRoomId);
                                 await fetch(`/api/v1/matches/${matchId}/npc/location`, {
@@ -2034,7 +2135,7 @@ return (
                                 }
                                 
                                 // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
-                                randomRoomIdPlayer = normalizeCorridorRoomId(randomRoomIdPlayer);
+                                randomRoomIdPlayer = normalizeRoomId(randomRoomIdPlayer);
                                 
                                 console.log('Moving player loser to random room:', randomRoomIdPlayer);
                                 await moveLoserToRandomRoom(currentUser.id, randomRoomIdPlayer);
@@ -2064,6 +2165,7 @@ return (
                         setFightDefender(null);
                         setFightAttacker(null);
                         setPendingTargetRoom(null);
+                        cleanVotingStates();
                         return;
                     }
 
@@ -2073,6 +2175,7 @@ return (
                         setFightDefender(null);
                         setFightAttacker(null);
                         setPendingTargetRoom(null);
+                        cleanVotingStates();
                         return;
                     }
                     const allRoomIds = [
@@ -2203,6 +2306,7 @@ return (
                     setFightDefender(null);
                     setFightAttacker(null);
                     setPendingTargetRoom(null);
+                    cleanVotingStates();
                 }
             }}
     />
@@ -2210,6 +2314,7 @@ return (
                 <button
                     className="end-match-button"
                     onClick={endMatch}
+                    style={{ display: isSpectator ? 'none' : 'block' }}
                 >
                     Finalizar partida
                 </button>
@@ -2249,12 +2354,27 @@ return (
             isOpen={isNpcLossModalOpen}
             handCards={handCards}
             bagCards={bagCards}
-            onClose={() => setIsNpcLossModalOpen(false)}
+            onClose={() => { setIsNpcLossModalOpen(false); setNpcLossModalTitle(); setNpcLossModalSubtitle(); }}
+            title={npcLossModalTitle}
+            subtitle={npcLossModalSubtitle}
             onDiscard={handleNpcLossDiscard}
         />
 
+        <VotingModal
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+            weaponProposed={weaponProposed}
+            userProposingWeapon={match?.players?.find(p => p.user?.id === proposingUserId)?.user}
+            proposingUserId={proposingUserId}
+            matchData={match}
+            stompClient={stompClient}
+            onSubmit={(voting) => {
+                setIsVotingModalOpen(false);
+            }}
+        />
+
       
-            <div className="match-chat-icon">
+            <div className={`match-chat-icon ${isSpectator ? 'spectator-hidden' : ''}`}>
                 <div className="chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
                     <FaComments size={30} color="white" />
                 </div>
@@ -2263,8 +2383,9 @@ return (
             {chatOpen && <ChatBox matchId={matchId} />}
 
             {/* Mensaje de turno */}
-            <div className="chat-button"
-            >
+              <div className="chat-button"
+                  style={{ marginTop: isSpectator ? '20px' : undefined }}
+              >
                 {!match?.currentTurnUserId
                 ? "Esperando..."
                 : match.currentTurnUserId === currentUser?.id

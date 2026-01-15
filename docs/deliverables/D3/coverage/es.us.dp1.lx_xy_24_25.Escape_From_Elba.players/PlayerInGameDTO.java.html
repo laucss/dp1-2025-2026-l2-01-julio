@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlayerInGameDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.players</a> &gt; <span class="el_source">PlayerInGameDTO.java</span></div><h1>PlayerInGameDTO.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
+
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class PlayerInGameDTO {
+    
+    // Jugador ID
+    private Integer id;
+    
+    // Estado del jugador durante la partida
+    private Integer strength;      
+    
+    private Integer actionPoints;
+    
+    private User user; 
+
+    private RoomDTO currentRoom;
+    
+
+    private HandInGameDTO hand;       
+    
+
+    private BagInGameDTO bag;  
+
+
+<span class="fc" id="L36">    public PlayerInGameDTO(Player player) {</span>
+<span class="fc" id="L37">        this.id = player.getId();</span>
+<span class="fc" id="L38">        this.strength = player.getStrength();</span>
+<span class="fc" id="L39">        this.actionPoints = player.getActionPoints();</span>
+<span class="fc" id="L40">        this.user= player.getUser();</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        this.currentRoom = player.getRoom() != null ? new RoomDTO(player.getRoom()) : null;</span>
+<span class="fc" id="L42">    }</span>
+
+
+<span class="nc" id="L45">    public PlayerInGameDTO(Player player, HandInGame hand, BagInGame bag) {</span>
+<span class="nc" id="L46">        this.id = player.getId();</span>
+<span class="nc" id="L47">        this.strength = player.getStrength();</span>
+<span class="nc" id="L48">        this.actionPoints = player.getActionPoints();</span>
+<span class="nc" id="L49">        this.user= player.getUser();</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        this.currentRoom = player.getRoom() != null ? new RoomDTO(player.getRoom()) : null;</span>
+<span class="nc" id="L51">        this.hand = new HandInGameDTO(hand);</span>
+<span class="nc" id="L52">        this.bag = new BagInGameDTO(bag);</span>
+
+<span class="nc" id="L54">    }</span>
+
+
+<span class="nc" id="L57">    public PlayerInGameDTO() {</span>
+<span class="nc" id="L58">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

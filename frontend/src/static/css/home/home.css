@@ -103,3 +103,33 @@
     transform: scale(1.05);           
 }
 
+.pending-invitations-banner {
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E72 100%);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    text-align: center;
+    font-weight: 600;
+    font-size: 1rem;
+    animation: slideDown 0.5s ease-out;
+    border: 2px solid #FF5252;
+}
+
+.pending-invitations-banner p {
+    margin: 0;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -5,7 +5,7 @@ import tokenService from '../../services/token.service';
 import getIdFromUrl from '../../util/getIdFromUrl';
 import WeaponModal from './WeaponModal';
 
-export default function FightModal({ isOpen, onClose, defender, attacker, onResolve, stompClient, bagCards = [] }) {
+export default function FightModal({ isOpen, onClose, defender, attacker, onResolve, stompClient, bagCards = [], matchData, votingResult, proposingUserId, onVotingResultProcessed }) {
     const currentUser = tokenService.getUser();
     const jwt = tokenService.getLocalAccessToken();
     const matchId = getIdFromUrl(2);
@@ -109,6 +109,40 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
 
         return () => subscription.unsubscribe();
     }, [stompClient, matchId, isOpen]);
+
+    // Manejar resultado de votación de arma
+    useEffect(() => {
+        if (!votingResult || votingResult.status !== 'FINISHED') return;
+
+        const handleVotingResult = async () => {
+            if (votingResult.result === 'ACCEPTED') {
+                // Determinar quién propuso el arma comparando proposingUserId con attacker y defender
+                const proposingPlayerIsAttacker = proposingUserId === attacker?.user?.id;
+                const playerRole = proposingPlayerIsAttacker ? 'ATTACKER' : 'DEFENDER';
+
+                // Crear el objeto weaponData con la palabra propuesta y el bonus
+                const weaponData = {
+                    word: votingResult.proposedWeapon,
+                    bonus: votingResult.finalBonus,
+                    cards: [] // Las cartas ya se quitaron de la bolsa, solo guardamos la palabra
+                };
+
+                // Agregar el arma a los totales del combate
+                await addWeaponToFight(weaponData, playerRole);
+            }
+
+            // Cerrar el modal de arma
+            setIsWeaponModalOpen(false);
+            setCurrentWeaponUser(null);
+
+            // Notificar que ya procesamos el resultado
+            if (onVotingResultProcessed) {
+                onVotingResultProcessed();
+            }
+        };
+
+        handleVotingResult();
+    }, [votingResult, attacker?.user?.id, currentUser?.id, onVotingResultProcessed]);
 
     // Resetear dados cuando se abre el modal
     useEffect(() => {
@@ -267,18 +301,16 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         return weapons.reduce((sum, w) => sum + (w.bonus || 0), 0);
     };
 
-    const handleWeaponSelected = async (weaponData) => {
-        let newWeapons, playerRole, newTotal;
+    const addWeaponToFight = async (weaponData, playerRole) => {
+        let newWeapons, newTotal;
         
-        if (currentWeaponUser === 'ATTACKER') {
+        if (playerRole === 'ATTACKER') {
             newWeapons = [...weaponsAttacker, weaponData];
-            playerRole = 'ATTACKER';
             newTotal = attackerStrength + parseInt(whiteDice, 10) + getTotalWeaponsBonus(newWeapons);
             setWeaponsAttacker(newWeapons);
             setTotalAttacker(newTotal);
         } else {
             newWeapons = [...weaponsDefender, weaponData];
-            playerRole = 'DEFENDER';
             newTotal = defenderStrength + parseInt(blackDice, 10) + getTotalWeaponsBonus(newWeapons);
             setWeaponsDefender(newWeapons);
             setTotalDefender(newTotal);
@@ -299,6 +331,10 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                 totalDefender: playerRole === 'DEFENDER' ? newTotal : totalDefender
             })
         });
+    };
+
+    const handleWeaponSelected = async (weaponData) => {
+        await addWeaponToFight(weaponData, currentWeaponUser);
         
         setIsWeaponModalOpen(false);
         setCurrentWeaponUser(null);
@@ -476,6 +512,8 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                 }}
                 player={currentWeaponUser === 'ATTACKER' ? attacker : defender}
                 onWeaponSelected={handleWeaponSelected}
+                matchData={matchData}
+                stompClient={stompClient}
             />
         </div>
     );

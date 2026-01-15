@@ -1,7 +1,7 @@
 import React from "react";
 import "../../static/css/match/actionsModal.css";
 
-export default function ActionsModal({ isOpen, onClose, moveToAdyacent, moveToRoomWithWord, onMoveNpcRequested }) {
+export default function ActionsModal({ isOpen, onClose, moveToAdyacent, moveToRoomWithWord, onMoveNpcRequested, onAttemptEscape, canAttemptEscape }) {
     if (!isOpen) return null;
 
     const move = () => {
@@ -23,7 +23,13 @@ export default function ActionsModal({ isOpen, onClose, moveToAdyacent, moveToRo
                 <button onClick={move}>Mover a habitación adyacente</button>
                 <button onClick={moveByLetters}>Mover a habitación con tu palabra</button>
                 <button onClick={() => { onMoveNpcRequested && onMoveNpcRequested(); onClose(); }}>Mover a un NPC</button>
-                <button>Intentar escapar</button>
+                <button
+                    onClick={() => { if (canAttemptEscape) { onAttemptEscape && onAttemptEscape(); onClose(); } }}
+                    disabled={!canAttemptEscape}
+                    title={!canAttemptEscape ? 'Debes estar en una de las cuatro torres para intentar escapar' : ''}
+                >
+                    Intentar escapar
+                </button>
 
                 <button className="close-btn" onClick={onClose}>Cerrar</button>
             </div>

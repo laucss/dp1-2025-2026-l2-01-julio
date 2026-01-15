@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react"
-import '../../static/css/match/weaponModal.css';
-import tokenService from "../../services/token.service";
-import getIdFromUrl from "../../util/getIdFromUrl";
+import '../../static/css/match/weaponModal.css'
+import tokenService from "../../services/token.service"
+import getIdFromUrl from "../../util/getIdFromUrl"
 
 // para mostrar las excepciones
-import { toast } from "react-toastify";
+import { toast } from "react-toastify"
 
 const jwt = tokenService.getLocalAccessToken();
 
-export default function WeaponModal({ isVisible, bagCards, onClose, player, onWeaponSelected }) {
+export default function WeaponModal({ isVisible, bagCards, onClose, player, onWeaponSelected, matchData, stompClient }) {
     const matchId = getIdFromUrl(2);
+    const currentUser = tokenService.getUser();
+    const currentPlayer = matchData?.players?.find(p => p.user?.id === currentUser.id)
     const [availableCards, setAvailableCards] = useState([]);
     const [selectedCards, setSelectedCards] = useState([]);
     const [formedWord, setFormedWord] = useState('');
@@ -42,6 +44,20 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
         setSelectedCards(prev => prev.filter((_, i) => i !== index));
     };
 
+    const notifyWeaponVoting = async (weaponWord, proposingPlayerUser) => {
+        if (!stompClient || !stompClient.active) return;
+
+        stompClient.publish({
+            destination: `/app/match/${matchId}/weapon-voting`,
+            body: JSON.stringify({
+                matchId: matchId,
+                weapon: weaponWord,
+                proposingUserId: proposingPlayerUser?.id,
+                proposingUsername: proposingPlayerUser?.username
+            })
+        });
+    };
+
     const validateAndSelectWeapon = async () => {
         if (selectedCards.length === 0) {
             setMessage('Please select at least one card');
@@ -50,10 +66,17 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
             return;
         }
 
+    if (!currentPlayer) {
+        setMessage('Error: Could not find player data. Please refresh the page.');
+        setMessageType('error');
+        setVisible(true);
+        return;
+    }
+
         setIsValidating(true);
         try {
             const wordLowerCase = formedWord.toLowerCase();
-            const response = await fetch(`/api/v1/bag/validate-weapon`, {
+            const response = await fetch(`/api/v1/bag/validate-weapon/${matchId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${jwt}`,
@@ -65,13 +88,15 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
                         frontImage: card.frontImage,
                         backImage: card.backImage,
                         letter: card.letter.toLowerCase()
-                    }))
+                    })),
+                    playerId: currentPlayer.id
                 })
             });
 
             if (response.ok) {
+                console.log('✅ Weapon validation response received', response);
                 const result = await response.json();
-                if (result.isValid) {
+                if (result.status === 'VALID') {
                     setMessage(`"${formedWord}" is a valid weapon! Bonus: +${result.bonusValue || 0}`);
                     setMessageType('success');
                     setVisible(true);
@@ -84,10 +109,12 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
                             cards: selectedCards
                         });
                     }, 500);
+                } else if (result.status === 'REQUIRES_VOTING'){
+                    // Notificar a todos los jugadores que hay una votación
+                    await notifyWeaponVoting(wordLowerCase, currentUser);
+                
                 } else {
                     toast.error(`"${formedWord}" is not a valid weapon. Try another combination.`);
-                    //setMessageType('error');
-                    //setVisible(true);
                 }
             } else {
                 const errorData = await response.json();
@@ -103,7 +130,7 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
         } finally {
             setIsValidating(false);
         }
-    };
+    }
 
     const handleCancel = () => {
         setAvailableCards(bagCards || []);
@@ -111,7 +138,7 @@ export default function WeaponModal({ isVisible, bagCards, onClose, player, onWe
         setFormedWord('');
         setMessage(null);
         onClose();
-    };
+    }
 
     return (
         <div className="modal-overlay">

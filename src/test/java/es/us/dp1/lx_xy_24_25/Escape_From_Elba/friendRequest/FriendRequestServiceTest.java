@@ -33,6 +33,9 @@ public class FriendRequestServiceTest {
     @Mock
     private UserRepository userRepository;
 
+        @Mock
+        private FriendWebsocketController friendWebsocketController;
+
     private static final Integer CURRENT_USER_ID = 4;
     private static final Integer ANOTHER_USER_ID = 5;
     private static final Integer USER_ID_NOT_EXIST = 100;
@@ -295,6 +298,11 @@ public class FriendRequestServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         FriendRequest toUpdate = new FriendRequest();
+        User sender = new User(); sender.setId(CURRENT_USER_ID);
+        User receiver = new User(); receiver.setId(ANOTHER_USER_ID);
+        toUpdate.setSender(sender);
+        toUpdate.setReceiver(receiver);
+
         FriendRequest updatedRequest = this.friendRequestService.acceptRequest(toUpdate);
 
         verify(friendRequestRepository).save(updatedRequest);
@@ -310,6 +318,11 @@ public class FriendRequestServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         FriendRequest toUpdate = new FriendRequest();
+        User sender = new User(); sender.setId(CURRENT_USER_ID);
+        User receiver = new User(); receiver.setId(ANOTHER_USER_ID);
+        toUpdate.setSender(sender);
+        toUpdate.setReceiver(receiver);
+
         FriendRequest updatedRequest = this.friendRequestService.rejectRequest(toUpdate);
 
         verify(friendRequestRepository).save(updatedRequest);
@@ -324,8 +337,13 @@ public class FriendRequestServiceTest {
         FriendRequest friendRequest = new FriendRequest();
         friendRequest.setId(REQUEST_EXIST_ACCEPTED_ID);
 
-        this.friendRequestService.deleteFriend(friendRequest);
+                User sender = new User(); sender.setId(CURRENT_USER_ID);
+                User receiver = new User(); receiver.setId(ANOTHER_USER_ID);
+                friendRequest.setSender(sender);
+                friendRequest.setReceiver(receiver);
 
-        verify(friendRequestRepository).deleteById(REQUEST_EXIST_ACCEPTED_ID);
+                this.friendRequestService.deleteFriend(friendRequest);
+
+                verify(friendRequestRepository).deleteById(REQUEST_EXIST_ACCEPTED_ID);
     }
 }

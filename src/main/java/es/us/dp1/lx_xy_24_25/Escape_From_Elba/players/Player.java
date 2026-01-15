@@ -1,5 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -17,6 +18,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Transient;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,8 +45,11 @@ public class Player extends BaseEntity {
 	@JoinColumn(name = "room_id")
 	private Room room;
 
+	@Min(0)
+	//@Max(7)
+	private Integer cardsDrawnInTurn; 
 
-    private Integer strength; //vamos a guarda la fuerza gastada
+    private Integer strength; 
 
     private Integer actionPoints;
 
@@ -67,6 +73,8 @@ public class Player extends BaseEntity {
 
 	@Transient
 	private BagInGame bag; 
+
+
 
 
 

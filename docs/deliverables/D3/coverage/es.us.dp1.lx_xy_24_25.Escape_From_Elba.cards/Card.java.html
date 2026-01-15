@@ -34,15 +34,23 @@ public class Card extends BaseEntity implements Prototype&lt;Card&gt; {
      * Constructor para poder hacer una copia de carta y aplicar el patron Prototipe
      */
 
-<span class="nc" id="L37">    public Card(Card carta){</span>
-<span class="nc" id="L38">        this.backImage = carta.backImage;</span>
-<span class="nc" id="L39">        this.frontImage = carta.frontImage;</span>
-<span class="nc" id="L40">        this.letter = carta.letter;</span>
-<span class="nc" id="L41">    }</span>
+<span class="fc" id="L37">    public Card(Card carta){</span>
+<span class="fc" id="L38">        setId(carta.getId());</span>
+<span class="fc" id="L39">        this.backImage = carta.backImage;</span>
+<span class="fc" id="L40">        this.frontImage = carta.frontImage;</span>
+<span class="fc" id="L41">        this.letter = carta.letter;</span>
+<span class="fc" id="L42">    }</span>
+
+<span class="fc" id="L44">    public Card(Integer id, String frontImage, String backImage, String letter){</span>
+<span class="fc" id="L45">        this.id = id;</span>
+<span class="fc" id="L46">        this.backImage = backImage;</span>
+<span class="fc" id="L47">        this.frontImage = frontImage;</span>
+<span class="fc" id="L48">        this.letter = letter;</span>
+<span class="fc" id="L49">    }</span>
 
     @JsonIgnore
     public Card getClone() {
-<span class="nc" id="L45">        return new Card(this); </span>
+<span class="fc" id="L53">        return new Card(this); </span>
     }
 
 }
