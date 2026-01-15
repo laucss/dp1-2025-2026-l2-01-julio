@@ -36,19 +36,7 @@ function AppNavbar() {
 
     roles.forEach((role) => {
         if (role === "ADMIN") {
-            adminLinks = (
-                <>                    
-                    <NavItem>
-                        <NavLink style={{ color: "white" }} tag={Link} to="/users">Users</NavLink>
-                    </NavItem>
-                    <NavItem>
-                        <NavLink style={{ color: "white" }} tag={Link} to="/achievements">Achievements</NavLink>
-                    </NavItem>   
-                    <NavItem>
-                        <NavLink style={{ color: "white" }} tag={Link} to="/matches">Matches</NavLink>
-                    </NavItem>
-                </>
-            )
+        
             profileLinks = (
                 <>
                     <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
@@ -62,11 +50,6 @@ function AppNavbar() {
     })
         roles.forEach((role) => {
         if (role === "PLAYER") {
-            ownerLinks = (
-                <> 
-       
-                </>
-            )
             profileLinks = (
                 <>
                     <NavItem>
