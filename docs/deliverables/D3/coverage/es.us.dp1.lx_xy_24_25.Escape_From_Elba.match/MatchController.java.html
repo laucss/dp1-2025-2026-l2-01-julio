@@ -2,11 +2,15 @@
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,12 +25,40 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.DiceTotalsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightDiceUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightResolvedDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.LoseAgainstNpcRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchHistorialDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MoveNpcToRoomDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MoveToRoomDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ReadyStateUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StealCardRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.WeaponsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,116 +71,623 @@ import jakarta.validation.Valid;
 public class MatchController {
     MatchService ms;
     LobbyService ls;
-    PlayerService ps;
+    PlayerService playerService;
+    HandService handService; 
+    BagService bagService; 
+    DeckService deckService;
+    MatchWebsocketController matchWebsocketController;
+    RoomService roomService;
+
     @Autowired
-<span class="nc" id="L44">    public MatchController(MatchService ms, LobbyService ls, PlayerService ps){</span>
-<span class="nc" id="L45">        this.ms=ms;</span>
-<span class="nc" id="L46">        this.ls=ls;</span>
-<span class="nc" id="L47">        this.ps=ps;</span>
-<span class="nc" id="L48">    }</span>
+    public MatchController(MatchService ms, LobbyService ls, PlayerService playerService, HandService handService, 
+                          BagService bagService, DeckService deckService, MatchWebsocketController matchWebsocketController,
+<span class="fc" id="L84">                          RoomService roomService){</span>
+<span class="fc" id="L85">        this.ms=ms;</span>
+<span class="fc" id="L86">        this.ls=ls;</span>
+<span class="fc" id="L87">        this.playerService=playerService;</span>
+<span class="fc" id="L88">        this.handService=handService; </span>
+<span class="fc" id="L89">        this.bagService=bagService; </span>
+<span class="fc" id="L90">        this.deckService=deckService;</span>
+<span class="fc" id="L91">        this.matchWebsocketController=matchWebsocketController;</span>
+<span class="fc" id="L92">        this.roomService=roomService;</span>
+<span class="fc" id="L93">    }</span>
+
+    @GetMapping(&quot;/adjacencies&quot;)
+    @Operation(summary = &quot;Get all adjacencies&quot;, description = &quot;Returns a map where each room id maps to a list of adjacent room ids&quot;)
+    public Map&lt;Integer, List&lt;Integer&gt;&gt; getAdjacencyMap() {
+<span class="fc" id="L98">        return roomService.findAllRooms().stream()</span>
+<span class="fc" id="L99">            .collect(Collectors.toMap(</span>
+<span class="fc" id="L100">                r -&gt; r.getId(),</span>
+<span class="fc" id="L101">                r -&gt; r.getAdjacencyList().stream()</span>
+<span class="fc" id="L102">                    .map(adj -&gt; adj.getId())</span>
+<span class="fc" id="L103">                    .collect(Collectors.toList())</span>
+            ));
+    }
 
     @GetMapping
     public List&lt;Match&gt; getAllGames(@ParameterObject() @RequestParam(value=&quot;name&quot;,required = false) String name, @ParameterObject @RequestParam(value=&quot;status&quot;,required = false) MatchStatus status){
-<span class="nc" id="L52">        return ms.getAllMatchs();</span>
+<span class="nc" id="L109">        return ms.getAllMatchs();</span>
     }
 
     @GetMapping(&quot;/{matchId}&quot;)
-    public Match getMatchById(@PathVariable(&quot;matchId&quot;)Integer matchId){
-<span class="nc" id="L57">        Optional&lt;Match&gt; m=ms.getMatchById(matchId);</span>
-<span class="nc bnc" id="L58" title="All 2 branches missed.">        if(!m.isPresent())</span>
-<span class="nc" id="L59">            throw new ResourceNotFoundException(&quot;Match&quot;, &quot;id&quot;, matchId);</span>
-<span class="nc" id="L60">        return m.get();</span>
+    public MatchDTO getMatchById(@PathVariable(&quot;matchId&quot;)Integer matchId){
+<span class="nc" id="L114">        MatchDTO m = ms.getMatchDTOById(matchId);</span>
+<span class="nc" id="L115">        return m;</span>
     }
 
     @GetMapping(&quot;/lobbies/private/{matchId}&quot;)
     public Optional&lt;Match&gt; getPrivateGame(@ParameterObject String code){
-<span class="nc" id="L65">        return ls.getPrivateLobby(code);</span>
+<span class="nc" id="L120">        return ls.getPrivateLobby(code);</span>
     }
 
     @GetMapping(&quot;/lobbies/{matchId}&quot;)
     public Optional&lt;Match&gt; getLobbyById(@PathVariable(&quot;matchId&quot;) Integer matchId) {
-<span class="nc" id="L70">        return ls.getById(matchId);</span>
+<span class="nc" id="L125">        return ls.getById(matchId);</span>
     }
 
     @GetMapping(&quot;/lobbies&quot;)
-    public List&lt;Match&gt; getPublicGames(){
-<span class="nc" id="L75">        return ls.getAllPublicLobbies();</span>
+    @Operation(summary = &quot;Get public matches&quot;, description = &quot;Get all public matches available to join.&quot;)
+    public Page&lt;Match&gt; getPublicGames(@ParameterObject @RequestParam(value=&quot;page&quot;, defaultValue = &quot;0&quot;) Integer page, @ParameterObject @RequestParam(value=&quot;size&quot;, defaultValue = &quot;10&quot;) Integer size){
+<span class="nc" id="L131">        return ls.getAllPublicLobbies(page,size);</span>
+    }
+
+    @GetMapping(&quot;/all-Matches&quot;)
+    public Page&lt;MatchHistorialDTO&gt; getAllMatches(@ParameterObject @RequestParam(value=&quot;page&quot;, defaultValue = &quot;0&quot;) Integer page, @ParameterObject @RequestParam(value=&quot;size&quot;, defaultValue = &quot;10&quot;) Integer size){
+<span class="nc" id="L136">        Page&lt;Match&gt; finishedMatches = ms.getFinishedAndInProgressMatches(page, size);</span>
+<span class="nc" id="L137">        return finishedMatches.map(MatchHistorialDTO::new);</span>
+    }
+
+    @GetMapping(&quot;/finishedMatches&quot;)
+    public Page&lt;MatchHistorialDTO&gt; getFinishedMatches(@ParameterObject @RequestParam(value=&quot;page&quot;, defaultValue = &quot;0&quot;) Integer page, @ParameterObject @RequestParam(value=&quot;size&quot;, defaultValue = &quot;10&quot;) Integer size){
+<span class="nc" id="L142">        Page&lt;Match&gt; finishedMatches = ms.getFinishedMatches(page, size);</span>
+<span class="nc" id="L143">        return finishedMatches.map(MatchHistorialDTO::new);</span>
+    }
+
+    @GetMapping(&quot;/all-Matches/{userId}&quot;)
+    public Page&lt;MatchHistorialDTO&gt; getAllMatchesByUser(@PathVariable(&quot;userId&quot;) Integer userId, @ParameterObject @RequestParam(value=&quot;page&quot;, defaultValue = &quot;0&quot;) Integer page, @ParameterObject @RequestParam(value=&quot;size&quot;, defaultValue = &quot;10&quot;) Integer size){
+<span class="nc" id="L148">        Page&lt;Match&gt; userMatches = ms.getMatchesPlayedByUser(userId, page, size);</span>
+<span class="nc" id="L149">        return userMatches.map(MatchHistorialDTO::new);</span>
+    }
+
+
+    @GetMapping(&quot;matches-created/{userId}&quot;)
+    public Page&lt;MatchHistorialDTO&gt; getAllMatchesCreatedByUser(@PathVariable(&quot;userId&quot;) Integer userId, @ParameterObject @RequestParam(value=&quot;page&quot;, defaultValue = &quot;0&quot;) Integer page, @ParameterObject @RequestParam(value=&quot;size&quot;, defaultValue = &quot;10&quot;) Integer size){
+<span class="nc" id="L155">        Page&lt;Match&gt; matchesCreated = ms.getMatchesPlayedAndCreatedByUser(userId, page, size);</span>
+<span class="nc" id="L156">        return matchesCreated.map(MatchHistorialDTO::new);</span>
+    }
+
+    @GetMapping(&quot;matches-won/{userId}&quot;)
+    public Page&lt;MatchHistorialDTO&gt; getAllMatchesWonByUser(@PathVariable(&quot;userId&quot;) Integer userId, @ParameterObject @RequestParam(value=&quot;page&quot;, defaultValue = &quot;0&quot;) Integer page, @ParameterObject @RequestParam(value=&quot;size&quot;, defaultValue = &quot;10&quot;) Integer size){
+<span class="nc" id="L161">        Page&lt;Match&gt; matchesWon = ms.getMatchesWonByUser(userId, page, size);</span>
+<span class="nc" id="L162">        return matchesWon.map(MatchHistorialDTO::new);</span>
     }
 
     @GetMapping(&quot;/lobbies/privates&quot;)
     public List&lt;Match&gt; getPrivateLobbies(){
-<span class="nc" id="L80">        return ls.getAllPrivateLobbies();</span>
+<span class="nc" id="L167">        return ls.getAllPrivateLobbies();</span>
     }
 
     @GetMapping(&quot;/{matchId}/players&quot;)
     public List&lt;Player&gt; getPlayersByMatchId(@PathVariable(&quot;matchId&quot;) Integer matchId) {
-<span class="nc" id="L85">        return ps.getPlayersByMatchId(matchId);</span>
+<span class="fc" id="L172">        return playerService.getPlayersByMatchId(matchId);</span>
     }
+
+    @GetMapping(&quot;/{matchId}/winner&quot;)
+    public Player getWinnerByMatchId(@PathVariable(&quot;matchId&quot;) Integer matchId) {
+<span class="fc" id="L177">        Player matchWinner = ms.getMatchWinner(matchId);</span>
+<span class="fc" id="L178">        return matchWinner;</span>
+    }   
 
     @GetMapping(&quot;/user/{userId}/in&quot;)
     public Integer userInMatch(@PathVariable(&quot;userId&quot;) Integer userId) {
-<span class="nc" id="L90">        return ms.userInMatch(userId);</span>
+<span class="fc" id="L183">        return ms.userInMatch(userId);</span>
     }
 
     
     @PostMapping(&quot;/lobbies&quot;)
+    @Operation(summary = &quot;Create lobby&quot;, description = &quot;Create a new game.&quot;)
     @ResponseStatus(HttpStatus.CREATED)
-    public  ResponseEntity&lt;Match&gt; createLobby(@RequestBody LobbyDTO lobbyDTO) {
-<span class="nc" id="L97">        Match game = new Match();</span>
-<span class="nc" id="L98">        Match saved= ls.createLobby(game, lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers());</span>
-<span class="nc" id="L99">        return ResponseEntity.status(HttpStatus.CREATED).body(saved);</span>
+    public  ResponseEntity&lt;Match&gt; createLobby(@Valid @RequestBody LobbyDTO lobbyDTO) {
+<span class="fc" id="L191">        Match saved= ls.createLobby(lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers(), lobbyDTO.getNumNpcs());</span>
+<span class="fc" id="L192">        return ResponseEntity.status(HttpStatus.CREATED).body(saved);</span>
     }
 
     @PostMapping(&quot;/lobbies/{matchId}/join&quot;)
+    @Operation(summary = &quot;Join public lobby&quot;, description = &quot;Join a public lobby from a list of available lobbies.&quot;)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity&lt;Match&gt; joinLobby(@Parameter(description = &quot;Id of the lobby to join&quot;) @PathVariable Integer matchId) {
-<span class="nc" id="L105">        Match joinedMatch = ls.joinLobby(matchId);</span>
+<span class="fc" id="L199">        Match joinedMatch = ls.joinLobby(matchId);</span>
 
-<span class="nc" id="L107">        return ResponseEntity.ok(joinedMatch);</span>
+<span class="fc" id="L201">        return ResponseEntity.ok(joinedMatch);</span>
 
 
     }
     
     @PostMapping(&quot;/lobbies/join/private&quot;)
+    @Operation(summary = &quot;Join private lobby&quot;, description = &quot;Join a private lobby using its code.&quot;)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity&lt;Match&gt; joinPrivateLobby(@RequestParam String code) {
-<span class="nc" id="L115">        Match joinedMatch = ls.joinPrivateLobby(code);</span>
-<span class="nc" id="L116">        return ResponseEntity.ok(joinedMatch);</span>
+<span class="fc" id="L210">        Match joinedMatch = ls.joinPrivateLobby(code);</span>
+<span class="fc" id="L211">        return ResponseEntity.ok(joinedMatch);</span>
     }
 
     @PostMapping(&quot;/lobbies/{matchId}/leave&quot;)
+    @Operation(summary = &quot;Leave a lobby&quot;, description = &quot;Leva a lobby before the game starts.&quot;)
     public ResponseEntity&lt;Match&gt; leaveLobby(@Parameter(description = &quot;Id of the lobby to leave&quot;) @PathVariable Integer matchId) {
-<span class="nc" id="L121">        Match leftMatch = ls.leaveLobby(matchId);</span>
-<span class="nc" id="L122">        return ResponseEntity.ok(leftMatch);</span>
+<span class="fc" id="L217">        Match leftMatch = ls.leaveLobby(matchId);</span>
+<span class="fc" id="L218">        return ResponseEntity.ok(leftMatch);</span>
+    }
+
+    @PostMapping(&quot;/lobbies/{matchId}/start&quot;)
+    @Operation(summary = &quot;Start match&quot;, description = &quot;Start a match from a lobby.&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; startMatch(@Parameter(description = &quot;Id of the lobby to start the match&quot;) @PathVariable Integer matchId) {
+<span class="fc" id="L224">        Match startedMatch = ms.startMatch(matchId);</span>
+<span class="fc" id="L225">        return ResponseEntity.ok(new MatchDTO(startedMatch));</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/submit-dice&quot;)
+    @Operation(summary = &quot;Decide order&quot;, description = &quot;Submit dice roll to decide player order at the start of the match.&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; submitDice(@PathVariable Integer matchId, @RequestParam Integer userId, @RequestParam Integer diceRoll) {
+
+        try {
+            // Llamamos al servicio que guarda la tirada y asigna orden si todos tiraron
+<span class="fc" id="L234">            Match m = ms.submitDiceAndAssignOrder(matchId, userId, diceRoll);</span>
+
+            // Devolvemos el estado actualizado de la partida
+<span class="fc" id="L237">            return ResponseEntity.ok(new MatchDTO(m));</span>
+
+<span class="nc" id="L239">        } catch (IllegalArgumentException e) {</span>
+            // Si hubo algún error (jugador no encontrado, ya tiró, etc.)
+<span class="nc" id="L241">            return ResponseEntity.badRequest().body(null);</span>
+        }
+    }
+
+    @PostMapping(&quot;/{matchId}/next-turn&quot;)
+    @Operation(summary = &quot;Next turn&quot;, description = &quot;Advance to the next player's turn in the match.&quot;)
+    public ResponseEntity&lt;Void&gt; nextTurn(@PathVariable(&quot;matchId&quot;) Integer matchId) {
+<span class="fc" id="L248">        ms.nextTurn(matchId);</span>
+<span class="fc" id="L249">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @PutMapping(&quot;/{matchId}/end&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; endMatch(@PathVariable(&quot;matchId&quot;) Integer matchId, @RequestBody @Valid Integer winnerId) {
+<span class="nc" id="L254">        Player winner = playerService.findById(winnerId);</span>
+<span class="nc" id="L255">        MatchDTO ended = ms.endMatch(matchId,winner);</span>
+<span class="nc" id="L256">        return ResponseEntity.ok(ended);</span>
+    }
+
+    @PutMapping(&quot;/{matchId}/leaveMatch&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; leaveMatch(@PathVariable(&quot;matchId&quot;) Integer matchId, @RequestBody @Valid Integer userId) {
+<span class="nc" id="L261">        MatchDTO match = ms.leaveMatch(matchId, userId);</span>
+<span class="nc" id="L262">        return ResponseEntity.ok(match);</span>
     }
 
 
 
     @PostMapping()
     public ResponseEntity&lt;Match&gt; createGame(@Valid @RequestBody Match m){
-<span class="nc" id="L129">        m=ms.save(m);</span>
+<span class="nc" id="L269">        m=ms.save(m);</span>
         URI location = ServletUriComponentsBuilder
-<span class="nc" id="L131">                    .fromCurrentRequest()</span>
-<span class="nc" id="L132">                    .path(&quot;/{id}&quot;)</span>
-<span class="nc" id="L133">                    .buildAndExpand(m.getId())</span>
-<span class="nc" id="L134">                .toUri();</span>
-<span class="nc" id="L135">        return ResponseEntity.created(location).body(m);</span>
+<span class="nc" id="L271">                    .fromCurrentRequest()</span>
+<span class="nc" id="L272">                    .path(&quot;/{id}&quot;)</span>
+<span class="nc" id="L273">                    .buildAndExpand(m.getId())</span>
+<span class="nc" id="L274">                .toUri();</span>
+<span class="nc" id="L275">        return ResponseEntity.created(location).body(m);</span>
     }
 
     @PutMapping(value=&quot;/{id}&quot;)
     public ResponseEntity&lt;Void&gt; updateGame(@Valid @RequestBody Match m,@PathVariable(&quot;id&quot;)Integer id){
-<span class="nc" id="L140">        Match mToUpdate=getMatchById(id);</span>
-<span class="nc" id="L141">        BeanUtils.copyProperties(m,mToUpdate, &quot;id&quot;);</span>
-<span class="nc" id="L142">        ms.save(mToUpdate);</span>
-<span class="nc" id="L143">        return ResponseEntity.noContent().build(); </span>
+<span class="nc" id="L280">        Match mToUpdate=ms.getMatchById(id); </span>
+<span class="nc" id="L281">        BeanUtils.copyProperties(m,mToUpdate, &quot;id&quot;);</span>
+<span class="nc" id="L282">        ms.save(mToUpdate);</span>
+<span class="nc" id="L283">        return ResponseEntity.noContent().build(); </span>
     } 
 
     @DeleteMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;Void&gt; deleteGame(@PathVariable(&quot;id&quot;)Integer id){
-<span class="nc bnc" id="L148" title="All 2 branches missed.">        if(getMatchById(id)!=null)</span>
-<span class="nc" id="L149">            ms.delete(id);</span>
-<span class="nc" id="L150">        return ResponseEntity.noContent().build();</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">        if(getMatchById(id)!=null)</span>
+<span class="nc" id="L289">            ms.delete(id);</span>
+<span class="nc" id="L290">        return ResponseEntity.noContent().build();</span>
     }
-}
 
+    @Operation(summary = &quot;Confirm the end of discard phase&quot;, description = &quot;Confirm the bag formed and the discarded cards to pass turn.&quot;)
+    @PutMapping(&quot;/{matchId}/confirmDiscardPhase&quot;)
+    public ResponseEntity&lt;Integer&gt; confirmDiscardPhase(@PathVariable Integer matchId, @RequestBody @Valid AllCardsStatusDTO data){
+<span class="nc" id="L296">        Integer nextTurnId = ms.confirmDiscardPhase(matchId, data); </span>
+<span class="nc" id="L297">        return ResponseEntity.ok(nextTurnId); </span>
+        
+    }
+
+    @PostMapping(&quot;/{matchId}/{playerId}/drawCardFromDeck&quot;)
+    public ResponseEntity&lt;DrawCardResultDTO&gt; drawCardFromDeck (@PathVariable Integer matchId, @PathVariable Integer playerId){
+<span class="fc" id="L303">        DrawCardResultDTO result = ms.playerDrawsCardFromDeck(matchId, playerId); </span>
+<span class="fc" id="L304">        return ResponseEntity.ok(result); </span>
+
+    } 
+
+    @PostMapping(&quot;/{matchId}/{playerId}/drawRewardCard&quot;)
+    public ResponseEntity&lt;DrawCardResultDTO&gt; drawRewardCard (@PathVariable Integer matchId, @PathVariable Integer playerId){
+<span class="fc" id="L310">        DrawCardResultDTO result = ms.playerDrawsRewardCard(matchId, playerId);</span>
+<span class="fc" id="L311">        return ResponseEntity.ok(result);</span>
+
+    }
+
+    @PostMapping(&quot;/{matchId}/{playerId}/playerWinsNiallCampbell&quot;)
+    public ResponseEntity&lt;DrawCardResultDTO&gt; playerWinsNiallCampbell (@PathVariable Integer matchId, @PathVariable Integer playerId){
+<span class="nc" id="L317">        Card card = ms.playerWinsNiallCampbell(matchId, playerId);</span>
+        // Si no hay carta descartada, retorna null sin robar nada
+<span class="nc" id="L319">        DeckInGame deck = deckService.findDeckById(matchId);</span>
+<span class="nc" id="L320">        HandInGame hand = handService.findPlayerHand(matchId, playerId);</span>
+<span class="nc" id="L321">        DrawCardResultDTO result = new DrawCardResultDTO(card, deck, hand);</span>
+
+        // Notificar por WebSocket el estado actualizado de cartas (incluye deck/discard)
+<span class="nc" id="L324">        AllCardsStatusDTO playerCards = ms.getAllCards(matchId, playerId);</span>
+<span class="nc" id="L325">        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, playerCards);</span>
+<span class="nc" id="L326">        matchWebsocketController.notifyCardsUpdate(matchId, update);</span>
+
+<span class="nc" id="L328">        return ResponseEntity.ok(result);</span>
+
+    }
+
+    @GetMapping(&quot;/{matchId}/{playerId}/getAllCards&quot;)
+    public ResponseEntity&lt;AllCardsStatusDTO&gt; getAllCards (@PathVariable Integer matchId, @PathVariable Integer playerId){
+<span class="fc" id="L334">        AllCardsStatusDTO result = ms.getAllCards(matchId, playerId); </span>
+<span class="fc" id="L335">        return ResponseEntity.ok(result); </span>
+    }
+
+    @PutMapping(&quot;/{matchId}/move&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; moveToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
+<span class="fc" id="L340">        ms.movePlayerToAdyacentRoom(matchId, data.getUserId(), data.getRoomId()); </span>
+<span class="fc" id="L341">        Match match = ms.getMatchById(matchId);</span>
+        
+<span class="fc" id="L343">        Player movedPlayer = match.getPlayers().stream()</span>
+<span class="fc" id="L344">            .filter(p -&gt; p.getUser().getId().equals(data.getUserId()))</span>
+<span class="fc" id="L345">            .findFirst()</span>
+<span class="fc" id="L346">            .orElse(null);</span>
+        
+<span class="pc bpc" id="L348" title="1 of 2 branches missed.">        if (movedPlayer != null) {</span>
+<span class="fc" id="L349">            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);</span>
+<span class="fc" id="L350">            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);</span>
+            
+<span class="fc" id="L352">            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(</span>
+<span class="fc" id="L353">                movedPlayer.getId(),</span>
+<span class="fc" id="L354">                movedPlayer.getUser().getId(),</span>
+<span class="fc" id="L355">                movedPlayer.getUser().getUsername(),</span>
+<span class="fc" id="L356">                movedPlayer.getActionPoints(),</span>
+<span class="fc" id="L357">                System.currentTimeMillis()</span>
+            );
+<span class="fc" id="L359">            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+        }
+        
+<span class="fc" id="L362">        return ResponseEntity.ok(new MatchDTO(match)); </span>
+    }
+
+    
+    @PutMapping(&quot;/{matchId}/moveNpc&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; moveNpcToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveNpcToRoomDTO data){
+<span class="nc" id="L368">        ms.moveNpcToAdyacentRoom(matchId, data.getNpcId(), data.getRoomId(), data.getUserId()); </span>
+<span class="nc" id="L369">        Match match = ms.getMatchById(matchId);</span>
+        
+<span class="nc" id="L371">        return ResponseEntity.ok(new MatchDTO(match)); </span>
+    }
+
+    @PutMapping(&quot;/{matchId}/moveLoser&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; moveLoserToRandomRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
+<span class="nc" id="L376">        ms.moveLoserPlayer(matchId, data.getUserId(), data.getRoomId()); </span>
+<span class="nc" id="L377">        Match match = ms.getMatchById(matchId);</span>
+        
+<span class="nc" id="L379">        Player movedPlayer = match.getPlayers().stream()</span>
+<span class="nc" id="L380">            .filter(p -&gt; p.getUser().getId().equals(data.getUserId()))</span>
+<span class="nc" id="L381">            .findFirst()</span>
+<span class="nc" id="L382">            .orElse(null);</span>
+        
+<span class="nc bnc" id="L384" title="All 2 branches missed.">        if (movedPlayer != null) {</span>
+<span class="nc" id="L385">            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);</span>
+<span class="nc" id="L386">            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);</span>
+            
+<span class="nc" id="L388">            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(</span>
+<span class="nc" id="L389">                movedPlayer.getId(),</span>
+<span class="nc" id="L390">                movedPlayer.getUser().getId(),</span>
+<span class="nc" id="L391">                movedPlayer.getUser().getUsername(),</span>
+<span class="nc" id="L392">                movedPlayer.getActionPoints(),</span>
+<span class="nc" id="L393">                System.currentTimeMillis()</span>
+            );
+<span class="nc" id="L395">            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+            
+<span class="nc" id="L397">            StrengthUpdateDTO strengthUpdate = new StrengthUpdateDTO(</span>
+<span class="nc" id="L398">                movedPlayer.getId(),</span>
+<span class="nc" id="L399">                movedPlayer.getUser().getId(),</span>
+<span class="nc" id="L400">                movedPlayer.getUser().getUsername(),</span>
+<span class="nc" id="L401">                movedPlayer.getStrength(),</span>
+<span class="nc" id="L402">                System.currentTimeMillis()</span>
+            );
+<span class="nc" id="L404">            matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);</span>
+        }
+        
+<span class="nc" id="L407">        return ResponseEntity.ok(new MatchDTO(match)); </span>
+    }
+
+    @PutMapping(&quot;/{matchId}/moveByLetters&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; moveByFormingRoomName(@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data) {
+<span class="nc" id="L412">        ms.movePlayerByFormingRoomName(matchId, data.getUserId(), data.getRoomId());</span>
+<span class="nc" id="L413">        Match match = ms.getMatchById(matchId);</span>
+        
+<span class="nc" id="L415">        Player movedPlayer = match.getPlayers().stream()</span>
+<span class="nc" id="L416">            .filter(p -&gt; p.getUser().getId().equals(data.getUserId()))</span>
+<span class="nc" id="L417">            .findFirst()</span>
+<span class="nc" id="L418">            .orElse(null);</span>
+        
+<span class="nc bnc" id="L420" title="All 2 branches missed.">        if (movedPlayer != null) {</span>
+<span class="nc" id="L421">            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);</span>
+<span class="nc" id="L422">            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);</span>
+            
+<span class="nc" id="L424">            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(</span>
+<span class="nc" id="L425">                movedPlayer.getId(),</span>
+<span class="nc" id="L426">                movedPlayer.getUser().getId(),</span>
+<span class="nc" id="L427">                movedPlayer.getUser().getUsername(),</span>
+<span class="nc" id="L428">                movedPlayer.getActionPoints(),</span>
+<span class="nc" id="L429">                System.currentTimeMillis()</span>
+            );
+<span class="nc" id="L431">            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+        }
+        
+<span class="nc" id="L434">        return ResponseEntity.ok(new MatchDTO(match));</span>
+    }
+
+    @GetMapping(&quot;/{matchId}/{playerId}/actionPoints&quot;)
+    public ResponseEntity&lt;Integer&gt; getActionPoints(@PathVariable Integer matchId, @PathVariable Integer playerId) {
+<span class="fc" id="L439">        Integer actionPoints = playerService.getPlayerActionPoints(matchId, playerId); </span>
+<span class="fc" id="L440">        return ResponseEntity.ok(actionPoints);</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-fight&quot;)
+    @Operation(summary = &quot;Notify fight&quot;, description = &quot;Notifies all players when a fight is initiated.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyFight(@PathVariable Integer matchId, @RequestBody FightUpdateDTO fightUpdate) {
+<span class="nc" id="L446">        matchWebsocketController.notifyFightUpdate(matchId, fightUpdate);</span>
+<span class="nc" id="L447">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-fight-dice&quot;)
+    @Operation(summary = &quot;Notify fight dice&quot;, description = &quot;Notifies all players when a dice is rolled during a fight.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyFightDice(@PathVariable Integer matchId, @RequestBody FightDiceUpdateDTO diceUpdate) {
+<span class="nc" id="L453">        matchWebsocketController.notifyFightDiceUpdate(matchId, diceUpdate);</span>
+<span class="nc" id="L454">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-dice-totals&quot;)
+    @Operation(summary = &quot;Notify dice totals&quot;, description = &quot;Notifies all players when dice totals are updated during a fight.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyDiceTotals(@PathVariable Integer matchId, @RequestBody DiceTotalsUpdateDTO totalsUpdate) {
+<span class="nc" id="L460">        matchWebsocketController.notifyDiceTotalsUpdate(matchId, totalsUpdate);</span>
+<span class="nc" id="L461">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-action-points&quot;)
+    @Operation(summary = &quot;Notify action points&quot;, description = &quot;Notifies all players when action points are updated.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyActionPoints(@PathVariable Integer matchId, @RequestBody ActionPointsUpdateDTO actionPointsUpdate) {
+<span class="nc" id="L467">        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+<span class="nc" id="L468">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/consume-all-action-points/{userId}&quot;)
+    @Operation(summary = &quot;Consume all action points&quot;, description = &quot;Consumes all action points for a user and notifies all players.&quot;)
+    public ResponseEntity&lt;Void&gt; consumeAllActionPoints(@PathVariable Integer matchId, @PathVariable Integer userId) {
+<span class="nc" id="L474">        ActionPointsUpdateDTO actionPointsUpdate = ms.consumeAllActionPointForUser(matchId, userId);</span>
+<span class="nc" id="L475">        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+<span class="nc" id="L476">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/consume-action-point/{userId}&quot;)
+    @Operation(summary = &quot;Consume one action point&quot;, description = &quot;Consumes one action point for a user and notifies all players.&quot;)
+    public ResponseEntity&lt;Void&gt; consumeOneActionPoint(@PathVariable Integer matchId, @PathVariable Integer userId) {
+<span class="nc" id="L482">        ActionPointsUpdateDTO actionPointsUpdate = ms.consumeOneActionPoint(matchId, userId);</span>
+<span class="nc" id="L483">        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+<span class="nc" id="L484">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-strength&quot;)
+    @Operation(summary = &quot;Notify strength&quot;, description = &quot;Notifies all players when strength is updated.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyStrength(@PathVariable Integer matchId, @RequestBody StrengthUpdateDTO strengthUpdate) {
+<span class="nc" id="L490">        matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);</span>
+<span class="nc" id="L491">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-ready-state&quot;)
+    @Operation(summary = &quot;Notify ready state&quot;, description = &quot;Notifies all players when a player changes their ready state during a fight.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyReadyState(@PathVariable Integer matchId, @RequestBody ReadyStateUpdateDTO readyStateUpdate) {
+<span class="nc" id="L497">        matchWebsocketController.notifyReadyStateUpdate(matchId, readyStateUpdate);</span>
+<span class="nc" id="L498">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-fight-weapons&quot;)
+    @Operation(summary = &quot;Notify weapons update&quot;, description = &quot;Notifies all players when a player adds or removes weapons during a fight.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyFightWeapons(@PathVariable Integer matchId, @RequestBody WeaponsUpdateDTO weaponsUpdate) {
+<span class="nc" id="L504">        matchWebsocketController.notifyWeaponsUpdate(matchId, weaponsUpdate);</span>
+<span class="nc" id="L505">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/{winnerId}/steal-card-from/{loserId}&quot;)
+    @Operation(summary = &quot;Steal card from another player&quot;, description = &quot;Winner steals a card from loser, either from hand (random/selected) or bag (selected). Returns updated card states for both players.&quot;)
+    public ResponseEntity&lt;Map&lt;String, AllCardsStatusDTO&gt;&gt; stealCardFromPlayer(
+            @PathVariable Integer matchId,
+            @PathVariable Integer winnerId,
+            @PathVariable Integer loserId,
+            @Valid @RequestBody StealCardRequestDTO request) {
+
+        try {
+            // Basic validation of source
+<span class="nc" id="L518">            String fromWhere = request.getFromWhere();</span>
+<span class="nc bnc" id="L519" title="All 6 branches missed.">            if (fromWhere == null || (!fromWhere.equals(&quot;hand&quot;) &amp;&amp; !fromWhere.equals(&quot;bag&quot;))) {</span>
+<span class="nc" id="L520">                return ResponseEntity.badRequest().build();</span>
+            }
+
+            // Build a Card reference using the complete card object when provided; null means random for 'hand'
+<span class="nc" id="L524">            es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card cardRef = null;</span>
+<span class="nc bnc" id="L525" title="All 4 branches missed.">            if (request.getCardId() != null &amp;&amp; fromWhere.equals(&quot;bag&quot;)) {</span>
+                // Para robo de bolsa, buscar la carta completa por ID
+<span class="nc" id="L527">                BagInGame loserBag = bagService.findPlayerBag(matchId, loserId);</span>
+                
+<span class="nc" id="L529">                Integer cardId = request.getCardId();</span>
+<span class="nc" id="L530">                final Integer finalCardId = cardId;</span>
+<span class="nc" id="L531">                cardRef = loserBag.getCards().stream()</span>
+<span class="nc bnc" id="L532" title="All 4 branches missed.">                    .filter(c -&gt; c.getId() != null &amp;&amp; c.getId().equals(finalCardId))</span>
+<span class="nc" id="L533">                    .findFirst()</span>
+<span class="nc" id="L534">                    .orElse(null);</span>
+                
+<span class="nc bnc" id="L536" title="All 2 branches missed.">                if (cardRef == null) {</span>
+<span class="nc" id="L537">                    return ResponseEntity.badRequest().body(null);</span>
+                }
+            }
+
+            // Execute steal in service layer
+<span class="nc" id="L542">            Integer currentTurnUserId = ms.getMatchById(matchId).getCurrentTurnUserId();</span>
+<span class="nc" id="L543">            ms.playerDrawsCardFromAnotherPlayerBag(cardRef, matchId, winnerId, loserId, fromWhere, currentTurnUserId);</span>
+
+            // Return updated card states for winner and loser and notify via WS
+<span class="nc" id="L546">            AllCardsStatusDTO winnerCards = ms.getAllCards(matchId, winnerId);</span>
+<span class="nc" id="L547">            AllCardsStatusDTO loserCards = ms.getAllCards(matchId, loserId);</span>
+
+<span class="nc" id="L549">            CardsUpdateDTO update = new CardsUpdateDTO(matchId, winnerCards, loserCards);</span>
+<span class="nc" id="L550">            matchWebsocketController.notifyCardsUpdate(matchId, update);</span>
+
+<span class="nc" id="L552">            return ResponseEntity.ok(Map.of(&quot;winner&quot;, winnerCards, &quot;loser&quot;, loserCards));</span>
+<span class="nc" id="L553">        } catch (Exception e) {</span>
+<span class="nc" id="L554">            System.err.println(&quot;Error al robar carta: &quot; + e.getMessage());</span>
+<span class="nc" id="L555">            e.printStackTrace();</span>
+<span class="nc" id="L556">            return ResponseEntity.internalServerError().build();</span>
+        }
+    }
+
+    @PostMapping(&quot;/{matchId}/{playerId}/lose-against-npc&quot;)
+    @Operation(summary = &quot;Player loses against NPC&quot;, description = &quot;Player chooses a card to discard after losing to an NPC.&quot;)
+    public ResponseEntity&lt;AllCardsStatusDTO&gt; playerLosesAgainstNpc(
+            @PathVariable Integer matchId,
+            @PathVariable Integer playerId,
+            @Valid @RequestBody LoseAgainstNpcRequestDTO request) {
+        try {
+<span class="nc" id="L567">            String fromWhere = request.getFromWhere();</span>
+<span class="nc" id="L568">            Integer cardId = request.getCardId();</span>
+
+<span class="nc bnc" id="L570" title="All 6 branches missed.">            if (fromWhere == null || (!&quot;hand&quot;.equals(fromWhere) &amp;&amp; !&quot;bag&quot;.equals(fromWhere))) {</span>
+<span class="nc" id="L571">                return ResponseEntity.badRequest().build();</span>
+            }
+<span class="nc bnc" id="L573" title="All 2 branches missed.">            if (cardId == null) {</span>
+<span class="nc" id="L574">                return ResponseEntity.badRequest().build();</span>
+            }
+
+<span class="nc" id="L577">            Card cardRef = null;</span>
+<span class="nc bnc" id="L578" title="All 2 branches missed.">            if (&quot;hand&quot;.equals(fromWhere)) {</span>
+<span class="nc" id="L579">                HandInGame hand = handService.findPlayerHand(matchId, playerId);</span>
+<span class="nc" id="L580">                cardRef = hand.getCards().stream()</span>
+<span class="nc bnc" id="L581" title="All 4 branches missed.">                    .filter(c -&gt; c.getId() != null &amp;&amp; c.getId().equals(cardId))</span>
+<span class="nc" id="L582">                    .findFirst()</span>
+<span class="nc" id="L583">                    .orElse(null);</span>
+<span class="nc" id="L584">            } else {</span>
+<span class="nc" id="L585">                BagInGame bag = bagService.findPlayerBag(matchId, playerId);</span>
+<span class="nc" id="L586">                cardRef = bag.getCards().stream()</span>
+<span class="nc bnc" id="L587" title="All 4 branches missed.">                    .filter(c -&gt; c.getId() != null &amp;&amp; c.getId().equals(cardId))</span>
+<span class="nc" id="L588">                    .findFirst()</span>
+<span class="nc" id="L589">                    .orElse(null);</span>
+            }
+
+<span class="nc bnc" id="L592" title="All 2 branches missed.">            if (cardRef == null) {</span>
+<span class="nc" id="L593">                return ResponseEntity.badRequest().build();</span>
+            }
+
+<span class="nc" id="L596">            Integer currentTurnUserId = ms.getMatchById(matchId).getCurrentTurnUserId();</span>
+<span class="nc" id="L597">            ms.playerLosesAgaintsNonPlayer(cardRef, matchId, playerId, currentTurnUserId, fromWhere);</span>
+
+<span class="nc" id="L599">            AllCardsStatusDTO updatedCards = ms.getAllCards(matchId, playerId);</span>
+<span class="nc" id="L600">            CardsUpdateDTO update = new CardsUpdateDTO(matchId, updatedCards, updatedCards);</span>
+<span class="nc" id="L601">            matchWebsocketController.notifyCardsUpdate(matchId, update);</span>
+
+<span class="nc" id="L603">            return ResponseEntity.ok(updatedCards);</span>
+<span class="nc" id="L604">        } catch (Exception e) {</span>
+<span class="nc" id="L605">            System.err.println(&quot;Error al descartar carta tras perder contra NPC: &quot; + e.getMessage());</span>
+<span class="nc" id="L606">            e.printStackTrace();</span>
+<span class="nc" id="L607">            return ResponseEntity.internalServerError().build();</span>
+        }
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-fight-resolved&quot;)
+    @Operation(summary = &quot;Notify fight resolved&quot;, description = &quot;Notifies all players when a fight is resolved and winner can steal a card.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyFightResolved(
+            @PathVariable Integer matchId,
+            @RequestBody FightResolvedDTO fightResolved) {
+<span class="nc" id="L616">        matchWebsocketController.notifyFightResolved(matchId, fightResolved);</span>
+<span class="nc" id="L617">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PutMapping(&quot;/{matchId}/player-strength&quot;)
+    @Operation(summary = &quot;Update player strength&quot;, description = &quot;Updates the strength of a player and notifies all players.&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; updatePlayerStrength(@PathVariable Integer matchId, @RequestBody Map&lt;String, Integer&gt; data) {
+<span class="nc" id="L623">        Integer userId = data.get(&quot;userId&quot;);</span>
+<span class="nc" id="L624">        Integer newStrength = data.get(&quot;strength&quot;);</span>
+        
+<span class="nc" id="L626">        Player player = playerService.findByMatchIdAndUserId(matchId, userId)</span>
+<span class="nc" id="L627">            .orElseThrow(() -&gt; new RuntimeException(&quot;Player no encontrado&quot;));</span>
+<span class="nc" id="L628">        player.setStrength(newStrength);</span>
+<span class="nc" id="L629">        playerService.save(player);</span>
+        
+<span class="nc" id="L631">        Match match = ms.getMatchById(matchId);</span>
+        
+<span class="nc" id="L633">        StrengthUpdateDTO strengthUpdate = new StrengthUpdateDTO(</span>
+<span class="nc" id="L634">            player.getId(),</span>
+<span class="nc" id="L635">            player.getUser().getId(),</span>
+<span class="nc" id="L636">            player.getUser().getUsername(),</span>
+<span class="nc" id="L637">            player.getStrength(),</span>
+<span class="nc" id="L638">            System.currentTimeMillis()</span>
+        );
+<span class="nc" id="L640">        matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);</span>
+        
+<span class="nc" id="L642">        return ResponseEntity.ok(new MatchDTO(match));</span>
+    }
+
+    @PutMapping(&quot;/{matchId}/npc-strength&quot;)
+    @Operation(summary = &quot;Update NPC strength&quot;, description = &quot;Updates the strength of an NPC and notifies all players.&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; updateNpcStrength(@PathVariable Integer matchId, @RequestBody Map&lt;String, Integer&gt; data) {
+<span class="nc" id="L648">        Integer npcId = data.get(&quot;npcId&quot;);</span>
+<span class="nc" id="L649">        Integer newStrength = data.get(&quot;strength&quot;);</span>
+        
+<span class="nc" id="L651">        Match match = ms.getMatchById(matchId);</span>
+<span class="nc" id="L652">        Npc npc = match.getNpcs().stream()</span>
+<span class="nc" id="L653">            .filter(n -&gt; n.getId().equals(npcId))</span>
+<span class="nc" id="L654">            .findFirst()</span>
+<span class="nc" id="L655">            .orElseThrow(() -&gt; new RuntimeException(&quot;NPC no encontrado&quot;));</span>
+        
+<span class="nc" id="L657">        npc.setStrength(newStrength);</span>
+<span class="nc" id="L658">        ms.save(match);</span>
+        
+<span class="nc" id="L660">        return ResponseEntity.ok(new MatchDTO(match));</span>
+    }
+
+    @PutMapping(&quot;/{matchId}/npc/location&quot;)
+    @Operation(summary = &quot;Force move NPC&quot;, description = &quot;Moves an NPC to a specified room without consuming player actions (used for system-driven moves).&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; forceMoveNpc(@PathVariable Integer matchId, @RequestBody Map&lt;String, Integer&gt; data) {
+<span class="nc" id="L666">        Integer npcId = data.get(&quot;npcId&quot;);</span>
+<span class="nc" id="L667">        Integer roomId = data.get(&quot;roomId&quot;);</span>
+        
+<span class="nc" id="L669">        Match match = ms.getMatchById(matchId);</span>
+<span class="nc" id="L670">        Npc npc = match.getNpcs().stream()</span>
+<span class="nc" id="L671">            .filter(n -&gt; n.getId().equals(npcId))</span>
+<span class="nc" id="L672">            .findFirst()</span>
+<span class="nc" id="L673">            .orElseThrow(() -&gt; new RuntimeException(&quot;NPC no encontrado&quot;));</span>
+        
+<span class="nc" id="L675">        npc.setRoom(roomService.findById(roomId));</span>
+<span class="nc" id="L676">        ms.save(match);</span>
+        
+        // Notify all clients about NPC location update
+<span class="nc" id="L679">        NpcLocationUpdateDTO locationUpdate = new NpcLocationUpdateDTO(npc);</span>
+<span class="nc" id="L680">        matchWebsocketController.notifyNpcLocationUpdate(matchId, locationUpdate);</span>
+        
+<span class="nc" id="L682">        return ResponseEntity.ok(new MatchDTO(match));</span>
+    }
+
+
+    @PostMapping(&quot;/{matchId}/escape-attempt&quot;)
+    public ResponseEntity&lt;EscapeAttemptResultDTO&gt; attemptEscape(@PathVariable Integer matchId, @RequestParam Integer userId, @RequestParam Integer rollDice){
+<span class="nc" id="L688">        EscapeAttemptResultDTO result = ms.escapeAttempt(matchId, userId, rollDice);</span>
+<span class="nc" id="L689">        return ResponseEntity.ok(result);</span>
+    }
+
+}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

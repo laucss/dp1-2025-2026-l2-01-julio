@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import jakarta.persistence.Embeddable;
+
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
-@Embeddable
 public class HandInGame {
 
     /*
@@ -25,13 +24,13 @@ public class HandInGame {
     private List&lt;Card&gt; cards; 
 
 
-<span class="nc" id="L28">    public HandInGame(List&lt;Card&gt; cards){</span>
-<span class="nc" id="L29">        this.cards= cards; </span>
-<span class="nc" id="L30">    }</span>
+<span class="fc" id="L27">    public HandInGame(List&lt;Card&gt; cards){</span>
+<span class="fc" id="L28">        this.cards= cards; </span>
+<span class="fc" id="L29">    }</span>
 
-<span class="nc" id="L32">    public HandInGame(){ </span>
-<span class="nc" id="L33">        this.cards= new ArrayList&lt;&gt;(); </span>
-<span class="nc" id="L34">    }</span>
+<span class="fc" id="L31">    public HandInGame(){ </span>
+<span class="fc" id="L32">        this.cards= new ArrayList&lt;&gt;(); </span>
+<span class="fc" id="L33">    }</span>
     
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

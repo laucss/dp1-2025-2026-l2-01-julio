@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MatchDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs</a> &gt; <span class="el_source">MatchDTO.java</span></div><h1>MatchDTO.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.TurnPhase;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomDTO;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class MatchDTO {
+
+    private String code;
+
+    //@NotNull
+    private Integer creatorId;
+    
+    @Enumerated(EnumType.STRING)
+    private MatchStatus status;
+
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
+<span class="pc" id="L39">    @Min(3)</span>
+    @Max(6)
+    @NotNull
+<span class="pc" id="L42">    private Integer maxPlayers = 6;</span>
+
+<span class="pc" id="L44">    @NotNull</span>
+    @Min(3)
+    @Max(6)
+<span class="pc" id="L47">    private Integer minPlayers = 3;</span>
+
+    @NotNull
+    private List&lt;PlayerInGameDTO&gt; players; 
+
+    private Integer numNpcs;
+
+
+<span class="pc" id="L55">    private List&lt;NpcDTO&gt; npcs = new ArrayList&lt;&gt;();</span>
+
+    private Integer currentTurnUserId;
+
+    private Integer turnNumber;
+
+    @Enumerated(EnumType.STRING)
+    private TurnPhase currentTurnPhase;
+
+<span class="pc" id="L64">    private List&lt;RoomDTO&gt; roomsState = new ArrayList&lt;&gt;();</span>
+
+    private DeckInGameDTO deck;
+
+    private Player winner;
+
+    @NotNull
+    private Boolean isPrivate;
+
+<span class="nc" id="L73">    public MatchDTO() {</span>
+<span class="nc" id="L74">    }</span>
+
+<span class="fc" id="L76">    public MatchDTO(Match match) {</span>
+<span class="fc" id="L77">        this.code = match.getCode();</span>
+<span class="fc" id="L78">        this.creatorId = match.getCreatorId();</span>
+<span class="fc" id="L79">        this.status = match.getStatus();</span>
+<span class="fc" id="L80">        this.startTime = match.getStartTime();</span>
+<span class="fc" id="L81">        this.endTime = match.getEndTime();</span>
+<span class="fc" id="L82">        this.maxPlayers = match.getMaxPlayers();</span>
+<span class="fc" id="L83">        this.minPlayers = match.getMinPlayers();</span>
+<span class="fc" id="L84">        this.players = match.getPlayers().stream().map(p-&gt; new PlayerInGameDTO(p)).toList();</span>
+<span class="fc" id="L85">        this.numNpcs = match.getNumNpcs();</span>
+<span class="pc" id="L86">        this.npcs = match.getNpcs().stream().map(n-&gt; new NpcDTO(n)).toList();</span>
+<span class="fc" id="L87">        this.turnNumber = match.getTurnNumber();</span>
+<span class="fc" id="L88">        this.currentTurnPhase = match.getCurrentTurnPhase();</span>
+<span class="fc" id="L89">        this.currentTurnUserId = match.getCurrentTurnUserId();</span>
+<span class="fc" id="L90">        this.roomsState = match.getRoomsState();</span>
+        //this.deck = new DeckInGameDTO(match.getDeck());
+<span class="fc" id="L92">        this.winner = match.getWinner();</span>
+<span class="fc" id="L93">        this.isPrivate = match.getIsPrivate();</span>
+<span class="fc" id="L94">    }</span>
+
+<span class="nc" id="L96">    public MatchDTO(Match match, DeckInGame deck, List&lt;PlayerInGameDTO&gt; players ) {</span>
+<span class="nc" id="L97">        this.code = match.getCode();</span>
+<span class="nc" id="L98">        this.creatorId = match.getCreatorId();</span>
+<span class="nc" id="L99">        this.status = match.getStatus();</span>
+<span class="nc" id="L100">        this.startTime = match.getStartTime();</span>
+<span class="nc" id="L101">        this.endTime = match.getEndTime();</span>
+<span class="nc" id="L102">        this.maxPlayers = match.getMaxPlayers();</span>
+<span class="nc" id="L103">        this.minPlayers = match.getMinPlayers();</span>
+<span class="nc" id="L104">        this.players = players;</span>
+<span class="nc" id="L105">        this.numNpcs = match.getNumNpcs();</span>
+<span class="nc" id="L106">        this.npcs = match.getNpcs().stream().map(n-&gt; new NpcDTO(n)).toList();</span>
+<span class="nc" id="L107">        this.turnNumber = match.getTurnNumber();</span>
+<span class="nc" id="L108">        this.currentTurnPhase = match.getCurrentTurnPhase();</span>
+<span class="nc" id="L109">        this.currentTurnUserId = match.getCurrentTurnUserId();</span>
+<span class="nc" id="L110">        this.roomsState = match.getRoomsState();</span>
+<span class="nc" id="L111">        this.deck = new DeckInGameDTO(deck);</span>
+<span class="nc" id="L112">        this.winner = match.getWinner();</span>
+<span class="nc" id="L113">        this.isPrivate = match.getIsPrivate();</span>
+<span class="nc" id="L114">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

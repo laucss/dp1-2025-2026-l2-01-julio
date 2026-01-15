@@ -2,6 +2,8 @@
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
@@ -21,10 +23,11 @@ import lombok.Setter;
 @Table(name = &quot;Chat&quot;)
 @EqualsAndHashCode(of = &quot;id&quot;)
 
-<span class="fc" id="L24">public class ChatMessage extends BaseEntity implements Comparable&lt;ChatMessage&gt;{</span>
+<span class="fc" id="L26">public class ChatMessage extends BaseEntity implements Comparable&lt;ChatMessage&gt;{</span>
     
     @NotNull
     @ManyToOne
+    @JsonIgnore
     private Player player;
 
     @NotBlank
@@ -36,21 +39,22 @@ import lombok.Setter;
 
     //para que salga la fechahora a la que se mandó el mensaje
     public void setDate(LocalDateTime time) {
-<span class="nc" id="L39">        this.time = LocalDateTime.now();</span>
-<span class="nc" id="L40">    }</span>
+<span class="fc" id="L42">        this.time = LocalDateTime.now();</span>
+<span class="fc" id="L43">    }</span>
 
 
     @ManyToOne
+    @JsonIgnore
     private Match match;
 
 
     @Override
     public int compareTo(ChatMessage o) {
-<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (o == null) return 1;</span>
-<span class="nc bnc" id="L50" title="All 4 branches missed.">        if (this.time == null &amp;&amp; o.getTime() == null) return 0;</span>
-<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (this.time == null) return -1;</span>
-<span class="nc bnc" id="L52" title="All 2 branches missed.">        if (o.getTime() == null) return 1;</span>
-<span class="nc" id="L53">        return this.time.compareTo(o.getTime());</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (o == null) return 1;</span>
+<span class="nc bnc" id="L54" title="All 4 branches missed.">        if (this.time == null &amp;&amp; o.getTime() == null) return 0;</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (this.time == null) return -1;</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (o.getTime() == null) return 1;</span>
+<span class="nc" id="L57">        return this.time.compareTo(o.getTime());</span>
     }
 
     

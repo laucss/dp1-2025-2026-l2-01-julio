@@ -37,15 +37,15 @@ public class AchievementRestController {
 
     @GetMapping
 	public ResponseEntity&lt;List&lt;Achievement&gt;&gt; findAll() {
-<span class="nc" id="L40">		return new ResponseEntity&lt;&gt;((List&lt;Achievement&gt;) achievementService.getAchievements(), HttpStatus.OK);</span>
+<span class="fc" id="L40">		return new ResponseEntity&lt;&gt;((List&lt;Achievement&gt;) achievementService.getAchievements(), HttpStatus.OK);</span>
 	}
 
 	@GetMapping(&quot;/{id}&quot;)
 	public ResponseEntity&lt;Achievement&gt; findAchievement(@PathVariable(&quot;id&quot;) int id){
-<span class="nc" id="L45">		Achievement achievementToGet=achievementService.getById(id);</span>
-<span class="nc bnc" id="L46" title="All 2 branches missed.">		if(achievementToGet==null)</span>
-<span class="nc" id="L47">			throw new ResourceNotFoundException(&quot;Achievement with id &quot;+id+&quot; not found!&quot;);</span>
-<span class="nc" id="L48">		return new ResponseEntity&lt;Achievement&gt;(achievementToGet, HttpStatus.OK);</span>
+<span class="fc" id="L45">		Achievement achievementToGet=achievementService.getById(id);</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">		if(achievementToGet==null)</span>
+<span class="fc" id="L47">			throw new ResourceNotFoundException(&quot;Achievement with id &quot;+id+&quot; not found!&quot;);</span>
+<span class="fc" id="L48">		return new ResponseEntity&lt;Achievement&gt;(achievementToGet, HttpStatus.OK);</span>
 	}
 
 	@PostMapping

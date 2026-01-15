@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VotingDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting</a> &gt; <span class="el_source">VotingDTO.java</span></div><h1>VotingDTO.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting;
+
+import java.util.List;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class VotingDTO {
+    private Integer matchId;
+    private String weaponProposed;
+    private VotingStatus status;
+    private VotingResult result;
+    private Integer votesInFavor;
+    private Integer votesAgainst;
+    private Integer finalBonus;
+    private List&lt;VoteDTO&gt; votes;
+
+<span class="fc" id="L20">    public VotingDTO(Voting voting){</span>
+<span class="fc" id="L21">        this.matchId = voting.getMatchId();</span>
+<span class="fc" id="L22">        this.weaponProposed = voting.getWeaponProposed();</span>
+<span class="fc" id="L23">        this.status = voting.getStatus();</span>
+<span class="fc" id="L24">        this.result = voting.getResult();</span>
+<span class="fc" id="L25">        this.votesInFavor = voting.getVotesInFavor();</span>
+<span class="fc" id="L26">        this.votesAgainst = voting.getVotesAgainst();</span>
+<span class="fc" id="L27">        this.finalBonus = voting.getFinalBonus();</span>
+<span class="fc" id="L28">        this.votes = voting.getVotes().stream().map(vote -&gt; new VoteDTO(vote)).toList();</span>
+<span class="fc" id="L29">    }</span>
+
+<span class="fc" id="L31">    public VotingDTO(){}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

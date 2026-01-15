@@ -1,158 +1,1046 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MatchService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match</a> &gt; <span class="el_source">MatchService.java</span></div><h1>MatchService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.BagNotValidException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsDrawnException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsInHand;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+
 
 @Service
 public class MatchService {
 
+<span class="fc" id="L55">    private static final Integer initialCardsPerPlayer = 3; </span>
+
     DeckService deckService; 
     HandService handService; 
-    BagService bagService; 
+    BagService bagService;
+    PlayerService playerService; 
+<span class="fc" id="L61">    Random ran = new Random();</span>
+    LobbyWebsocketController lobbyWebsocketController;
+    MatchWebsocketController matchWebsocketController;
+    Checkers checkers; 
 
-    MatchRepository mrepo;
+    MatchRepository matchRepo;
+    PlayerRepository playerRepo;
+    RoomRepository roomRepository;
+    NpcRepository npcRepository;
+    RoomService roomService;
 
     @Autowired
-<span class="nc" id="L27">    public MatchService(MatchRepository mrepo, DeckService deckService, HandService handService, BagService bagService) {</span>
-<span class="nc" id="L28">        this.mrepo = mrepo;</span>
-<span class="nc" id="L29">        this.deckService = deckService;</span>
-<span class="nc" id="L30">        this.handService = handService;</span>
-<span class="nc" id="L31">        this.bagService = bagService; </span>
-<span class="nc" id="L32">    }</span>
+    public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, 
+            RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
+            PlayerService playerService, LobbyWebsocketController lobbyWebsocketController,
+<span class="fc" id="L76">            MatchWebsocketController matchWebsocketController, NpcRepository npcRepository, Checkers checkers) {</span>
+<span class="fc" id="L77">        this.matchRepo = mrepo;</span>
+<span class="fc" id="L78">        this.playerRepo = playerRepo;</span>
+<span class="fc" id="L79">        this.roomRepository = roomRepository;</span>
+<span class="fc" id="L80">        this.npcRepository = npcRepository;</span>
+<span class="fc" id="L81">        this.roomService = roomService;</span>
+<span class="fc" id="L82">        this.deckService = deckService;</span>
+<span class="fc" id="L83">        this.handService = handService;</span>
+<span class="fc" id="L84">        this.bagService = bagService; </span>
+<span class="fc" id="L85">        this.playerService = playerService;</span>
+<span class="fc" id="L86">        this.lobbyWebsocketController = lobbyWebsocketController;</span>
+<span class="fc" id="L87">        this.matchWebsocketController = matchWebsocketController;</span>
+<span class="fc" id="L88">        this.checkers = checkers; </span>
+<span class="fc" id="L89">    }</span>
 
     @Transactional(readOnly = true)
     public List&lt;Match&gt; getAllMatchs() {
-<span class="nc" id="L36">        return mrepo.findAll();</span>
+<span class="fc" id="L93">        return matchRepo.findAll();</span>
     }
-
-    /*@Transactional(readOnly = true)  El metodo esta en LobbyService por ahora
-    public Page&lt;Match&gt; getAllPublicLobbies(Pageable pageable) {
-        return mrepo.findPublicLobbies(pageable);
-    }*/
 
     @Transactional(readOnly = true)
     public List&lt;Match&gt; getMatchsByName(String name) {
-<span class="nc" id="L46">        return mrepo.findByName(name);</span>
+<span class="nc" id="L98">        return matchRepo.findByName(name);</span>
     }
 
     @Transactional(readOnly = true) //????
     public List&lt;Match&gt; getRunningMatches(){
-<span class="nc" id="L51">        return mrepo.findAll();</span>
+<span class="nc" id="L103">        return matchRepo.findAll();</span>
     }
 
     @Transactional
     public Match save(Match m) {
-<span class="nc" id="L56">        mrepo.save(m);</span>
-<span class="nc" id="L57">        return m;</span>
+<span class="fc" id="L108">        matchRepo.save(m);</span>
+<span class="fc" id="L109">        return m;</span>
     }
 
     @Transactional(readOnly=true)
-    public Optional&lt;Match&gt; getMatchById(Integer matchId){
-<span class="nc" id="L62">        return mrepo.findById(matchId);</span>
+    public Match getMatchById(Integer matchId){
+<span class="fc" id="L114">        Optional&lt;Match&gt; m= matchRepo.findById(matchId);</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if(!m.isPresent())</span>
+<span class="fc" id="L116">            throw new IllegalArgumentException(&quot;Match not found&quot;);</span>
+<span class="fc" id="L117">        return m.get();</span>
     }
+
+    @Transactional(readOnly=true)
+    public MatchDTO getMatchDTOById(Integer matchId){
+<span class="nc" id="L122">        Match m = getMatchById(matchId); </span>
+<span class="nc" id="L123">        DeckInGame deck = deckService.findDeckById(m.getId());</span>
+<span class="nc" id="L124">        List&lt;PlayerInGameDTO&gt; newPlayersList = new ArrayList&lt;&gt;(); </span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        for (Player player : m.getPlayers()){</span>
+<span class="nc" id="L126">            HandInGame hand = handService.findPlayerHand(m.getId(), player.getId()); </span>
+<span class="nc" id="L127">            BagInGame bag = bagService.findPlayerBag(m.getId(), player.getId()); </span>
+<span class="nc" id="L128">            newPlayersList.add(new PlayerInGameDTO(player, hand, bag)); </span>
+<span class="nc" id="L129">        }</span>
+
+<span class="nc" id="L131">        return new MatchDTO(m, deck, newPlayersList);</span>
+    }
+
 
     @Transactional(readOnly = true)
     public Integer userInMatch(Integer userId) {
-<span class="nc" id="L67">        return mrepo.userInMatch(userId);</span>
+<span class="fc" id="L137">        return matchRepo.userInMatch(userId);</span>
     }
 
     @Transactional
     public void delete(Integer id) {
-<span class="nc" id="L72">        mrepo.deleteById(id);</span>
-<span class="nc" id="L73">    }</span>
+<span class="fc" id="L142">        matchRepo.deleteById(id);</span>
+<span class="fc" id="L143">    }</span>
 
+//------------------FUNCIONES PARA EL HISTORIAL DE PARTIDAS ------------------------------------------------------
 
-
-    //Funcion para innicializar un match 
-    @Transactional
-    public void startMatch(Integer matchId) {
-<span class="nc" id="L80">        Match m = mrepo.findById(matchId).orElseThrow(() -&gt; new IllegalArgumentException(&quot;Match not found&quot;));</span>
-        
-        // le creamos una mano y una bolsa asociadas a cada jugador 
-<span class="nc" id="L83">        List&lt;Player&gt; playersInGame = m.getPlayers(); </span>
-<span class="nc bnc" id="L84" title="All 2 branches missed.">        for (Player player : playersInGame){</span>
-<span class="nc" id="L85">            handService.createPlayerHand(matchId, player.getId());</span>
-<span class="nc" id="L86">            bagService.createPlayerbag(matchId, player.getId());</span>
-<span class="nc" id="L87">        }</span>
-        
-<span class="nc" id="L89">        m.setStatus(MatchStatus.PLAYING);</span>
-<span class="nc" id="L90">        m.setStartTime(LocalDateTime.now());</span>
-<span class="nc" id="L91">        m.setDeck(deckService.initializeDeck(matchId));</span>
-<span class="nc" id="L92">        mrepo.save(m);</span>
-<span class="nc" id="L93">    }</span>
-
-
-    /*
-     * METODOS RELACIONADOS CON LAS CARTAS 
-     */
-
-    /*
-     * Reparte las cartas iniciales a un jugador 
-     * si se quiere cambiar el número de cartas repartidas inicialmente: cambiar variable en DeckService
-     */
-
-    @Transactional
-    public List&lt;Card&gt; distributeInitialCardsToPlayer(Integer matchId, Integer playerId) {
-<span class="nc" id="L107">        List&lt;Card&gt; cards = deckService.drawInitialCardsFromDeck(matchId); </span>
-
-<span class="nc" id="L109">        handService.addFewCardsToPlayerHand(matchId, playerId, cards);</span>
-
-<span class="nc" id="L111">        return cards; </span>
+    //Para devolver el listado de todo el historial de partidas finalizadas y en curso
+    @Transactional(readOnly = true) 
+    public Page&lt;Match&gt; getFinishedAndInProgressMatches(Integer page, Integer size) {
+<span class="fc" id="L150">        return matchRepo.findFinishedAndInProgress(PageRequest.of(page,size));</span>
     }
+
+    //Para devolver el listado de partidas en curso 
+    @Transactional(readOnly = true)
+    public List&lt;Match&gt; getInProgressMatches() {
+<span class="fc" id="L156">        return matchRepo.findInProgress();</span>
+    }
+
+
+    //Para devolver el listado de partidas finalizadas
+    @Transactional(readOnly = true)
+    public Page&lt;Match&gt; getFinishedMatches(Integer page, Integer size) {
+<span class="nc" id="L163">        return matchRepo.findFinished(PageRequest.of(page,size));</span>
+    }
+
+
+    //Para devolver el listado de partidas jugadas por un usuario
+    @Transactional(readOnly = true)
+    public Page&lt;Match&gt; getMatchesPlayedByUser(Integer userId, Integer page, Integer size) {
+<span class="fc" id="L170">        return matchRepo.findMatchesPlayedByUser(userId, PageRequest.of(page, size));</span>
+    }
+
+    //Para devolver el listado de partidas creadas por un usuario 
+    @Transactional(readOnly = true)
+    public Page&lt;Match&gt; getMatchesPlayedAndCreatedByUser(Integer userId, Integer page, Integer size) {
+<span class="fc" id="L176">        return matchRepo.findMatchesPlayedAndCreatedByUser(userId, PageRequest.of(page, size));</span>
+    }
+
+    //Para devolver el listado de partidas ganadas por un usuario 
+    @Transactional(readOnly = true)
+    public Page&lt;Match&gt; getMatchesWonByUser(Integer userId, Integer page, Integer size) {
+<span class="fc" id="L182">        return matchRepo.findMatchesWonByUser(userId, PageRequest.of(page, size));</span>
+    }
+
+
+//------------------------------------FUNCIONES PARA GESTIONAR LA PARTIDA---------------------------------------------------------
+
+    //Función para inicializar un match
+    @Transactional
+    public Match startMatch(Integer matchId) {
+<span class="nc" id="L191">        Match m = matchRepo.findById(matchId).orElseThrow(() -&gt; new IllegalArgumentException(&quot;Match not found&quot;));</span>
+        
+        //Cambiamos el estado de la partida a PLAYING
+<span class="nc" id="L194">        m.setStatus(MatchStatus.PLAYING);</span>
+
+        //Inicializamos la fecha de inicio
+<span class="nc" id="L197">        m.setStartTime(LocalDateTime.now());</span>
+
+        //Inicializamos los npcs de la partida 
+
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        for ( int i=0; i&lt; m.getNumNpcs(); i++){</span>
+<span class="nc" id="L202">            Npc npc = new Npc(); //Creamos el npc</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">            npc.setIsNiallCampbell( i== m.getNumNpcs()-1); // Si es el último npc que creamos, es Niall Campbell</span>
+<span class="nc" id="L204">            npc.setStrength(1); // El valor de la fuerza al inicio es 1</span>
+<span class="nc" id="L205">            npc.setMatch(m);// Lo asociamos a la partida</span>
+<span class="nc" id="L206">            m.getNpcs().add(npc);// Lo añadimos a la lista de npcs de la partida </span>
+<span class="nc" id="L207">            npcRepository.save(npc); // Lo guardamos en la base de datos</span>
+        } 
+
+
+        // le creamos una mano y una bolsa asociadas a cada jugador 
+<span class="nc" id="L212">        List&lt;Player&gt; playersInGame = m.getPlayers(); </span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        for (Player player : playersInGame){</span>
+
+<span class="nc" id="L215">            player.setDiceOrder(null); // Inicializamos el valor de la tirada de dado a null</span>
+<span class="nc" id="L216">            player.setOrderInMatch(null);</span>
+<span class="nc" id="L217">            player.setActionPoints(0);</span>
+<span class="nc" id="L218">            player.setStrength(1);</span>
+<span class="nc" id="L219">            player.setCardsDrawnInTurn(0);</span>
+            
+<span class="nc" id="L221">        }</span>
+
+        
+<span class="nc" id="L224">        DeckInGame deck = initializePlayerHandCards(matchId, playersInGame); </span>
+<span class="nc" id="L225">        m.setDeck(deck);</span>
+<span class="nc" id="L226">        m.setRoomsState(roomService.initializeRoomsForMatch(m));</span>
+<span class="nc" id="L227">        m.setCurrentTurnUserId(null);</span>
+<span class="nc" id="L228">        m.setTurnNumber(0);</span>
+<span class="nc" id="L229">        matchRepo.save(m);</span>
+        
+<span class="nc" id="L231">        LobbyUpdateDTO update = createLobbyUpdate(m, &quot;START&quot;, &quot;&quot;);</span>
+<span class="nc" id="L232">        lobbyWebsocketController.notifyGameStarted(matchId, update);</span>
+        
+<span class="nc" id="L234">        return m;</span>
+    }
+    
+    @Transactional
+    private LobbyUpdateDTO createLobbyUpdate(Match match, String action, String username) {
+<span class="nc" id="L239">        List&lt;LobbyUpdateDTO.PlayerLobbyDTO&gt; players = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        for (Player p : match.getPlayers()) {</span>
+<span class="nc" id="L241">            players.add(new LobbyUpdateDTO.PlayerLobbyDTO(</span>
+<span class="nc" id="L242">                p.getUser().getId(),</span>
+<span class="nc" id="L243">                p.getUser().getUsername(),</span>
+<span class="nc" id="L244">                p.getUser().getAvatar()</span>
+            ));
+<span class="nc" id="L246">        }</span>
+<span class="nc" id="L247">        return new LobbyUpdateDTO(match.getId(), players, action, username);</span>
+    }
+
+    //Función para decidir el orden de los jugadores en la partida según la tirada de dados.
+    @Transactional
+    public Match submitDiceAndAssignOrder(Integer matchId, Integer userId, Integer diceRoll) {
+
+<span class="fc" id="L254">        Match match = matchRepo.findById(matchId)</span>
+<span class="pc" id="L255">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Match not found&quot;));</span>
+
+
+<span class="fc" id="L258">        Player player = playerRepo.findByMatchAndUser(matchId, userId)</span>
+<span class="pc" id="L259">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Player not found in this match&quot;));</span>
+ 
+        //Comprobamos que el jugador no haya tirado el dado
+<span class="pc bpc" id="L262" title="1 of 2 branches missed.">        if (player.getDiceOrder() != null) {</span>
+<span class="nc" id="L263">            throw new IllegalArgumentException(&quot;The player has already rolled the dice.&quot;);</span>
+        }
+
+
+<span class="fc" id="L267">        player.setDiceOrder(diceRoll);</span>
+<span class="fc" id="L268">        playerRepo.save(player);</span>
+
+
+<span class="fc" id="L271">        boolean allRolled = match.getPlayers().stream()</span>
+<span class="fc bfc" id="L272" title="All 2 branches covered.">                .allMatch(p -&gt; p.getDiceOrder() != null);</span>
+
+        //Cuando todos los jugadores hayan tirado el dado, asignamos el orden de turno
+<span class="pc bpc" id="L275" title="1 of 2 branches missed.">        if (allRolled) {</span>
+            //  Asignar orden de turno
+<span class="nc" id="L277">            List&lt;Player&gt; ordered = match.getPlayers().stream()</span>
+<span class="nc" id="L278">                    .sorted((a, b) -&gt; {</span>
+<span class="nc" id="L279">                        int cmp = b.getDiceOrder() - a.getDiceOrder(); // dado mayor primero</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                        if (cmp == 0) {</span>
+                            // Desempate automático usando ID
+<span class="nc" id="L282">                            return a.getId().compareTo(b.getId());</span>
+                        }
+<span class="nc" id="L284">                        return cmp;</span>
+                    })
+<span class="nc" id="L286">                    .toList();</span>
+
+<span class="nc bnc" id="L288" title="All 2 branches missed.">            for (int i = 0; i &lt; ordered.size(); i++) {</span>
+<span class="nc" id="L289">                ordered.get(i).setOrderInMatch(i);</span>
+<span class="nc" id="L290">                playerRepo.save(ordered.get(i));</span>
+            }
+
+<span class="nc" id="L293">            match.setCurrentTurnUserId(ordered.get(0).getUser().getId());</span>
+<span class="nc" id="L294">            match.setTurnNumber(1);</span>
+<span class="nc" id="L295">            match.setCurrentTurnPhase(TurnPhase.DRAW);</span>
+<span class="nc" id="L296">            matchRepo.save(match);</span>
+            
+            // Notificar a todos los jugadores que el turno ha comenzado
+<span class="nc" id="L299">            TurnUpdateDTO turnUpdate = new TurnUpdateDTO(</span>
+                matchId,
+<span class="nc" id="L301">                ordered.get(0).getUser().getId(),</span>
+<span class="nc" id="L302">                ordered.get(0).getUser().getUsername(),</span>
+<span class="nc" id="L303">                1,</span>
+<span class="nc" id="L304">                TurnPhase.DRAW.toString()</span>
+            );
+<span class="nc" id="L306">            matchWebsocketController.notifyTurnUpdate(matchId, turnUpdate);</span>
+        }
+
+<span class="fc" id="L309">        return match;</span>
+    }
+
+
+    @Transactional(rollbackFor = MoreThan7CardsInHand.class)
+    public Match nextTurn(Integer matchId) {
+<span class="nc" id="L315">        Match m = matchRepo.findById(matchId)</span>
+<span class="nc" id="L316">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Match not found&quot;));</span>
+        //Obtenemos el id del user del jugador que tiene el turno actualmente
+<span class="nc" id="L318">        Integer currenUserTurnId = m.getCurrentTurnUserId();</span>
+        //Buscamos el jugador correspondiente
+<span class="nc" id="L320">        Player currentPlayerTurn = m.getPlayers().stream()</span>
+<span class="nc" id="L321">                .filter(p -&gt; p.getUser().getId().equals(currenUserTurnId))</span>
+<span class="nc" id="L322">                .findFirst()</span>
+<span class="nc" id="L323">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Player not found&quot;));</span>
+
+        // checkeamos que tenga menos de 7 cartas en su mano, pues sino tiene que descartar
+<span class="nc" id="L326">        HandInGame currentPlayerHand = handService.findPlayerHand(matchId, currentPlayerTurn.getId()); </span>
+<span class="nc" id="L327">        checkers.checkNoMoreThan7CardsInHand(new HandInGameDTO(currentPlayerHand));</span>
+
+        // si todo está correcto, le reseteamos el número de cartas robadas en el turno a cero
+<span class="nc" id="L330">        currentPlayerTurn.setCardsDrawnInTurn(0); </span>
+<span class="nc" id="L331">        playerRepo.save(currentPlayerTurn);</span>
+
+        //Obtenemos el indice de orden del jugador actual
+<span class="nc" id="L334">        Integer currentIndx = currentPlayerTurn.getOrderInMatch();</span>
+        //Calculamos el indice del siguiente jugador
+<span class="nc" id="L336">        Integer nextIndx = (currentIndx + 1) % m.getPlayers().size();</span>
+        //Buscamos el siguiente jugador por su orden en la partida
+<span class="nc" id="L338">        Player nextPlayerTurn = m.getPlayers().stream()</span>
+<span class="nc" id="L339">                .filter(p -&gt; p.getOrderInMatch().equals(nextIndx))</span>
+<span class="nc" id="L340">                .findFirst()</span>
+<span class="nc" id="L341">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Player not found&quot;));</span>
+        //Actualizamos el id del jugador que tiene el turno actualmente en la partida
+<span class="nc" id="L343">        m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());</span>
+<span class="nc" id="L344">        m.setCurrentTurnPhase(TurnPhase.DRAW);</span>
+
+        // actualizamos sus puntos de acción por si acaso (del jugador que empieza el turno)
+<span class="nc" id="L347">        playerService.getPlayerActionPoints(matchId, nextPlayerTurn.getId()); </span>
+
+        // actualizamos el estado de la partida 
+<span class="nc" id="L350">        matchRepo.save(m);</span>
+        
+        // Notificar a todos los jugadores el cambio de turno
+<span class="nc" id="L353">        TurnUpdateDTO turnUpdate = new TurnUpdateDTO(</span>
+            matchId,
+<span class="nc" id="L355">            nextPlayerTurn.getUser().getId(),</span>
+<span class="nc" id="L356">            nextPlayerTurn.getUser().getUsername(),</span>
+<span class="nc" id="L357">            m.getTurnNumber(),</span>
+<span class="nc" id="L358">            TurnPhase.DRAW.toString()</span>
+        );
+<span class="nc" id="L360">        matchWebsocketController.notifyTurnUpdate(matchId, turnUpdate);</span>
+        
+<span class="nc" id="L362">        return m;</span>
+ 
+    }
+
+
+    @Transactional
+    public MatchDTO endMatch(Integer matchId, Player winner) {
+<span class="fc" id="L369">        Match m = matchRepo.findById(matchId)</span>
+<span class="pc" id="L370">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Match not found&quot;));</span>
+
+<span class="pc bpc" id="L372" title="1 of 2 branches missed.">        if (m.getStatus() == MatchStatus.FINISHED) {</span>
+<span class="nc" id="L373">            return new MatchDTO(m);</span>
+        }
+
+        //Cambiamos estado a FINISHED
+<span class="fc" id="L377">        m.setStatus(MatchStatus.FINISHED);</span>
+
+        // Guuardardamos hora de fin y el ganador
+<span class="fc" id="L380">        m.setEndTime(LocalDateTime.now());</span>
+<span class="fc" id="L381">        m.setWinner(winner);</span>
+
+<span class="fc bfc" id="L383" title="All 2 branches covered.">        if (m.getStartTime() != null) {</span>
+<span class="fc" id="L384">            long durationSeconds = java.time.Duration.between(m.getStartTime(), m.getEndTime()).toSeconds();</span>
+        }
+
+<span class="fc" id="L387">        deleteMatchCards(matchId); </span>
+
+<span class="fc" id="L389">        matchRepo.save(m);</span>
+
+<span class="fc" id="L391">        return new MatchDTO(m);</span>
+    }
+
+
+    @Transactional 
+    public MatchDTO  leaveMatch(Integer matchId, Integer userId){
+<span class="nc" id="L397">        Match m = matchRepo.findById(matchId)</span>
+<span class="nc" id="L398">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Match not found&quot;));</span>
+<span class="nc" id="L399">        Player p = playerRepo.findByMatchAndUser(matchId, userId)</span>
+<span class="nc" id="L400">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Player not found in this match&quot;));</span>
+        
+        
+        //Guardamos el orden del turno del jugador que se va
+<span class="nc" id="L404">        Integer leavingPlayerOrder = p.getOrderInMatch();</span>
+        //Guardamos si el jugador que se va tiene el turno actual
+<span class="nc" id="L406">        Boolean isLeavingPlayerCurrentTurn = m.getCurrentTurnUserId().equals(userId);</span>
+
+<span class="nc" id="L408">        m.getPlayers().remove(p);</span>
+
+<span class="nc bnc" id="L410" title="All 2 branches missed.">        if (isLeavingPlayerCurrentTurn){</span>
+<span class="nc" id="L411">            Integer nextIndx = (leavingPlayerOrder + 1) % m.getPlayers().size();</span>
+<span class="nc" id="L412">            Player nextPlayerTurn = m.getPlayers().stream()</span>
+<span class="nc" id="L413">                .filter(pl -&gt; pl.getOrderInMatch().equals(nextIndx))</span>
+<span class="nc" id="L414">                .findFirst()</span>
+<span class="nc" id="L415">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Player not found&quot;));</span>
+            //Actualizamos el id del jugador que tiene el turno actualmente en la partida
+<span class="nc" id="L417">            m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());</span>
+<span class="nc" id="L418">            m.setCurrentTurnPhase(TurnPhase.DRAW);</span>
+        }
+
+        
+
+        //Actualizamos el orden de los jugadores que quedan en la partida 
+<span class="nc bnc" id="L424" title="All 2 branches missed.">        for (Player player : m.getPlayers()){</span>
+            //Todos los jugadores que iban después del que se va adelantan una posición
+<span class="nc bnc" id="L426" title="All 2 branches missed.">            if (player.getOrderInMatch() &gt; leavingPlayerOrder){</span>
+<span class="nc" id="L427">                player.setOrderInMatch(player.getOrderInMatch() - 1);</span>
+<span class="nc" id="L428">                playerRepo.save(player);</span>
+            }
+<span class="nc" id="L430">        }</span>
+
+        //Si no se llega al minimo de jugadores, se termina la partida
+<span class="nc bnc" id="L433" title="All 2 branches missed.">        if (m.getPlayers().size() &lt; m.getMinPlayers()){</span>
+<span class="nc" id="L434">            endMatch(matchId, null);</span>
+        } else {
+<span class="nc" id="L436">            matchRepo.save(m);</span>
+        }
+
+<span class="nc" id="L439">        return new MatchDTO(m);</span>
+
+
+    }
+
+
+    @Transactional
+    public void deleteMatchCards(Integer matchId){
+<span class="fc" id="L447">        deckService.deleteDeckInGame(matchId);</span>
+<span class="fc" id="L448">        handService.deleteMatchHands(matchId);</span>
+<span class="fc" id="L449">        bagService.deleteMatchBags(matchId);</span>
+<span class="fc" id="L450">    }</span>
+
+
+
+    
+    // -------------------------------------------- METODOS RELACIONADOS CON LAS CARTAS ----------------------------------------------------------------------
+
+
 
     /*
      * Jugador roba una carta del mazo de robar
      */
-    @Transactional
-    public void playerDrawsCardFromDeck(Integer matchId, Integer playerId){
-<span class="nc" id="L119">        Card stolenCard =deckService.drawCard(matchId); </span>
+    @Transactional(rollbackFor = MoreThan7CardsDrawnException.class)
+    public DrawCardResultDTO playerDrawsCardFromDeck(Integer matchId, Integer playerId){
 
-<span class="nc" id="L121">        handService.addCardToPlayerHand(stolenCard, matchId, playerId);</span>
-<span class="nc" id="L122">    }</span>
+        // buscamos al jugador para checkear sus cartas robadas en el turno
+<span class="nc" id="L466">        Player player = playerRepo.findById(playerId).orElse(null); </span>
+        
+        // checkeamos que no haya robado más de 7 cartas 
+<span class="nc" id="L469">        checkers.checkCardsDrawnInTurn(player);</span>
+
+        // si no es el caso, procedemos a robar la carta
+<span class="nc" id="L472">        Card stolenCard =deckService.drawCard(matchId); </span>
+<span class="nc" id="L473">        DeckInGame deck = deckService.findDeckById(matchId); </span>
+
+<span class="nc" id="L475">        HandInGame hand = handService.addCardToPlayerHand(stolenCard, matchId, playerId);</span>
+        // actualimos el valor de los puntos de acción del jugador en la bd y de sus cartas robadas en el turno
+<span class="nc" id="L477">        player.setCardsDrawnInTurn(player.getCardsDrawnInTurn() + 1);</span>
+<span class="nc" id="L478">        player.setActionPoints(player.getActionPoints() - 1);</span>
+<span class="nc" id="L479">        playerRepo.save(player);</span>
+        
+        // Notificar cambios de cartas por WebSocket
+<span class="nc" id="L482">        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);</span>
+<span class="nc" id="L483">        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);</span>
+<span class="nc" id="L484">        matchWebsocketController.notifyCardsUpdate(matchId, update);</span>
+
+<span class="nc" id="L486">        return new DrawCardResultDTO(stolenCard, deck, hand); </span>
+    }
 
     /*
-     * Jugador roba una carta de la mano o bolsa de otro jugador
+     * Jugador roba una carta de recompensa (sin consumir puntos de acción)
+     */
+    @Transactional
+    public DrawCardResultDTO playerDrawsRewardCard(Integer matchId, Integer playerId){
+<span class="fc" id="L494">        Card stolenCard = deckService.drawCard(matchId);</span>
+<span class="fc" id="L495">        DeckInGame deck = deckService.findDeckById(matchId);</span>
+
+<span class="fc" id="L497">        HandInGame hand = handService.addCardToPlayerHand(stolenCard, matchId, playerId);</span>
+
+        // Notificar cambios de cartas por WebSocket
+<span class="fc" id="L500">        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);</span>
+<span class="fc" id="L501">        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);</span>
+<span class="fc" id="L502">        matchWebsocketController.notifyCardsUpdate(matchId, update);</span>
+
+<span class="fc" id="L504">        return new DrawCardResultDTO(stolenCard, deck, hand);</span>
+    }
+
+    /*
+     * Método que devuelve el estado de todas las cartas relacionadas con un jugador en una partida
+     */
+
+    @Transactional(readOnly = true)
+    public AllCardsStatusDTO getAllCards (Integer matchId, Integer playerId){
+<span class="fc" id="L513">        DeckInGameDTO deck = new DeckInGameDTO(deckService.findDeckById(matchId)); </span>
+
+<span class="fc" id="L515">        HandInGameDTO hand = new HandInGameDTO(handService.findPlayerHand(matchId, playerId)); </span>
+
+<span class="fc" id="L517">        BagInGameDTO bag = new BagInGameDTO(bagService.findPlayerBag(matchId, playerId));</span>
+
+<span class="fc" id="L519">        return new AllCardsStatusDTO(hand, bag, deck, playerId); </span>
+    }
+
+    /*
+     * Inicializa las manos de los jugadores y el mazo de cartas para una partida
+     * También actualiza / inicializa el valor de los puntos de acción de cada jugador
+     */
+    @Transactional
+    public DeckInGame initializePlayerHandCards (Integer matchId, List&lt;Player&gt; players){
+<span class="nc" id="L528">        DeckInGame deck = deckService.initializeDeck(matchId); </span>
+<span class="nc bnc" id="L529" title="All 2 branches missed.">        for (Player player : players) {</span>
+<span class="nc" id="L530">            handService.createPlayerHand(matchId, player.getId());</span>
+<span class="nc" id="L531">            bagService.createPlayerbag(matchId, player.getId());</span>
+<span class="nc" id="L532">        }</span>
+<span class="nc bnc" id="L533" title="All 2 branches missed.">        for (int i = 0; i &lt; initialCardsPerPlayer; i++) {</span>
+<span class="nc bnc" id="L534" title="All 2 branches missed.">            for (Player player : players) {</span>
+                    // Sacamos la carta del mazo y se la damos al jugador
+<span class="nc" id="L536">                    Card card = deck.getNotDiscardedCards().remove(0); // carta del tope del deck</span>
+<span class="nc" id="L537">                    handService.addCardToPlayerHand(card, matchId, player.getId());</span>
+<span class="nc" id="L538">                    playerService.getPlayerActionPoints(matchId, player.getId()); // actualizamos / incializamos los puntos de acción del jugador</span>
+<span class="nc" id="L539">            }</span>
+        }
+<span class="nc" id="L541">        return deck;     </span>
+
+    }
+
+    @Transactional(rollbackFor = {BagNotValidException.class, MoreThan7CardsInHand.class})
+    public Integer confirmDiscardPhase(Integer matchId, AllCardsStatusDTO data ) {
+        // vemos si la palabra es válida 
+<span class="nc" id="L548">        Boolean validBag = bagService.checkBagIsValid(data.getBag().getCards()); </span>
+        
+        // checkeamos que el jugador no tenga más de 7 cartas en la mano y su palabra sea válida 
+<span class="nc" id="L551">        checkers.checkNoMoreThan7CardsInHand(data.getHand());       </span>
+<span class="nc" id="L552">        checkers.checkWordIsValid(validBag);       </span>
+
+        // si la palabra de la bolsa es válida o está vacía, actualizamos todo y pasamos al siguiente turno 
+<span class="nc" id="L555">        handService.update(data.getHand(), matchId, data.getPlayerId());</span>
+<span class="nc" id="L556">        bagService.update(data.getBag(), matchId, data.getPlayerId());</span>
+<span class="nc" id="L557">        deckService.update(data.getDeck(), matchId); </span>
+<span class="nc" id="L558">        Integer nextTurnId = nextTurn(matchId).getCurrentTurnUserId(); </span>
+<span class="nc" id="L559">        return nextTurnId; </span>
+    }
+
+
+    // ------------------------------------------- FUNCIONES LLEVADAS A CABO EN LAS PELEAS -------------------------------------------------------------------
+
+    /*
+     * JUGADOR GANA A JUGADOR 
+     * Contexto: es una pelea entre dos jugadores activos, quien gana roba una carta del perdedor
+     * La carta que puede robar el ganador puede ser de la mano o de la bolsa del perdedor, si es de la bolsa la elige deliberadamente, 
+     * si es de la mano es aleatoriamente  
+     * 
+     * la carta robada siempre va a la mano del ganador y si el perdedor es el jugador con el turno actual, pierde todos sus puntos de acción
+     * 
+     * fromWhere indica si la carta robada es de la mano (&quot;hand&quot;) o de la bolsa (&quot;bag&quot;)
+     * 
+     * el winnerId y el loserId son los ids de los players no de los users
      */
 
     @Transactional
-    public void playerDrawsCardFromAnotherPlayer(Card card, Integer matchId, Integer playerIdWinner, Integer PlayerIdLoser){
-    
+    public void playerDrawsCardFromAnotherPlayerBag(Card card, Integer matchId, Integer winnerId, Integer loserId, String fromWhere, Integer currentTurnUserId){
+        // checkeamos que ambos jugadores existen en la partida
+<span class="nc" id="L581">        Player loser = playerService.findById(loserId); </span>
+<span class="nc" id="L582">        Player winner = playerService.findById(winnerId);</span>
 
-<span class="nc" id="L132">    }</span>
+        // quitamos la carta de la mano o bolsa del perdedor y se la añadimos a la mano del ganador
+
+<span class="nc bnc" id="L586" title="All 2 branches missed.">        if (fromWhere.equals(&quot;hand&quot;)){ </span>
+            // Selección aleatoria de carta de la mano del perdedor
+<span class="nc" id="L588">            HandInGame loserHand = handService.findPlayerHand(matchId, loserId);</span>
+<span class="nc" id="L589">            java.util.List&lt;Card&gt; loserHandCards = loserHand.getCards();</span>
+<span class="nc bnc" id="L590" title="All 4 branches missed.">            if (loserHandCards == null || loserHandCards.isEmpty()) {</span>
+<span class="nc" id="L591">                throw new IllegalStateException(&quot;Loser has no cards in hand to steal&quot;);</span>
+            }
+<span class="nc" id="L593">            Card randomCard = loserHandCards.get((int) Math.floor(Math.random() * loserHandCards.size()));</span>
+<span class="nc" id="L594">            handService.removeCardFromPlayerHand(randomCard, matchId, loserId);</span>
+<span class="nc" id="L595">            handService.addCardToPlayerHand(randomCard, matchId, winnerId);</span>
+
+<span class="nc bnc" id="L597" title="All 2 branches missed.">        } else if (fromWhere.equals(&quot;bag&quot;)){</span>
+<span class="nc" id="L598">            bagService.removeCardFromPlayerBag(card, matchId, loserId);</span>
+<span class="nc" id="L599">            handService.addCardToPlayerHand(card, matchId, winnerId); </span>
+        
+        } else {
+<span class="nc" id="L602">            throw new IllegalArgumentException(&quot;fromWhere must be 'hand' or 'bag'&quot;);</span>
+        }
+        // Actualizar estadísticas de batallas
+<span class="nc" id="L605">        int winnerBattlesWon = Optional.ofNullable(winner.getBattlesWon()).orElse(0);</span>
+<span class="nc" id="L606">        int winnerBattlesPlayed = Optional.ofNullable(winner.getBattlesPlayed()).orElse(0);</span>
+<span class="nc" id="L607">        int loserBattlesPlayed = Optional.ofNullable(loser.getBattlesPlayed()).orElse(0);</span>
+
+<span class="nc" id="L609">        winner.setBattlesWon(winnerBattlesWon + 1);</span>
+<span class="nc" id="L610">        winner.setBattlesPlayed(winnerBattlesPlayed + 1);</span>
+<span class="nc" id="L611">        loser.setBattlesPlayed(loserBattlesPlayed + 1);</span>
+
+<span class="nc" id="L613">        playerRepo.save(winner);</span>
+<span class="nc" id="L614">        playerRepo.save(loser);</span>
+<span class="nc" id="L615">    }</span>
+
+
 
     /*
-     * Jugador descarta una carta de su bolsa o mano
-     * Jugador pierde contra no jugador
+     * JUGADOR GANA A NO-JUGADOR 
+     * Contexto: un jugador activo vence a un npc (no jugador) en una pelea
+     * Resultado: el jugador roba una carta del mazo, el npc suma un punto a su fuerza
      */
 
     @Transactional
-    public void playerLosesAgaintsNonPlayer(Card card, Integer matchId, Integer playerId){
+    public Card playerBeatsNonPlayer(Integer matchId, Integer playerId, Integer npcId){
+
+<span class="fc" id="L628">        Card stolenCard =deckService.drawCard(matchId);</span>
+<span class="fc" id="L629">        handService.addCardToPlayerHand(stolenCard, matchId, playerId);</span>
+
+<span class="fc" id="L631">        return stolenCard;</span>
     
-<span class="nc" id="L142">    }</span>
+    }
 
     /*
-     * Jugador recibe la primera carta del mazo de descartes (si hay) tras vencer a niall
+     * JUGADOR GANA NIALL CAMPBELL
+     * Contexto: un jugador activo vence a Niall Campbell en una pelea
+     * Resultado: el jugador recibe la última carta descartada del mazo, si la hay 
      */
 
     @Transactional
-    public void playerWinsNiallCampbell(Integer matchId, Integer playerId){
-<span class="nc" id="L150">        Card discardedCard = deckService.getAndRemoveLastDiscardedCard(matchId); </span>
+    public Card playerWinsNiallCampbell(Integer matchId, Integer playerId){
+<span class="fc" id="L643">        Card discardedCard = deckService.getAndRemoveLastDiscardedCard(matchId); </span>
 
-<span class="nc" id="L152">        handService.addCardToPlayerHand(discardedCard, matchId, playerId);</span>
-<span class="nc" id="L153">    }</span>
+<span class="fc bfc" id="L645" title="All 2 branches covered.">        if (discardedCard != null){</span>
+             // no hay carta descartada que dar al jugador
+<span class="fc" id="L647">             handService.addCardToPlayerHand(discardedCard, matchId, playerId);</span>
+<span class="fc" id="L648">             return discardedCard;</span>
+        } else {
+<span class="fc" id="L650">            return null; </span>
+        }
+        
+    }
 
 
+    /*
+     * NO-JUGADOR GANA A JUGADOR
+     * Contexto: un jugador activo pierde contra un npc (no jugador) en una pelea
+     * Resultado: el jugador pierde la carta que el quiera de su mano o bolsa, y pierde todos sus puntos de acción
+     * 
+     * fromWhere indica si la carta perdida es de la mano (&quot;hand&quot;) o de la bolsa (&quot;bag&quot;)
+     */
+
+    @Transactional
+    public void playerLosesAgaintsNonPlayer(Card card, Integer matchId, Integer playerId, Integer currentTurnUserId, String fromWhere){
+        //actualizar puntos de acción del jugador, pierde todos sus puntos de acción
+        //Hay que añadir que se vaya a una habitación aleatoria 
+        /* 
+        Player player = playerService.findById(playerId);
+        //Realmente hace falta esto? ya que podemos mover un npc y que otro jugador tenga una pelea con el aunque no sea su turno
+      //if (player.getUser().getId() == currentTurnUserId){
+        player.setActionPoints(0);  
+        playerService.save(player); */
+        
+         
+
+        // Poner a cero los puntos de acción del jugador que ha perdido
+<span class="fc" id="L678">        Player player = playerService.findById(playerId);</span>
+<span class="fc" id="L679">        player.setActionPoints(0);</span>
+<span class="fc" id="L680">        playerService.save(player);</span>
+
+<span class="pc bpc" id="L682" title="1 of 2 branches missed.">        if (fromWhere.equals(&quot;hand&quot;)){</span>
+<span class="fc" id="L683">            handService.removeCardFromPlayerHand(card, matchId, playerId);</span>
+<span class="nc bnc" id="L684" title="All 2 branches missed.">        } else if (fromWhere.equals(&quot;bag&quot;)){</span>
+<span class="nc" id="L685">            bagService.removeCardFromPlayerBag(card, matchId, playerId); </span>
+        } else {
+<span class="nc" id="L687">            throw new IllegalArgumentException(&quot;fromWhere must be 'hand' or 'bag'&quot;);</span>
+        }
+
+        // añadimos la carta seleccionada al mazo de descartes
+<span class="fc" id="L691">        deckService.addCardToDiscardedPile(matchId, card);</span>
+            
+<span class="fc" id="L693">    }</span>
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------------
     
+
+    @Transactional
+    public Player getMatchWinner(Integer matchId) {
+<span class="fc" id="L700">        Match match = matchRepo.findById(matchId)</span>
+<span class="pc" id="L701">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Match not found&quot;));</span>
+
+<span class="pc bpc" id="L703" title="1 of 2 branches missed.">        if (match.getStatus() != MatchStatus.FINISHED) {</span>
+<span class="nc" id="L704">            throw new IllegalStateException(&quot;Match is not finished yet&quot;);</span>
+        }
+
+
+<span class="fc" id="L708">        return match.getWinner();</span>
+    }
+    
+    @Transactional
+    public ActionPointsUpdateDTO consumeActionPointForUser(Integer matchId, Integer userId) {
+<span class="fc" id="L713">        Player player = playerRepo.findByMatchAndUser(matchId, userId)</span>
+<span class="pc" id="L714">                .orElseThrow(() -&gt; new RuntimeException(&quot;Jugador no encontrado en la partida&quot;));</span>
+<span class="pc bpc" id="L715" title="1 of 2 branches missed.">        Integer currentPoints = player.getActionPoints() != null ? player.getActionPoints() : 0;</span>
+<span class="pc bpc" id="L716" title="1 of 2 branches missed.">        if (currentPoints &gt; 0) {</span>
+<span class="fc" id="L717">            player.setActionPoints(currentPoints - 1);</span>
+<span class="fc" id="L718">            playerRepo.save(player);</span>
+        }
+<span class="fc" id="L720">        return new ActionPointsUpdateDTO(</span>
+<span class="fc" id="L721">            player.getId(),</span>
+<span class="fc" id="L722">            player.getUser().getId(),</span>
+<span class="fc" id="L723">            player.getUser().getUsername(),</span>
+<span class="fc" id="L724">            player.getActionPoints(),</span>
+<span class="fc" id="L725">            System.currentTimeMillis()</span>
+        );
+    }
+
+    @Transactional
+    public ActionPointsUpdateDTO consumeAllActionPointForUser(Integer matchId, Integer userId) {
+<span class="fc" id="L731">        Player player = playerRepo.findByMatchAndUser(matchId, userId)</span>
+<span class="pc" id="L732">                .orElseThrow(() -&gt; new RuntimeException(&quot;Jugador no encontrado en la partida&quot;));</span>
+<span class="fc" id="L733">        player.setActionPoints(0);</span>
+<span class="fc" id="L734">        playerRepo.save(player);</span>
+<span class="fc" id="L735">        return new ActionPointsUpdateDTO(</span>
+<span class="fc" id="L736">            player.getId(),</span>
+<span class="fc" id="L737">            player.getUser().getId(),</span>
+<span class="fc" id="L738">            player.getUser().getUsername(),</span>
+<span class="fc" id="L739">            player.getActionPoints(),</span>
+<span class="fc" id="L740">            System.currentTimeMillis()</span>
+        );
+    }
+
+
+    //Función para mover un jugador de una sala a otra adyacente
+    @Transactional
+    public Player movePlayerToAdyacentRoom(Integer matchId, Integer userId, Integer targetRoomId) {
+<span class="fc" id="L748">        Match match = matchRepo.findById(matchId)</span>
+<span class="pc" id="L749">                .orElseThrow(() -&gt; new RuntimeException(&quot;Partida no encontrada&quot;));</span>
+<span class="pc bpc" id="L750" title="1 of 2 branches missed.">        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){</span>
+<span class="fc" id="L751">            match.setCurrentTurnPhase(TurnPhase.ACTIONS);</span>
+        }
+<span class="fc" id="L753">        matchRepo.save(match);</span>
+        //Recuperar el jugador dentro del match
+<span class="fc" id="L755">        Player player = playerRepo.findByMatchAndUser(matchId, userId)</span>
+<span class="pc" id="L756">                .orElseThrow(() -&gt; new RuntimeException(&quot;Jugador no encontrado en la partida&quot;));</span>
+<span class="fc" id="L757">        Room currentRoom = player.getRoom();</span>
+<span class="pc bpc" id="L758" title="1 of 2 branches missed.">        if (currentRoom == null) {</span>
+<span class="nc" id="L759">            throw new RuntimeException(&quot;Jugador no tiene sala asignada&quot;);</span>
+        }
+        // checkear que el jugador tiene puntos de acción para poder moverse 
+        // TODO: revisar si tengo que usar la función de playerService de getPlayerActionPoints en vez de acceder directamente al atributo
+<span class="pc bpc" id="L763" title="1 of 2 branches missed.">        if (player.getActionPoints() &lt;= 0) {</span>
+<span class="nc" id="L764">            throw new NoActionPointsException(&quot;Move not allowed: player has no action points left&quot;);</span>
+        }
+        //Recuperar la sala destino
+<span class="fc" id="L767">        Room targetRoom = roomRepository.findById(targetRoomId)</span>
+<span class="pc" id="L768">            .orElseThrow(() -&gt; new RuntimeException(&quot;Sala destino no encontrada&quot;));</span>
+        //Validar si la sala destino es adyacente
+<span class="fc" id="L770">        List&lt;Room&gt; adjacent = currentRoom.getAdjacencyList();</span>
+<span class="fc" id="L771">        boolean canMove = adjacent.stream()</span>
+<span class="fc" id="L772">                .anyMatch(r -&gt; r.getId().equals(targetRoom.getId()));</span>
+<span class="pc bpc" id="L773" title="1 of 2 branches missed.">        if (!canMove) {</span>
+<span class="nc" id="L774">            throw new RuntimeException(&quot;Movimiento no permitido: la sala destino no es adyacente&quot;);</span>
+        }
+        //Actualizar la sala del jugador y sus puntos de acción
+<span class="pc bpc" id="L777" title="1 of 2 branches missed.">        if (!targetRoom.getId().equals(currentRoom.getId())) {</span>
+<span class="fc" id="L778">            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);</span>
+<span class="fc" id="L779">            player.setRoomsVisited(visited + 1);</span>
+        }
+<span class="fc" id="L781">        player.setRoom(targetRoom);</span>
+<span class="pc bpc" id="L782" title="1 of 2 branches missed.">        if (player.getActionPoints() &gt; 0) {</span>
+<span class="fc" id="L783">            player.setActionPoints(player.getActionPoints() - 1);</span>
+        } 
+
+        //Guardar cambios
+<span class="fc" id="L787">        return playerRepo.save(player);</span>
+    }
+
+    @Transactional
+    public Npc moveNpcToAdyacentRoom(Integer matchId, Integer npcId, Integer targetRoomId, Integer userId) {
+<span class="fc" id="L792">        Match match = matchRepo.findById(matchId)</span>
+<span class="pc" id="L793">            .orElseThrow(() -&gt; new RuntimeException(&quot;Partida no encontrada&quot;));</span>
+
+<span class="pc bpc" id="L795" title="1 of 2 branches missed.">        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){</span>
+<span class="fc" id="L796">            match.setCurrentTurnPhase(TurnPhase.ACTIONS);</span>
+        }
+<span class="fc" id="L798">        matchRepo.save(match);</span>
+
+        //Buscamos al npc que queremos mover de la partida
+<span class="fc" id="L801">        Npc npc = npcRepository.findById(npcId)</span>
+<span class="pc" id="L802">            .orElseThrow(() -&gt; new RuntimeException(&quot;NPC no encontrado en la partida&quot;));</span>
+
+        //Obtenemos la habitación actual en la que se encuentra el npc
+<span class="fc" id="L805">        Room currentRoomNpc = npc.getRoom();</span>
+<span class="pc bpc" id="L806" title="1 of 2 branches missed.">        if (currentRoomNpc == null) {</span>
+<span class="nc" id="L807">            throw new RuntimeException(&quot;NPC no tiene sala asignada&quot;); }</span>
+
+        //Obtenemos la sala destino a la que queremos mover al npc
+<span class="fc" id="L810">        Room targetRoom = roomRepository.findById(targetRoomId)</span>
+<span class="pc" id="L811">            .orElseThrow(() -&gt; new RuntimeException(&quot;Sala destino no encontrada&quot;));</span>
+
+        //Comprobamos que el jugador tiene puntos de acción para poder mover al npc
+<span class="fc" id="L814">        Player player = playerRepo.findByMatchAndUser(matchId, userId)</span>
+<span class="pc" id="L815">                .orElseThrow(() -&gt; new RuntimeException(&quot;Jugador no encontrado en la partida&quot;));</span>
+<span class="pc bpc" id="L816" title="1 of 2 branches missed.">        if (player.getActionPoints() &lt;= 0) {</span>
+<span class="nc" id="L817">            throw new NoActionPointsException(&quot;Move not allowed: player has no action points left&quot;); }</span>
+
+        //Comprobamos que la sala destino es adyacente a la sala actual del npc
+<span class="fc" id="L820">        List&lt;Room&gt; adjacent = currentRoomNpc.getAdjacencyList();</span>
+<span class="fc" id="L821">        boolean canMove = adjacent.stream()</span>
+<span class="fc" id="L822">                .anyMatch(r -&gt; r.getId().equals(targetRoom.getId()));</span>
+<span class="pc bpc" id="L823" title="1 of 2 branches missed.">        if (!canMove) {</span>
+<span class="nc" id="L824">            throw new RuntimeException(&quot;Movimiento no permitido: la sala destino no es adyacente&quot;); }</span>
+
+        //Actualizamos la sala del npc y los puntos de acción del jugador
+
+<span class="fc" id="L828">        npc.setRoom(targetRoom);</span>
+        
+
+<span class="pc bpc" id="L831" title="1 of 2 branches missed.">        if (player.getActionPoints() &gt; 0) {</span>
+<span class="fc" id="L832">            player.setActionPoints(player.getActionPoints() - 1);</span>
+<span class="fc" id="L833">            playerRepo.save(player);</span>
+        }
+        //Guardamos los cambios
+<span class="fc" id="L836">        return npcRepository.save(npc);</span>
+    }
+
+
+    @Transactional
+    public Player moveLoserPlayer(Integer matchId, Integer userId, Integer targetRoomId) {
+<span class="fc" id="L842">        Match match = matchRepo.findById(matchId)</span>
+<span class="pc" id="L843">                .orElseThrow(() -&gt; new RuntimeException(&quot;Partida no encontrada&quot;));</span>
+<span class="pc bpc" id="L844" title="1 of 2 branches missed.">        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){</span>
+<span class="fc" id="L845">            match.setCurrentTurnPhase(TurnPhase.ACTIONS);</span>
+        }
+        //Recuperar el jugador dentro del match
+<span class="fc" id="L848">        Player player = playerRepo.findByMatchAndUser(matchId, userId)</span>
+<span class="pc" id="L849">                .orElseThrow(() -&gt; new RuntimeException(&quot;Jugador no encontrado en la partida&quot;));</span>
+        //Recuperar la sala destino
+<span class="fc" id="L851">        Room targetRoom = roomRepository.findById(targetRoomId)</span>
+<span class="pc" id="L852">            .orElseThrow(() -&gt; new RuntimeException(&quot;Sala destino no encontrada&quot;));</span>
+        //Actualizar la sala y fuerza del jugador
+<span class="fc" id="L854">        Room currentRoom = player.getRoom();</span>
+<span class="pc bpc" id="L855" title="1 of 4 branches missed.">        if (currentRoom == null || !targetRoom.getId().equals(currentRoom.getId())) {</span>
+<span class="fc" id="L856">            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);</span>
+<span class="fc" id="L857">            player.setRoomsVisited(visited + 1);</span>
+        }
+<span class="fc" id="L859">        player.setRoom(targetRoom);</span>
+<span class="fc" id="L860">        player.setStrength(player.getStrength() + 1);</span>
+        
+        //Guardar cambios
+<span class="fc" id="L863">        return playerRepo.save(player);</span>
+    }
+
+    public ActionPointsUpdateDTO consumeOneActionPoint(Integer matchId, Integer userId) {
+<span class="fc" id="L867">        Player player = playerRepo.findByMatchAndUser(matchId, userId)</span>
+<span class="pc" id="L868">            .orElseThrow(() -&gt; new RuntimeException(&quot;Jugador no encontrado en la partida&quot;));</span>
+
+<span class="fc" id="L870">        int current = Optional.ofNullable(player.getActionPoints()).orElse(0);</span>
+<span class="fc" id="L871">        int updated = Math.max(0, current - 1);</span>
+<span class="fc" id="L872">        player.setActionPoints(updated);</span>
+<span class="fc" id="L873">        playerRepo.save(player);</span>
+
+<span class="fc" id="L875">        return new ActionPointsUpdateDTO(</span>
+<span class="fc" id="L876">            player.getId(),</span>
+<span class="fc" id="L877">            player.getUser().getId(),</span>
+<span class="fc" id="L878">            player.getUser().getUsername(),</span>
+<span class="fc" id="L879">            updated,</span>
+<span class="fc" id="L880">            System.currentTimeMillis()</span>
+        );
+    }
+    @Transactional
+    public Player movePlayerByFormingRoomName(Integer matchId, Integer userId, Integer targetRoomId) {
+<span class="fc" id="L885">        Match match = matchRepo.findById(matchId)</span>
+<span class="pc" id="L886">                .orElseThrow(() -&gt; new RuntimeException(&quot;Partida no encontrada&quot;));</span>
+<span class="pc bpc" id="L887" title="1 of 2 branches missed.">        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){</span>
+<span class="fc" id="L888">            match.setCurrentTurnPhase(TurnPhase.ACTIONS);</span>
+        }
+<span class="fc" id="L890">        matchRepo.save(match);</span>
+
+<span class="fc" id="L892">        Player player = playerRepo.findByMatchAndUser(matchId, userId)</span>
+<span class="pc" id="L893">                .orElseThrow(() -&gt; new RuntimeException(&quot;Jugador no encontrado en la partida&quot;));</span>
+        
+<span class="pc bpc" id="L895" title="1 of 2 branches missed.">        if (player.getActionPoints() &lt;= 0) {</span>
+<span class="nc" id="L896">            throw new NoActionPointsException(&quot;Move not allowed: player has no action points left&quot;);</span>
+        }
+
+<span class="fc" id="L899">        Room targetRoom = roomRepository.findById(targetRoomId)</span>
+<span class="pc" id="L900">            .orElseThrow(() -&gt; new RuntimeException(&quot;Sala destino no encontrada&quot;));</span>
+
+        // Obtener la bolsa del jugador y sus letras
+<span class="fc" id="L903">        BagInGame playerBag = bagService.findPlayerBag(matchId, player.getId());</span>
+<span class="pc bpc" id="L904" title="2 of 4 branches missed.">        if (playerBag == null || playerBag.getCards().isEmpty()) {</span>
+<span class="nc" id="L905">            throw new RuntimeException(&quot;El jugador no tiene cartas en su bolsa&quot;);</span>
+        }
+
+        // Recopilar todas las letras de la bolsa
+<span class="fc" id="L909">        String availableLetters = &quot;&quot;;</span>
+<span class="fc bfc" id="L910" title="All 2 branches covered.">        for (Card card : playerBag.getCards()) {</span>
+<span class="pc bpc" id="L911" title="1 of 2 branches missed.">            if (card.getLetter() != null) {</span>
+<span class="fc" id="L912">                availableLetters += card.getLetter().toLowerCase();</span>
+            }
+<span class="fc" id="L914">        }</span>
+
+        // Obtener nombre de la sala sin espacios
+<span class="fc" id="L917">        String roomName = targetRoom.getName().toLowerCase().replaceAll(&quot;\\s+&quot;, &quot;&quot;);</span>
+
+        // Intentar formar la palabra con las letras disponibles
+<span class="fc" id="L920">        String remaining = availableLetters;</span>
+<span class="fc bfc" id="L921" title="All 2 branches covered.">        for (char c : roomName.toCharArray()) {</span>
+<span class="pc bpc" id="L922" title="1 of 2 branches missed.">            if (remaining.indexOf(c) &gt;= 0) {</span>
+<span class="fc" id="L923">                remaining = remaining.replaceFirst(String.valueOf(c), &quot;&quot;);</span>
+            } else {
+<span class="nc" id="L925">                throw new RuntimeException(&quot;No se puede formar '&quot; + targetRoom.getName() + </span>
+                    &quot;' con las letras disponibles en la bolsa&quot;);
+            }
+        }
+
+        // Si llegamos aquí, el movimiento es válido
+<span class="fc" id="L931">        Room currentRoom = player.getRoom();</span>
+<span class="pc bpc" id="L932" title="3 of 4 branches missed.">        if (currentRoom == null || !targetRoom.getId().equals(currentRoom.getId())) {</span>
+<span class="fc" id="L933">            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);</span>
+<span class="fc" id="L934">            player.setRoomsVisited(visited + 1);</span>
+        }
+<span class="fc" id="L936">        player.setRoom(targetRoom);</span>
+<span class="pc bpc" id="L937" title="1 of 2 branches missed.">        if (player.getActionPoints() &gt; 0) {</span>
+<span class="fc" id="L938">            player.setActionPoints(player.getActionPoints() - 1);</span>
+        }
+
+<span class="fc" id="L941">        return playerRepo.save(player);</span>
+    }
+
+
+    @Transactional
+    public EscapeAttemptResultDTO escapeAttempt( Integer matchId, Integer userId, Integer rolldiceResult) {
+<span class="fc" id="L947">        Match m = matchRepo.findById(matchId)</span>
+<span class="pc" id="L948">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Match not found&quot;));</span>
+<span class="fc" id="L949">        Player p = playerRepo.findByMatchAndUser(matchId, userId)</span>
+<span class="pc" id="L950">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Player not found in this match&quot;));</span>
+
+        //Comprobamos que el jugador tenga puntos de acción para poder realizar la acción
+<span class="pc bpc" id="L953" title="1 of 2 branches missed.">        if (p.getActionPoints() &lt;= 0) {</span>
+<span class="nc" id="L954">            throw new NoActionPointsException(&quot;Escape attempt not allowed: player has no action points left&quot;);</span>
+        }
+        
+
+        //Comprobamos que el jugador cumpla las condiciones para poder realizar un intento de escape 
+
+        //Primero comprobamos que el jugador se encuentre en una de las torres
+<span class="fc" id="L961">        Room playerRoom = p.getRoom();</span>
+<span class="fc" id="L962">        List&lt;Room&gt; towers = roomService.getAllTowers();</span>
+<span class="fc" id="L963">        boolean inTower = towers.stream().anyMatch(r -&gt; r.equals(playerRoom));</span>
+<span class="pc bpc" id="L964" title="1 of 2 branches missed.">        if (!inTower) {</span>
+<span class="nc" id="L965">            throw new IllegalArgumentException(&quot;Player is not in a tower room&quot;);</span>
+        }
+
+        //Segundo comprobamos que el jugador tengo en su bolsa las cartas necesarias para formas la palabra de escape correspondiente a la torre
+        // o las palabras “EMPEROR” o “CAMPBELL”
+
+        //Primero obtenemos la bolsa del jugador 
+<span class="fc" id="L972">        BagInGame playerBag = bagService.findPlayerBag(matchId, p.getId());</span>
+        //Obtenemos las cartas de la bolsa
+<span class="fc" id="L974">        List&lt;Card&gt; bagCards = playerBag.getCards();</span>
+        //Convertimos la lista de cartas en una lista de DTO de cartas
+<span class="fc" id="L976">        List&lt;CardDTO&gt; bagCardDTOs = bagCards.stream()</span>
+<span class="fc" id="L977">                .map(CardDTO::new)</span>
+<span class="fc" id="L978">                .toList();</span>
+        //Obtenemos la palabra que forman las letras de las cartas de la bolsa
+<span class="fc" id="L980">        String bagWord = bagService.wordFromCards(bagCardDTOs).toLowerCase().replaceAll(&quot;\\s+&quot;, &quot;&quot;) ;</span>
+
+        //Obtenemos la palabra de escape correspondiente a la torre en la que se encuentra el jugador
+<span class="fc" id="L983">        String towerEscapeWord = roomService.getWordOfEscapeFromTower(playerRoom.getId()).toLowerCase().replaceAll(&quot;\\s+&quot;, &quot;&quot;);</span>
+
+        //Comprobamos si la palabra de la bolsa del jugador es igual a la palabra de escape de la torre o a las palabras especiales
+<span class="pc bpc" id="L986" title="5 of 6 branches missed.">        boolean hasRequiredWord = bagWord.equals(towerEscapeWord) || bagWord.equals(&quot;emperor&quot;) || bagWord.equals(&quot;campbell&quot;);</span>
+<span class="pc bpc" id="L987" title="1 of 2 branches missed.">        if (!hasRequiredWord) {</span>
+<span class="nc" id="L988">            throw new IllegalArgumentException(&quot;Player does not have the required word in their bag to attempt escape&quot;);</span>
+        }
+
+
+        //Cuando se cumplan las condiciones realizamos el intento de escape 
+<span class="fc" id="L993">        EscapeAttemptResultDTO resultado = new EscapeAttemptResultDTO();</span>
+
+<span class="fc bfc" id="L995" title="All 2 branches covered.">        if(rolldiceResult &lt; p.getStrength()){</span>
+            //El intento de escape es existoso
+<span class="fc" id="L997">            endMatch(matchId, p);</span>
+<span class="fc" id="L998">            resultado.setSuccess(true);</span>
+<span class="fc" id="L999">            resultado.setWinnerUserId(p.getUser().getId());</span>
+<span class="fc" id="L1000">            resultado.setDiscardRequired(false);</span>
+<span class="fc" id="L1001">            return resultado;</span>
+
+        } else {
+            //El intento de escape falla y ocurre lo mismo que si un jugador pierde contra un npc en una pelea
+<span class="fc" id="L1005">            List&lt;Room&gt; availableRooms = getAvailableRoomsForPlayer(matchId);</span>
+<span class="pc bpc" id="L1006" title="1 of 2 branches missed.">            if (availableRooms.isEmpty()) {</span>
+<span class="nc" id="L1007">                throw new IllegalStateException(&quot;No available rooms for escape&quot;);</span>
+            }
+<span class="fc" id="L1009">            Room randomRoom = availableRooms.get(new Random().nextInt(availableRooms.size()));</span>
+<span class="fc" id="L1010">            consumeAllActionPointForUser(matchId, userId);</span>
+<span class="fc" id="L1011">            moveLoserPlayer(matchId, userId, randomRoom.getId());</span>
+
+<span class="fc" id="L1013">            resultado.setSuccess(false);</span>
+<span class="fc" id="L1014">            resultado.setDiscardRequired(true);</span>
+<span class="fc" id="L1015">            return resultado;</span>
+        }
+        }
+
+
+
+        @Transactional
+        List&lt;Room&gt; getAvailableRoomsForPlayer(Integer matchId) {
+<span class="fc" id="L1023">        List&lt;Player&gt; players = getMatchById(matchId).getPlayers();</span>
+<span class="fc" id="L1024">        List&lt;Npc&gt; npcs = getMatchById(matchId).getNpcs();</span>
+<span class="fc" id="L1025">        List&lt;Room&gt; roomsOcupied = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L1026" title="1 of 2 branches missed.">        for (Player p: players){</span>
+<span class="nc bnc" id="L1027" title="All 2 branches missed.">            if (!roomsOcupied.contains(p.getRoom())){</span>
+<span class="nc" id="L1028">                roomsOcupied.add(p.getRoom());</span>
+            }
+<span class="nc" id="L1030">        }</span>
+<span class="pc bpc" id="L1031" title="1 of 2 branches missed.">        for (Npc n: npcs){</span>
+<span class="nc bnc" id="L1032" title="All 2 branches missed.">            if (!roomsOcupied.contains(n.getRoom())){</span>
+<span class="nc" id="L1033">                roomsOcupied.add(n.getRoom());</span>
+            }
+<span class="nc" id="L1035">        }</span>
+<span class="fc" id="L1036">        List&lt;Room&gt; rooms = roomRepository.findAll();</span>
+<span class="fc" id="L1037">        List&lt;Room&gt; towers = roomService.getAllTowers();</span>
+<span class="fc" id="L1038">        rooms.removeAll(towers);</span>
+<span class="fc" id="L1039">        rooms.removeAll(roomsOcupied);</span>
+<span class="fc" id="L1040">        return rooms;</span>
+
+    } 
 }
+
+
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

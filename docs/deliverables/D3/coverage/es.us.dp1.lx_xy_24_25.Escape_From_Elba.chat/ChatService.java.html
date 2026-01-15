@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
@@ -23,52 +21,53 @@ public class ChatService {
     private final UserService userService;
 
     @Autowired
-<span class="nc" id="L26">    public ChatService(PlayerService playerService, ChatRepository chatRepository, UserService userService) {</span>
-<span class="nc" id="L27">        this.playerService = playerService;</span>
-<span class="nc" id="L28">        this.chatRepository = chatRepository;</span>
-<span class="nc" id="L29">        this.userService = userService;</span>
+<span class="fc" id="L24">    public ChatService(PlayerService playerService, ChatRepository chatRepository, UserService userService) {</span>
+<span class="fc" id="L25">        this.playerService = playerService;</span>
+<span class="fc" id="L26">        this.chatRepository = chatRepository;</span>
+<span class="fc" id="L27">        this.userService = userService;</span>
 
-<span class="nc" id="L31">    }</span>
+<span class="fc" id="L29">    }</span>
     
     @Transactional(readOnly = true)
-    public List&lt;ChatMessage&gt; findChatOfMyGame() {
-<span class="nc" id="L35">        var user = userService.findCurrentUser();</span>
-<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (user == null) return Collections.emptyList();</span>
-<span class="nc" id="L37">        Integer userId = user.getId();</span>
-<span class="nc" id="L38">        Optional&lt;Player&gt; maybePlayer = playerService.findById(userId);</span>
-<span class="nc bnc" id="L39" title="All 2 branches missed.">        if (maybePlayer.isEmpty()) return Collections.emptyList();</span>
-<span class="nc" id="L40">        Player me = maybePlayer.get();</span>
-<span class="nc bnc" id="L41" title="All 4 branches missed.">        if (me.getMatch() == null || me.getMatch().getId() == null) return Collections.emptyList();</span>
-<span class="nc" id="L42">        Integer matchId = me.getMatch().getId();</span>
-<span class="nc" id="L43">        List&lt;ChatMessage&gt; chat = chatRepository.findByMatchId(matchId);</span>
-<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (chat == null) return Collections.emptyList();</span>
-<span class="nc" id="L45">        chat.sort(Comparator.comparing(ChatMessage::getTime, Comparator.nullsLast(Comparator.naturalOrder())));</span>
-<span class="nc" id="L46">        return chat;</span>
+    public List&lt;ChatMessage&gt; findChatOfMyGame(Integer matchId) {
+
+<span class="fc" id="L34">        var user = userService.findCurrentUser();</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (user == null) return Collections.emptyList();</span>
+
+<span class="fc" id="L37">        Optional&lt;Player&gt; maybePlayer = playerService.findByMatchIdAndUserId(matchId, user.getId());</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (maybePlayer.isEmpty()) return Collections.emptyList(); </span>
+
+<span class="fc" id="L40">        List&lt;ChatMessage&gt; chat = chatRepository.findByMatchId(matchId);</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if (chat == null) return Collections.emptyList();</span>
+
+<span class="fc" id="L43">        chat.sort(Comparator.comparing(ChatMessage::getTime)); </span>
+<span class="fc" id="L44">        return chat;</span>
     }
+
     
 
     @Transactional
-    public ChatMessage createChatMessage(ChatMessageDTO chatMessageDTO) {
-        try {
-<span class="nc" id="L53">            var user = userService.findCurrentUser();</span>
-<span class="nc bnc" id="L54" title="All 2 branches missed.">            if (user == null) throw new IllegalStateException(&quot;Usuario no autenticado&quot;);</span>
-<span class="nc" id="L55">            Integer userId = user.getId();</span>
-<span class="nc" id="L56">            Integer matchId = chatMessageDTO.getMatchId();</span>
-<span class="nc bnc" id="L57" title="All 2 branches missed.">            if (matchId == null) throw new IllegalArgumentException(&quot;matchId es obligatorio en el DTO&quot;);</span>
-<span class="nc" id="L58">            Optional&lt;Player&gt; maybeAuthor = playerService.findByMatchIdAndUserId(matchId, userId);</span>
-<span class="nc" id="L59">            Player author = maybeAuthor.orElseThrow(() -&gt; new IllegalStateException(&quot;Jugador no encontrado en la partida indicada&quot;));</span>
-<span class="nc" id="L60">            Match match = author.getMatch();</span>
-<span class="nc bnc" id="L61" title="All 4 branches missed.">            if (match == null || match.getId() == null)</span>
-<span class="nc" id="L62">                throw new IllegalStateException(&quot;El jugador no está en ninguna partida&quot;);</span>
-<span class="nc" id="L63">            ChatMessage created = new ChatMessage();</span>
-<span class="nc" id="L64">            created.setPlayer(author);</span>
-<span class="nc" id="L65">            created.setMessage(chatMessageDTO.getMessage());</span>
-<span class="nc" id="L66">            created.setDate(LocalDateTime.now());</span>
-<span class="nc" id="L67">            created.setMatch(match);</span>
-<span class="nc" id="L68">            return chatRepository.save(created);</span>
-<span class="nc" id="L69">        } catch (ResourceNotFoundException ex) {</span>
-<span class="nc" id="L70">            throw new IllegalStateException(&quot;Jugador actual no encontrado&quot;, ex);</span>
-        }
+    public ChatMessage createChatMessage(Integer matchId, ChatMessageDTO dto) {
+
+<span class="fc" id="L52">        var user = userService.findCurrentUser();</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (user == null)</span>
+<span class="fc" id="L54">            throw new IllegalStateException(&quot;Usuario no autenticado&quot;);</span>
+
+<span class="fc" id="L56">        Optional&lt;Player&gt; maybeAuthor =</span>
+<span class="fc" id="L57">                playerService.findByMatchIdAndUserId(matchId, user.getId());</span>
+
+<span class="fc" id="L59">        Player author = maybeAuthor.orElseThrow(</span>
+<span class="fc" id="L60">                () -&gt; new IllegalStateException(&quot;No eres jugador de esta partida&quot;)</span>
+        );
+
+<span class="fc" id="L63">        ChatMessage created = new ChatMessage();</span>
+<span class="fc" id="L64">        created.setPlayer(author);</span>
+<span class="fc" id="L65">        created.setMatch(author.getMatch());</span>
+<span class="fc" id="L66">        created.setMessage(dto.getMessage());</span>
+<span class="fc" id="L67">        created.setDate(LocalDateTime.now());</span>
+
+<span class="fc" id="L69">        return chatRepository.save(created);</span>
     }
+
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

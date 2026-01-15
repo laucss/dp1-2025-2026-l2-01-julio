@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications</a> &gt; <span class="el_source">NotificationService.java</span></div><h1>NotificationService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+<span class="fc" id="L12">public class NotificationService {</span>
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    public Notification sendInvite(User sender, User receiver, Match match) throws IllegalArgumentException {
+        // Verificar si ya existe una invitación pendiente entre estos dos jugadores específicos
+<span class="fc" id="L18">        Optional&lt;Notification&gt; existingInvite = notificationRepository.findBySenderIdAndReceiverIdAndStatus(</span>
+<span class="fc" id="L19">            sender.getId(), receiver.getId(), NotificationStatus.PENDING</span>
+        );
+        
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (existingInvite.isPresent()) {</span>
+<span class="fc" id="L23">            throw new IllegalArgumentException(&quot;Ya existe una invitación pendiente entre estos jugadores&quot;);</span>
+        }
+        
+<span class="fc" id="L26">        Notification notification = new Notification();</span>
+<span class="fc" id="L27">        notification.setSender(sender);</span>
+<span class="fc" id="L28">        notification.setReceiver(receiver);</span>
+<span class="fc" id="L29">        notification.setMatch(match);</span>
+<span class="fc" id="L30">        notification.setType(NotificationType.INVITE);</span>
+<span class="fc" id="L31">        notification.setStatus(NotificationStatus.PENDING);</span>
+<span class="fc" id="L32">        notification.setCreatedAt(LocalDateTime.now());</span>
+<span class="fc" id="L33">        return notificationRepository.save(notification);</span>
+    }
+
+    public List&lt;Notification&gt; getPendingNotifications(Integer receiverId) {
+<span class="fc" id="L37">        return notificationRepository.findByReceiverIdAndStatus(receiverId, NotificationStatus.PENDING);</span>
+    }
+
+    public Optional&lt;Notification&gt; getNotificationBetweenUsers(Integer senderId, Integer receiverId, Integer matchId) {
+<span class="fc" id="L41">        return notificationRepository.findBySenderIdAndReceiverIdAndMatchIdAndStatus(senderId, receiverId, matchId, NotificationStatus.PENDING);</span>
+    }
+
+    public Optional&lt;Notification&gt; getNotification(Integer id) {
+<span class="fc" id="L45">        return notificationRepository.findById(id);</span>
+    }
+
+    public Notification acceptInvite(Notification notification) {
+<span class="fc" id="L49">        notification.setStatus(NotificationStatus.ACCEPTED);</span>
+<span class="fc" id="L50">        return notificationRepository.save(notification);</span>
+    }
+
+    public Notification rejectInvite(Notification notification) {
+<span class="fc" id="L54">        notification.setStatus(NotificationStatus.REJECTED);</span>
+<span class="fc" id="L55">        return notificationRepository.save(notification);</span>
+    }
+
+    public void rejectOtherInvitesForMatch(Integer receiverId, Integer matchId, Integer acceptedNotificationId) {
+        // Obtener todas las invitaciones pendientes para este receiver en esta partida
+<span class="fc" id="L60">        List&lt;Notification&gt; pendingInvites = notificationRepository.findByReceiverIdAndMatchIdAndStatus(</span>
+            receiverId, matchId, NotificationStatus.PENDING
+        );
+        
+        // Rechazar todas excepto la que acabamos de aceptar
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        for (Notification invite : pendingInvites) {</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            if (!invite.getId().equals(acceptedNotificationId)) {</span>
+<span class="fc" id="L67">                rejectInvite(invite);</span>
+            }
+<span class="fc" id="L69">        }</span>
+<span class="fc" id="L70">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
