@@ -12,6 +12,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -108,6 +109,7 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.PUT,"/api/v1/matches/{matchId}/move").hasAnyAuthority(PLAYER, ADMIN)
                 .requestMatchers(HttpMethod.POST, "/api/v1/bag/validate-weapon/{matchId}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers("/api/v1/voting/**").hasAnyAuthority(PLAYER)
 
                 .requestMatchers(HttpMethod.GET, "/api/v1/voting/**").hasAnyAuthority(PLAYER, ADMIN) //TODO
                 .requestMatchers(HttpMethod.POST, "/api/v1/voting/vote/**").hasAnyAuthority(PLAYER, ADMIN) //TODO
