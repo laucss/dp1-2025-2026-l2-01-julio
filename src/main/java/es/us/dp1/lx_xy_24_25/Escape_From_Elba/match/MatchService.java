@@ -118,7 +118,7 @@ public class MatchService {
     public Match getMatchById(Integer matchId){
         Optional<Match> m= matchRepo.findById(matchId);
         if(!m.isPresent())
-            throw new ResourceNotFoundException("Match", "id", matchId);
+            throw new IllegalArgumentException("Match not found");
         return m.get();
     }
 
