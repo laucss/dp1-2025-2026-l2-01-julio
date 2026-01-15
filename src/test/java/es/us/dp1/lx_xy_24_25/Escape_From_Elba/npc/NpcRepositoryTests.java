@@ -2,6 +2,7 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.npc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
@@ -89,5 +90,39 @@ public class NpcRepositoryTests {
     public void findByIdAndMatchIdWithRandomIdsReturnsEmpty(Integer id) {
         Optional<Npc> npc = npcRepository.findByIdAndMatchId(id, id);
         assertTrue(npc.isEmpty());
+    }
+
+
+    @Test
+    public void saveNpcCreatesNpc() {
+        // Creamos la entidad directamente
+        Npc npc = new Npc();
+        npc.setStrength(10);
+        npc.setIsNiallCampbell(false);
+
+        Npc saved = npcRepository.save(npc);
+
+        assertThat(saved.getId()).isNotNull();
+        assertEquals(10, saved.getStrength());
+        assertFalse(saved.getIsNiallCampbell());
+    }
+
+    @Test
+    public void saveNpcUpdatesExistingNpc() {
+        // Guardamos un NPC primero
+        Npc npc = new Npc();
+        npc.setStrength(5);
+        npc.setIsNiallCampbell(false);
+        npcRepository.save(npc);
+
+        // Modificamos la entidad existente
+        npc.setStrength(20);
+        npc.setIsNiallCampbell(true);
+
+        Npc updated = npcRepository.save(npc);
+
+        assertEquals(npc.getId(), updated.getId());
+        assertEquals(20, updated.getStrength());
+        assertTrue(updated.getIsNiallCampbell());
     }
 }

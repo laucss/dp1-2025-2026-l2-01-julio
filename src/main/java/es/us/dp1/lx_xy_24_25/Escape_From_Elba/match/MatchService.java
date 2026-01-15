@@ -26,6 +26,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.BagNotValidException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.InvalidMovementException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsDrawnException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsInHand;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
@@ -188,7 +189,7 @@ public class MatchService {
     //Función para inicializar un match
     @Transactional
     public Match startMatch(Integer matchId) {
-        Match m = matchRepo.findById(matchId).orElseThrow(() -> new IllegalArgumentException("Match not found"));
+        Match m = matchRepo.findById(matchId).orElseThrow(() -> new ResourceNotFoundException("Match not found"));
         
         //Cambiamos el estado de la partida a PLAYING
         m.setStatus(MatchStatus.PLAYING);
@@ -624,9 +625,30 @@ public class MatchService {
 
     @Transactional
     public Card playerBeatsNonPlayer(Integer matchId, Integer playerId, Integer npcId){
+        // Obtener el jugador y el NPC
+        Player player = playerService.findById(playerId);
+        Npc npc = npcRepository.findById(npcId)
+                .orElseThrow(() -> new IllegalArgumentException("NPC not found"));
 
-        Card stolenCard =deckService.drawCard(matchId);
+        // Robar carta del mazo y añadirla a la mano del jugador
+        Card stolenCard = deckService.drawCard(matchId);
         handService.addCardToPlayerHand(stolenCard, matchId, playerId);
+
+        // Actualizar la fuerza del NPC
+        npc.setStrength(npc.getStrength() + 1);
+        npcRepository.save(npc);
+
+        // Actualizar estadísticas de batallas del jugador
+        int battlesWon = Optional.ofNullable(player.getBattlesWon()).orElse(0);
+        int battlesPlayed = Optional.ofNullable(player.getBattlesPlayed()).orElse(0);
+        player.setBattlesWon(battlesWon + 1);
+        player.setBattlesPlayed(battlesPlayed + 1);
+        playerRepo.save(player);
+
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
 
         return stolenCard;
     
@@ -689,6 +711,11 @@ public class MatchService {
 
         // añadimos la carta seleccionada al mazo de descartes
         deckService.addCardToDiscardedPile(matchId, card);
+        
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
             
     }
 
@@ -746,14 +773,14 @@ public class MatchService {
     @Transactional
     public Player movePlayerToAdyacentRoom(Integer matchId, Integer userId, Integer targetRoomId) {
         Match match = matchRepo.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Partida no encontrada"));
         if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
             match.setCurrentTurnPhase(TurnPhase.ACTIONS);
         }
         matchRepo.save(match);
         //Recuperar el jugador dentro del match
         Player player = playerRepo.findByMatchAndUser(matchId, userId)
-                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+                .orElseThrow(() -> new ResourceNotFoundException("Jugador no encontrado en la partida"));
         Room currentRoom = player.getRoom();
         if (currentRoom == null) {
             throw new RuntimeException("Jugador no tiene sala asignada");
@@ -765,13 +792,13 @@ public class MatchService {
         }
         //Recuperar la sala destino
         Room targetRoom = roomRepository.findById(targetRoomId)
-            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
+            .orElseThrow(() -> new ResourceNotFoundException("Sala destino no encontrada"));
         //Validar si la sala destino es adyacente
         List<Room> adjacent = currentRoom.getAdjacencyList();
         boolean canMove = adjacent.stream()
                 .anyMatch(r -> r.getId().equals(targetRoom.getId()));
         if (!canMove) {
-            throw new RuntimeException("Movimiento no permitido: la sala destino no es adyacente");
+            throw new InvalidMovementException("Movimiento no permitido: la sala destino no es adyacente");
         }
         //Actualizar la sala del jugador y sus puntos de acción
         if (!targetRoom.getId().equals(currentRoom.getId())) {

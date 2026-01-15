@@ -83,12 +83,14 @@ public class StatisticService {
 
     // batallas ganadas por un usuario
     public Integer getBattlesWonByUser(Integer currentUserId) {
-        return playerRepository.getBattlesWonByUser(currentUserId);
+        Integer battlesWon = playerRepository.getBattlesWonByUser(currentUserId);
+        return battlesWon != null ? battlesWon : 0;
     }
 
     // total de batallas disputadas (suma de batallas jugadas por todos los jugadores)
     public Integer getTotalBattlesDisputed() {
-        return playerRepository.getTotalBattlesDisputed();
+        Integer totalBattlesDisputed = playerRepository.getTotalBattlesDisputed();
+        return totalBattlesDisputed != null ? totalBattlesDisputed : 0;
     }
 
     // habitaciones visitadas por un usuario

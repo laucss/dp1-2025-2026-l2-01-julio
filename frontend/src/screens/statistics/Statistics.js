@@ -76,9 +76,21 @@ export default function Statistics(){
                         <h2>Action Points</h2>
                         <p className="stat-value">{data.totalActionPoints}</p>
                     </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">🎯</div>
+                        <h2>Battles won</h2>
+                        <p className="stat-value">{data.battlesWon}</p>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">🚪</div>
+                        <h2>Rooms visited</h2>
+                        <p className="stat-value">{data.roomsVisited}</p>
+                    </div>
                 </div>
                 :
-                <div className="statistics-container">
+                <div className="statistics-container-avg">
                     <div className="stat-card">
                         <div className="stat-icon">👥</div>
                         <h2>Average Players/Match</h2>
@@ -88,6 +100,16 @@ export default function Statistics(){
                         <div className="stat-icon">🎮</div>
                         <h2>Total Matches Played</h2>
                         <p className="stat-value">{data.totalMatchesPlayed}</p>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-icon">🎯</div>
+                        <h2>Total Battles Disputed</h2>
+                        <p className="stat-value">{data.totalBattlesDisputed}</p>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-icon">🎯</div>
+                        <h2>Average Rooms Visited/Match</h2>
+                        <p className="stat-value">{parseFloat(data.averageRoomsVisitedPerMatch).toFixed(2)}</p>
                     </div>
                 </div>
                 }

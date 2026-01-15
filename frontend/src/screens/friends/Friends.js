@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './friends.css';
-import { FaSearch, FaUser, FaEye, FaGamepad, FaTrash } from 'react-icons/fa';
+import { FaSearch, FaUser, FaEye, FaGamepad, FaTrash, FaArrowLeft } from 'react-icons/fa';
 import UserStatusIndicator from '../../components/UserStatusIndicator';
 import tokenService from '../../services/token.service';
 import useRequestStates from '../../hooks/useRequestStates';
@@ -367,6 +367,7 @@ export default function Friends() {
     <div className="friends-page">
 
       <div className="friends-container">
+
 
       <h1>Friends</h1>
 

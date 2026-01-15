@@ -1,63 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BagService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag</a> &gt; <span class="el_source">BagService.java</span></div><h1>BagService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DictionaryService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.EmptyWeaponException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.VotingService;
 
 
 
 @Service
 public class BagService {
-    
+
+<span class="fc" id="L30">    private static final Integer MAX_LETTERS_ALLOWED = 2; // es el número máximo de letras que puedes guardar en tu bolsa sin tener que checkear que la palabra exista</span>
+<span class="fc" id="L31">    private static final Integer BONUS_WEAPONS = 1; // la bonificación que te llevas al formar un arma válida </span>
+
+    RestTemplate restTemplate;
     Checkers checkers;
     PlayerService playerService; 
+    DictionaryService dictionaryService;
+    VotingService votingService;
 
-<span class="fc" id="L23">    public BagService(Checkers checkers, PlayerService playerService){</span>
-<span class="fc" id="L24">        this.checkers = checkers; </span>
-<span class="fc" id="L25">        this.playerService = playerService; </span>
-<span class="fc" id="L26">    }</span>
+    @Autowired
+<span class="fc" id="L40">    public BagService(Checkers checkers, PlayerService playerService, DictionaryService dictionaryService, RestTemplate restTemplate, VotingService votingService){</span>
+<span class="fc" id="L41">        this.checkers = checkers; </span>
+<span class="fc" id="L42">        this.playerService = playerService; </span>
+<span class="fc" id="L43">        this.dictionaryService = dictionaryService;</span>
+<span class="fc" id="L44">        this.restTemplate=restTemplate; </span>
+<span class="fc" id="L45">        this.votingService = votingService; </span>
+<span class="fc" id="L46">    }</span>
 
     /*
      * Variable que vamos a usar a modo de &quot;almacenamiento&quot; en memoria del estado de la bolsa
      * Map de la forma: 
      * Map&lt;MatchId, Map&lt;PlayerId, BagInGame&gt;&gt; 
      */
-<span class="fc" id="L33">    private final Map&lt;Integer, Map&lt;Integer, BagInGame&gt;&gt; activesBags = new HashMap&lt;&gt;(); </span>
+<span class="fc" id="L53">    private final Map&lt;Integer, Map&lt;Integer, BagInGame&gt;&gt; activesBags = new HashMap&lt;&gt;(); </span>
 
 
+
+    public Map&lt;Integer, Map&lt;Integer, BagInGame&gt;&gt; getActivesBags() {
+<span class="fc" id="L58">        return activesBags;</span>
+    }
     /*
      * Método que crea un BagInGame para un jugador
      */
+    @Transactional
     public void createPlayerbag(Integer matchId, Integer playerId){
-<span class="nc" id="L40">        playerService.findById(playerId); </span>
         // TODO: revisar si tengo que checkear que match exista
 
-<span class="nc" id="L43">        activesBags.putIfAbsent(matchId, new HashMap&lt;&gt;()); </span>
-<span class="nc" id="L44">        BagInGame newBag = new BagInGame();</span>
+<span class="fc" id="L67">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.computeIfAbsent(matchId, m -&gt; new HashMap&lt;&gt;());</span>
 
-<span class="nc" id="L46">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.get(matchId);</span>
-<span class="nc" id="L47">        playerMap.put(playerId, newBag); </span>
+        // Solo añadimos la mano si no existe
+<span class="fc" id="L70">        playerMap.putIfAbsent(playerId, new BagInGame());</span>
+        
 
-<span class="nc" id="L49">    }</span>
+<span class="fc" id="L73">    }</span>
 
     /*
      * Método que tras acabar una partida, borra la bolsa en memoria del jugador 
      */
-    public void deletePlayerBag(Integer matchId, Integer playerId){
-<span class="nc" id="L55">        playerService.findById(playerId); </span>
+    @Transactional
+    public void deleteMatchBags(Integer matchId){
+        //playerService.findById(playerId); 
         // TODO: revisar si tengo que checkear que match exista
 
-<span class="nc" id="L58">        Map&lt;Integer, BagInGame&gt; playerMap= activesBags.get(matchId); </span>
-<span class="nc" id="L59">        playerMap.remove(playerId); </span>
-<span class="nc" id="L60">    }</span>
+<span class="fc" id="L83">        activesBags.remove(matchId); </span>
+<span class="fc" id="L84">    }</span>
 
     
 
@@ -65,78 +89,230 @@ public class BagService {
      * Método que busca y devuelve el BagInGame del jugador
      */
 
+    @Transactional (readOnly = true)
     public BagInGame findPlayerBag(Integer matchId, Integer playerId){
-<span class="nc" id="L69">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.get(matchId); </span>
-<span class="nc" id="L70">        BagInGame playersBag = playerMap.get(playerId); </span>
+<span class="fc" id="L94">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.get(matchId); </span>
 
-<span class="nc bnc" id="L72" title="All 2 branches missed.">        if ( playersBag == null){</span>
-<span class="nc" id="L73">            throw new ResourceNotFoundException(&quot;The players bag does not exist or is not found&quot;); </span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if ( playerMap == null ){</span>
+<span class="fc" id="L97">            return new BagInGame(); // devuelvo una lista vacía por si acaso da error porque no se carga hasta que se le da a empezar partida </span>
         }
-<span class="nc" id="L75">        return playersBag; </span>
+
+<span class="fc" id="L100">        BagInGame playersBag = playerMap.get(playerId); </span>
+<span class="fc" id="L101">        return playersBag; </span>
     }
 
     /*
      * Método que quita una carta de la bolsa del jugador 
      */
 
+    @Transactional 
     public Card removeCardFromPlayerBag(Card card, Integer matchId, Integer playerId){
-<span class="nc" id="L83">        checkers.checkCardExists(card);</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (card == null) {</span>
+<span class="fc" id="L111">            return null;</span>
+        }
         
-<span class="nc" id="L85">        BagInGame playerBag = findPlayerBag(matchId, playerId); </span>
-<span class="nc" id="L86">        List&lt;Card&gt; playerCards = playerBag.getCards(); </span>
-<span class="nc" id="L87">        Card removedCard = null; </span>
+<span class="fc" id="L114">        BagInGame playerBag = findPlayerBag(matchId, playerId); </span>
+<span class="fc" id="L115">        List&lt;Card&gt; playerCards = playerBag.getCards(); </span>
+<span class="fc" id="L116">        Card removedCard = null; </span>
         
-<span class="nc bnc" id="L89" title="All 2 branches missed.">        for (int i=0; i&lt;playerCards.size(); i++){</span>
-<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (playerCards.get(i).equals(card)){</span>
-<span class="nc" id="L91">                removedCard = playerCards.get(i); </span>
-<span class="nc" id="L92">                playerCards.remove(i); </span>
-<span class="nc" id="L93">                break; </span>
+        // Buscar por referencia exacta primero (más confiable para objetos en memoria)
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        for (int i = 0; i &lt; playerCards.size(); i++){</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">            if (playerCards.get(i) == card) {</span>
+<span class="fc" id="L121">                removedCard = playerCards.get(i); </span>
+<span class="fc" id="L122">                playerCards.remove(i);</span>
+<span class="fc" id="L123">                break; </span>
             }
         }
-<span class="nc" id="L96">        return removedCard; </span>
+        
+        // Si no se encontró por referencia, buscar por ID o letra
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        if (removedCard == null) {</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">            for (int i = 0; i &lt; playerCards.size(); i++){</span>
+<span class="fc" id="L130">                Card c = playerCards.get(i);</span>
+<span class="fc" id="L131">                boolean match = false;</span>
+                
+                // Comparar por ID si ambos tienen ID
+<span class="pc bpc" id="L134" title="5 of 6 branches missed.">                if (card.getId() != null &amp;&amp; c.getId() != null &amp;&amp; card.getId().equals(c.getId())) {</span>
+<span class="nc" id="L135">                    match = true;</span>
+                }
+                // Si no hay ID, comparar por letra
+<span class="pc bpc" id="L138" title="2 of 4 branches missed.">                else if (card.getLetter() != null &amp;&amp; card.getLetter().equals(c.getLetter())) {</span>
+<span class="fc" id="L139">                    match = true;</span>
+                }
+                
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">                if (match) {</span>
+<span class="fc" id="L143">                    removedCard = playerCards.get(i); </span>
+<span class="fc" id="L144">                    playerCards.remove(i);</span>
+<span class="fc" id="L145">                    break; </span>
+                }
+            }
+        }
+        
+<span class="fc" id="L150">        return removedCard; </span>
 
     }
     
 
-
-
-
-
     /*
-     * Valida si la palabra que forma el usuario es valida para guardarse en la bolsa
-     * llamando a una api de diccionario si tiene más de letras
-     * Despues, guarda y actualiza la nueva bolsa del juagador
+     * Método que recibe un array de cartas y saca la palabra que forman
      */
 
-    /*
     @Transactional 
-    public Boolean isValidWordForBag (String word) {
+    public String wordFromCards (List&lt;CardDTO&gt; cards) {
+<span class="fc" id="L161">        StringBuilder word = new StringBuilder();</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        for (CardDTO card : cards){</span>
+<span class="fc" id="L163">            word.append(card.getLetter()); </span>
+<span class="fc" id="L164">        }</span>
+<span class="fc" id="L165">        return word.toString();</span>
+    }
 
-        // hay que mirar a ver cómo hacer para que tampoco acepte nombres propios 
-     
-        if (word.length &gt;= 3){
 
-            // hacer llamada a la api de free dictionary api: 
-            // https://api.dictionaryapi.dev/api/v2/entries/en/&lt;word&gt;
-            
-            // basicamente hacerle una llamada a esa api con la palabra y ver si devuelve una respuesta válida
 
-            // hay otra opción de api que es https://www.wordsapi.com/  aunque creo que es un poco menos completa pero ns 
+    /*
+     * Valida si la palabra que forma el usuario existe en el diccionario y por ende se puede guardar en la bolsa 
+     * Primero se va a checkear si la palabra está en el diccionario local (DictionaryService) que hemos añadido con más de 100 palabras y si no está, 
+     *          se hará una llamada a la API externa de free dictionary api. 
+     * Se ha hecho lo del diccionario local para intentar reducir el número de llamadas a la API externa, 
+     *          porque ya nos pasó que la api dejó de funcionar justo el día de la entrega y presentación del sprint. 
+     * Despues, guarda y actualiza la nueva bolsa del jugador
+     */
 
-            
-            BagRepository.save(bag); 
+ 
+    @Transactional 
+    public boolean doesWordExists (String word) {
+      
+
+        // hacer llamada a la api de free dictionary api: 
+        // https://api.dictionaryapi.dev/api/v2/entries/en/&lt;word&gt;
+        // hay otra opción de api que es https://www.wordsapi.com/  aunque creo que es un poco menos completa pero ns 
         
+<span class="fc bfc" id="L188" title="All 2 branches covered.">        if (dictionaryService.containsWord(word)){</span>
+<span class="fc" id="L189">            return true; </span>
+
+        } else {
+<span class="fc" id="L192">            String url = &quot;https://api.dictionaryapi.dev/api/v2/entries/en/&quot;+ word; </span>
+
+            try {
+<span class="fc" id="L195">                ResponseEntity&lt;String&gt; response = restTemplate.exchange(url, HttpMethod.GET, null, String.class); </span>
+
+<span class="fc" id="L197">                return response.getStatusCode().is2xxSuccessful(); // devuelve true</span>
+        
+<span class="nc" id="L199">            } catch (HttpClientErrorException e){</span>
+<span class="nc" id="L200">                return false; </span>
+                
+<span class="fc" id="L202">            } catch (Exception e) {</span>
+                // TODO: handle exception en el validar bag
+<span class="fc" id="L204">                return false; </span>
+            }
+        }
+        
+    }
+        
+    
+
+    /*
+     * Método que realiza la comprobación completa del array de cartas que manda el frontend de la bolsa 
+     * (la unión de las dos funciones anteriores, básicamente)
+     */
+
+    @Transactional 
+    public boolean checkBagIsValid (List&lt;CardDTO&gt; cards){
+
+        // si la bolsa no está vacía hacemos la comprobación
+<span class="fc bfc" id="L221" title="All 2 branches covered.">        if (!cards.isEmpty()){</span>
+<span class="pc bpc" id="L222" title="1 of 2 branches missed.">            if (cards.size()&gt; MAX_LETTERS_ALLOWED){ // si tiene más de 2 letras, checkear en el diccionario</span>
+<span class="fc" id="L223">                String word = wordFromCards(cards); </span>
+<span class="fc" id="L224">                return doesWordExists(word); </span>
+            } else {
+<span class="nc" id="L226">                return true; // si tiene 2 o menos letras, es válida automáticamente</span>
+            }
+        }
+        // si está vacía devolvemos true para que pueda seguir 
+<span class="fc" id="L230">        return true;  </span>
+
+    }
+
+    /*
+     * Método al que se llama cuando se forma un arma y se quiere validar. 
+     * Escenarios: 
+     * - que se la palabra esté en la lista de armas dada por el juego -&gt; es válida y se suma 1 punto 
+     * - que no esté en la lista pero que sí exista la palabra en el diccionario -&gt; se inicia una votación con el resto de participantes y se llega a un consenso
+     * - que no exisa la palabra directamente en el diccionario -&gt; petición inválida 
+     */
+
+    public WeaponValidationDTO validateWeapon(BagInGameDTO bag, Integer matchId){
+<span class="fc bfc" id="L243" title="All 2 branches covered.">        if (bag.getCards().isEmpty()){</span>
+<span class="fc" id="L244">            throw new EmptyWeaponException(&quot;Try putting a weapon or cancel the operation &quot;); </span>
+        } else {
+<span class="fc" id="L246">            String word = wordFromCards(bag.getCards()); </span>
+<span class="fc" id="L247">            boolean isOnTheList = isWeaponOnTheList(word); </span>
+<span class="fc bfc" id="L248" title="All 2 branches covered.">            if (isOnTheList){</span>
+<span class="fc" id="L249">                return new WeaponValidationDTO(word,BONUS_WEAPONS, ValidationWeaponStatus.VALID);</span>
+            } else {
+<span class="fc" id="L251">                boolean existsInDictionary = doesWordExists(word);</span>
+<span class="fc bfc" id="L252" title="All 2 branches covered.">                if (existsInDictionary){</span>
+<span class="fc" id="L253">                    votingService.startVoting(matchId, word, bag.getPlayerId()); </span>
+<span class="fc" id="L254">                    return new WeaponValidationDTO(word,0, ValidationWeaponStatus.REQUIRES_VOTING);</span>
+                } else {
+<span class="fc" id="L256">                    return new WeaponValidationDTO(word,0, ValidationWeaponStatus.INVALID);</span>
+                }
             }
 
+        }
     }
-     */
-
 
 
     /*
-     * Método que checkea si palabra formada forma parte de la lista de armas ofrecida por el juego 
+     * Método que checkea si palabra formada es parte de la lista de armas ofrecida por el juego 
      */
+
+    @Transactional 
+    public boolean isWeaponOnTheList(String word){ 
+      
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        if (dictionaryService.isWeapon(word)){</span>
+<span class="fc" id="L272">            return true; </span>
+
+        } else {
+<span class="fc" id="L275">            return false;</span>
+        } 
+    }
+
+
+    /*
+     * Método que checkea que el arma propuesta exista en el diccionario para que se pueda proceder a la votación 
+     */
+    @Transactional 
+    public boolean checkProposedWeaponExists(List&lt;CardDTO&gt; cards){
+<span class="fc" id="L285">        String word = wordFromCards(cards);</span>
+<span class="fc" id="L286">        return doesWordExists(word);</span>
+    }
+
     
+    
+
+    /*
+     * Método que actualiza la bolsa del jugador dado 
+     */
+    @Transactional 
+    public void update(BagInGameDTO bag, Integer matchId, Integer playerId){
+
+        //checkear que exista el player y tal 
+
+<span class="fc" id="L300">        BagInGame newBag = new BagInGame(); </span>
+
+<span class="fc" id="L302">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.get(matchId);</span>
+
+            // tengo que hacer lo de newArrayList&lt;&gt;(deck...) dentro del set porque si no se hace así ç
+        // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
+<span class="fc" id="L306">        newBag.setCards(new ArrayList&lt;&gt;(bag.getCards().stream()</span>
+<span class="fc" id="L307">            .map(dto -&gt; new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));</span>
+
+<span class="fc" id="L309">        playerMap.put(playerId, newBag); </span>
+<span class="fc" id="L310">        activesBags.put(matchId, playerMap); </span>
+
+<span class="fc" id="L312">    }</span>
+
+    
+
     
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

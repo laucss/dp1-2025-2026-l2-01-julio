@@ -52,22 +52,22 @@ export default function CreateLobby() {
 
 
   <div className="lobby-creation-content">
-    <h1>Crear Partida</h1>
+    <h1>Create Match</h1>
 
     <form onSubmit={handleCreate}>
       <div>
-        <label>Nombre</label>
+        <label>Name</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Nombre de la partida"
+          placeholder="Match name"
           required
         />
       </div>
 
       <div>
-        <label>Número de jugadores</label>
+        <label>Number of Players</label>
         <div className="player-count-container">
           <button className="circle-btn" type="button" onClick={() => setMaxPlayers((prev) => Math.max(3, prev - 1))}>-</button>
           <span>{maxPlayers}</span>
@@ -76,7 +76,7 @@ export default function CreateLobby() {
       </div>
 
       <div>
-        <label>Número de NPCs</label>
+        <label>Number of NPCs</label>
         <div className="player-count-container">
           <button className="circle-btn" type="button" onClick={() => setNumNpcs(prev => Math.max(3, prev - 1))}>-</button>
           <span>{numNpcs}</span>
@@ -94,13 +94,13 @@ export default function CreateLobby() {
             checked={isPrivate}
             onChange={(e) => setIsPrivate(e.target.checked)}
           />
-          Partida privada
+          Private Match
         </label>
       </div>
 
     <div className="button-row" style={{ display: "flex", justifyContent: "center", gap: "15px", marginTop: "1rem" }}>
-        <button type="submit">Crear</button>
-        <button type="cancel" onClick={() => navigate("/")}>Cancelar</button>
+        <button type="submit">Create</button>
+        <button type="cancel" onClick={() => navigate("/")}>Cancel</button>
     </div>      
     </form>
 

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WeaponsUpdateDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs</a> &gt; <span class="el_source">WeaponsUpdateDTO.java</span></div><h1>WeaponsUpdateDTO.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs;
+
+import java.util.List;
+
+public class WeaponsUpdateDTO {
+    private Integer matchId;
+    private Integer playerId;
+    private String playerRole; // &quot;ATTACKER&quot;, &quot;DEFENDER&quot;
+    private List&lt;WeaponData&gt; weapons;
+    private Integer totalAttacker;
+    private Integer totalDefender;
+
+<span class="nc" id="L13">    public WeaponsUpdateDTO() {}</span>
+
+    public WeaponsUpdateDTO(Integer matchId, Integer playerId, String playerRole, 
+<span class="nc" id="L16">                           List&lt;WeaponData&gt; weapons, Integer totalAttacker, Integer totalDefender) {</span>
+<span class="nc" id="L17">        this.matchId = matchId;</span>
+<span class="nc" id="L18">        this.playerId = playerId;</span>
+<span class="nc" id="L19">        this.playerRole = playerRole;</span>
+<span class="nc" id="L20">        this.weapons = weapons;</span>
+<span class="nc" id="L21">        this.totalAttacker = totalAttacker;</span>
+<span class="nc" id="L22">        this.totalDefender = totalDefender;</span>
+<span class="nc" id="L23">    }</span>
+
+<span class="nc" id="L25">    public Integer getMatchId() { return matchId; }</span>
+<span class="nc" id="L26">    public void setMatchId(Integer matchId) { this.matchId = matchId; }</span>
+
+<span class="nc" id="L28">    public Integer getPlayerId() { return playerId; }</span>
+<span class="nc" id="L29">    public void setPlayerId(Integer playerId) { this.playerId = playerId; }</span>
+
+<span class="nc" id="L31">    public String getPlayerRole() { return playerRole; }</span>
+<span class="nc" id="L32">    public void setPlayerRole(String playerRole) { this.playerRole = playerRole; }</span>
+
+<span class="nc" id="L34">    public List&lt;WeaponData&gt; getWeapons() { return weapons; }</span>
+<span class="nc" id="L35">    public void setWeapons(List&lt;WeaponData&gt; weapons) { this.weapons = weapons; }</span>
+
+<span class="nc" id="L37">    public Integer getTotalAttacker() { return totalAttacker; }</span>
+<span class="nc" id="L38">    public void setTotalAttacker(Integer totalAttacker) { this.totalAttacker = totalAttacker; }</span>
+
+<span class="nc" id="L40">    public Integer getTotalDefender() { return totalDefender; }</span>
+<span class="nc" id="L41">    public void setTotalDefender(Integer totalDefender) { this.totalDefender = totalDefender; }</span>
+
+    public static class WeaponData {
+        private String name;
+        private Integer bonus;
+
+<span class="nc" id="L47">        public WeaponData() {}</span>
+
+<span class="nc" id="L49">        public WeaponData(String name, Integer bonus) {</span>
+<span class="nc" id="L50">            this.name = name;</span>
+<span class="nc" id="L51">            this.bonus = bonus;</span>
+<span class="nc" id="L52">        }</span>
+
+<span class="nc" id="L54">        public String getName() { return name; }</span>
+<span class="nc" id="L55">        public void setName(String name) { this.name = name; }</span>
+
+<span class="nc" id="L57">        public Integer getBonus() { return bonus; }</span>
+<span class="nc" id="L58">        public void setBonus(Integer bonus) { this.bonus = bonus; }</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L63">        return &quot;WeaponsUpdateDTO{&quot; +</span>
+                &quot;matchId=&quot; + matchId +
+                &quot;, playerId=&quot; + playerId +
+                &quot;, playerRole='&quot; + playerRole + '\'' +
+                &quot;, weapons=&quot; + weapons +
+                &quot;, totalAttacker=&quot; + totalAttacker +
+                &quot;, totalDefender=&quot; + totalDefender +
+                '}';
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

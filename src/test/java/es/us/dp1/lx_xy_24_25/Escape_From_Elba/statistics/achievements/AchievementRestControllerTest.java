@@ -228,4 +228,253 @@ class AchievementRestControllerTest {
         
         verify(achievementService, times(1)).deleteAchievementById(99);
     }
+
+    @Test
+    @WithMockUser(username = "admin", authorities = {"ADMIN"})
+    @DisplayName("Find all achievements as admin")
+    void testFindAllAsAdmin() throws Exception {
+        List<Achievement> achievements = new ArrayList<>();
+        achievements.add(testAchievement);
+        
+        when(achievementService.getAchievements()).thenReturn(achievements);
+        
+        mockMvc.perform(get("/api/v1/achievements")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Find achievement with all tier types")
+    void testFindAchievementsAllTiers() throws Exception {
+        List<Achievement> achievements = new ArrayList<>();
+        
+        Achievement facil = new Achievement();
+        facil.setId(1);
+        facil.setDescription("Facil achievement");
+        facil.setMetric(Metric.VICTORIES);
+        facil.setThreshold(1.0);
+        facil.setTier(TierType.FACIL);
+        
+        Achievement intermedio = new Achievement();
+        intermedio.setId(2);
+        intermedio.setDescription("Intermedio achievement");
+        intermedio.setMetric(Metric.VICTORIES);
+        intermedio.setThreshold(5.0);
+        intermedio.setTier(TierType.INTERMEDIO);
+        
+        Achievement dificil = new Achievement();
+        dificil.setId(3);
+        dificil.setDescription("Dificil achievement");
+        dificil.setMetric(Metric.VICTORIES);
+        dificil.setThreshold(10.0);
+        dificil.setTier(TierType.DIFICIL);
+        
+        achievements.add(facil);
+        achievements.add(intermedio);
+        achievements.add(dificil);
+        
+        when(achievementService.getAchievements()).thenReturn(achievements);
+        
+        mockMvc.perform(get("/api/v1/achievements")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)));
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Find achievement with different metrics")
+    void testFindAchievementsDifferentMetrics() throws Exception {
+        Achievement achievement1 = new Achievement();
+        achievement1.setId(1);
+        achievement1.setDescription("Win matches");
+        achievement1.setMetric(Metric.VICTORIES);
+        achievement1.setThreshold(5.0);
+        achievement1.setTier(TierType.FACIL);
+        
+        Achievement achievement2 = new Achievement();
+        achievement2.setId(2);
+        achievement2.setDescription("Play games");
+        achievement2.setMetric(Metric.GAMES_PLAYED);
+        achievement2.setThreshold(10.0);
+        achievement2.setTier(TierType.FACIL);
+        
+        Achievement achievement3 = new Achievement();
+        achievement3.setId(3);
+        achievement3.setDescription("Earn points");
+        achievement3.setMetric(Metric.ACTION_POINTS_EARNED);
+        achievement3.setThreshold(50.0);
+        achievement3.setTier(TierType.INTERMEDIO);
+        
+        List<Achievement> achievements = List.of(achievement1, achievement2, achievement3);
+        
+        when(achievementService.getAchievements()).thenReturn(achievements);
+        
+        mockMvc.perform(get("/api/v1/achievements")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].metric", is("VICTORIES")))
+                .andExpect(jsonPath("$[1].metric", is("GAMES_PLAYED")))
+                .andExpect(jsonPath("$[2].metric", is("ACTION_POINTS_EARNED")));
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Create achievement with different thresholds")
+    void testCreateAchievementDifferentThresholds() throws Exception {
+        testAchievement.setThreshold(5.0);
+        
+        when(achievementService.saveAchievement(any())).thenReturn(testAchievement);
+        
+        Achievement result = achievementService.saveAchievement(testAchievement);
+        
+        assertEquals(5.0, result.getThreshold());
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Update achievement threshold")
+    void testUpdateAchievementThreshold() throws Exception {
+        testAchievement.setThreshold(10.0);
+        
+        when(achievementService.saveAchievement(any())).thenReturn(testAchievement);
+        
+        Achievement result = achievementService.saveAchievement(testAchievement);
+        
+        assertEquals(10.0, result.getThreshold());
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Update achievement tier")
+    void testUpdateAchievementTier() throws Exception {
+        testAchievement.setTier(TierType.DIFICIL);
+        
+        when(achievementService.saveAchievement(any())).thenReturn(testAchievement);
+        
+        Achievement result = achievementService.saveAchievement(testAchievement);
+        
+        assertEquals(TierType.DIFICIL, result.getTier());
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Find achievements by tier DIFICIL")
+    void testFindAchievementsByTierDificil() throws Exception {
+        Achievement dificilAchievement = new Achievement();
+        dificilAchievement.setTier(TierType.DIFICIL);
+        
+        List<Achievement> achievements = List.of(dificilAchievement);
+        
+        when(achievementService.getAchievementsByTier(TierType.DIFICIL)).thenReturn(achievements);
+        
+        List<Achievement> result = achievementService.getAchievementsByTier(TierType.DIFICIL);
+        
+        assertEquals(1, result.size());
+        assertEquals(TierType.DIFICIL, result.get(0).getTier());
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Find multiple achievements with same tier")
+    void testFindMultipleAchievementsSameTier() throws Exception {
+        Achievement achievement1 = new Achievement();
+        achievement1.setId(1);
+        achievement1.setTier(TierType.FACIL);
+        
+        Achievement achievement2 = new Achievement();
+        achievement2.setId(2);
+        achievement2.setTier(TierType.FACIL);
+        
+        List<Achievement> achievements = List.of(achievement1, achievement2);
+        
+        when(achievementService.getAchievementsByTier(TierType.FACIL)).thenReturn(achievements);
+        
+        List<Achievement> result = achievementService.getAchievementsByTier(TierType.FACIL);
+        
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Create achievement with high threshold")
+    void testCreateAchievementHighThreshold() throws Exception {
+        testAchievement.setThreshold(100.0);
+        testAchievement.setTier(TierType.DIFICIL);
+        
+        when(achievementService.saveAchievement(any())).thenReturn(testAchievement);
+        
+        Achievement result = achievementService.saveAchievement(testAchievement);
+        
+        assertEquals(100.0, result.getThreshold());
+        assertEquals(TierType.DIFICIL, result.getTier());
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Find achievement and verify all fields")
+    void testFindAchievementVerifyAllFields() throws Exception {
+        when(achievementService.getById(1)).thenReturn(testAchievement);
+        
+        mockMvc.perform(get("/api/v1/achievements/1")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.description").exists())
+                .andExpect(jsonPath("$.metric").exists())
+                .andExpect(jsonPath("$.threshold").exists())
+                .andExpect(jsonPath("$.tier").exists());
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Delete multiple achievements")
+    void testDeleteMultipleAchievements() throws Exception {
+        achievementService.deleteAchievementById(1);
+        achievementService.deleteAchievementById(2);
+        achievementService.deleteAchievementById(3);
+        
+        verify(achievementService, times(1)).deleteAchievementById(1);
+        verify(achievementService, times(1)).deleteAchievementById(2);
+        verify(achievementService, times(1)).deleteAchievementById(3);
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Update achievement metric")
+    void testUpdateAchievementMetric() throws Exception {
+        testAchievement.setMetric(Metric.TOTAL_PLAY_TIME);
+        
+        when(achievementService.saveAchievement(any())).thenReturn(testAchievement);
+        
+        Achievement result = achievementService.saveAchievement(testAchievement);
+        
+        assertEquals(Metric.TOTAL_PLAY_TIME, result.getMetric());
+    }
+
+    @Test
+    @WithMockUser(username = "player1", authorities = {"PLAYER"})
+    @DisplayName("Create achievement with all metrics types")
+    void testCreateAchievementsAllMetrics() throws Exception {
+        Achievement a1 = new Achievement();
+        a1.setMetric(Metric.VICTORIES);
+        
+        Achievement a2 = new Achievement();
+        a2.setMetric(Metric.GAMES_PLAYED);
+        
+        Achievement a3 = new Achievement();
+        a3.setMetric(Metric.ACTION_POINTS_EARNED);
+        
+        Achievement a4 = new Achievement();
+        a4.setMetric(Metric.TOTAL_PLAY_TIME);
+        
+        when(achievementService.saveAchievement(any())).thenReturn(a1, a2, a3, a4);
+        
+        assertEquals(Metric.VICTORIES, achievementService.saveAchievement(a1).getMetric());
+        assertEquals(Metric.GAMES_PLAYED, achievementService.saveAchievement(a2).getMetric());
+        assertEquals(Metric.ACTION_POINTS_EARNED, achievementService.saveAchievement(a3).getMetric());
+        assertEquals(Metric.TOTAL_PLAY_TIME, achievementService.saveAchievement(a4).getMetric());
+    }
 }

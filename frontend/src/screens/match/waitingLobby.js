@@ -177,13 +177,13 @@ export default function WaitingRoom() {
               <FaUserPlus />
             </button>
 
-            <h1>Espere a que la partida comience...</h1>
-            <p>Lobby ID: {matchId}</p>
+            <h1>Wait for the match to start...</h1>
+            
 
             <Table className="mt-4">
               <thead>
                 <tr>
-                  <th className="text-center">Jugadores en el Lobby</th>
+                  <th className="text-center">Players in the Lobby</th>
                 </tr>
               </thead>
               <tbody>
@@ -228,12 +228,12 @@ export default function WaitingRoom() {
                 disabled={!canStart}
                 onClick={startGame}
               >
-                Comenzar Partida
+                Start Match
               </Button>
             )}
 
             <Button color="danger" onClick={leaveLobby}>
-              Salir del Lobby
+              Leave Lobby
             </Button>
           </div>
         </div>
@@ -301,10 +301,10 @@ function OnlineFriendsModal({ friends, onClose, lobby }) {
   return (
     <div className="modal-overlay">
       <div className="modal-card enlarged-modal">
-        <h2>Amigos Online</h2>
+        <h2>Online Friends</h2>
         <div className="friends-list-scroll">
           {friends.length === 0 ? (
-            <p className="no-friends">No hay amigos online</p>
+            <p className="no-friends">No online friends</p>
           ) : (
             friends.map(f => (
               <div key={f.id} className="friend-mini-container">
@@ -317,23 +317,23 @@ function OnlineFriendsModal({ friends, onClose, lobby }) {
                   <span className="friend-name">{f.displayName}</span>
                 </div>
                 {isFriendInLobby(f) ? (
-                  <span className="waiting-invite-text-small">Unido</span>
+                  <span className="waiting-invite-text-small">Joined</span>
                 ) : (
                   inviteStatus[f.id] === "success" ? (
-                    <span className="waiting-invite-text-small">Esperando...</span>
+                    <span className="waiting-invite-text-small">Waiting...</span>
                   ) : (
                     <button className="invite-btn" onClick={() => handleInvite(f)} disabled={inviteStatus[f.id] === "loading"}>
-                      {inviteStatus[f.id] === "loading" ? "Enviando..." : "Invitar"}
+                      {inviteStatus[f.id] === "loading" ? "Sending..." : "Invite"}
                     </button>
                   )
                 )}
-                {inviteStatus[f.id] === "error" && <span className="invite-error">Error al invitar</span>}
+                {inviteStatus[f.id] === "error" && <span className="invite-error">Error inviting</span>}
               </div>
             ))
           )}
         </div>
         <button className="close-btn" onClick={onClose}>
-          Cerrar
+          Close
         </button>
       </div>
     </div>

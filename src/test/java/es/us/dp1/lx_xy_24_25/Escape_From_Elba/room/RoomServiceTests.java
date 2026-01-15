@@ -3,6 +3,7 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.room;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +93,12 @@ public class RoomServiceTests {
         assertEquals(2, rooms.size());
         assertTrue(rooms.contains(room1));
         assertTrue(rooms.contains(room2));
+    }
+
+    @Test
+    public void findByIdReturnsNullWhenNotExists() {
+        Room found = roomService.findById(999999);
+        assertNull(found);
     }
 
 }

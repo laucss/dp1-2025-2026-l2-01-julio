@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LobbyUpdateDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby</a> &gt; <span class="el_source">LobbyUpdateDTO.java</span></div><h1>LobbyUpdateDTO.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby;
+
+import java.util.List;
+
+public class LobbyUpdateDTO {
+    private Integer lobbyId;
+    private List&lt;PlayerLobbyDTO&gt; players;
+    private String action; 
+    private String username;
+
+<span class="nc" id="L11">    public LobbyUpdateDTO() {}</span>
+
+<span class="nc" id="L13">    public LobbyUpdateDTO(Integer lobbyId, List&lt;PlayerLobbyDTO&gt; players, String action, String username) {</span>
+<span class="nc" id="L14">        this.lobbyId = lobbyId;</span>
+<span class="nc" id="L15">        this.players = players;</span>
+<span class="nc" id="L16">        this.action = action;</span>
+<span class="nc" id="L17">        this.username = username;</span>
+<span class="nc" id="L18">    }</span>
+
+<span class="nc" id="L20">    public Integer getLobbyId() { return lobbyId; }</span>
+<span class="nc" id="L21">    public void setLobbyId(Integer lobbyId) { this.lobbyId = lobbyId; }</span>
+
+<span class="nc" id="L23">    public List&lt;PlayerLobbyDTO&gt; getPlayers() { return players; }</span>
+<span class="nc" id="L24">    public void setPlayers(List&lt;PlayerLobbyDTO&gt; players) { this.players = players; }</span>
+
+<span class="nc" id="L26">    public String getAction() { return action; }</span>
+<span class="nc" id="L27">    public void setAction(String action) { this.action = action; }</span>
+
+<span class="nc" id="L29">    public String getUsername() { return username; }</span>
+<span class="nc" id="L30">    public void setUsername(String username) { this.username = username; }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L34">        return &quot;LobbyUpdateDTO{&quot; +</span>
+                &quot;lobbyId=&quot; + lobbyId +
+                &quot;, action='&quot; + action + '\'' +
+                &quot;, username='&quot; + username + '\'' +
+<span class="nc" id="L38">                &quot;, players=&quot; + players.size() +</span>
+                '}';
+    }
+
+    // Inner class para los jugadores
+    public static class PlayerLobbyDTO {
+        private Integer userId;
+        private String username;
+        private String avatar;
+
+<span class="nc" id="L48">        public PlayerLobbyDTO() {}</span>
+
+<span class="nc" id="L50">        public PlayerLobbyDTO(Integer userId, String username, String avatar) {</span>
+<span class="nc" id="L51">            this.userId = userId;</span>
+<span class="nc" id="L52">            this.username = username;</span>
+<span class="nc" id="L53">            this.avatar = avatar;</span>
+<span class="nc" id="L54">        }</span>
+
+<span class="nc" id="L56">        public Integer getUserId() { return userId; }</span>
+<span class="nc" id="L57">        public void setUserId(Integer userId) { this.userId = userId; }</span>
+
+<span class="nc" id="L59">        public String getUsername() { return username; }</span>
+<span class="nc" id="L60">        public void setUsername(String username) { this.username = username; }</span>
+
+<span class="nc" id="L62">        public String getAvatar() { return avatar; }</span>
+<span class="nc" id="L63">        public void setAvatar(String avatar) { this.avatar = avatar; }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

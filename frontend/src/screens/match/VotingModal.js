@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import tokenService from '../../services/token.service'
 import getIdFromUrl from '../../util/getIdFromUrl'
 import '../../static/css/match/votingModal.css'
@@ -6,23 +6,26 @@ import '../../static/css/match/votingModal.css'
 // para alerta de errores
 import { toast } from "react-toastify";
 
-export default function StartDiceModal({ isOpen, onClose, userProposingWeapon, weaponProposed, matchData, onSubmit }) {
+export default function VotingModal({ isOpen, onClose, userProposingWeapon, weaponProposed, matchData, onSubmit, proposingUserId, stompClient }) {
 
     const jwt = tokenService.getLocalAccessToken()
     const currentUser = tokenService.getUser()
-    const currentPlayer = matchData?.players?.find(p => p.userId === currentUser.id)
+    const currentPlayer = matchData?.players?.find(p => p.user?.id === currentUser.id)
     const matchId = getIdFromUrl(2)
     
     const [answer, setAnswer] = useState(false)
     const [votes, setVotes] = useState(0)
 
     // Calcular cuántos jugadores hay en total y cuántos han votado
-    const totalPlayers = matchData?.players?.length-1 || 0; //  se resta uno para excluir al jugador que propuso el arma 
-    // const votes = 
-    // const allPlayersVoted = votes >= totalPlayers && totalPlayers > 0;
-    
+    const totalPlayers = matchData?.players?.length-1 || 0; //  se resta uno para excluir al jugador que propuso el arma
 
-    if (!isOpen) return null
+    // Reiniciar estados cuando se abre una nueva votación
+    useEffect(() => {
+        if (isOpen) {
+            setAnswer(false);
+            setVotes(0);
+        }
+    }, [isOpen, weaponProposed]); 
 
     const submitVote = async (voteValue) => {
         try {
@@ -35,26 +38,19 @@ export default function StartDiceModal({ isOpen, onClose, userProposingWeapon, w
                 body: JSON.stringify({
                     playerId: currentPlayer.id,
                     inFavor: voteValue, // 'YES' | 'NO'
-                    
                 })
-        })
-            setAnswer(voteValue) // guardamos que ha votado 
-            setVotes(prevVotes => prevVotes + 1)
+            });
             
             if (response.ok){
-                const data = await response.json()
-                if (data.status === 'FINISHED'){
-                    onSubmit(data) // mandamos todo el objeto para que se lea el resultado y se use la bonificación
-                }
-            }
-
-            if (!response.ok){
+                const data = await response.json();
+                setAnswer(voteValue); // guardamos que ha votado
+                setVotes(prevVotes => prevVotes + 1);
+                
+                // Si la votación ha terminado, el backend lo notificará por WebSocket
+                // No necesitamos hacer nada aquí
+            } else {
                 const error = await response.json();
                 throw error;
-            }
-
-            else {
-                toast.error("There has been an error while submitting your vote.")
             }
 
         } catch (error) {
@@ -63,24 +59,37 @@ export default function StartDiceModal({ isOpen, onClose, userProposingWeapon, w
         }
     }
 
+    // Suscribirse a actualizaciones de votación desde el backend
+    useEffect(() => {
+        if (!stompClient || !stompClient.active || !isOpen) return;
 
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.weapon.voting.result`, (msg) => {
+            const votingResult = JSON.parse(msg.body);
+            if (votingResult.status === 'FINISHED') {
+                onSubmit(votingResult);
+            }
+        });
 
-    
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId, isOpen, onSubmit]);
+
+    if (!isOpen) return null
+
     return (
-        <div className='modal-voting-overlay '>
+        <div className='modal-voting-overlay'>
             <div className='modal-voting-content-wrapper'>
 
-                {currentUser.id !== userProposingWeapon.id ? (
+                {currentUser.id !== proposingUserId ? (
                     <div>
 
                         <h2>Weapon proposed</h2>
                         <p className="weapon-name">"{weaponProposed}"</p>
                         <p className="proposed-by">
-                            Proposed by {userProposingWeapon.username}
+                            Proposed by {userProposingWeapon?.username || 'Unknown'}
                         </p>
 
                         <button
-                            disabled={answer !== null}
+                            disabled={answer !== false}
                             onClick={() => {
                                 submitVote('YES')
                             }}>
@@ -88,7 +97,7 @@ export default function StartDiceModal({ isOpen, onClose, userProposingWeapon, w
                         </button>
 
                         <button
-                            disabled={answer !== null}
+                            disabled={answer !== false}
                             onClick={() => {
                                 submitVote('NO')
                             }}>
@@ -101,7 +110,7 @@ export default function StartDiceModal({ isOpen, onClose, userProposingWeapon, w
 
                 }
 
-                {currentUser.id === userProposingWeapon.id ? (
+                {currentUser.id === proposingUserId ? (
                     <h1> Waiting for the voting to finished</h1>
                 ) : null }
 
@@ -110,7 +119,4 @@ export default function StartDiceModal({ isOpen, onClose, userProposingWeapon, w
         </div>
         
     )
-
-
-
 }
