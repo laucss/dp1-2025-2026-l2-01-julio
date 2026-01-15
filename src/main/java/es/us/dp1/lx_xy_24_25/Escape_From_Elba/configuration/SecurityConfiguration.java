@@ -109,8 +109,8 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.POST, "/api/v1/bag/validate-weapon/{matchId}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/deck/**").hasAnyAuthority(PLAYER, ADMIN)
 
-                .requestMatchers(HttpMethod.GET, "/api/v1/voting/**").permitAll() //TODO
-                .requestMatchers(HttpMethod.POST, "/api/v1/voting/vote/**").permitAll() //TODO
+                .requestMatchers(HttpMethod.GET, "/api/v1/voting/**").hasAnyAuthority(PLAYER, ADMIN) //TODO
+                .requestMatchers(HttpMethod.POST, "/api/v1/voting/vote/**").hasAnyAuthority(PLAYER, ADMIN) //TODO
 
 
                 // API restringida para administradores

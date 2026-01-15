@@ -35,7 +35,7 @@ public class ExceptionHandlerController {
 		return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
 	}
 
-	@ExceptionHandler(MoreVotesThanPlayersException.class)
+	@ExceptionHandler(	AlreadyVotedException.class)
 	@ResponseStatus(value = HttpStatus.CONFLICT)
 	public ResponseEntity<ErrorMessage> moreVotesThanPlayersException(MoreVotesThanPlayersException ex, WebRequest request) {
 		ErrorMessage message = new ErrorMessage(HttpStatus.CONFLICT.value(), new Date(), ex.getMessage(),
@@ -65,7 +65,7 @@ public class ExceptionHandlerController {
 		PlayerNotInTheGame.class, 
 		MoreThan7CardsDrawnException.class,
 		EmptyWeaponException.class,
-		AlreadyVotedException.class
+		MoreVotesThanPlayersException.class
 	})
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	public ResponseEntity<ErrorMessage> handleBadRequestExceptions(RuntimeException ex, WebRequest request) {
