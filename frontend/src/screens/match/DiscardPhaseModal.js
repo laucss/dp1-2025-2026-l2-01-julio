@@ -46,7 +46,7 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
             distance: 3
             },
         })
-    );
+    )
 
     useEffect(() => {
         setHandCards(hand)
@@ -55,11 +55,12 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
         setDeckCards(deck)
         setCurrentPlayer(player)
         setPlayerTurnId()
-    }, [isVisible])
+    }, [isVisible, bag, hand, deck, player])
 
     if (!isVisible) return null
 
     const confirm = async () => {
+        console.log('deck IN modal', deckCards)
         try {
             const handToUpdate = {
                 cards: handCards.map(card => ({
@@ -68,7 +69,7 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
                     backImage: card.backImage,
                     letter: card.letter
                 }))
-            };
+            }
             const bagToUpdate = {
                 cards: bagCards.map(card => ({
                     id: card.id,
@@ -168,7 +169,6 @@ const handleDragEnd = (event) => {
             setHandCards(prev => prev.filter(c => c.id !== active.id))
             setBagCards(prev => prev.filter(c => c.id !== active.id))
             setCardsToDiscard(prev => [...prev, card])
-            return
         }
 
         // caso 1: de la mano a la bolsa 

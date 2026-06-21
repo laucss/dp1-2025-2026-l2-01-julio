@@ -578,10 +578,8 @@ export default function Match(){
 
                 setMatch(data)
                 setPlayer(data.players)
-                setDeck(data.deck.notDiscardedCards)
-                setDiscardPile(data.deck.discardedCards)
+                setDeck(data.deck)
                 setActionPoints(data.players.filter(p=>p.user.id === currentUser.id)[0].actionPoints)
-                
 
             } catch (error) {
                 
@@ -1397,8 +1395,6 @@ export default function Match(){
         }
     }
 
-
-console.log('match', match)
     
     const endMatch = () => {
         if (!window.confirm("¿Are you sure you want to end the match?")) return; 
@@ -1966,9 +1962,9 @@ return (
                             </button>
 
                         <div className="discard-pile-section">
-                            {discardPile.length > 0 ? (
+                            {deck.discardedCards.length > 0 ? (
                                 <img 
-                                    src={`/resources${discardPile[discardPile.length - 1].frontImage}`} 
+                                    src={`/resources${deck.discardedCards[deck.discardedCards.length - 1].frontImage}`} 
                                     alt="Última carta descartada"
                                     style={{ width: "150px", height: "auto" }}
                                 />
@@ -2351,6 +2347,7 @@ return (
             onVotingResultProcessed={() => setVotingResult(null)}
             onResolve={async (currentUserWon) => {handleFightResult(currentUserWon)}}    
     />
+
 
 
         <DiscardPhaseModal

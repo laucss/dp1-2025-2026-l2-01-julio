@@ -49,7 +49,9 @@ public class DictionaryService {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
             dictionary = reader.lines()
+                        .map(String::trim)
                         .map(String::toLowerCase)
+                        .filter(s -> !s.isEmpty())
                         .collect(Collectors.toSet()); 
             }
     }
@@ -64,7 +66,9 @@ public class DictionaryService {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
             weapons = reader.lines()
+                        .map(String::trim)
                         .map(String::toLowerCase)
+                        .filter(s -> !s.isEmpty())
                         .collect(Collectors.toSet()); 
             }
     }

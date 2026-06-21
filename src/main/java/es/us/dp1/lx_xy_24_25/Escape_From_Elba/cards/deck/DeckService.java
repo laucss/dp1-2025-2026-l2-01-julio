@@ -121,7 +121,7 @@ public class DeckService {
         DeckInGame deck = findDeckById(matchId); 
         if (deck.getNotDiscardedCards().isEmpty()) {
             deck = shuffleAndDicardedToNotDiscarded(deck); 
-}
+        }
 
         Card card = deck.getNotDiscardedCards().getLast();
         deck.getNotDiscardedCards().removeLast(); 
