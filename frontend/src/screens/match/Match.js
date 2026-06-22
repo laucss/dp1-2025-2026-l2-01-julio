@@ -105,43 +105,43 @@ export default function Match(){
     
     // const posiciones de las habitaciones en el mapa 
     const roomPositions = {
-        1: { left: '26%', top: '12%' },   // North Tower v
-        2: { left: '35.5%', top: '15%' },   // Caesar Room v
-        3: { left: '44.5%', top: '9%' },   // Opal Room v
-        4: { left: '56%', top: '8%' },   // Coral Room v 
-        5: { left: '64.5%', top: '15%' },   // Roof v
-        6: { left: '74%', top: '13%' },   // East Tower v 
-        7: { left: '32%', top: '27.5%' },   // Corridor 1 v
-        8: { left: '44.5%', top: '23.5%' },   // Cafe v
-        9: { left: '50%', top: '21%' },   // Corridor 2 v
-        10: { left: '50%', top: '21%' },  // Corridor 2 (dup) v
-        11: { left: '55.5%', top: '23.5%' },  // Parlor v
-        12: { left: '68%', top: '27.5%' },  // Corridor 3 v 
-        13: { left: '26.5%', top: '41%' },  // Ball Room v
-        14: { left: '32.5%', top: '40%' },  // Corridor 4 v
-        15: { left: '38.5%', top: '41%' },  // SPA v 
-        16: { left: '61.5%', top: '41%' },  // Pool v
-        17: { left: '67.5%', top: '41%' },  // Corridor 5 v
-        18: { left: '73.5%', top: '41%' },  // Sleep Room v
-        19: { left: '26.5%', top: '58%' },  // Class Room v
-        20: { left: '32.5%', top: '58%' },  // Corridor 6 v
-        21: { left: '38.5%', top: '58%' },  // Arbor v
-        22: { left: '61.5%', top: '58%' },  // Farm v
-        23: { left: '67.5%', top: '58%' },  // Corridor 7 v
-        24: { left: '73.5%', top: '58%' },  // Meal Room v
-        25: { left: '32%', top: '72%' },  // Corridor 8 v
-        26: { left: '44.5%', top: '76%' },  // Bar v
-        27: { left: '50%', top: '78%' },  // Corridor 9 v
-        28: { left: '50%', top: '78%' },  // Corridor 9 (dup) v
-        29: { left: '55.5%', top: '76%' },  // Lab v
-        30: { left: '68%', top: '72%' },  // Corridor 10 v
-        31: { left: '26%', top: '87%' },  // West Tower v
-        32: { left: '35.5%', top: '85%' },  // Cellar v
-        33: { left: '44.5%', top: '92%' },  // Apple Room v
-        34: { left: '56%', top: '92%' },  // Map Room v 
-        35: { left: '64.5%', top: '85%' },  // Parole Room v
-        36: { left: '74%', top: '87%' },  // South Tower v
-        37: { left: '50%', top: '50%' },  // Safe Area v
+        1: { x: 55, y: 69 },   // North Tower v
+        2: { x: 160, y: 80 },   // Caesar Room v
+        3: { x: 257, y: 45 },   // Opal Room v
+        4: { x: 383, y: 45 },   // Coral Room v 
+        5: { x: 480, y: 97 },   // Roof v
+        6: { x: 585, y: 55 },   // East Tower v 
+        7: { x: 124, y: 138 },   // Corridor 1 v
+        8: { x: 283, y: 118 },   // Cafe v
+        9: { x: 125, y: 140 },   // Corridor 2 v
+        10: { x: 515, y: 140 },  // Corridor 2 (dup) v
+        11: { x: 384, y: 138 },  // Parlor v
+        12: { x: 514, y: 138 },  // Corridor 3 v 
+        13: { x: 62, y: 235 },  // Ball Room v
+        14: { x: 125, y: 200 },  // Corridor 4 v
+        15: { x: 190, y: 220 },  // SPA v 
+        16: { x: 450, y: 234 },  // Pool v
+        17: { x: 514, y: 205 },  // Corridor 5 v
+        18: { x: 577, y: 211 },  // Sleep Room v
+        19: { x: 62, y: 298 },  // Class Room v
+        20: { x: 125, y: 301 },  // Corridor 6 v
+        21: { x: 190, y: 314 },  // Arbor v
+        22: { x: 445, y: 320 },  // Farm v
+        23: { x: 514, y: 303 },  // Corridor 7 v
+        24: { x: 580, y: 310 },  // Meal Room v
+        25: { x: 125, y: 362 },  // Corridor 8 v
+        26: { x: 255, y: 402 },  // Bar v
+        27: { x: 320, y: 410 },  // Corridor 9 v
+        28: { x: 320, y: 410 },  // Corridor 9 (dup) v
+        29: { x: 382, y: 402 },  // Lab v
+        30: { x: 515, y: 362 },  // Corridor 10 v
+        31: { x: 55, y: 470 },  // West Tower v
+        32: { x: 160, y: 444 },  // Cellar v
+        33: { x: 255, y: 462 },  // Apple Room v
+        34: { x: 382, y: 462 },  // Map Room v 
+        35: { x: 480, y: 425 },  // Parole Room v
+        36: { x: 585, y: 473 },  // South Tower v
+        37: { x: 320, y: 295 },  // Safe Area v
     };
     // CARGAR DATOS PARTIDA 
       const [adjacencies, setAdjacencies] = useFetchState(
@@ -580,11 +580,13 @@ export default function Match(){
                 setPlayer(data.players)
                 setDeck(data.deck)
                 setActionPoints(data.players.filter(p=>p.user.id === currentUser.id)[0].actionPoints)
+                //console.log('posiciones', player)
 
             } catch (error) {
                 
             }
     }
+
 
     //console.log('deck', deck)
     // Mover el ganador a la habitación objetivo
@@ -1994,117 +1996,121 @@ return (
 
             
 
-                <div className="map-column" style={{ position: 'relative' }}>
-                    <map name="Map">
-                <area className="Area" href="#" target="" alt="Safe Area" title="Safe Area" coords="321,251,84" shape="circle" onClick={(e)=>{e.preventDefault(); move(37)}}/>
-                <area className="Area" href="#" target="" alt="West Tower" title="West Tower" coords="13,489,98,388" shape="rect" onClick={(e)=>{e.preventDefault(); move(31)}}/>
-                <area className="Area" href="#" target="" alt="South Tower" title="South Tower" coords="541,389,628,488" shape="rect" onClick={(e)=>{e.preventDefault(); move(36)}}/>
-                <area className="Area" href="#" target="" alt="North Tower" title="North Tower" coords="13,12,99,113" shape="rect" onClick={(e)=>{e.preventDefault(); move(1)}}/>
-                <area className="Area" href="#" target="" alt="East Tower" title="East Tower" coords="542,11,626,111" shape="rect" onClick={(e)=>{e.preventDefault(); move(6)}}/>
-                <area className="Area" href="#" target="" alt="Caesar Room" title="Caesar Room" coords="110,40,210,114" shape="rect" onClick={(e)=>{e.preventDefault();move(2)}}/>
-                <area className="Area" href="#" target="" alt="Opal Room" title="Opal Room" coords="220,10,292,69" shape="rect" onClick={(e)=>{e.preventDefault(); move(3)}}/>
-                <area className="Area" href="#" target="" alt="Coral Room" title="Coral Room" coords="345,11,418,69" shape="rect" onClick={(e)=>{e.preventDefault(); move(4)}}/>
-                <area className="Area" href="#" target="" alt="Roof" title="Roof" coords="429,38,530,112" shape="rect" onClick={(e)=>{e.preventDefault(); move(5)}}/>
-                <area className="Area" href="#" target="" alt="Cafe" title="Cafe" coords="293,154,221,80" shape="rect" onClick={(e)=>{e.preventDefault(); move(8)}}/>
-                <area className="Area" href="#" target="" alt="Parlor" title="Parlor" coords="345,81,417,152" shape="rect" onClick={(e)=>{e.preventDefault(); move(11)}}/>
-                <area className="Area" href="#" target="" alt="Pool" title="Pool" coords="369,165,488,166,488,251,419,251,407,206" shape="poly" onClick={(e)=>{e.preventDefault(); move(16)}}/>
-                <area className="Area" href="#" target="" alt="SPA" title="SPA" coords="271,166,237,197,221,236,153,237,152,165" shape="poly" onClick={(e)=>{e.preventDefault(); move(15)}}/>
-                <area className="Area" href="#" target="" alt="Arbor" title="Arbor" coords="151,248,151,334,266,334,236,299,221,250" shape="poly" onClick={(e)=>{e.preventDefault(); move(21)}}/>
-                <area className="Area" href="#" target="" alt="Farm" title="Farm" coords="488,264,488,334,371,334,403,296,416,265" shape="poly" onClick={(e)=>{e.preventDefault(); move(22)}}/>
-                <area className="Area" href="" target="" alt="Ball Room" title="Ball Room" coords="25,166,98,251" shape="rect" onClick={(e)=>{e.preventDefault(); move(13)}}/>
-                <area className="Area" href="" target="" alt="Sleep Room" title="Sleep Room" coords="540,165,614,238" shape="rect" onClick={(e)=>{e.preventDefault(); move(18)}} />
-                <area className="Area" href="" target="" alt="Class Room" title="Class Room" coords="25,263,97,334" shape="rect" onClick={(e)=>{e.preventDefault(); move(19)}}/>
-                <area className="Area" href="" target="" alt="Meal Room" title="Meal Room" coords="541,249,613,335" shape="rect" onClick={(e)=>{e.preventDefault(); move(24)}}/>
-                <area className="Area" href="" target="" alt="Bar" title="Bar" coords="221,346,292,417" shape="rect" onClick={(e)=>{e.preventDefault(); move(26)}}/>
-                <area className="Area" href="" target="" alt="Lab" title="Lab" coords="346,346,418,418" shape="rect" onClick={(e)=>{e.preventDefault(); move(29)}}/>
-                <area className="Area" href="" target="" alt="Cellar" title="Cellar" coords="109,387,209,460" shape="rect" onClick={(e)=>{e.preventDefault(); move(32)}}/>
-                <area className="Area" href="" target="" alt="Apple Room" title="Apple Room" coords="221,430,293,488" shape="rect" onClick={(e)=>{e.preventDefault(); move(33)}}/>
-                <area className="Area" href="" target="" alt="Parole Room" title="Parole Room" coords="429,387,529,459" shape="rect" onClick={(e)=>{e.preventDefault(); move(35)}}/>
-                <area className="Area" href="" target="" alt="Map Room" title="Map Room" coords="345,430,419,490" shape="rect" onClick={(e)=>{e.preventDefault(); move(34)}}/>
-                <area className="Area" href="" target="" alt="Corridor 1" title="Corridor 1" coords="25,123,209,153" shape="rect" onClick={(e)=>{e.preventDefault(); move(7)}}/>
-                <area className="Area" href="" target="" alt="Corridor 2" title="Corridor 2" coords="304,57,335,155" shape="rect" onClick={(e)=>{e.preventDefault(); move(9)}}/>
-                <area className="Area" href="" target="" alt="Corridor 3" title="Corridor 3" coords="430,122,613,154" shape="rect" onClick={(e)=>{e.preventDefault(); move(12)}}/>
-                <area className="Area" href="" target="" alt="Corridor 4" title="Corridor 4" coords="109,164,141,250" shape="rect" onClick={(e)=>{e.preventDefault(); move(14)}}/>
-                <area className="Area" href="" target="" alt="Corridor 5" title="Corridor 5" coords="500,164,529,238" shape="rect" onClick={(e)=>{e.preventDefault(); move(17)}}/>
-                <area className="Area" href="" target="" alt="Corridor 6" title="Corridor 6" coords="109,262,141,334" shape="rect" onClick={(e)=>{e.preventDefault(); move(20)}}/>
-                <area className="Area" href="" target="" alt="Corridor 7" title="Corridor 7" coords="500,248,529,333" shape="rect" onClick={(e)=>{e.preventDefault(); move(23)}}/>
-                <area className="Area" href="" target="" alt="Corridor 8" title="Corridor 8" coords="25,345,209,376" shape="rect" onClick={(e)=>{e.preventDefault(); move(25)}}/>
-                <area className="Area" href="" target="" alt="Corridor 9" title="Corridor 9" coords="304,345,335,441" shape="rect" onClick={(e)=>{e.preventDefault(); move(27)}}/>
-                <area className="Area" href="" target="" alt="Corridor 10" title="Corridor 10" coords="429,346,613,376" shape="rect" onClick={(e)=>{e.preventDefault(); move(30)}}/>
-                    </map>
-                    <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
-                    
-                    {/* Fichas de jugadores sobre el mapa */}
-                    {match?.players?.map(player => {
-                        if (!player.currentRoom) return null;                      
-                        const position = roomPositions[player.currentRoom.id];
-                        if (!position) return null;
-                        return (
-                            <img 
-                                key={player.id}
-                                src={player.user.avatar || "/Avatar_default.png"}
-                                alt={player.user.username}
-                                title={player.user.username}
-                                style={{
-                                    position: 'absolute',
-                                    left: position.left,
-                                    top: position.top,
-                                    transform: 'translate(-50%, -50%)',
-                                    width: '30px',
-                                    height: '30px',
-                                    borderRadius: '50%',
-                                    border: `3px solid ${getPlayerColor(player.id)}`,
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                                    zIndex: 10,
-                                    pointerEvents: 'none'
-                                }}
-                            />
-                        );
-                    })}
-                    
-                    {/* Fichas de NPCs sobre el mapa */}
-                    {match?.npcs?.map((npc, index) => {
-                        if (!npc.room) return null;
-                        const position = roomPositions[npc.room.id];
-                        if (!position) return null;
-                        const isSelectable = moveNpcMode && !isSpectator && match?.currentTurnUserId === currentUser?.id;
-                        const isSelected = selectedNpcIndex === index || (selectedNpcId != null && selectedNpcId === npc.id);
-                        return (
-                            <div
-                                key={`npc-${index}`}
-                                title={npc.name || `NPC ${index+1}`}
-                                onClick={(e) => {
-                                    if (!isSelectable) return;
-                                    e.stopPropagation();
-                                    setSelectedNpcIndex(index);
-                                    setSelectedNpcId(npc.id ?? null);
-                                }}
-                                style={{
-                                    position: 'absolute',
-                                    left: position.left,
-                                    top: position.top,
-                                    transform: 'translate(-50%, -50%)',
-                                    width: '25px',
-                                    height: '25px',
-                                    borderRadius: '50%',
-                                    backgroundColor: npc.isNiallCampbell ? '#ff0000' : '#666',
-                                    border: isSelected ? '3px solid yellow' : '2px solid white',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                                    zIndex: 20,
-                                    pointerEvents: isSelectable ? 'auto' : 'none',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: 'white',
-                                    fontSize: '10px',
-                                    fontWeight: 'bold',
-                                    cursor: isSelectable ? 'pointer' : 'default'
-                                }}
-                            >
-                                {npc.isNiallCampbell ? 'N' : 'X'}
-                            </div>
-                        );
-                    })}
+                <div className="map-container">
+                    <div className="board-wrapper">
+                        <map name="Map">
+                    <area className="Area" href="#" target="" alt="Safe Area" title="Safe Area" coords="321,251,84" shape="circle" onClick={(e)=>{e.preventDefault(); move(37)}}/>
+                    <area className="Area" href="#" target="" alt="West Tower" title="West Tower" coords="13,489,98,388" shape="rect" onClick={(e)=>{e.preventDefault(); move(31)}}/>
+                    <area className="Area" href="#" target="" alt="South Tower" title="South Tower" coords="541,389,628,488" shape="rect" onClick={(e)=>{e.preventDefault(); move(36)}}/>
+                    <area className="Area" href="#" target="" alt="North Tower" title="North Tower" coords="13,12,99,113" shape="rect" onClick={(e)=>{e.preventDefault(); move(1)}}/>
+                    <area className="Area" href="#" target="" alt="East Tower" title="East Tower" coords="542,11,626,111" shape="rect" onClick={(e)=>{e.preventDefault(); move(6)}}/>
+                    <area className="Area" href="#" target="" alt="Caesar Room" title="Caesar Room" coords="110,40,210,114" shape="rect" onClick={(e)=>{e.preventDefault();move(2)}}/>
+                    <area className="Area" href="#" target="" alt="Opal Room" title="Opal Room" coords="220,10,292,69" shape="rect" onClick={(e)=>{e.preventDefault(); move(3)}}/>
+                    <area className="Area" href="#" target="" alt="Coral Room" title="Coral Room" coords="345,11,418,69" shape="rect" onClick={(e)=>{e.preventDefault(); move(4)}}/>
+                    <area className="Area" href="#" target="" alt="Roof" title="Roof" coords="429,38,530,112" shape="rect" onClick={(e)=>{e.preventDefault(); move(5)}}/>
+                    <area className="Area" href="#" target="" alt="Cafe" title="Cafe" coords="293,154,221,80" shape="rect" onClick={(e)=>{e.preventDefault(); move(8)}}/>
+                    <area className="Area" href="#" target="" alt="Parlor" title="Parlor" coords="345,81,417,152" shape="rect" onClick={(e)=>{e.preventDefault(); move(11)}}/>
+                    <area className="Area" href="#" target="" alt="Pool" title="Pool" coords="369,165,488,166,488,251,419,251,407,206" shape="poly" onClick={(e)=>{e.preventDefault(); move(16)}}/>
+                    <area className="Area" href="#" target="" alt="SPA" title="SPA" coords="271,166,237,197,221,236,153,237,152,165" shape="poly" onClick={(e)=>{e.preventDefault(); move(15)}}/>
+                    <area className="Area" href="#" target="" alt="Arbor" title="Arbor" coords="151,248,151,334,266,334,236,299,221,250" shape="poly" onClick={(e)=>{e.preventDefault(); move(21)}}/>
+                    <area className="Area" href="#" target="" alt="Farm" title="Farm" coords="488,264,488,334,371,334,403,296,416,265" shape="poly" onClick={(e)=>{e.preventDefault(); move(22)}}/>
+                    <area className="Area" href="" target="" alt="Ball Room" title="Ball Room" coords="25,166,98,251" shape="rect" onClick={(e)=>{e.preventDefault(); move(13)}}/>
+                    <area className="Area" href="" target="" alt="Sleep Room" title="Sleep Room" coords="540,165,614,238" shape="rect" onClick={(e)=>{e.preventDefault(); move(18)}} />
+                    <area className="Area" href="" target="" alt="Class Room" title="Class Room" coords="25,263,97,334" shape="rect" onClick={(e)=>{e.preventDefault(); move(19)}}/>
+                    <area className="Area" href="" target="" alt="Meal Room" title="Meal Room" coords="541,249,613,335" shape="rect" onClick={(e)=>{e.preventDefault(); move(24)}}/>
+                    <area className="Area" href="" target="" alt="Bar" title="Bar" coords="221,346,292,417" shape="rect" onClick={(e)=>{e.preventDefault(); move(26)}}/>
+                    <area className="Area" href="" target="" alt="Lab" title="Lab" coords="346,346,418,418" shape="rect" onClick={(e)=>{e.preventDefault(); move(29)}}/>
+                    <area className="Area" href="" target="" alt="Cellar" title="Cellar" coords="109,387,209,460" shape="rect" onClick={(e)=>{e.preventDefault(); move(32)}}/>
+                    <area className="Area" href="" target="" alt="Apple Room" title="Apple Room" coords="221,430,293,488" shape="rect" onClick={(e)=>{e.preventDefault(); move(33)}}/>
+                    <area className="Area" href="" target="" alt="Parole Room" title="Parole Room" coords="429,387,529,459" shape="rect" onClick={(e)=>{e.preventDefault(); move(35)}}/>
+                    <area className="Area" href="" target="" alt="Map Room" title="Map Room" coords="345,430,419,490" shape="rect" onClick={(e)=>{e.preventDefault(); move(34)}}/>
+                    <area className="Area" href="" target="" alt="Corridor 1" title="Corridor 1" coords="25,123,209,153" shape="rect" onClick={(e)=>{e.preventDefault(); move(7)}}/>
+                    <area className="Area" href="" target="" alt="Corridor 2" title="Corridor 2" coords="304,57,335,155" shape="rect" onClick={(e)=>{e.preventDefault(); move(9)}}/>
+                    <area className="Area" href="" target="" alt="Corridor 3" title="Corridor 3" coords="430,122,613,154" shape="rect" onClick={(e)=>{e.preventDefault(); move(12)}}/>
+                    <area className="Area" href="" target="" alt="Corridor 4" title="Corridor 4" coords="109,164,141,250" shape="rect" onClick={(e)=>{e.preventDefault(); move(14)}}/>
+                    <area className="Area" href="" target="" alt="Corridor 5" title="Corridor 5" coords="500,164,529,238" shape="rect" onClick={(e)=>{e.preventDefault(); move(17)}}/>
+                    <area className="Area" href="" target="" alt="Corridor 6" title="Corridor 6" coords="109,262,141,334" shape="rect" onClick={(e)=>{e.preventDefault(); move(20)}}/>
+                    <area className="Area" href="" target="" alt="Corridor 7" title="Corridor 7" coords="500,248,529,333" shape="rect" onClick={(e)=>{e.preventDefault(); move(23)}}/>
+                    <area className="Area" href="" target="" alt="Corridor 8" title="Corridor 8" coords="25,345,209,376" shape="rect" onClick={(e)=>{e.preventDefault(); move(25)}}/>
+                    <area className="Area" href="" target="" alt="Corridor 9" title="Corridor 9" coords="304,345,335,441" shape="rect" onClick={(e)=>{e.preventDefault(); move(27)}}/>
+                    <area className="Area" href="" target="" alt="Corridor 10" title="Corridor 10" coords="429,346,613,376" shape="rect" onClick={(e)=>{e.preventDefault(); move(30)}}/>
+                        </map>
+                        <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
+                        
+                        {/* Fichas de jugadores sobre el mapa */}
+                        {match?.players?.map(player => {
+                            if (!player.currentRoom) return null;                      
+                            const position = roomPositions[player.currentRoom.id];
+                            if (!position) return null;
+                            return (
+                                <img 
+                                    key={player.id}
+                                    src={player.user.avatar || "/Avatar_default.png"}
+                                    alt={player.user.username}
+                                    title={player.user.username}
+                                    style={{
+                                        aspectRatio: '1 / 1',
+                                        position: 'absolute',
+                                        left: `${position.x}px`,
+                                        top: `${position.y}px`,
+                                        transform: 'translate(-50%, -50%)',
+                                        width: '30px',
+                                        height: '30px',
+                                        borderRadius: '50%',
+                                        border: `3px solid ${getPlayerColor(player.id)}`,
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                                        zIndex: 10,
+                                        pointerEvents: 'none',
+                                        transition: 'left 0.5s ease, top 0.5s ease'
+                                    }}
+                                />
+                            );
+                        })}
+                        
+                        {/* Fichas de NPCs sobre el mapa */}
+                        {match?.npcs?.map((npc, index) => {
+                            if (!npc.room) return null;
+                            const position = roomPositions[npc.room.id];
+                            if (!position) return null;
+                            const isSelectable = moveNpcMode && !isSpectator && match?.currentTurnUserId === currentUser?.id;
+                            const isSelected = selectedNpcIndex === index || (selectedNpcId != null && selectedNpcId === npc.id);
+                            return (
+                                <div
+                                    key={`npc-${index}`}
+                                    title={npc.name || `NPC ${index+1}`}
+                                    onClick={(e) => {
+                                        if (!isSelectable) return;
+                                        e.stopPropagation();
+                                        setSelectedNpcIndex(index);
+                                        setSelectedNpcId(npc.id ?? null);
+                                    }}
+                                    style={{
+                                        position: 'absolute',
+                                        left: `${position.x}px`,
+                                        top: `${position.y}px`,
+                                        transform: 'translate(-50%, -50%)',
+                                        width: '25px',
+                                        height: '25px',
+                                        borderRadius: '50%',
+                                        backgroundColor: npc.isNiallCampbell ? '#ff0000' : '#666',
+                                        border: isSelected ? '3px solid yellow' : '2px solid white',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                                        zIndex: 20,
+                                        pointerEvents: isSelectable ? 'auto' : 'none',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: 'white',
+                                        fontSize: '10px',
+                                        fontWeight: 'bold',
+                                        cursor: isSelectable ? 'pointer' : 'default'
+                                    }}
+                                >
+                                    {npc.isNiallCampbell ? 'N' : 'X'}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
                 
                 {/*Sección donde aparacen el resto de jugadores con sus respectivas bolsa*/}
