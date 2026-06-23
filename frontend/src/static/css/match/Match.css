@@ -292,16 +292,6 @@
     font-weight: 600;
 }
 
-
-
-
-.Map {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-}
-
 .match-board {
     display: flex;
     gap: 20px;
@@ -310,12 +300,29 @@
 }
 
 
-.map-column {
-    flex: 1 1 auto;
+.Map {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+}
+
+
+.map-container {
+    width: 100%;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.board-wrapper {
+    position: relative; 
+    width: 100%;
+    max-width: 640px;  
+    
+    aspect-ratio: 640 / 500; 
 }
 /*------------------------ sección de la info del jugador concreto ------------------------*/
 
