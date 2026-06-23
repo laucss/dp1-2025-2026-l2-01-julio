@@ -48,13 +48,15 @@ public class AchievementRestController {
 		return new ResponseEntity<Achievement>(achievementToGet, HttpStatus.OK);
 	}
 
+	@GetMapping("/metrics")
+	public ResponseEntity<List<String>> getMetrics(){
+		return new ResponseEntity<>((List<String>) achievementService.getMetrics(), HttpStatus.OK);
+	}
+
 	@PostMapping
-	public ResponseEntity<Achievement> createAchievement(@RequestBody @Valid Achievement newAchievement, BindingResult br){ 
+	public ResponseEntity<Achievement> createAchievement(@RequestBody @Valid Achievement newAchievement){ 
 		Achievement result=null;
-		if(!br.hasErrors())
-			result=achievementService.saveAchievement(newAchievement);
-		else
-			throw new BadRequestException(br.getAllErrors());
+		result=achievementService.saveAchievement(newAchievement);
 		return new ResponseEntity<>(result,HttpStatus.CREATED);	
 	}
 

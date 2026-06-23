@@ -1,6 +1,4 @@
-import {
-    useState
-} from "react"; 
+import { useState, useEffect } from "react"; 
 import tokenService from "../../services/token.service"; 
 import { Link } from "react-router-dom"; 
 import { Form, Input, Label } from "reactstrap"; 
@@ -13,16 +11,15 @@ import './AchievementUserList.css';
 const jwt = tokenService.getLocalAccessToken(); 
 
 export default function AchievementEdit() { 
-    const id = getIdFromUrl(2); 
+    const id = getIdFromUrl(2) 
     const emptyAchievement = { 
-        id: id==="new"?null:id, 
-        name: "", 
+        id: id==="new" ? null : id,  
         description: "", 
         badgeImage: "", 
         threshold: 1,
         metric: "GAMES_PLAYED", 
-        actualDescription: "" 
-    }; 
+        tier: "FACIL"
+    }
     
     const [message, setMessage] = useState(null); 
     const [visible, setVisible] = useState(false); 
@@ -32,7 +29,21 @@ export default function AchievementEdit() {
         setMessage, 
         setVisible, 
         id 
-    );
+    )
+
+    const [metrics, setMetrics] = useState([])
+
+    useEffect(() => {
+        fetch("/api/v1/achievements/metrics", {
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: "application/json"
+            }
+        })
+        .then(response => response.json())
+        .then(data => setMetrics(data))
+        .catch(error => console.error(error));
+    }, [])
 
     const modal = getErrorModal(setVisible, visible, message); 
     const navigate = useNavigate(); 
@@ -96,16 +107,27 @@ export default function AchievementEdit() {
                             <Label for="metric" className="custom-form-input-label"> Metric </Label> 
                             <Input type="select" required name="metric" id="metric" value={achievement.metric || ""} onChange={handleChange} className="custom-input" > 
                                 <option value="">None</option> 
-                                <option value="GAMES_PLAYED">GAMES_PLAYED</option> 
-                                <option value="VICTORIES">VICTORIES</option> 
-                                <option value="TOTAL_PLAY_TIME">TOTAL_PLAY_TIME</option> 
-                                <option value="ACTION_POINTS_EARNED">ACTION_POINTS_EARNED</option>
+                                {metrics.map(metric => (
+                                    <option key={metric} value={metric}>
+                                        {metric}
+                                    </option>
+                                ))}
                             </Input> 
                         </div> 
                         <div className="custom-form-input"> 
                             <Label for="theshold" className="custom-form-input-label"> Threshold value: </Label> 
                             <Input type="number" required name="threshold" id="threshold" value={achievement.threshold || ""} onChange={handleChange} className="custom-input" /> 
                         </div> 
+
+                        <div className="custom-form-input"> 
+                            <Label for="tier" className="custom-form-input-label"> Tier: </Label> 
+                            <Input type="select" required name="tier" id="tier" value={achievement.tier || ""} onChange={handleChange} className="custom-input" > 
+                                <option value="">None</option> 
+                                <option value="FACIL">FACIL</option> 
+                                <option value="INTERMEDIO">INTERMEDIO</option> 
+                                <option value="DIFICIL">DIFICIL</option>
+                            </Input> 
+                        </div>
                         <div className="custom-button-row"> 
                             <button className="auth-button">Save</button> 
                             <Link to={`/achievements`} className="auth-button" style={{ textDecoration: "none" }} > Cancel </Link> 
