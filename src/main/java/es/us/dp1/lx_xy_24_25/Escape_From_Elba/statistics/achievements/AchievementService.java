@@ -2,6 +2,7 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics.achievements;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,5 +81,9 @@ public class AchievementService {
 
     public List<Achievement> getAchievementsByTier(TierType tier){
         return repo.findByTier(tier);
+    }
+
+    public List<String> getMetrics(){
+        return Arrays.stream(Metric.values()).map(Enum::name).toList();
     }
 }
