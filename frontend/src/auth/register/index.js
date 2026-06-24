@@ -4,7 +4,7 @@ import tokenService from "../../services/token.service";
 import FormGenerator from "../../components/formGenerator/formGenerator";
 import { registerFormPlayer } from "./form/registerFormPlayer";
 import { registerFormAdmin } from "./form/registerFormAdmin";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 export default function Register() {
   let [type, setType] = useState(null);

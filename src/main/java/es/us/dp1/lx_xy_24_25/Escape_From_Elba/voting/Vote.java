@@ -2,7 +2,6 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,7 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.user;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
 import java.util.List;
 import java.util.stream.Collectors;
 

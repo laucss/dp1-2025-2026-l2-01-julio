@@ -1,7 +1,5 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.Setter;
 

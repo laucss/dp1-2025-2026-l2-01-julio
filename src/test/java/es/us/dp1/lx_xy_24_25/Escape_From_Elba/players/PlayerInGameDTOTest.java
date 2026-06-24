@@ -2,8 +2,6 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

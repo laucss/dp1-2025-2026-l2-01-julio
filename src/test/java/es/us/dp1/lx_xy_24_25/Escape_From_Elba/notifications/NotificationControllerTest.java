@@ -2,7 +2,6 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

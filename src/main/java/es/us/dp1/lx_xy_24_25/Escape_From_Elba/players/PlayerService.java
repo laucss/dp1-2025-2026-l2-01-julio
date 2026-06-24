@@ -3,7 +3,6 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.players;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.maven.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

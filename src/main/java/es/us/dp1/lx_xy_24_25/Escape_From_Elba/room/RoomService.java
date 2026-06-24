@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcDTO;
 
 @Service
 public class RoomService {

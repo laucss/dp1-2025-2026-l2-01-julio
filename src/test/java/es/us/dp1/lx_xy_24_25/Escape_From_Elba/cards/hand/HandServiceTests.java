@@ -1,7 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 
 
