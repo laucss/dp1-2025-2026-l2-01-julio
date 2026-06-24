@@ -169,6 +169,7 @@ const handleDragEnd = (event) => {
             setHandCards(prev => prev.filter(c => c.id !== active.id))
             setBagCards(prev => prev.filter(c => c.id !== active.id))
             setCardsToDiscard(prev => [...prev, card])
+            return
         }
 
         // caso 1: de la mano a la bolsa 
