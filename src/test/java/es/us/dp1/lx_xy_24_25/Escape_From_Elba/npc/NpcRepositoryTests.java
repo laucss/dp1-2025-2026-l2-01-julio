@@ -17,9 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcRepository;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
 
 @SpringBootTest

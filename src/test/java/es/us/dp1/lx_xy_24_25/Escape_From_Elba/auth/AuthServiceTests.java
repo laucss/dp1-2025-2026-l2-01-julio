@@ -1,7 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth;
 
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
@@ -15,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth.payload.request.SignupRequest;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.Authorities;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.AuthoritiesService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 
 
