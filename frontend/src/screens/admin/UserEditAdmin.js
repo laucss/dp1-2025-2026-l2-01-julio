@@ -126,6 +126,7 @@ export default function UserEditAdmin() {
             </Label>
             <Input
               type="email"
+              required
               name="email"
               id="email"
               value={email}
@@ -139,6 +140,7 @@ export default function UserEditAdmin() {
             </Label>
             <Input
               type="password"
+              required
               name="password"
               id="password"
               value={password}
