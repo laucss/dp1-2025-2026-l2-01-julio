@@ -296,6 +296,7 @@ INSERT INTO room_adjacency_list (room_id, adjacency_list_id)
                (37,27),
                (37,28);
 
+/*
 -- Friend request test data
 -- User IDs: 101-110 for friend request tests
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (101,'test_user_101','test101@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
@@ -325,7 +326,7 @@ INSERT INTO requests(id, request_status, sender, receiver) VALUES (206, 'PENDING
 INSERT INTO requests(id, request_status, sender, receiver) VALUES (207, 'PENDING', 107, 103);
 
 -- Ensure match 1 has a winner set to player.id=9
-/* Por facilitar el testeo lo comento
+ Por facilitar el testeo lo comento
 UPDATE match
    SET status = 'FINISHED',
            start_time = '2025-12-01 18:00:00',

@@ -33,22 +33,19 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 
 @Service
 public class UserService {
 
 	private UserRepository userRepository;
-	private PlayerRepository playerRepository;
 	private MatchService matchService;
 
 	@PersistenceContext
 	private EntityManager entityManager;
 
 	@Autowired
-	public UserService(UserRepository userRepository, PlayerRepository playerRepository, MatchService matchService) {
+	public UserService(UserRepository userRepository, MatchService matchService) {
 		this.userRepository = userRepository;
-		this.playerRepository = playerRepository;
 		this.matchService = matchService;
 	}
 
