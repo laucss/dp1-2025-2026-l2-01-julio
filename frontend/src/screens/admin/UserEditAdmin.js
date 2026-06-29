@@ -22,7 +22,6 @@ export default function UserEditAdmin() {
   const [message, setMessage] = useState(null);
   const [visible, setVisible] = useState(false);
   const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
   const [user, setUser] = useFetchState(
     emptyItem,
     `/api/v1/users/${id}`,
@@ -45,8 +44,13 @@ export default function UserEditAdmin() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    const body = { username: user.username, password: password, email: email,  authority: user.authority?.authority};
     if (!user.id) {
+      const body = { 
+        username: user.username, 
+        password: password, 
+        email: user.email, 
+        authority: user.authority?.authority 
+      }
       fetch("/api/v1/auth/signup", {
         method: "POST",
         headers: {
@@ -69,7 +73,13 @@ export default function UserEditAdmin() {
       .catch((message) => alert(message));
 
     } else {
-      body.id = user.id;
+      const body = { 
+        id: user.id,
+        username: user.username, 
+        password: password, 
+        email: user.email, 
+        authority: user.authority 
+      }
       fetch(`/api/v1/users/${user.id}` , {
         method: "PUT",
         headers: {
@@ -129,8 +139,8 @@ export default function UserEditAdmin() {
               required
               name="email"
               id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={user.email || ""}
+              onChange={handleChange}
               className="custom-input"
             />
           </div>
@@ -143,7 +153,7 @@ export default function UserEditAdmin() {
               required
               name="password"
               id="password"
-              value={password}
+              value={password }
               onChange={(e) => setPassword(e.target.value)}
               className="custom-input"
             />
