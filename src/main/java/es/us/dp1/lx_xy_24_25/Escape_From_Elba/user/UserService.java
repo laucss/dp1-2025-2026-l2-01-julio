@@ -20,6 +20,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -29,6 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 
 @Service
@@ -36,15 +40,16 @@ public class UserService {
 
 	private UserRepository userRepository;
 	private PlayerRepository playerRepository;
+	private MatchService matchService;
 
 	@PersistenceContext
 	private EntityManager entityManager;
 
 	@Autowired
-	public UserService(UserRepository userRepository, PlayerRepository playerRepository) {
+	public UserService(UserRepository userRepository, PlayerRepository playerRepository, MatchService matchService) {
 		this.userRepository = userRepository;
 		this.playerRepository = playerRepository;
-
+		this.matchService = matchService;
 	}
 
 	@Transactional
@@ -111,6 +116,27 @@ public class UserService {
 	@Transactional
 	public void deleteUser(Integer id) {
 		User toDelete = findUser(id);
+
+		// buscamos aquellas partidas creadas y ganadas por él para eliminarlas o modificarlas
+		List<Match> matchesCreatedByUser = userRepository.findMatchesCreatedByUser(id);
+		matchesCreatedByUser.stream().forEach(m -> matchService.delete(m.getId()));
+
+		List<Match> matchesWonByUser = userRepository.findMatchesWonByUser(id);
+		for (Match m : matchesWonByUser) {
+			m.setWinner(null);
+			matchService.save(m);
+		}
+
+		// no pilla bien la edición del ganador a null, por lo que lo forzamos y limpiamos
+		try {
+			entityManager.flush();
+			entityManager.clear();
+		} catch (Exception e){
+		}
+
+		// lo volvemos a llamar por si acaso para que esté actualizado
+		toDelete = findUser(id);
+		
 		this.userRepository.delete(toDelete);
 	}
 

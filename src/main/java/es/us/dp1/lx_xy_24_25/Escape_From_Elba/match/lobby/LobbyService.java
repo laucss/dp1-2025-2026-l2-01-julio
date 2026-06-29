@@ -84,6 +84,8 @@ public class LobbyService {
         Player player = new Player(); 
         player.setUser(currentUser);     
         player.setMatch(m);
+        playerService.save(player);
+
         m.getPlayers().add(player);
         Match savedMatch = mrepo.save(m);
         
@@ -104,6 +106,8 @@ public class LobbyService {
         Player player = new Player(); 
         player.setUser(currentUser);
         player.setMatch(m);
+        playerService.save(player);
+
         m.getPlayers().add(player);
         Match savedMatch = mrepo.save(m);
         
@@ -123,14 +127,20 @@ public class LobbyService {
             if (currentUser == null) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Usuario no autenticado");
             }
+
+        checkers.checkPlayerAlreadyInALobby(currentUser);
+
         Match game = new Match();
+        game.setStatus(MatchStatus.WAITING);
+
         Player player = new Player(); 
         player.setUser(currentUser);
-        checkers.checkPlayerAlreadyInALobby(currentUser);
-        game.setStatus(MatchStatus.WAITING);
+        player.setMatch(game);
+        playerService.save(player);   
+        
         game.setPlayers(new ArrayList<>());
         game.getPlayers().add(player);
-        player.setMatch(game);
+       
         game.setName(name);
         game.setMaxPlayers(maxPlayers);
         game.setNumNpcs(numNpcs);
