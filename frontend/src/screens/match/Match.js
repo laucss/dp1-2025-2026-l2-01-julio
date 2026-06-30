@@ -805,246 +805,254 @@ export default function Match(){
         }
     };
 
+    const handleNpcMove = async (roomId) => {
+
+        if (selectedNpcIndex === null) {
+            alert('Selecciona primero un NPC en el mapa');
+            return;
+        }
+
+        const npc = match?.npcs?.[selectedNpcIndex];
+        const npcIdToSend = npc?.id ?? null;
+
+        if (!npcIdToSend) {
+            alert('No se puede mover: el NPC no tiene identificador.');
+            setSelectedNpcIndex(null);
+            setSelectedNpcId(null);
+            setMoveNpcMode(false);
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/v1/matches/${matchId}/moveNpc`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: currentUser.id,
+                    roomId,
+                    npcId: npcIdToSend
+                })
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('Error moving NPC:', response.status, text);
+                return;
+            }
+
+            const data = await response.json();
+
+            updatePlayerData(data);
+
+            setSelectedNpcIndex(null);
+            setSelectedNpcId(null);
+            setMoveNpcMode(false);
+
+            const targetRoomNormalized = normalizeRoomId(roomId);
+
+            const playerInRoom = data.players.find(p => {
+                const playerRoomId =
+                    p.currentRoom?.id ||
+                    p.roomId ||
+                    p.room?.id;
+
+                return normalizeRoomId(playerRoomId) === targetRoomNormalized;
+            });
+
+            if (playerInRoom && roomId !== 37) {
+
+                const movedNpc =
+                    data.npcs.find(n => n.id === npcIdToSend);
+
+                if (movedNpc) {
+
+                    await notifyFight({
+                        attackerId: playerInRoom.user.id,
+                        attackerUsername: playerInRoom.user.username,
+                        defenderId: movedNpc.id,
+                        defenderUsername: movedNpc.isNiallCampbell
+                            ? "Niall Campbell"
+                            : "NPC",
+                        roomId,
+                        isBot: true
+                    });
+
+                }
+            }
+
+        } catch (err) {
+
+            console.error(err);
+
+        } finally {
+
+            setSelectedNpcIndex(null);
+            setSelectedNpcId(null);
+            setMoveNpcMode(false);
+
+        }
+    };
+
+    const performPlayerMove = async (roomId, endpoint, resetMoveMode) => {
+
+        try {
+
+            const isSafeArea = roomId === 37;
+
+            const otherPlayer = getPlayerInRoom(roomId);
+
+            if (otherPlayer && !isSafeArea) {
+
+                setPendingTargetRoom(roomId);
+                setFightDefender(otherPlayer);
+                setIsFightModalOpen(true);
+                resetMoveMode(false);
+
+                await notifyFight({
+                    attackerId: currentUser.id,
+                    attackerUsername: currentUser.username,
+                    defenderId: otherPlayer.user.id,
+                    defenderUsername: otherPlayer.user.username,
+                    roomId
+                });
+
+                return;
+            }
+
+            const botInRoom = getNpcInRoom(roomId);
+
+            if (botInRoom && !isSafeArea) {
+
+                const currentPlayerData = currentPlayer?.[0];
+
+                setPendingTargetRoom(roomId);
+                setFightDefender(botInRoom);
+                setFightAttacker(currentPlayerData);
+                setIsFightModalOpen(true);
+                resetMoveMode(false);
+
+                try {
+
+                    const consumeResponse = await fetch(
+                        `/api/v1/matches/${matchId}/consume-action-point/${currentUser.id}`,
+                        {
+                            method: "POST",
+                            headers: {
+                                Authorization: `Bearer ${jwt}`,
+                                "Content-Type": "application/json",
+                            },
+                        }
+                    );
+
+                    if (consumeResponse.ok) {
+                        setActionPoints(prev => Math.max(0, prev - 1));
+                    }
+
+                } catch (err) {
+
+                    console.error(err);
+
+                }
+
+                await notifyFight({
+                    attackerId: currentUser.id,
+                    attackerUsername: currentUser.username,
+                    defenderId: botInRoom.id,
+                    defenderUsername: `Bot ${botInRoom.id}`,
+                    roomId,
+                    isBot: true
+                });
+
+                return;
+            }
+
+            const response = await fetch(
+                `/api/v1/matches/${matchId}/${endpoint}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        userId: currentUser.id,
+                        roomId
+                    })
+                }
+            );
+
+            if (response.ok) {
+
+                const data = await response.json();
+
+                updatePlayerData(data);
+
+                const movedPlayer = data.players.find(
+                    p => p.user.id === currentUser.id
+                );
+
+                if (movedPlayer) {
+                    await notifyActionPoints(
+                        currentUser.id,
+                        movedPlayer.actionPoints
+                    );
+                }
+
+                resetMoveMode(false);
+
+            } else {
+
+                resetMoveMode(false);
+                toast.error(response.statusText);
+
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
+    };
+
+    const handleWordMove = async (roomId) => {
+        return performPlayerMove(
+            roomId,
+            "moveByLetters",
+            setMoveToRoomWithWord
+        );
+    };
+
+    const handleAdjacentMove = async (roomId) => {
+        return performPlayerMove(
+            roomId,
+            "move",
+            setMoveToAdyacentRoom
+        );
+    };
+     
+
+
 
     const move = async (roomId) => {
         // Si vamos a mover un NPC
         if (moveNpcMode) {
-            if (selectedNpcIndex === null) {
-                alert('Selecciona primero un NPC en el mapa');
-                return;
-            }
-
-            const npc = match?.npcs?.[selectedNpcIndex];
-            const npcIdToSend = npc?.id ?? null;
-            if (!npcIdToSend) {
-                alert('No se puede mover: el NPC no tiene identificador. Reinicia el servidor backend.');
-                setSelectedNpcIndex(null);
-                setSelectedNpcId(null);
-                setMoveNpcMode(false);
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/v1/matches/${matchId}/moveNpc`, {
-                    method: 'PUT',
-                    headers: {
-                        Authorization: `Bearer ${jwt}`,
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ userId: currentUser.id, roomId: roomId, npcId: npcIdToSend })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    updatePlayerData(data);
-                    setSelectedNpcIndex(null);
-                    setSelectedNpcId(null);
-                    setMoveNpcMode(false);
-
-                    // Verificar si hay un jugador en la habitación destino
-                    const targetRoomNormalized = normalizeRoomId(roomId);
-                    const playerInRoom = data.players.find(p => {
-                        const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
-                        return normalizeRoomId(playerRoomId) === targetRoomNormalized;
-                    });
-
-                    if (playerInRoom && roomId !== 37) {
-                        // Encontrar el NPC que se acaba de mover
-                        const movedNpc = data.npcs.find(n => n.id === npcIdToSend);
-                        
-                        if (movedNpc) {
-                            // Notificar a todos los jugadores sobre el combate (incluido el jugador local)
-                            // No abrir el modal aquí - se abrirá cuando llegue la notificación WebSocket
-                            await notifyFight({attackerId: playerInRoom.user.id,attackerUsername: playerInRoom.user.username,defenderId: movedNpc.id,defenderUsername: movedNpc.isNiallCampbell? "Niall Campbell": "NPC",roomId,isBot: true });
-                        }
-                    }
-                } else {
-                    const text = await response.text();
-                    console.error('Error moving NPC:', response.status, text);
-                    setSelectedNpcIndex(null);
-                    setSelectedNpcId(null);
-                    setMoveNpcMode(false);
-                }
-            } catch (err) {
-                console.error('Error moving NPC:', err);
-                setSelectedNpcIndex(null);
-                setSelectedNpcId(null);
-                setMoveNpcMode(false);
-            }
-            return;
+            return handleNpcMove(roomId);
         }
-
-        // Player move flow
-        //console.log('roomId destino', roomId)
-        //console.log('actual roomID', currentPlayer?.?.currentRoom?.id || currentPlayer?.?.roomId || currentPlayer?.?.room?.id)
         
         // Move with words flow
         if (moveToRoomWithWord === true){
-            try {
-                const isSafeArea = roomId === 37;
-                const otherPlayer = getPlayerInRoom(roomId);
-            
-                if (otherPlayer && !isSafeArea) {
-                    setPendingTargetRoom(roomId);
-                    setFightDefender(otherPlayer);
-                    setIsFightModalOpen(true);
-                    setMoveToRoomWithWord(false);
-
-                    await notifyFight({attackerId: currentUser.id,attackerUsername: currentUser.username,defenderId: otherPlayer.user.id,defenderUsername: otherPlayer.user.username,roomId});
-                    return;
-                }
-
-                // Detectar NPCs en la habitación de destino
-                const botInRoom = getNpcInRoom(roomId);
-
-                if (botInRoom && !isSafeArea) {
-                    const currentPlayerData = currentPlayer?.[0];
-                    setPendingTargetRoom(roomId);
-                    setFightDefender(botInRoom);
-                    setFightAttacker(currentPlayerData);
-                    setIsFightModalOpen(true);
-                    setMoveToRoomWithWord(false);
-
-                    // Consumir 1 punto de acción por el intento de movimiento, incluso si luego se pierde la batalla
-                    try {
-                        const consumeResponse = await fetch(`/api/v1/matches/${matchId}/consume-action-point/${currentUser.id}`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${jwt}`,
-                                'Content-Type': 'application/json',
-                            },
-                        });
-                        if (consumeResponse.ok) {
-                            setActionPoints(prev => Math.max(0, prev - 1));
-                        }
-                    } catch (err) {
-                        console.error('Error consuming action point on NPC fight start:', err);
-                    }
-                    
-    
-                    
-                    return;
-                }
-
-                const response = await fetch(`/api/v1/matches/${matchId}/moveByLetters`, {
-                    method: "PUT",
-                    headers: {
-                        Authorization: `Bearer ${jwt}`,
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        userId: currentUser.id,
-                        roomId: roomId
-                    })
-                })
-
-                if (response.ok) {
-                    const data = await response.json()
-                    updatePlayerData(data);
-                    const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
-                    if (movedPlayer) {
-                        await notifyActionPoints(currentUser.id, movedPlayer.actionPoints);
-                    }
-                    setMoveToRoomWithWord(false)
-                } else {
-                    setMoveToRoomWithWord(false)
-                    toast.error(response.statusText)
-                }
-            } catch (error) {
-                console.log('error', error)
-            }
-            return;
+            return handleWordMove(roomId);
         }
         
         if (moveToAdyacentRoom===false) return ;
         if (moveToAdyacentRoom === true){
-            try {
-                const currentRoomId = currentPlayer?.currentRoom?.id || currentPlayer?.roomId || currentPlayer?.room?.id;
-                if (!areRoomsAdjacent(adjacencies, currentRoomId, roomId)) {
-                    toast.error("You cannot move to a room that is not adyacent");
-                    setMoveToAdyacentRoom(false);
-                    return;
-                }
-
-                const isSafeArea = roomId === 37;
-                const otherPlayer = getPlayerInRoom(roomId);
-                
-
-                if (otherPlayer && !isSafeArea) {
-                    setPendingTargetRoom(roomId);
-                    setFightDefender(otherPlayer);
-                    setIsFightModalOpen(true);
-                    setMoveToAdyacentRoom(false);
-                    
-                     await notifyFight({attackerId: currentUser.id,attackerUsername: currentUser.username,defenderId: otherPlayer.user.id,defenderUsername: otherPlayer.user.username,roomId});
-                    
-                    return;
-                }
-
-                // Detectar NPCs en la habitación de destino
-                console.log('Buscando NPCs. match?.npcs:', match?.npcs);
-                const botInRoom = getNpcInRoom(roomId);
-
-                console.log('botInRoom encontrado:', botInRoom);
-                if (botInRoom && !isSafeArea) {
-                    const currentPlayerData = currentPlayer?.[0];
-                    setPendingTargetRoom(roomId);
-                    setFightDefender(botInRoom);
-                    setFightAttacker(currentPlayerData);
-                    setIsFightModalOpen(true);
-                    setMoveToAdyacentRoom(false);
-
-                    // Consumir 1 punto de acción por el intento de movimiento, incluso si luego se pierde la batalla
-                    try {
-                        const consumeResponse = await fetch(`/api/v1/matches/${matchId}/consume-action-point/${currentUser.id}`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${jwt}`,
-                                'Content-Type': 'application/json',
-                            },
-                        });
-                        if (consumeResponse.ok) {
-                            setActionPoints(prev => Math.max(0, prev - 1));
-                        }
-                    } catch (err) {
-                        console.error('Error consuming action point on NPC fight start:', err);
-                    }
-                  
-                    await notifyFight({attackerId: currentUser.id,attackerUsername: currentUser.username,defenderId: botInRoom.id,defenderUsername: `Bot ${botInRoom.id}`,roomId,isBot: true});
-                    return;
-                }
-
-                {console.log(roomId)}
-                const response = await fetch (`/api/v1/matches/${matchId}/move`, {
-                method: "PUT",
-                headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                }, body: JSON.stringify({
-                    userId: currentUser.id,
-                    roomId: roomId
-                }) 
-
-                })
-
-                if (response.ok) {
-                    const data = await response.json();
-                    updatePlayerData(data);
-                    const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
-                    if (movedPlayer) {
-                        await notifyActionPoints(currentUser.id, movedPlayer.actionPoints);
-                    }
-                    setMoveToAdyacentRoom(false);
-                } else {
-                    setMoveToAdyacentRoom(false);
-                    toast.error(response.statusText);
-                }
-            } catch (error) {
-                console.log('error', error);
-            }
+            return handleAdjacentMove(roomId);
         }
     }
 
