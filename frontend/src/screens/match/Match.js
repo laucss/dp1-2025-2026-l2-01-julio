@@ -640,13 +640,6 @@ export default function Match(){
         }
     }
 
-    /*
-    console.log('hand' , handCards)
-    console.log('bag' , bagCards)
-    */
-    //console.log('deck' , deck)
-    //console.log('match', match)
-    
 
     // FUNCION ROBAR CARTA
     const drawCard = async () => { 
@@ -789,6 +782,28 @@ export default function Match(){
         });
     };
 
+    const notifyActionPoints = async (userId, actionPoints) => {
+        try {
+            await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    matchId,
+                    userId,
+                    actionPoints
+                })
+            });
+
+            if (userId === currentUser.id) {
+                setActionPoints(actionPoints);
+            }
+        } catch (err) {
+            console.error("Error notifying action points:", err);
+        }
+    };
 
 
     const move = async (roomId) => {
@@ -912,44 +927,28 @@ export default function Match(){
                     return;
                 }
 
-                const response = await fetch (`/api/v1/matches/${matchId}/moveByLetters`, {
-                method: "PUT",
-                headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                }, body: JSON.stringify({
-                    userId: currentUser.id,
-                    roomId: roomId
-                }) 
-
+                const response = await fetch(`/api/v1/matches/${matchId}/moveByLetters`, {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: currentUser.id,
+                        roomId: roomId
+                    })
                 })
 
-                if (response.ok){
+                if (response.ok) {
                     const data = await response.json()
                     updatePlayerData(data);
                     const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
                     if (movedPlayer) {
-                        await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${jwt}`,
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                matchId: matchId,
-                                userId: currentUser.id,
-                                actionPoints: movedPlayer.actionPoints
-                            })
-                        }).catch(err => console.error('Error notifying action points:', err));
-                        
-                        setActionPoints(movedPlayer.actionPoints);
+                        await notifyActionPoints(currentUser.id, movedPlayer.actionPoints);
                     }
-                    
                     setMoveToRoomWithWord(false)
-                }
-
-                else if (!response.ok) {
+                } else {
                     setMoveToRoomWithWord(false)
                     toast.error(response.statusText)
                 }
@@ -1031,36 +1030,20 @@ export default function Match(){
 
                 })
 
-                if (response.ok){
-                    const data = await response.json()
+                if (response.ok) {
+                    const data = await response.json();
                     updatePlayerData(data);
                     const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
                     if (movedPlayer) {
-                        await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${jwt}`,
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                matchId: matchId,
-                                userId: currentUser.id,
-                                actionPoints: movedPlayer.actionPoints
-                            })
-                        }).catch(err => console.error('Error notifying action points:', err));
-                        
-                        setActionPoints(movedPlayer.actionPoints);
+                        await notifyActionPoints(currentUser.id, movedPlayer.actionPoints);
                     }
-                    
-                    setMoveToAdyacentRoom(false)
-                }
-
-                else if (!response.ok) {
-                    setMoveToAdyacentRoom(false)
-                    toast.error(response.statusText)
+                    setMoveToAdyacentRoom(false);
+                } else {
+                    setMoveToAdyacentRoom(false);
+                    toast.error(response.statusText);
                 }
             } catch (error) {
-                console.log('error', error)
+                console.log('error', error);
             }
         }
     }
@@ -1091,18 +1074,7 @@ export default function Match(){
                 
             const movedPlayer = data.players.find(p => p.user.id === userId);
             if (movedPlayer) {
-                await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${jwt}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        matchId: matchId,
-                        userId: userId,
-                        actionPoints: movedPlayer.actionPoints
-                    })
-                }).catch(err => console.error('Error notifying action points:', err));
+                await notifyActionPoints(userId,movedPlayer.actionPoints);
             }
             return data;
         } catch (err) {
