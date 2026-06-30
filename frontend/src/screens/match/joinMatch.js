@@ -22,7 +22,7 @@ export default function JoinMatch() {
 
   const fetchLobbies = async (status, currentPage = 0) => {
     try {
-      const response = await fetch(`/api/v1/matches/lobbies?status=${status}&page=${currentPage}&size=10`, {
+      const response = await fetch(`/api/v1/lobbies?status=${status}&page=${currentPage}&size=10`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
 
@@ -44,7 +44,7 @@ export default function JoinMatch() {
 
   const handleJoin = async (match) => {
     try {
-      const response = await fetch(`/api/v1/matches/lobbies/${match.id}/join`, {
+      const response = await fetch(`/api/v1/lobbies/${match.id}/join`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -74,7 +74,7 @@ export default function JoinMatch() {
 
     const handleSpectate = async (match) => {
     try {
-      const response = await fetch(`/api/v1/matches/lobbies/${match.id}/join`, {
+      const response = await fetch(`/api/v1/lobbies/${match.id}/join`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -110,7 +110,7 @@ export default function JoinMatch() {
     }
 
     try {
-      const response = await fetch(`/api/v1/matches/lobbies/join/private?code=${privateCode}`, {
+      const response = await fetch(`/api/v1/lobbies/join/private?code=${privateCode}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -141,32 +141,34 @@ export default function JoinMatch() {
       </td>
       <td className="text-center">
         <ButtonGroup>
-          {match.players && match.players.length >= match.maxPlayers ? (
-            <Button
-              size="sm"
-              color="danger" // rojo
-              disabled       // no se puede hacer click
-            >
-              FULL
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              color="success"
-              aria-label={"join-" + match.name}
-              onClick={() => handleJoin(match)}
-            >
-              Join
-            </Button>
-          )}
+          {match.status === "WAITING" &&
+            (match.players && match.players.length >= match.maxPlayers ? (
+              <Button
+                size="sm"
+                color="danger"
+                disabled
+              >
+                FULL
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                color="success"
+                aria-label={`join-${match.name}`}
+                onClick={() => handleJoin(match)}
+              >
+                Join
+              </Button>
+            ))}
+
           <Button
-              size="sm"
-              color="info"
-              aria-label={"join-" + match.name}
-              onClick={() => handleSpectate(match)}
-            >
-              Spectate
-            </Button>
+            size="sm"
+            color="info"
+            aria-label={`spectate-${match.name}`}
+            onClick={() => handleSpectate(match)}
+          >
+            Spectate
+          </Button>
         </ButtonGroup>
       </td>
     </tr>

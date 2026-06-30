@@ -26,7 +26,7 @@ export default function WaitingRoom() {
 
   const [lobby, setLobby] = useFetchState(
     [],
-    `/api/v1/matches/lobbies/${matchId}`,
+    `/api/v1/lobbies/${matchId}`,
     jwt,
     setMessage,
     setVisible
@@ -146,7 +146,7 @@ export default function WaitingRoom() {
 
 
   const leaveLobby = async () => {
-    await fetch(`/api/v1/matches/lobbies/${matchId}/leave`, {
+    await fetch(`/api/v1/lobbies/${matchId}/leave`, {
       method: "POST",
       headers: { Authorization: `Bearer ${jwt}` },
     });
@@ -154,7 +154,7 @@ export default function WaitingRoom() {
   };
 
   const startGame = async () => {
-    await fetch(`/api/v1/matches/lobbies/${matchId}/start`, {
+    await fetch(`/api/v1/lobbies/${matchId}/start`, {
       method: "POST",
       headers: { Authorization: `Bearer ${jwt}` },
     });

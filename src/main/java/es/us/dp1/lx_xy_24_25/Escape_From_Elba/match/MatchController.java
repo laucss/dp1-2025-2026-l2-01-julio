@@ -3,7 +3,6 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -11,7 +10,6 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -51,14 +48,11 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ReadyStateUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.WeaponsUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -69,7 +63,6 @@ import jakarta.validation.Valid;
 @SecurityRequirement(name = "bearerAuth")
 public class MatchController {
     MatchService ms;
-    LobbyService ls;
     PlayerService playerService;
     HandService handService; 
     BagService bagService; 
@@ -78,11 +71,10 @@ public class MatchController {
     RoomService roomService;
 
     @Autowired
-    public MatchController(MatchService ms, LobbyService ls, PlayerService playerService, HandService handService, 
+    public MatchController(MatchService ms, PlayerService playerService, HandService handService, 
                           BagService bagService, DeckService deckService, MatchWebsocketController matchWebsocketController,
                           RoomService roomService){
         this.ms=ms;
-        this.ls=ls;
         this.playerService=playerService;
         this.handService=handService; 
         this.bagService=bagService; 
@@ -114,23 +106,7 @@ public class MatchController {
         return m;
     }
 
-    @GetMapping("/lobbies/private/{matchId}")
-    public Optional<Match> getPrivateGame(@ParameterObject String code){
-        return ls.getPrivateLobby(code);
-    }
-
-    @GetMapping("/lobbies/{matchId}")
-    public Optional<Match> getLobbyById(@PathVariable("matchId") Integer matchId) {
-        return ls.getById(matchId);
-    }
-
-    @GetMapping("/lobbies")
-    @Operation(summary = "Get public matches", description = "Get all public matches available to join.")
-    public Page<Match> getPublicGames(@RequestParam MatchStatus status,
-                                        @RequestParam(defaultValue = "0") Integer page,
-                                        @RequestParam(defaultValue = "10") Integer size) {
-        return ls.getAllPublicGamesByStatus(status,page,size);
-    }
+    
 
     @GetMapping("/all-Matches")
     public Page<MatchHistorialDTO> getAllMatches(@ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
@@ -163,11 +139,6 @@ public class MatchController {
         return matchesWon.map(MatchHistorialDTO::new);
     }
 
-    @GetMapping("/lobbies/privates")
-    public List<Match> getPrivateLobbies(){
-        return ls.getAllPrivateLobbies();
-    }
-
     @GetMapping("/{matchId}/players")
     public List<Player> getPlayersByMatchId(@PathVariable("matchId") Integer matchId) {
         return playerService.getPlayersByMatchId(matchId);
@@ -184,47 +155,6 @@ public class MatchController {
         return ms.userInMatch(userId);
     }
 
-    
-    @PostMapping("/lobbies")
-    @Operation(summary = "Create lobby", description = "Create a new game.")
-    @ResponseStatus(HttpStatus.CREATED)
-    public  ResponseEntity<Match> createLobby(@Valid @RequestBody LobbyDTO lobbyDTO) {
-        Match saved= ls.createLobby(lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers(), lobbyDTO.getNumNpcs());
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
-
-    @PostMapping("/lobbies/{matchId}/join")
-    @Operation(summary = "Join public lobby", description = "Join a public lobby from a list of available lobbies.")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Match> joinLobby(@Parameter(description = "Id of the lobby to join") @PathVariable Integer matchId) {
-        Match joinedMatch = ls.joinLobby(matchId);
-
-        return ResponseEntity.ok(joinedMatch);
-
-
-    }
-    
-    @PostMapping("/lobbies/join/private")
-    @Operation(summary = "Join private lobby", description = "Join a private lobby using its code.")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Match> joinPrivateLobby(@RequestParam String code) {
-        Match joinedMatch = ls.joinPrivateLobby(code);
-        return ResponseEntity.ok(joinedMatch);
-    }
-
-    @PostMapping("/lobbies/{matchId}/leave")
-    @Operation(summary = "Leave a lobby", description = "Leva a lobby before the game starts.")
-    public ResponseEntity<Match> leaveLobby(@Parameter(description = "Id of the lobby to leave") @PathVariable Integer matchId) {
-        Match leftMatch = ls.leaveLobby(matchId);
-        return ResponseEntity.ok(leftMatch);
-    }
-
-    @PostMapping("/lobbies/{matchId}/start")
-    @Operation(summary = "Start match", description = "Start a match from a lobby.")
-    public ResponseEntity<MatchDTO> startMatch(@Parameter(description = "Id of the lobby to start the match") @PathVariable Integer matchId) {
-        Match startedMatch = ms.startMatch(matchId);
-        return ResponseEntity.ok(new MatchDTO(startedMatch));
-    }
 
     @PostMapping("/{matchId}/submit-dice")
     @Operation(summary = "Decide order", description = "Submit dice roll to decide player order at the start of the match.")

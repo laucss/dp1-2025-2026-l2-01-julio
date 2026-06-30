@@ -7,7 +7,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.*;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
@@ -17,12 +17,12 @@ import java.util.Optional;
 @Component
 public class Checkers {
 
-    private final MatchRepository matchRepository;
+    private final LobbyRepository lobbyRepository;
     private final CardRepository cardRepository; 
     private final PlayerRepository playerRepository;
 
-    public Checkers(MatchRepository matchRepository, PlayerRepository playerRepository, CardRepository cardRepository) {
-        this.matchRepository = matchRepository;
+    public Checkers(LobbyRepository lobbyRepository, PlayerRepository playerRepository, CardRepository cardRepository) {
+        this.lobbyRepository = lobbyRepository;
         this.playerRepository = playerRepository;
         this.cardRepository = cardRepository; 
     }
@@ -45,7 +45,7 @@ public class Checkers {
 
     
     public void checkPlayerAlreadyInALobby(User user){
-        if(matchRepository.findLobbyWhereUserIsIn(user.getId()).isPresent()){
+        if(lobbyRepository.findLobbyWhereUserIsIn(user.getId()).isPresent()){
             throw new PlayerAlreadyInALobbyException("The player is already in a lobby");
 
         }
