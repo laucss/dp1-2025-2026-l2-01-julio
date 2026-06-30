@@ -1,11 +1,8 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
-//cambio para merge en FSS8078
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-//import scala.concurrent.duration.Duration;
-
 
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -13,11 +10,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
@@ -46,27 +40,40 @@ import jakarta.validation.constraints.NotNull;
 @EqualsAndHashCode(of = "id")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Match extends NamedEntity {
+
+    // -------------------------------------------------------- ATRIBUTOS --------------------------------------------------------
     
+    // Código
     private String code;
 
-    //@NotNull
-    private Integer creatorId;
-    
+    // Indica si la partida es privada
+    @NotNull
+    private Boolean isPrivate;
+
+    // Estado: WAITING, PLAYING, VOTING, FINISHED
     @Enumerated(EnumType.STRING)
     private MatchStatus status;
 
-    
-    
+    //Indica la fase actual del turno
+    @Enumerated(EnumType.STRING)
+    private TurnPhase currentTurnPhase;
+
+    private Integer currentTurnUserId;
+
+    private Integer turnNumber;
+
     //Tiempos
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
+    // Creador
+    //@NotNull
+    private Integer creatorId;
 
-    public Duration getDuration() {
-        if(startTime == null || endTime == null) return null;
-        return Duration.between(startTime, endTime);
-    }
-    
+    // Ganador
+    @OneToOne(optional = true)
+    @JoinColumn(name = "winner_id")
+    private Player winner;
 
     //Máximo y mínimo de jugadores
     @Min(3)
@@ -79,61 +86,35 @@ public class Match extends NamedEntity {
     @Max(6)
     private Integer minPlayers = 3;
 
-    //Validación para asegurar que minplayers es menor o igual que maxplayers???
-    @AssertTrue(message = "minPlayers debe ser menor o igual que maxPlayers")
-    private boolean isPlayerLimitsValid() {
-        if (minPlayers == null || maxPlayers == null) 
-            return true;
-        return minPlayers <= maxPlayers;
-    }
-
     //Jugadores 
     @NotNull
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Player> players = new ArrayList<>(); 
 
-
     //Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)
-
     private Integer numNpcs = 3;
 
-
-    //Npcs 
+    //Lista de Npcs 
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Npc> npcs = new ArrayList<>();
 
-    private Integer currentTurnUserId;
-
-    private Integer turnNumber;
-
-    //Indica la fase actual del turno
-    @Enumerated(EnumType.STRING)
-    private TurnPhase currentTurnPhase;
 
     @Transient // transient porque no se guardan en la base de datos 
     private DeckInGame deck; 
 
+    // Habitaciones
     @Transient
     private List<RoomDTO> roomsState = new ArrayList<>();
 
-    @OneToOne(optional = true)
-    @JoinColumn(name = "winner_id")
-    private Player winner;
-    /*
-    @NotNull
-    @OneToOne(cascade = CascadeType.ALL)
-    private Chat chat;
 
-    @NotNull
-    @OneToOne(cascade = CascadeType.ALL)
-    private Board board;
 
-    */
+    // -------------------------------------------------------- PROPIEDADES DERIVADAS --------------------------------------------------------
 
-    //Indica si la partida es privada
-    @NotNull
-    private Boolean isPrivate;
-
+    public Duration getDuration() {
+        if(startTime == null || endTime == null) return null;
+        return Duration.between(startTime, endTime);
+    }
+    
     public Boolean isInProgress() {
 		return this.getStartTime() != null && this.getEndTime() == null;
 	}
@@ -141,14 +122,6 @@ public class Match extends NamedEntity {
     public Boolean isFinished() {
         return this.getEndTime() != null;
     }
-
-    //añade jugador 
-    /** Version cortita de la que está abajo, hablarlo.
-    public void addPlayer(PlayerInGame player) {
-        this.players.add(player);
-        player.setMatch(this); 
-    }
-    */
 
     public void addPlayer(Player player) {
         if (player == null) throw new IllegalArgumentException("El jugador no puede ser nulo");
@@ -189,7 +162,7 @@ public class Match extends NamedEntity {
         }
     }
 
-    //Código que se genera al indicar que la partida es privada
+    // Código que se genera al indicar que la partida es privada
     public String generateCodeLobby() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         SecureRandom random = new SecureRandom();
@@ -205,11 +178,22 @@ public class Match extends NamedEntity {
 
 
     public List<RoomDTO> getRoomsState() {
-    return roomsState;
+        return roomsState;
     }
 
     public void setRoomsState(List<RoomDTO> roomsState) {
-    this.roomsState = roomsState;
+        this.roomsState = roomsState;
+    }
+
+
+    // -------------------------------------------------------- VALIDACIONES --------------------------------------------------------
+
+    // Validación para asegurar que minplayers es menor o igual que maxplayers
+    @AssertTrue(message = "minPlayers debe ser menor o igual que maxPlayers")
+    private boolean isPlayerLimitsValid() {
+        if (minPlayers == null || maxPlayers == null) 
+            return true;
+        return minPlayers <= maxPlayers;
     }
 
 
