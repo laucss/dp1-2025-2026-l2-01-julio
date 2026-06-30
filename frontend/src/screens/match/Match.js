@@ -762,6 +762,33 @@ export default function Match(){
         }
     };
 
+    const notifyFight = async ({
+        attackerId,
+        attackerUsername,
+        defenderId,
+        defenderUsername,
+        roomId,
+        isBot = false
+    }) => {
+        await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                matchId,
+                attackerId,
+                attackerUsername,
+                defenderId,
+                defenderUsername,
+                roomId,
+                action: "START",
+                isBot
+            })
+        });
+    };
+
 
 
     const move = async (roomId) => {
@@ -814,23 +841,7 @@ export default function Match(){
                         if (movedNpc) {
                             // Notificar a todos los jugadores sobre el combate (incluido el jugador local)
                             // No abrir el modal aquí - se abrirá cuando llegue la notificación WebSocket
-                            await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
-                                method: 'POST',
-                                headers: {
-                                    'Authorization': `Bearer ${jwt}`,
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    matchId: matchId,
-                                    attackerId: playerInRoom.user.id,
-                                    attackerUsername: playerInRoom.user.username,
-                                    defenderId: movedNpc.id,
-                                    defenderUsername: movedNpc.isNiallCampbell ? 'NiallCampbell' : 'NPC',
-                                    roomId: roomId,
-                                    action: 'START',
-                                    isBot: true
-                                })
-                            });
+                            await notifyFight({attackerId: playerInRoom.user.id,attackerUsername: playerInRoom.user.username,defenderId: movedNpc.id,defenderUsername: movedNpc.isNiallCampbell? "Niall Campbell": "NPC",roomId,isBot: true });
                         }
                     }
                 } else {
@@ -864,24 +875,8 @@ export default function Match(){
                     setFightDefender(otherPlayer);
                     setIsFightModalOpen(true);
                     setMoveToRoomWithWord(false);
-                    
-                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${jwt}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            matchId: matchId,
-                            attackerId: currentUser.id,
-                            attackerUsername: currentUser.username,
-                            defenderId: otherPlayer.user.id,
-                            defenderUsername: otherPlayer.user.username,
-                            roomId: roomId,
-                            action: 'START'
-                        })
-                    });
-                    
+
+                    await notifyFight({attackerId: currentUser.id,attackerUsername: currentUser.username,defenderId: otherPlayer.user.id,defenderUsername: otherPlayer.user.username,roomId});
                     return;
                 }
 
@@ -912,23 +907,7 @@ export default function Match(){
                         console.error('Error consuming action point on NPC fight start:', err);
                     }
                     
-                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${jwt}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            matchId: matchId,
-                            attackerId: currentUser.id,
-                            attackerUsername: currentUser.username,
-                            defenderId: botInRoom.id,
-                            defenderUsername: `Bot ${botInRoom.id}`,
-                            roomId: roomId,
-                            action: 'START',
-                            isBot: true
-                        })
-                    });
+    
                     
                     return;
                 }
@@ -1000,22 +979,7 @@ export default function Match(){
                     setIsFightModalOpen(true);
                     setMoveToAdyacentRoom(false);
                     
-                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${jwt}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            matchId: matchId,
-                            attackerId: currentUser.id,
-                            attackerUsername: currentUser.username,
-                            defenderId: otherPlayer.user.id,
-                            defenderUsername: otherPlayer.user.username,
-                            roomId: roomId,
-                            action: 'START'
-                        })
-                    });
+                     await notifyFight({attackerId: currentUser.id,attackerUsername: currentUser.username,defenderId: otherPlayer.user.id,defenderUsername: otherPlayer.user.username,roomId});
                     
                     return;
                 }
@@ -1048,25 +1012,8 @@ export default function Match(){
                     } catch (err) {
                         console.error('Error consuming action point on NPC fight start:', err);
                     }
-                    
-                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${jwt}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            matchId: matchId,
-                            attackerId: currentUser.id,
-                            attackerUsername: currentUser.username,
-                            defenderId: botInRoom.id,
-                            defenderUsername: `Bot ${botInRoom.id}`,
-                            roomId: roomId,
-                            action: 'START',
-                            isBot: true
-                        })
-                    });
-                    
+                  
+                    await notifyFight({attackerId: currentUser.id,attackerUsername: currentUser.username,defenderId: botInRoom.id,defenderUsername: `Bot ${botInRoom.id}`,roomId,isBot: true});
                     return;
                 }
 
