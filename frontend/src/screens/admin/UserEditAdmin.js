@@ -15,6 +15,7 @@ export default function UserEditAdmin() {
     id: null,
     username: "",
     password: "",
+    email: "",
     authority: null,
   };
   const id = getIdFromUrl(2);
@@ -43,24 +44,63 @@ export default function UserEditAdmin() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    const body = { ...user, password: password};
-    fetch("/api/v1/users" + (user.id ? "/" + user.id : ""), {
-      method: user.id ? "PUT" : "POST",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    })
-      .then((response) => response.json())
-      .then((json) => {
-        if (json.message) {
-          setMessage(json.message);
-          setVisible(true);
-        } else window.location.href = "/users";
+    if (!user.id) {
+      const body = { 
+        username: user.username, 
+        password: password, 
+        email: user.email, 
+        authority: user.authority?.authority 
+      }
+      fetch("/api/v1/auth/signup", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+      .then((response) => {
+          if (!response.ok) {
+            throw new Error("There have been an error while siging up the user");
+          }
+          return response.json();
+        })
+      .then(() => {
+        alert("User successfully registered.");
+        window.location.href = "/users";
       })
       .catch((message) => alert(message));
+
+    } else {
+      const body = { 
+        id: user.id,
+        username: user.username, 
+        password: password, 
+        email: user.email, 
+        authority: user.authority 
+      }
+      fetch(`/api/v1/users/${user.id}` , {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("There have been an error while updating the user");
+        }
+        return response.json();
+      })
+      .then(() => {
+        alert("User successfully updated.");
+        window.location.href = "/users";
+      })
+        .catch((message) => alert(message));
+    }
   }
 
   const modal = getErrorModal(setVisible, visible, message);
@@ -91,14 +131,29 @@ export default function UserEditAdmin() {
             />
           </div>
           <div className="custom-form-input">
+            <Label for="email" className="custom-form-input-label">
+              Email
+            </Label>
+            <Input
+              type="email"
+              required
+              name="email"
+              id="email"
+              value={user.email || ""}
+              onChange={handleChange}
+              className="custom-input"
+            />
+          </div>
+          <div className="custom-form-input">
             <Label for="password" className="custom-form-input-label">
               Password
             </Label>
             <Input
               type="password"
+              required
               name="password"
               id="password"
-              value={password}
+              value={password }
               onChange={(e) => setPassword(e.target.value)}
               className="custom-input"
             />
