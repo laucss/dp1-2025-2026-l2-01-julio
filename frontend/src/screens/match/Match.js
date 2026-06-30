@@ -563,10 +563,7 @@ export default function Match(){
             }
 
             const data = await response.json();
-            console.log('movePlayerToRoom success', data);
-            setMatch(data);
-            if (data.players) {
-                setPlayer(data.players);
+            updatePlayerData(data);
                 
                 // Si el ganador es el jugador actual, actualizar los puntos de acción
                 const movedPlayer = data.players.find(p => p.user.id === currentUser?.id);
@@ -574,7 +571,6 @@ export default function Match(){
                     setActionPoints(movedPlayer.actionPoints);
                     console.log('Action points updated for winner:', movedPlayer.actionPoints);
                 }
-            }
             return data;
         } catch (err) {
             console.error('Error moving player:', err);
@@ -742,6 +738,30 @@ export default function Match(){
         });
     };
 
+    const updatePlayerData = (data) => {
+        setMatch(data);
+
+        if (!data.players) return;
+
+        setPlayer(data.players);
+
+        const me = data.players.find(
+            p => p.user.id === currentUser.id
+        );
+
+        if (me) {
+            setCurrentPlayer([me]);
+            setPlayersList(
+                data.players.filter(
+                    p => p.user.id !== currentUser.id
+                )
+            );
+
+            setActionPoints(me.actionPoints ?? actionPoints);
+            setStrength(Math.min(6, me.strength ?? strength));
+        }
+    };
+
 
 
     const move = async (roomId) => {
@@ -775,17 +795,7 @@ export default function Match(){
 
                 if (response.ok) {
                     const data = await response.json();
-                    setMatch(data);
-                    if (data.players) {
-                        setPlayer(data.players);
-                        const me = data.players.find(p => p.user.id === currentUser.id);
-                        if (me) {
-                            setCurrentPlayer([me]);
-                            setPlayersList(data.players.filter(p => p.user.id !== currentUser.id));
-                            setActionPoints(me.actionPoints ?? actionPoints);
-                            setStrength(Math.min(6, me.strength ?? strength));
-                        }
-                    }
+                    updatePlayerData(data);
                     setSelectedNpcIndex(null);
                     setSelectedNpcId(null);
                     setMoveNpcMode(false);
@@ -938,16 +948,7 @@ export default function Match(){
 
                 if (response.ok){
                     const data = await response.json()
-                    setMatch(data)
-                    if (data.players) {
-                        setPlayer(data.players)
-                        const me = data.players.find(p => p.user.id === currentUser.id)
-                        if (me) {
-                            setCurrentPlayer([me])
-                            setPlayersList(data.players.filter(p => p.user.id !== currentUser.id))
-                        }
-                    }
-                    
+                    updatePlayerData(data);
                     const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
                     if (movedPlayer) {
                         await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
@@ -1085,16 +1086,7 @@ export default function Match(){
 
                 if (response.ok){
                     const data = await response.json()
-                    setMatch(data)
-                    if (data.players) {
-                        setPlayer(data.players)
-                        const me = data.players.find(p => p.user.id === currentUser.id)
-                        if (me) {
-                            setCurrentPlayer([me])
-                            setPlayersList(data.players.filter(p => p.user.id !== currentUser.id))
-                        }
-                    }
-                    
+                    updatePlayerData(data);
                     const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
                     if (movedPlayer) {
                         await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
@@ -1126,144 +1118,7 @@ export default function Match(){
         }
     }
 
-    const moveWithWords = async (roomId) => {
-        if (moveToRoomWithWord===false) return ;
-        if (moveToRoomWithWord === true){
-            try {
-
-                const isSafeArea = roomId === 37;
-                const otherPlayer = getPlayerInRoom(roomId);
-                
-
-                if (otherPlayer && !isSafeArea) {
-                    setPendingTargetRoom(roomId);
-                    setFightDefender(otherPlayer);
-                    setIsFightModalOpen(true);
-                    moveToRoomWithWord(false);
-                    
-                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${jwt}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            matchId: matchId,
-                            attackerId: currentUser.id,
-                            attackerUsername: currentUser.username,
-                            defenderId: otherPlayer.user.id,
-                            defenderUsername: otherPlayer.user.username,
-                            roomId: roomId,
-                            action: 'START'
-                        })
-                    });
-                    
-                    return;
-                }
-
-                // Detectar NPCs en la habitación de destino
-                const botInRoom = getNpcInRoom(roomId);
-                if (botInRoom && !isSafeArea) {
-                    const currentPlayerData = currentPlayer?.[0];
-                    setPendingTargetRoom(roomId);
-                    setFightDefender(botInRoom);
-                    setFightAttacker(currentPlayerData);
-                    setIsFightModalOpen(true);
-                    moveToRoomWithWord(false);
-
-                    // Consumir 1 punto de acción por el intento de movimiento, incluso si luego se pierde la batalla
-                    try {
-                        const consumeResponse = await fetch(`/api/v1/matches/${matchId}/consume-action-point/${currentUser.id}`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${jwt}`,
-                                'Content-Type': 'application/json',
-                            },
-                        });
-                        if (consumeResponse.ok) {
-                            setActionPoints(prev => Math.max(0, prev - 1));
-                        }
-                    } catch (err) {
-                        console.error('Error consuming action point on NPC fight start:', err);
-                    }
-                    
-                    await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${jwt}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            matchId: matchId,
-                            attackerId: currentUser.id,
-                            attackerUsername: currentUser.username,
-                            defenderId: botInRoom.id,
-                            defenderUsername: `Bot ${botInRoom.id}`,
-                            roomId: roomId,
-                            action: 'START',
-                            isBot: true
-                        })
-                    });
-                    
-                    return;
-                }
-
-                {console.log(roomId)}
-                const response = await fetch (`/api/v1/matches/${matchId}/moveByLetters`, {
-                method: "PUT",
-                headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                }, body: JSON.stringify({
-                    userId: currentUser.id,
-                    roomId: roomId
-                }) 
-
-                })
-
-                if (response.ok){
-                    const data = await response.json()
-                    setMatch(data)
-                    if (data.players) {
-                        setPlayer(data.players)
-                        const me = data.players.find(p => p.user.id === currentUser.id)
-                        if (me) {
-                            setCurrentPlayer([me])
-                            setPlayersList(data.players.filter(p => p.user.id !== currentUser.id))
-                        }
-                    }
-                    
-                    const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
-                    if (movedPlayer) {
-                        await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${jwt}`,
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                matchId: matchId,
-                                userId: currentUser.id,
-                                actionPoints: movedPlayer.actionPoints
-                            })
-                        }).catch(err => console.error('Error notifying action points:', err));
-                        
-                        setActionPoints(movedPlayer.actionPoints);
-                    }
-                    
-                    setMoveToRoomWithWord(false)
-                }
-
-                else if (!response.ok) {
-                    setMoveToRoomWithWord(false)
-                    toast.error(response.statusText)
-                }
-            } catch (error) {
-                console.log('error', error)
-            }
-        }
-    }
+    
 
     const moveLoserToRandomRoom = async (userId, roomId) => {
         try {
@@ -1285,26 +1140,22 @@ export default function Match(){
             }
 
             const data = await response.json();
-            console.log('movePlayerToRoom success', data);
-            setMatch(data);
-            if (data.players) {
-                setPlayer(data.players);
+            updatePlayerData(data);
                 
-                const movedPlayer = data.players.find(p => p.user.id === userId);
-                if (movedPlayer) {
-                    await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${jwt}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            matchId: matchId,
-                            userId: userId,
-                            actionPoints: movedPlayer.actionPoints
-                        })
-                    }).catch(err => console.error('Error notifying action points:', err));
-                }
+            const movedPlayer = data.players.find(p => p.user.id === userId);
+            if (movedPlayer) {
+                await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jwt}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        matchId: matchId,
+                        userId: userId,
+                        actionPoints: movedPlayer.actionPoints
+                    })
+                }).catch(err => console.error('Error notifying action points:', err));
             }
             return data;
         } catch (err) {
