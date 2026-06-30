@@ -20,6 +20,9 @@ import VotingModal from "./VotingModal";
 import { normalizeRoomId, areRoomsAdjacent } from "./utils/roomUtils";
 import { roomPositions } from "./utils/roomPositions";
 import { getPlayerColor } from "./utils/playersUtil";
+import CurrentPlayerInfo from "./components/CurrentPlayerInfo";
+import DeckSection from "./components/DeckSection";
+import OtherPlayersPanel from "./components/OthersPlayersSection";
 
 // para alerta de errores
 import { toast } from "react-toastify";
@@ -92,10 +95,6 @@ export default function Match(){
     // Determinar si el usuario actual es un espectador
     const isSpectator = !currentUser || !match?.players?.some(p => p.user.id === currentUser.id);
     
-
-
-
-    
     // CARGAR DATOS PARTIDA 
       const [adjacencies, setAdjacencies] = useFetchState(
         [],
@@ -111,7 +110,6 @@ export default function Match(){
     }, [matchId])
     //console.log('match', match)
 
-    
     
     useEffect(() => {
         const client = new Client({
@@ -1595,473 +1593,267 @@ if (!match) {
 
 return (
     <div className={`match-container ${isSpectator ? 'spectator-mode' : ''}`}>
-
-            {/*Modal donde se tiran los dados nada más empezar la partida para elegir el orden de los turnos*/}
-            <StartDiceModal 
-                isOpen={!isSpectator && isDiceModalOpen && (match?.turnNumber === 0 || match?.currentTurnPhase === null)}
-                onClose={() => setIsDiceModalOpen(false)}
-                onDiceRolled={handleDiceRolled}
-                matchData={match}
-            />
-            <EscapeDiceModal
-                isOpen={isEscapeModalOpen}
-                onClose={() => setIsEscapeModalOpen(false)}
-                onResult={async (result) => {
-                    try {
-                        await fetchMatchAndPlayers();
-                        if (!result.success && result.discardRequired) {
-                            setNpcLossModalTitle('Tu intento de escape ha fallado');
-                            setNpcLossModalSubtitle('Elige de donde descartar una carta');
-                            setIsNpcLossModalOpen(true);
-                        }
-                    } catch (err) {
-                        console.error('Error handling escape result:', err);
+        {/* Modal donde se tiran los dados nada más empezar la partida para elegir el orden de los turnos */}
+        <StartDiceModal
+            isOpen={!isSpectator && isDiceModalOpen && (match?.turnNumber === 0 || match?.currentTurnPhase === null)}
+            onClose={() => setIsDiceModalOpen(false)}
+            onDiceRolled={handleDiceRolled}
+            matchData={match}
+        />
+        <EscapeDiceModal
+            isOpen={isEscapeModalOpen}
+            onClose={() => setIsEscapeModalOpen(false)}
+            onResult={async (result) => {
+                try {
+                    await fetchMatchAndPlayers();
+                    if (!result.success && result.discardRequired) {
+                        setNpcLossModalTitle('Tu intento de escape ha fallado');
+                        setNpcLossModalSubtitle('Elige de donde descartar una carta');
+                        setIsNpcLossModalOpen(true);
                     }
-                }}
-            />
-            
-            <div className="match-board" style={{ position: 'relative' }}>
-                <div className="player-and-decks-section"> 
-                    
-                    <div className={`current-player ${isSpectator ? 'spectator-hidden' : ''}`}>
-                        <div className="current-player-info"> 
-                            <div style={{
+                } catch (err) {
+                    console.error('Error handling escape result:', err);
+                }
+            }}
+        />
+
+        <div className="match-board" style={{ position: 'relative' }}>
+            <div className="player-and-decks-section">
+                <div className={`current-player ${isSpectator ? 'spectator-hidden' : ''}`}>
+                    <CurrentPlayerInfo
+                        currentPlayer={currentPlayer}
+                        actionPoints={actionPoints}
+                        strength={strength}
+                        getPlayerColor={getPlayerColor}
+                        players={match?.players}
+                    />
+                </div>
+
+                <DeckSection
+                    numCardsDrawn={numCardsDrawn}
+                    drawCard={drawCard}
+                    canDraw={canDraw}
+                    deck={deck}
+                    match={match}
+                    currentUser={currentUser}
+                />
+            </div>
+
+            <div className="map-container">
+                <div className="board-wrapper">
+                    <map name="Map">
+                        <area className="Area" href="#" target="" alt="Safe Area" title="Safe Area" coords="321,251,84" shape="circle" onClick={(e) => { e.preventDefault(); move(37); }}/>
+                        <area className="Area" href="#" target="" alt="West Tower" title="West Tower" coords="13,489,98,388" shape="rect" onClick={(e) => { e.preventDefault(); move(31); }}/>
+                        <area className="Area" href="#" target="" alt="South Tower" title="South Tower" coords="541,389,628,488" shape="rect" onClick={(e) => { e.preventDefault(); move(36); }}/>
+                        <area className="Area" href="#" target="" alt="North Tower" title="North Tower" coords="13,12,99,113" shape="rect" onClick={(e) => { e.preventDefault(); move(1); }}/>
+                        <area className="Area" href="#" target="" alt="East Tower" title="East Tower" coords="542,11,626,111" shape="rect" onClick={(e) => { e.preventDefault(); move(6); }}/>
+                        <area className="Area" href="#" target="" alt="Caesar Room" title="Caesar Room" coords="110,40,210,114" shape="rect" onClick={(e) => { e.preventDefault(); move(2); }}/>
+                        <area className="Area" href="#" target="" alt="Opal Room" title="Opal Room" coords="220,10,292,69" shape="rect" onClick={(e) => { e.preventDefault(); move(3); }}/>
+                        <area className="Area" href="#" target="" alt="Coral Room" title="Coral Room" coords="345,11,418,69" shape="rect" onClick={(e) => { e.preventDefault(); move(4); }}/>
+                        <area className="Area" href="#" target="" alt="Roof" title="Roof" coords="429,38,530,112" shape="rect" onClick={(e) => { e.preventDefault(); move(5); }}/>
+                        <area className="Area" href="#" target="" alt="Cafe" title="Cafe" coords="293,154,221,80" shape="rect" onClick={(e) => { e.preventDefault(); move(8); }}/>
+                        <area className="Area" href="#" target="" alt="Parlor" title="Parlor" coords="345,81,417,152" shape="rect" onClick={(e) => { e.preventDefault(); move(11); }}/>
+                        <area className="Area" href="#" target="" alt="Pool" title="Pool" coords="369,165,488,166,488,251,419,251,407,206" shape="poly" onClick={(e) => { e.preventDefault(); move(16); }}/>
+                        <area className="Area" href="#" target="" alt="SPA" title="SPA" coords="271,166,237,197,221,236,153,237,152,165" shape="poly" onClick={(e) => { e.preventDefault(); move(15); }}/>
+                        <area className="Area" href="#" target="" alt="Arbor" title="Arbor" coords="151,248,151,334,266,334,236,299,221,250" shape="poly" onClick={(e) => { e.preventDefault(); move(21); }}/>
+                        <area className="Area" href="#" target="" alt="Farm" title="Farm" coords="488,264,488,334,371,334,403,296,416,265" shape="poly" onClick={(e) => { e.preventDefault(); move(22); }}/>
+                        <area className="Area" href="" target="" alt="Ball Room" title="Ball Room" coords="25,166,98,251" shape="rect" onClick={(e) => { e.preventDefault(); move(13); }}/>
+                        <area className="Area" href="" target="" alt="Sleep Room" title="Sleep Room" coords="540,165,614,238" shape="rect" onClick={(e) => { e.preventDefault(); move(18); }}/>
+                        <area className="Area" href="" target="" alt="Class Room" title="Class Room" coords="25,263,97,334" shape="rect" onClick={(e) => { e.preventDefault(); move(19); }}/>
+                        <area className="Area" href="" target="" alt="Meal Room" title="Meal Room" coords="541,249,613,335" shape="rect" onClick={(e) => { e.preventDefault(); move(24); }}/>
+                        <area className="Area" href="" target="" alt="Bar" title="Bar" coords="221,346,292,417" shape="rect" onClick={(e) => { e.preventDefault(); move(26); }}/>
+                        <area className="Area" href="" target="" alt="Lab" title="Lab" coords="346,346,418,418" shape="rect" onClick={(e) => { e.preventDefault(); move(29); }}/>
+                        <area className="Area" href="" target="" alt="Cellar" title="Cellar" coords="109,387,209,460" shape="rect" onClick={(e) => { e.preventDefault(); move(32); }}/>
+                        <area className="Area" href="" target="" alt="Apple Room" title="Apple Room" coords="221,430,293,488" shape="rect" onClick={(e) => { e.preventDefault(); move(33); }}/>
+                        <area className="Area" href="" target="" alt="Parole Room" title="Parole Room" coords="429,387,529,459" shape="rect" onClick={(e) => { e.preventDefault(); move(35); }}/>
+                        <area className="Area" href="" target="" alt="Map Room" title="Map Room" coords="345,430,419,490" shape="rect" onClick={(e) => { e.preventDefault(); move(34); }}/>
+                        <area className="Area" href="" target="" alt="Corridor 1" title="Corridor 1" coords="25,123,209,153" shape="rect" onClick={(e) => { e.preventDefault(); move(7); }}/>
+                        <area className="Area" href="" target="" alt="Corridor 2" title="Corridor 2" coords="304,57,335,155" shape="rect" onClick={(e) => { e.preventDefault(); move(9); }}/>
+                        <area className="Area" href="" target="" alt="Corridor 3" title="Corridor 3" coords="430,122,613,154" shape="rect" onClick={(e) => { e.preventDefault(); move(12); }}/>
+                        <area className="Area" href="" target="" alt="Corridor 4" title="Corridor 4" coords="109,164,141,250" shape="rect" onClick={(e) => { e.preventDefault(); move(14); }}/>
+                        <area className="Area" href="" target="" alt="Corridor 5" title="Corridor 5" coords="500,164,529,238" shape="rect" onClick={(e) => { e.preventDefault(); move(17); }}/>
+                        <area className="Area" href="" target="" alt="Corridor 6" title="Corridor 6" coords="109,262,141,334" shape="rect" onClick={(e) => { e.preventDefault(); move(20); }}/>
+                        <area className="Area" href="" target="" alt="Corridor 7" title="Corridor 7" coords="500,248,529,333" shape="rect" onClick={(e) => { e.preventDefault(); move(23); }}/>
+                        <area className="Area" href="" target="" alt="Corridor 8" title="Corridor 8" coords="25,345,209,376" shape="rect" onClick={(e) => { e.preventDefault(); move(25); }}/>
+                        <area className="Area" href="" target="" alt="Corridor 9" title="Corridor 9" coords="304,345,335,441" shape="rect" onClick={(e) => { e.preventDefault(); move(27); }}/>
+                        <area className="Area" href="" target="" alt="Corridor 10" title="Corridor 10" coords="429,346,613,376" shape="rect" onClick={(e) => { e.preventDefault(); move(30); }}/>
+                    </map>
+                    <img src="/ElbaBoard.png" useMap="#Map" className="Map" />
+                    {match?.players?.map(player => {
+                        if (!player.currentRoom) return null;
+                        const position = roomPositions[player.currentRoom.id];
+                        if (!position) return null;
+                        return (
+                            <img
+                                key={player.id}
+                                src={player.user.avatar || "/Avatar_default.png"}
+                                alt={player.user.username}
+                                title={player.user.username}
+                                style={{
+                                    aspectRatio: '1 / 1',
+                                    position: 'absolute',
+                                    left: `${position.x}px`,
+                                    top: `${position.y}px`,
+                                    transform: 'translate(-50%, -50%)',
+                                    width: '30px',
+                                    height: '30px',
                                     borderRadius: '50%',
-                                    border: `4px solid ${getPlayerColor(match?.players || [], currentPlayer?.id)}`,
-                                    display: "flex",
-                                    flexShrink: 0,
-                                    boxSizing: 'border-box',
+                                    border: `3px solid ${getPlayerColor(match?.players || [], player.id)}`,
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                                    zIndex: 10,
+                                    pointerEvents: 'none',
+                                    transition: 'left 0.5s ease, top 0.5s ease'
+                                }}
+                            />
+                        );
+                    })}
+                    {match?.npcs?.map((npc, index) => {
+                        if (!npc.room) return null;
+                        const position = roomPositions[npc.room.id];
+                        if (!position) return null;
+                        const isSelectable = moveNpcMode && !isSpectator && match?.currentTurnUserId === currentUser?.id;
+                        const isSelected = selectedNpcIndex === index || (selectedNpcId != null && selectedNpcId === npc.id);
+                        return (
+                            <div
+                                key={`npc-${index}`}
+                                title={npc.name || `NPC ${index + 1}`}
+                                onClick={(e) => {
+                                    if (!isSelectable) return;
+                                    e.stopPropagation();
+                                    setSelectedNpcIndex(index);
+                                    setSelectedNpcId(npc.id ?? null);
+                                }}
+                                style={{
+                                    position: 'absolute',
+                                    left: `${position.x}px`,
+                                    top: `${position.y}px`,
+                                    transform: 'translate(-50%, -50%)',
+                                    width: '25px',
+                                    height: '25px',
+                                    borderRadius: '50%',
+                                    backgroundColor: npc.isNiallCampbell ? '#ff0000' : '#666',
+                                    border: isSelected ? '3px solid yellow' : '2px solid white',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                                    zIndex: 20,
+                                    pointerEvents: isSelectable ? 'auto' : 'none',
+                                    display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                }}>
-                                    {currentPlayer?.user?.avatar ? (
-                                        <img src={currentPlayer.user.avatar} alt={`${currentPlayer.user.username} avatar`} className="current-avatar-img" style={{ borderRadius: '50%' }} />
-                                    ) : <img src="/Avatar_default.png" alt="Default avatar" className="current-avatar-img" style={{ borderRadius: '50%' }} />}
-                                </div>
-                                <p className="player-username">{currentPlayer?.user?.username}</p>
-
-                        </div>
-                        <div className="points-section">
-                                        <div className="action-points">
-                                            <h1>{actionPoints}</h1>
-                                            <p>Action points </p>
-                                        </div>
-
-                                        <div className="action-points">
-                                            <h1>{strength}</h1>
-                                            <p>strength </p>
-                                        </div>
-                    
-                            </div>
-                        
-                    </div>
-
-
-
-                    <div className="deck-row">
-                            <button 
-                                onClick={ () => {
-                                    if (numCardsDrawn < 7) {
-                                        drawCard()
-                                    } else {
-                                        alert("No puedes robar más de 7 cartas")
-                                    } 
-                                }}
-                                disabled={!canDraw}
-                                style={{ 
-                                    border: "none", 
-                                    background: "transparent", 
-                                    padding: 0, 
-                                    cursor: !canDraw ? "not-allowed" : "pointer", 
-                                    opacity: !canDraw ? 0.4 : 1,
-                                    outline: "none",
-                                }}
-                            >
-                                <img 
-                                    src="/backCard.png" 
-                                    alt="Robar carta"
-                                    className="deck-pile"
-                                />
-                            </button>
-
-                        <div className="discard-pile-section">
-                            {deck.discardedCards.length > 0 ? (
-                                <img 
-                                    src={`/resources${deck.discardedCards[deck.discardedCards.length - 1].frontImage}`} 
-                                    alt="Última carta descartada"
-                                    style={{ width: "150px", height: "auto" }}
-                                />
-                            ) : (
-                                <div className="dicard-pile">
-                                    Empty
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="turn-banner">
-                        {match?.currentTurnUserId === currentUser?.id ? (
-                            <div className="turn-message turn-mine">
-                                ¡Es tu turno!
-                            </div>
-                        ) : (
-                            <div className="turn-message turn-others">
-                                Turno de: {match?.players?.find(p => p.user.id === match.currentTurnUserId)?.user.username || "Esperando..."}
-                            </div>
-                        )}
-                    </div>
-
-                    
-
-                </div>
-
-            
-
-                <div className="map-container">
-                    <div className="board-wrapper">
-                        <map name="Map">
-                    <area className="Area" href="#" target="" alt="Safe Area" title="Safe Area" coords="321,251,84" shape="circle" onClick={(e)=>{e.preventDefault(); move(37)}}/>
-                    <area className="Area" href="#" target="" alt="West Tower" title="West Tower" coords="13,489,98,388" shape="rect" onClick={(e)=>{e.preventDefault(); move(31)}}/>
-                    <area className="Area" href="#" target="" alt="South Tower" title="South Tower" coords="541,389,628,488" shape="rect" onClick={(e)=>{e.preventDefault(); move(36)}}/>
-                    <area className="Area" href="#" target="" alt="North Tower" title="North Tower" coords="13,12,99,113" shape="rect" onClick={(e)=>{e.preventDefault(); move(1)}}/>
-                    <area className="Area" href="#" target="" alt="East Tower" title="East Tower" coords="542,11,626,111" shape="rect" onClick={(e)=>{e.preventDefault(); move(6)}}/>
-                    <area className="Area" href="#" target="" alt="Caesar Room" title="Caesar Room" coords="110,40,210,114" shape="rect" onClick={(e)=>{e.preventDefault();move(2)}}/>
-                    <area className="Area" href="#" target="" alt="Opal Room" title="Opal Room" coords="220,10,292,69" shape="rect" onClick={(e)=>{e.preventDefault(); move(3)}}/>
-                    <area className="Area" href="#" target="" alt="Coral Room" title="Coral Room" coords="345,11,418,69" shape="rect" onClick={(e)=>{e.preventDefault(); move(4)}}/>
-                    <area className="Area" href="#" target="" alt="Roof" title="Roof" coords="429,38,530,112" shape="rect" onClick={(e)=>{e.preventDefault(); move(5)}}/>
-                    <area className="Area" href="#" target="" alt="Cafe" title="Cafe" coords="293,154,221,80" shape="rect" onClick={(e)=>{e.preventDefault(); move(8)}}/>
-                    <area className="Area" href="#" target="" alt="Parlor" title="Parlor" coords="345,81,417,152" shape="rect" onClick={(e)=>{e.preventDefault(); move(11)}}/>
-                    <area className="Area" href="#" target="" alt="Pool" title="Pool" coords="369,165,488,166,488,251,419,251,407,206" shape="poly" onClick={(e)=>{e.preventDefault(); move(16)}}/>
-                    <area className="Area" href="#" target="" alt="SPA" title="SPA" coords="271,166,237,197,221,236,153,237,152,165" shape="poly" onClick={(e)=>{e.preventDefault(); move(15)}}/>
-                    <area className="Area" href="#" target="" alt="Arbor" title="Arbor" coords="151,248,151,334,266,334,236,299,221,250" shape="poly" onClick={(e)=>{e.preventDefault(); move(21)}}/>
-                    <area className="Area" href="#" target="" alt="Farm" title="Farm" coords="488,264,488,334,371,334,403,296,416,265" shape="poly" onClick={(e)=>{e.preventDefault(); move(22)}}/>
-                    <area className="Area" href="" target="" alt="Ball Room" title="Ball Room" coords="25,166,98,251" shape="rect" onClick={(e)=>{e.preventDefault(); move(13)}}/>
-                    <area className="Area" href="" target="" alt="Sleep Room" title="Sleep Room" coords="540,165,614,238" shape="rect" onClick={(e)=>{e.preventDefault(); move(18)}} />
-                    <area className="Area" href="" target="" alt="Class Room" title="Class Room" coords="25,263,97,334" shape="rect" onClick={(e)=>{e.preventDefault(); move(19)}}/>
-                    <area className="Area" href="" target="" alt="Meal Room" title="Meal Room" coords="541,249,613,335" shape="rect" onClick={(e)=>{e.preventDefault(); move(24)}}/>
-                    <area className="Area" href="" target="" alt="Bar" title="Bar" coords="221,346,292,417" shape="rect" onClick={(e)=>{e.preventDefault(); move(26)}}/>
-                    <area className="Area" href="" target="" alt="Lab" title="Lab" coords="346,346,418,418" shape="rect" onClick={(e)=>{e.preventDefault(); move(29)}}/>
-                    <area className="Area" href="" target="" alt="Cellar" title="Cellar" coords="109,387,209,460" shape="rect" onClick={(e)=>{e.preventDefault(); move(32)}}/>
-                    <area className="Area" href="" target="" alt="Apple Room" title="Apple Room" coords="221,430,293,488" shape="rect" onClick={(e)=>{e.preventDefault(); move(33)}}/>
-                    <area className="Area" href="" target="" alt="Parole Room" title="Parole Room" coords="429,387,529,459" shape="rect" onClick={(e)=>{e.preventDefault(); move(35)}}/>
-                    <area className="Area" href="" target="" alt="Map Room" title="Map Room" coords="345,430,419,490" shape="rect" onClick={(e)=>{e.preventDefault(); move(34)}}/>
-                    <area className="Area" href="" target="" alt="Corridor 1" title="Corridor 1" coords="25,123,209,153" shape="rect" onClick={(e)=>{e.preventDefault(); move(7)}}/>
-                    <area className="Area" href="" target="" alt="Corridor 2" title="Corridor 2" coords="304,57,335,155" shape="rect" onClick={(e)=>{e.preventDefault(); move(9)}}/>
-                    <area className="Area" href="" target="" alt="Corridor 3" title="Corridor 3" coords="430,122,613,154" shape="rect" onClick={(e)=>{e.preventDefault(); move(12)}}/>
-                    <area className="Area" href="" target="" alt="Corridor 4" title="Corridor 4" coords="109,164,141,250" shape="rect" onClick={(e)=>{e.preventDefault(); move(14)}}/>
-                    <area className="Area" href="" target="" alt="Corridor 5" title="Corridor 5" coords="500,164,529,238" shape="rect" onClick={(e)=>{e.preventDefault(); move(17)}}/>
-                    <area className="Area" href="" target="" alt="Corridor 6" title="Corridor 6" coords="109,262,141,334" shape="rect" onClick={(e)=>{e.preventDefault(); move(20)}}/>
-                    <area className="Area" href="" target="" alt="Corridor 7" title="Corridor 7" coords="500,248,529,333" shape="rect" onClick={(e)=>{e.preventDefault(); move(23)}}/>
-                    <area className="Area" href="" target="" alt="Corridor 8" title="Corridor 8" coords="25,345,209,376" shape="rect" onClick={(e)=>{e.preventDefault(); move(25)}}/>
-                    <area className="Area" href="" target="" alt="Corridor 9" title="Corridor 9" coords="304,345,335,441" shape="rect" onClick={(e)=>{e.preventDefault(); move(27)}}/>
-                    <area className="Area" href="" target="" alt="Corridor 10" title="Corridor 10" coords="429,346,613,376" shape="rect" onClick={(e)=>{e.preventDefault(); move(30)}}/>
-                        </map>
-                        <img src="/ElbaBoard.png" useMap="#Map" className="Map"/>
-                        
-                        {/* Fichas de jugadores sobre el mapa */}
-                        {match?.players?.map(player => {
-                            if (!player.currentRoom) return null;                      
-                            const position = roomPositions[player.currentRoom.id];
-                            if (!position) return null;
-                            return (
-                                <img 
-                                    key={player.id}
-                                    src={player.user.avatar || "/Avatar_default.png"}
-                                    alt={player.user.username}
-                                    title={player.user.username}
-                                    style={{
-                                        aspectRatio: '1 / 1',
-                                        position: 'absolute',
-                                        left: `${position.x}px`,
-                                        top: `${position.y}px`,
-                                        transform: 'translate(-50%, -50%)',
-                                        width: '30px',
-                                        height: '30px',
-                                        borderRadius: '50%',
-                                        border: `3px solid ${getPlayerColor(match?.players || [], player.id)}`,
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                                        zIndex: 10,
-                                        pointerEvents: 'none',
-                                        transition: 'left 0.5s ease, top 0.5s ease'
-                                    }}
-                                />
-                            );
-                        })}
-                        
-                        {/* Fichas de NPCs sobre el mapa */}
-                        {match?.npcs?.map((npc, index) => {
-                            if (!npc.room) return null;
-                            const position = roomPositions[npc.room.id];
-                            if (!position) return null;
-                            const isSelectable = moveNpcMode && !isSpectator && match?.currentTurnUserId === currentUser?.id;
-                            const isSelected = selectedNpcIndex === index || (selectedNpcId != null && selectedNpcId === npc.id);
-                            return (
-                                <div
-                                    key={`npc-${index}`}
-                                    title={npc.name || `NPC ${index+1}`}
-                                    onClick={(e) => {
-                                        if (!isSelectable) return;
-                                        e.stopPropagation();
-                                        setSelectedNpcIndex(index);
-                                        setSelectedNpcId(npc.id ?? null);
-                                    }}
-                                    style={{
-                                        position: 'absolute',
-                                        left: `${position.x}px`,
-                                        top: `${position.y}px`,
-                                        transform: 'translate(-50%, -50%)',
-                                        width: '25px',
-                                        height: '25px',
-                                        borderRadius: '50%',
-                                        backgroundColor: npc.isNiallCampbell ? '#ff0000' : '#666',
-                                        border: isSelected ? '3px solid yellow' : '2px solid white',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                                        zIndex: 20,
-                                        pointerEvents: isSelectable ? 'auto' : 'none',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        color: 'white',
-                                        fontSize: '10px',
-                                        fontWeight: 'bold',
-                                        cursor: isSelectable ? 'pointer' : 'default'
-                                    }}
-                                >
-                                    {npc.isNiallCampbell ? 'N' : 'X'}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-                
-                {/*Sección donde aparacen el resto de jugadores con sus respectivas bolsa*/}
-                <div className="other-players-section"> 
-                    <div className="players-avatars-section">
-                    {playersList.map((p) => (
-                        <div key={p.user.id} className="player-avatar-card">
-                            
-                            <div className="player-bag-display">
-                                {otherPlayersBags[p.id] && otherPlayersBags[p.id].length > 0 ? (     
-                                        <div className="bag-cards-container">
-                                            {otherPlayersBags[p.id].map((carta, index) => (
-                                                <img 
-                                                    key={index} 
-                                                    src={`/resources${carta.frontImage}`} 
-                                                    alt={`Carta ${carta.letter}`} 
-                                                    className="player-bag-card"
-                                                    title={carta.letter}
-                                                />
-                                            ))}
-                                        </div>
-                                ) : (
-                                    <p className="empty-bag">Empty Bag</p>
-                                )}
-                            </div>
-                            
-                            <div className="player-info-row">
-                                <div style={{
-                                    borderRadius: '50%',
-                                    border: `4px solid ${getPlayerColor(match?.players || [], p.id)}`,
-                                    display: 'inline-block',
-                                    padding: '3px',
-                                    flexShrink: 0
-                                }}>
-                                    {p.user.avatar ? (
-                                        <img src={p.user.avatar} alt={`${p.user.username} avatar`} className="player-avatar-img" style={{ borderRadius: '50%' }} />
-                                    ) : <img src="/Avatar_default.png" alt="Default avatar" className="player-avatar-img" style={{ borderRadius: '50%' }} />}
-                                </div>
-                                <p className="player-username">{p.user.username}</p>
-                            </div>
-                            
-                        </div>
-                    ))}
-                </div>
-            </div>
-            
-            </div>
-
-            {/*Mensaje de movimiento de los NPC*/}
-            {moveNpcMode && !isSpectator && match?.currentTurnUserId === currentUser?.id && (
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: '60px', zIndex: 30 }}>
-                    <div style={{ padding: '14px 42px', background: '#d200005e', color: '#fff', borderRadius: '10px', fontWeight: '700', fontSize: '20px', minWidth: '280px', textAlign: 'center', transform: 'translateX(20px)' }}>
-                        {selectedNpcIndex === null ? 'Select the NPC you want to move' : 'Select the room'}
-                    </div>
-                </div>
-            )}
-
-
-
-
-            {match?.currentTurnUserId === currentUser?.id && (
-                <button
-                    className="end-turn-button"
-                    onClick={handleEndTurn}
-                    disabled={isEndingTurn}
-                >
-                End your turn
-                </button>
-            )}
-
-
-            
-
-            {/* TABLA DE JUGADORES Y NPCS 
-            <div
-            className="entities-panel"
-            style={{
-                position: 'absolute',
-                top: '80%',
-                right: '30px',
-                transform: 'translateY(-50%)',
-                width: '320px',
-                backgroundColor:  '#c0392b',
-                color: 'white',
-                borderRadius: '8px',
-                padding: '10px',
-                fontSize: '14px',
-                zIndex: 1000,
-                boxShadow: '0 0 10px rgba(0,0,0,0.3)'
-            }}
-            >
-            <h4 style={{ textAlign: 'center', margin: '5px 0' }}>Ubicación de Jugadores y NPCs</h4>
-                <table style={{ width: '100%', textAlign: 'center', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr>
-                            <th style={{ borderBottom: '1px solid #fff', padding: '3px' }}>Nombre</th>
-                            <th style={{ borderBottom: '1px solid #fff', padding: '3px' }}>Tipo</th>
-                            <th style={{ borderBottom: '1px solid #fff', padding: '3px' }}>Habitación</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {match?.players.map(player => (
-                            <tr 
-                                key={player.id} 
-                                style={{
-                                    backgroundColor: '#ff4c4cff', // Color de fondo para jugadores
                                     color: 'white',
-                                    fontWeight: currentPlayer?.id === player.id ? 'bold' : 'normal' // Resalta tu jugador
+                                    fontSize: '10px',
+                                    fontWeight: 'bold',
+                                    cursor: isSelectable ? 'pointer' : 'default'
                                 }}
                             >
-                                <td style={{ padding: '3px' }}>{player.user.username}</td>
-                                <td style={{ padding: '3px' }}>Jugador</td>
-                                <td style={{ padding: '3px' }}>{player.currentRoom?.name}</td>
-                            </tr>
-                        ))}
-                        {match?.npcs.map((npc, index) => (
-                            <tr 
-                                key={index}
-                                style={{
-                                    backgroundColor: '#f87575ff',
-                                    color: 'white'
-                                }}
-                            >
-                                <td style={{ padding: '3px' }}>{npc.name || `NPC ${index+1}`}{npc.isNiallCampbell ? ' (Niall)' : ''}</td>
-                                <td style={{ padding: '3px' }}>NPC</td>
-                                <td style={{ padding: '3px' }}>{npc.room?.name}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-            */}
-            <div >
-                <div className={`player-section ${isSpectator ? 'spectator-hidden' : ''}`}>
-                    <div className="cards-section">
-                        <div className="player-hand">
-                            <div className="hand-cards"> 
-                                {Array.isArray(handCards) && handCards.map((carta) => (
-                                                <div key={carta.id} >
-                                                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                                </div>
-                                ))}
+                                {npc.isNiallCampbell ? 'N' : 'X'}
                             </div>
-                        </div>
-                        <div className="player-bag">
-                            <div className="bag-cards"> 
-                                {Array.isArray(bagCards) && bagCards.map((carta) => (
-                                                <div key={carta.id} >
-                                                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card"/>
-                                                </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div className="buttons-section">
-                        
-                        <button className={`leave-match-button${isSpectator ? 'spectator-hidden' : ''}`}
-                            onClick={() => setDiscardPhaseOpen(true)}
-                            disabled={
-                            match.currentTurnUserId !== currentUser.id }
-                            title="Discard cards from hand"
-                        >
-                            Discard and bag
-                        </button>
-                        <button className={`leave-match-button ${isSpectator ? 'spectator-hidden' : ''}`}
-                            title="Discard cards from hand"
-                            onClick={() => setIsActionsModalOpen(true) }
-                            disabled={
-                            match.currentTurnUserId !== currentUser.id || actionPoints === 0 }
-                        >
-                            Actions
-                        </button>
-
-                        {
-                            (() => {
-                                const currentRoomId = currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id);
-                                const canAttemptEscape = [1,6,31,36].includes(normalizeRoomId(currentRoomId));
-                                return (
-                                    <ActionsModal
-                                        isOpen={isActionsModalOpen}
-                                        onClose={() => setIsActionsModalOpen(false)}
-                                        moveToAdyacent={() => setMoveToAdyacentRoom(true) }
-                                        moveToRoomWithWord={() => setMoveToRoomWithWord(true) }
-                                        onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
-                                        onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
-                                        canAttemptEscape={canAttemptEscape}
-                                    />
-                                )
-                            })()
-                        }
-
-                <button
-                    className="leave-match-button"
-                    onClick={leaveMatch}
-                    style={{ marginLeft: '15px', background: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', marginTop: isSpectator ? '20px' : undefined }}
-                >
-                    Leave Match
-                </button>
-                <button
-                    className="end-match-button"
-                    onClick={endMatch}
-                    style={{ display: (isSpectator || match?.creatorId !== currentUser?.id) ? 'none' : 'block' }}
-                >
-                    End match
-                </button>
-
-                <div className={`match-chat-icon ${isSpectator ? 'spectator-hidden' : ''}`}>
-                    <div className="match-chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
-                        <FaComments size={30} color="white" />
-                    </div>
+                        );
+                    })}
                 </div>
 
-                {chatOpen && <ChatBox matchId={matchId} />}
-
-                {/* Mensaje de turno */}
-            
+                <div style={{ position: 'absolute', right: 20, top: 20, width: '300px', maxHeight: '600px', zIndex: 15 }}>
+                    <OtherPlayersPanel
+                        playersList={playersList}
+                        otherPlayersBags={otherPlayersBags}
+                        getPlayerColor={getPlayerColor}
+                        players={match?.players}
+                    />
+                </div>
+            </div>
         </div>
-    </div>
 
+        {moveNpcMode && !isSpectator && match?.currentTurnUserId === currentUser?.id && (
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: '60px', zIndex: 30 }}>
+                <div style={{ padding: '14px 42px', background: '#d200005e', color: '#fff', borderRadius: '10px', fontWeight: '700', fontSize: '20px', minWidth: '280px', textAlign: 'center', transform: 'translateX(20px)' }}>
+                    {selectedNpcIndex === null ? 'Select the NPC you want to move' : 'Select the room'}
+                </div>
+            </div>
+        )}
 
-        </div>
+        {match?.currentTurnUserId === currentUser?.id && (
+            <button
+                className="end-turn-button"
+                onClick={handleEndTurn}
+                disabled={isEndingTurn}
+            >
+                End your turn
+            </button>
+        )}
 
-    <FightModal
+        <div className={`player-section ${isSpectator ? 'spectator-hidden' : ''}`}>
+                <div className="cards-section">
+                    <div className="player-hand">
+                        <div className="hand-cards">
+                            {Array.isArray(handCards) && handCards.map((carta) => (
+                                <div key={carta.id}>
+                                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="player-bag">
+                        <div className="bag-cards">
+                            {Array.isArray(bagCards) && bagCards.map((carta) => (
+                                <div key={carta.id}>
+                                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                <div className="buttons-section">
+                    <button className={`leave-match-button${isSpectator ? 'spectator-hidden' : ''}`}
+                        onClick={() => setDiscardPhaseOpen(true)}
+                        disabled={match.currentTurnUserId !== currentUser.id}
+                        title="Discard cards from hand"
+                    >
+                        Discard and bag
+                    </button>
+                    <button className={`leave-match-button ${isSpectator ? 'spectator-hidden' : ''}`}
+                        title="Discard cards from hand"
+                        onClick={() => setIsActionsModalOpen(true)}
+                        disabled={match.currentTurnUserId !== currentUser.id || actionPoints === 0}
+                    >
+                        Actions
+                    </button>
+                    <ActionsModal
+                        isOpen={isActionsModalOpen}
+                        onClose={() => setIsActionsModalOpen(false)}
+                        moveToAdyacent={() => setMoveToAdyacentRoom(true)}
+                        moveToRoomWithWord={() => setMoveToRoomWithWord(true)}
+                        onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
+                        onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
+                        canAttemptEscape={[1, 6, 31, 36].includes(normalizeRoomId(currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id)))}
+                    />
+                    <button
+                        className="leave-match-button"
+                        onClick={leaveMatch}
+                        style={{ marginLeft: '15px', background: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', marginTop: isSpectator ? '20px' : undefined }}
+                    >
+                        Leave Match
+                    </button>
+                    <button
+                        className="end-match-button"
+                        onClick={endMatch}
+                        style={{ display: (isSpectator || match?.creatorId !== currentUser?.id) ? 'none' : 'block' }}
+                    >
+                        End match
+                    </button>
+                    <div className={`match-chat-icon ${isSpectator ? 'spectator-hidden' : ''}`}>
+                        <div className="match-chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
+                            <FaComments size={30} color="white" />
+                        </div>
+                    </div>
+                    {chatOpen && <ChatBox matchId={matchId} />}
+                </div>
+            </div>
+
+        <FightModal
             isOpen={isFightModalOpen}
-            onClose={() => { 
-                setIsFightModalOpen(false); 
-                setFightDefender(null); 
-                setFightAttacker(null); 
+            onClose={() => {
+                setIsFightModalOpen(false);
+                setFightDefender(null);
+                setFightAttacker(null);
                 cleanVotingStates();
             }}
             defender={fightDefender}
@@ -2072,10 +1864,8 @@ return (
             votingResult={votingResult}
             proposingUserId={proposingUserId}
             onVotingResultProcessed={() => setVotingResult(null)}
-            onResolve={async (currentUserWon) => {handleFightResult(currentUserWon)}}    
-    />
-
-
+            onResolve={async (currentUserWon) => { handleFightResult(currentUserWon); }}
+        />
 
         <DiscardPhaseModal
             isVisible={discardPhaseOpen}
@@ -2085,11 +1875,11 @@ return (
             player={currentPlayer}
             onClose={() => setDiscardPhaseOpen(false)}
             updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
-            onSave={async () =>{
-                await fetchCards()
-                setDiscardPhaseOpen(false)
+            onSave={async () => {
+                await fetchCards();
+                setDiscardPhaseOpen(false);
             }}
-            />
+        />
 
         <StealCardModal
             isOpen={isStealModalOpen}
@@ -2129,9 +1919,6 @@ return (
                 setIsVotingModalOpen(false);
             }}
         />
-
-      
-
-        </div>
-    );
+    </div>
+);
 }

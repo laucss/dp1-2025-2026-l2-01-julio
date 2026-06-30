@@ -294,9 +294,12 @@
 
 .match-board {
     display: flex;
-    gap: 20px;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: 0;
+    align-items: center;
     justify-content: center;
+    min-height: 100vh;
+    position: relative;
 }
 
 
@@ -329,7 +332,10 @@
 .player-and-decks-section{
     display: flex;
     flex-direction: column;
-    gap: 10px;  
+    gap: 10px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
 }
 
 .current-player-info {
@@ -488,11 +494,6 @@
 }
 
 .end-turn-button{
-    margin-left: 050px;
-    position: absolute;
-    left: 87%;                
-    transform: translateX(-50%);
-    margin-top: -80px;
     padding: 15px 35px; 
     font-size: 22px;
     background: #c0392b;
@@ -501,7 +502,12 @@
     border-radius: 8px;
     max-width: 500px;
     min-width: 230px;
-    cursor: pointer
+    cursor: pointer;
+    position: fixed;
+    bottom: 320px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
 }
 
 /* Ocultar elementos en modo espectador */
