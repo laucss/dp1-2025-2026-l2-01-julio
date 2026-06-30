@@ -54,8 +54,8 @@ public class LobbyService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Match> getAllPublicLobbies(Integer page, Integer size) {
-        return mrepo.findPublicLobbies(PageRequest.of(page,size));
+    public Page<Match> getAllPublicGamesByStatus(MatchStatus status, Integer page, Integer size) {
+        return mrepo.findAllPublicGamesByStatus(status, PageRequest.of(page,size));
     }
 
         @Transactional(readOnly = true)

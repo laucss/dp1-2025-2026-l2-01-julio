@@ -18,6 +18,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -67,7 +68,7 @@ public class Match extends NamedEntity {
     private LocalDateTime endTime;
 
     // Creador
-    //@NotNull
+    // @NotNull
     private Integer creatorId;
 
     // Ganador
@@ -75,7 +76,7 @@ public class Match extends NamedEntity {
     @JoinColumn(name = "winner_id")
     private Player winner;
 
-    //Máximo y mínimo de jugadores
+    // Máximo y mínimo de jugadores
     @Min(3)
     @Max(6)
     @NotNull
@@ -86,18 +87,22 @@ public class Match extends NamedEntity {
     @Max(6)
     private Integer minPlayers = 3;
 
-    //Jugadores 
+    // Jugadores 
     @NotNull
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Player> players = new ArrayList<>(); 
 
-    //Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)
+    // Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)
     private Integer numNpcs = 3;
 
-    //Lista de Npcs 
+    // Lista de Npcs 
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Npc> npcs = new ArrayList<>();
 
+    // Espectadores 
+    @OneToMany
+    @JoinColumn(name = "match_id")
+    private List<User> spectators = new ArrayList<>(); 
 
     @Transient // transient porque no se guardan en la base de datos 
     private DeckInGame deck; 

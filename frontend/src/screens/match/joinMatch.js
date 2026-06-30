@@ -12,7 +12,7 @@ export default function JoinMatch() {
   const [lobbies, setLobbies] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-
+  const [selectedTab, setSelectedTab] = useState("WAITING")
   const [showModal, setShowModal] = useState(false);  
   const [privateCode, setPrivateCode] = useState("");
   const [showFullMatchModal, setShowFullMatchModal] = useState(false);
@@ -20,9 +20,9 @@ export default function JoinMatch() {
 
   const navigate = useNavigate();
 
-  const fetchLobbies = async (currentPage = 0) => {
+  const fetchLobbies = async (status, currentPage = 0) => {
     try {
-      const response = await fetch(`/api/v1/matches/lobbies?page=${currentPage}&size=10`, {
+      const response = await fetch(`/api/v1/matches/lobbies?status=${status}&page=${currentPage}&size=10`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
 
@@ -70,7 +70,37 @@ export default function JoinMatch() {
     } catch (error) {
       alert(" Error al conectar con el servidor.");
     }
-  };
+  }
+
+    const handleSpectate = async (match) => {
+    try {
+      const response = await fetch(`/api/v1/matches/lobbies/${match.id}/join`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: 'application/json',
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        navigate(`/lobby/${match.id}`);
+      } else {
+        let text = "";
+        try { text = await response.text(); } catch {}
+        const lower = (text || "").toLowerCase();
+        if (response.status === 400 && (lower.includes("llena") || lower.includes("full"))) {
+          setShowFullMatchModal(true);
+        } else if (response.status === 400 && (lower.includes("comenzado") || lower.includes("empezado") || lower.includes("correct status"))) {
+          setShowStartedMatchModal(true);
+        } else {
+          alert(" No se pudo unir al lobby: " + (text || "Error desconocido"));
+        }
+      }
+    } catch (error) {
+      alert(" Error al conectar con el servidor.");
+    }
+  }
 
  
   const handleJoinPrivate = async () => {
@@ -129,29 +159,57 @@ export default function JoinMatch() {
               Join
             </Button>
           )}
+          <Button
+              size="sm"
+              color="info"
+              aria-label={"join-" + match.name}
+              onClick={() => handleSpectate(match)}
+            >
+              Spectate
+            </Button>
         </ButtonGroup>
       </td>
     </tr>
-  ));
+  ))
 
   useEffect(() => {
-    fetchLobbies(page);
-  }, [page]);
+    fetchLobbies(selectedTab,page);
+  }, [selectedTab,page]);
 
   return (
   <div className="admin-page-container">
     <div className="lobbies-overlay">
     <div className="lobbies-box">
 
-                {/* Flecha de volver al inicio */}
-        <button 
-            className="back-arrow-btn"
-            onClick={() => navigate('/')}
-          >
-            ￩
+      {/* Flecha de volver al inicio */}
+      <button 
+          className="back-arrow-btn"
+          onClick={() => navigate('/')}
+        >
+          ￩
       </button>
 
-      <h1>Lobbies</h1>
+      <ButtonGroup className="mb-3">
+        <Button
+          color={selectedTab === "WAITING" ? "primary" : "secondary"}
+          onClick={() => {
+            setSelectedTab("WAITING");
+            setPage(0);
+          }}
+        >
+          Lobbies
+        </Button>
+
+        <Button
+          color={selectedTab === "PLAYING" ? "primary" : "secondary"}
+          onClick={() => {
+            setSelectedTab("PLAYING");
+            setPage(0);
+          }}
+        >
+          Ongoing Matches
+        </Button>
+      </ButtonGroup>
 
       <Table aria-label="lobbies" className="mt-4">
         <thead>
@@ -184,7 +242,7 @@ export default function JoinMatch() {
     <Modal isOpen={showModal} toggle={() => setShowModal(false)}>
       <ModalHeader toggle={() => setShowModal(false)}>Join Private Lobby</ModalHeader>
       <ModalBody>
-        <p>Introduce el código del lobby privado:</p>
+        <p>Enter the private lobby code:</p>
         <Input
           type="text"
           value={privateCode}
@@ -202,14 +260,14 @@ export default function JoinMatch() {
     <Modal isOpen={showFullMatchModal} toggle={() => setShowFullMatchModal(false)} centered backdrop="static">
       <ModalBody className="text-center" style={{ padding: '40px 20px' }}>
         <p style={{ fontSize: '18px', marginBottom: '30px' }}>
-          La partida a la que te quieres unir ya está llena
+          The match you want to join is already full
         </p>
         <Button 
           color="primary" 
           onClick={() => setShowFullMatchModal(false)}
           style={{ marginTop: '20px' }}
         >
-          Cerrar
+          Close
         </Button>
       </ModalBody>
     </Modal>
@@ -218,14 +276,14 @@ export default function JoinMatch() {
     <Modal isOpen={showStartedMatchModal} toggle={() => setShowStartedMatchModal(false)} centered backdrop="static">
       <ModalBody className="text-center" style={{ padding: '40px 20px' }}>
         <p style={{ fontSize: '18px', marginBottom: '30px' }}>
-          La partida a la que te quieres unir ya ha comenzado
+          The game you want to join has already started
         </p>
         <Button 
           color="primary" 
           onClick={() => setShowStartedMatchModal(false)}
           style={{ marginTop: '20px' }}
         >
-          Cerrar
+          Close
         </Button>
       </ModalBody>
     </Modal>
