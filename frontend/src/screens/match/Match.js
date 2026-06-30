@@ -17,6 +17,10 @@ import NpcLossDiscardModal from "./NpcLossDiscardModal";
 import EscapeDiceModal from "./EscapeDiceModal";
 import VotingModal from "./VotingModal";
 
+import { normalizeRoomId, areRoomsAdjacent } from "./utils/roomUtils";
+import { roomPositions } from "./utils/roomPositions";
+import { getPlayerColor } from "./utils/playersUtil";
+
 // para alerta de errores
 import { toast } from "react-toastify";
 
@@ -88,61 +92,10 @@ export default function Match(){
     // Determinar si el usuario actual es un espectador
     const isSpectator = !currentUser || !match?.players?.some(p => p.user.id === currentUser.id);
     
-    // Función para obtener un color único para cada jugador
-    const getPlayerColor = (playerId) => {
-        const colors = ['#ff5353ff', '#4ECDC4', '#ffac3fff', '#e5541aff', '#52a852ff', '#2a15ceff'];
-        const allPlayers = match?.players || [];
-        const playerIndex = allPlayers.findIndex(p => p.id === playerId);
-        return colors[playerIndex % colors.length];
-    };
 
-    // Agrupa los corredores duplicados (9/10 y 27/28) para tratarlos como la misma habitación
-    const normalizeRoomId = (roomId) => {
-        if (roomId === 10) return 9;
-        if (roomId === 28) return 27;
-        return roomId;
-    };
+
+
     
-    // const posiciones de las habitaciones en el mapa 
-    const roomPositions = {
-        1: { x: 55, y: 69 },   // North Tower v
-        2: { x: 160, y: 80 },   // Caesar Room v
-        3: { x: 257, y: 45 },   // Opal Room v
-        4: { x: 383, y: 45 },   // Coral Room v 
-        5: { x: 480, y: 97 },   // Roof v
-        6: { x: 585, y: 55 },   // East Tower v 
-        7: { x: 124, y: 138 },   // Corridor 1 v
-        8: { x: 283, y: 118 },   // Cafe v
-        9: { x: 125, y: 140 },   // Corridor 2 v
-        10: { x: 515, y: 140 },  // Corridor 2 (dup) v
-        11: { x: 384, y: 138 },  // Parlor v
-        12: { x: 514, y: 138 },  // Corridor 3 v 
-        13: { x: 62, y: 235 },  // Ball Room v
-        14: { x: 125, y: 200 },  // Corridor 4 v
-        15: { x: 190, y: 220 },  // SPA v 
-        16: { x: 450, y: 234 },  // Pool v
-        17: { x: 514, y: 205 },  // Corridor 5 v
-        18: { x: 577, y: 211 },  // Sleep Room v
-        19: { x: 62, y: 298 },  // Class Room v
-        20: { x: 125, y: 301 },  // Corridor 6 v
-        21: { x: 190, y: 314 },  // Arbor v
-        22: { x: 445, y: 320 },  // Farm v
-        23: { x: 514, y: 303 },  // Corridor 7 v
-        24: { x: 580, y: 310 },  // Meal Room v
-        25: { x: 125, y: 362 },  // Corridor 8 v
-        26: { x: 255, y: 402 },  // Bar v
-        27: { x: 320, y: 410 },  // Corridor 9 v
-        28: { x: 320, y: 410 },  // Corridor 9 (dup) v
-        29: { x: 382, y: 402 },  // Lab v
-        30: { x: 515, y: 362 },  // Corridor 10 v
-        31: { x: 55, y: 470 },  // West Tower v
-        32: { x: 160, y: 444 },  // Cellar v
-        33: { x: 255, y: 462 },  // Apple Room v
-        34: { x: 382, y: 462 },  // Map Room v 
-        35: { x: 480, y: 425 },  // Parole Room v
-        36: { x: 585, y: 473 },  // South Tower v
-        37: { x: 320, y: 295 },  // Safe Area v
-    };
     // CARGAR DATOS PARTIDA 
       const [adjacencies, setAdjacencies] = useFetchState(
         [],
@@ -763,6 +716,32 @@ export default function Match(){
         }
     }
 
+    const getPlayerInRoom = (roomId) => {
+        const targetRoomNormalized = normalizeRoomId(roomId);
+
+        return match?.players?.find(p => {
+            const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
+
+            return (
+                p.user?.id !== currentUser?.id &&
+                normalizeRoomId(playerRoomId) === targetRoomNormalized
+            );
+        });
+    };
+
+    const getNpcInRoom = (roomId) => {
+        const targetRoomNormalized = normalizeRoomId(roomId);
+
+        return match?.npcs?.find(npc => {
+            const npcRoomId = npc.room?.id;
+
+            return (
+                npcRoomId &&
+                normalizeRoomId(npcRoomId) === targetRoomNormalized
+            );
+        });
+    };
+
 
 
     const move = async (roomId) => {
@@ -868,13 +847,8 @@ export default function Match(){
         if (moveToRoomWithWord === true){
             try {
                 const isSafeArea = roomId === 37;
-                
-                const targetRoomNormalized = normalizeRoomId(roomId);
-                const otherPlayer = match?.players?.find(p => {
-                    const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
-                    return p.user?.id !== currentUser?.id && normalizeRoomId(playerRoomId) === targetRoomNormalized;
-                });
-
+                const otherPlayer = getPlayerInRoom(roomId);
+            
                 if (otherPlayer && !isSafeArea) {
                     setPendingTargetRoom(roomId);
                     setFightDefender(otherPlayer);
@@ -902,10 +876,7 @@ export default function Match(){
                 }
 
                 // Detectar NPCs en la habitación de destino
-                const botInRoom = match?.npcs?.find(npc => {
-                    const npcRoomId = npc.room?.id;
-                    return npcRoomId && normalizeRoomId(npcRoomId) === targetRoomNormalized;
-                });
+                const botInRoom = getNpcInRoom(roomId);
 
                 if (botInRoom && !isSafeArea) {
                     const currentPlayerData = currentPlayer?.[0];
@@ -1012,19 +983,15 @@ export default function Match(){
         if (moveToAdyacentRoom === true){
             try {
                 const currentRoomId = currentPlayer?.currentRoom?.id || currentPlayer?.roomId || currentPlayer?.room?.id;
-                if (!areRoomsAdjacent(currentRoomId, roomId)) {
+                if (!areRoomsAdjacent(adjacencies, currentRoomId, roomId)) {
                     toast.error("You cannot move to a room that is not adyacent");
                     setMoveToAdyacentRoom(false);
                     return;
                 }
 
                 const isSafeArea = roomId === 37;
+                const otherPlayer = getPlayerInRoom(roomId);
                 
-                const targetRoomNormalized = normalizeRoomId(roomId);
-                const otherPlayer = match?.players?.find(p => {
-                    const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
-                    return p.user?.id !== currentUser?.id && normalizeRoomId(playerRoomId) === targetRoomNormalized;
-                });
 
                 if (otherPlayer && !isSafeArea) {
                     setPendingTargetRoom(roomId);
@@ -1054,12 +1021,7 @@ export default function Match(){
 
                 // Detectar NPCs en la habitación de destino
                 console.log('Buscando NPCs. match?.npcs:', match?.npcs);
-                console.log('targetRoomNormalized:', targetRoomNormalized);
-                const botInRoom = match?.npcs?.find(npc => {
-                    const npcRoomId = npc.room?.id;
-                    console.log('NPC:', npc, 'npcRoomId:', npcRoomId, 'normalizado:', normalizeRoomId(npcRoomId));
-                    return npcRoomId && normalizeRoomId(npcRoomId) === targetRoomNormalized;
-                });
+                const botInRoom = getNpcInRoom(roomId);
 
                 console.log('botInRoom encontrado:', botInRoom);
                 if (botInRoom && !isSafeArea) {
@@ -1170,12 +1132,8 @@ export default function Match(){
             try {
 
                 const isSafeArea = roomId === 37;
+                const otherPlayer = getPlayerInRoom(roomId);
                 
-                const targetRoomNormalized = normalizeRoomId(roomId);
-                const otherPlayer = match?.players?.find(p => {
-                    const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
-                    return p.user?.id !== currentUser?.id && normalizeRoomId(playerRoomId) === targetRoomNormalized;
-                });
 
                 if (otherPlayer && !isSafeArea) {
                     setPendingTargetRoom(roomId);
@@ -1204,15 +1162,7 @@ export default function Match(){
                 }
 
                 // Detectar NPCs en la habitación de destino
-                console.log('Buscando NPCs. match?.npcs:', match?.npcs);
-                console.log('targetRoomNormalized:', targetRoomNormalized);
-                const botInRoom = match?.npcs?.find(npc => {
-                    const npcRoomId = npc.room?.id;
-                    console.log('NPC:', npc, 'npcRoomId:', npcRoomId, 'normalizado:', normalizeRoomId(npcRoomId));
-                    return npcRoomId && normalizeRoomId(npcRoomId) === targetRoomNormalized;
-                });
-
-                console.log('botInRoom encontrado:', botInRoom);
+                const botInRoom = getNpcInRoom(roomId);
                 if (botInRoom && !isSafeArea) {
                     const currentPlayerData = currentPlayer?.[0];
                     setPendingTargetRoom(roomId);
@@ -1533,13 +1483,6 @@ if (!match) {
 }
 
 
-    const areRoomsAdjacent = (fromId, toId) => {
-        if (!fromId || !toId) return false;
-        if (!adjacencies || typeof adjacencies !== 'object' || Array.isArray(adjacencies)) return false;
-
-        const neighbors = adjacencies[fromId] || adjacencies[fromId.toString()] || [];
-        return Array.isArray(neighbors) && neighbors.includes(toId);
-    };
 
     //console.log('handCards', handCards)
 
@@ -1906,7 +1849,7 @@ return (
                         <div className="current-player-info"> 
                             <div style={{
                                     borderRadius: '50%',
-                                    border: `4px solid ${getPlayerColor(currentPlayer?.id)}`,
+                                    border: `4px solid ${getPlayerColor(match?.players || [], currentPlayer?.id)}`,
                                     display: "flex",
                                     flexShrink: 0,
                                     boxSizing: 'border-box',
@@ -2057,7 +2000,7 @@ return (
                                         width: '30px',
                                         height: '30px',
                                         borderRadius: '50%',
-                                        border: `3px solid ${getPlayerColor(player.id)}`,
+                                        border: `3px solid ${getPlayerColor(match?.players || [], player.id)}`,
                                         boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
                                         zIndex: 10,
                                         pointerEvents: 'none',
@@ -2140,7 +2083,7 @@ return (
                             <div className="player-info-row">
                                 <div style={{
                                     borderRadius: '50%',
-                                    border: `4px solid ${getPlayerColor(p.id)}`,
+                                    border: `4px solid ${getPlayerColor(match?.players || [], p.id)}`,
                                     display: 'inline-block',
                                     padding: '3px',
                                     flexShrink: 0
