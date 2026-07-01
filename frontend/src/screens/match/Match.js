@@ -22,6 +22,7 @@ import { getPlayerColor } from "./utils/playersUtil";
 import CurrentPlayerInfo from "./components/CurrentPlayerInfo";
 import DeckSection from "./components/DeckSection";
 import MatchBoardMap from "./components/MatchBoardMap";
+import { getRandomFreeRoom } from "./utils/roomHelpers";
 
 // para alerta de errores
 import { toast } from "react-toastify";
@@ -1318,34 +1319,7 @@ if (!match) {
                         }
                         
                         // Enviar al bot perdedor a una habitación aleatoria
-                        const allRoomIds = [
-                            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
-                        ];
-                        
-                        const occupiedRoomIds = new Set();
-                        (match?.players || []).forEach(p => {
-                            const rid = p.currentRoom?.id || p.roomId || p.room?.id;
-                            const normalized = normalizeRoomId(rid);
-                            if (normalized) occupiedRoomIds.add(normalized);
-                        });
-                        (match?.npcs || []).forEach(npc => {
-                            const rid = npc.room?.id;
-                            const normalized = normalizeRoomId(rid);
-                            if (normalized) occupiedRoomIds.add(normalized);
-                        });
-                        
-                        const candidates = allRoomIds.filter(r => !occupiedRoomIds.has(r) && r !== normalizeRoomId(defenderRoomId));
-                        let botRandomRoomId = null;
-                        if (candidates.length > 0) {
-                            botRandomRoomId = candidates[Math.floor(Math.random() * candidates.length)];
-                        } else {
-                            const fallback = allRoomIds.filter(r => r !== normalizeRoomId(defenderRoomId));
-                            botRandomRoomId = fallback[Math.floor(Math.random() * fallback.length)];
-                        }
-                        
-                        // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
-                            botRandomRoomId = normalizeRoomId(botRandomRoomId);
+                        const botRandomRoomId = getRandomFreeRoom(match, defenderRoomId);
                         
                         console.log('Moving NPC loser to random room:', botRandomRoomId);
                         await fetch(`/api/v1/matches/${matchId}/npc/location`, {
@@ -1379,38 +1353,8 @@ if (!match) {
                         // El jugador perdió contra el bot: mover solo al jugador a habitación aleatoria e incrementar fuerza del jugador
                         console.log('Player lost against NPC. Moving player to random room and increasing player strength...');
                         
-                        const allRoomIds = [
-                            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
-                        ];
-                        
-                        const playerRoomId = normalizeRoomId(currentPlayer?.[0]?.currentRoom?.id);
-                        
-                        const occupiedRoomIds = new Set();
-                        (match?.players || []).forEach(p => {
-                            const rid = p.currentRoom?.id || p.roomId || p.room?.id;
-                            const normalized = normalizeRoomId(rid);
-                            if (normalized) occupiedRoomIds.add(normalized);
-                        });
-                        (match?.npcs || []).forEach(npc => {
-                            const rid = npc.room?.id;
-                            const normalized = normalizeRoomId(rid);
-                            if (normalized) occupiedRoomIds.add(normalized);
-                        });
-                        
-                        // Mover al jugador perdedor a una sala aleatoria
-                        const candidatesPlayer = allRoomIds.filter(r => !occupiedRoomIds.has(r) && r !== playerRoomId);
-                        let randomRoomIdPlayer = null;
-                        if (candidatesPlayer.length > 0) {
-                            randomRoomIdPlayer = candidatesPlayer[Math.floor(Math.random() * candidatesPlayer.length)];
-                        } else {
-                            const fallback = allRoomIds.filter(r => r !== playerRoomId);
-                            randomRoomIdPlayer = fallback[Math.floor(Math.random() * fallback.length)];
-                        }
-                        
-                        // Normalizar habitaciones corridor (10 -> 9, 28 -> 27)
-                        randomRoomIdPlayer = normalizeRoomId(randomRoomIdPlayer);
-                        
+                        const randomRoomIdPlayer = getRandomFreeRoom(match, defenderRoomId);
+                
                         console.log('Moving player loser to random room:', randomRoomIdPlayer);
                         await moveLoserToRandomRoom(currentUser.id, randomRoomIdPlayer);
                         
@@ -1452,42 +1396,14 @@ if (!match) {
                 cleanVotingStates();
                 return;
             }
-            const allRoomIds = [
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
-            ];
+        
             const winnerPlayer = match?.players?.find(p => p.user?.id === (winnerUser?.id || winnerUser?.user?.id));
             const winnerRoomIdRaw = winnerPlayer?.currentRoom?.id || winnerPlayer?.roomId || null;
             const winnerRoomId = normalizeRoomId(winnerRoomIdRaw);
 
-            const occupiedRoomIds = new Set();
-            (match?.players || []).forEach(p => {
-                const rid = p.currentRoom?.id || p.roomId || p.room?.id;
-                const normalized = normalizeRoomId(rid);
-                if (normalized) occupiedRoomIds.add(normalized);
-            });
-            (match?.npcs || []).forEach(npc => {
-                const rid = npc.room?.id;
-                const normalized = normalizeRoomId(rid);
-                if (normalized) occupiedRoomIds.add(normalized);
-            });
+            const randomRoomId = getRandomFreeRoom(match, winnerRoomId);
 
-            const candidates = allRoomIds.filter(r => r !== winnerRoomId && !occupiedRoomIds.has(r));
-            if (candidates.length === 0) {
-                console.warn('No candidate rooms to move loser');
-                setIsFightModalOpen(false);
-                setFightDefender(null);
-                setFightAttacker(null);
-                return;
-            }
-            let randomRoomId = null;
-            if (candidates.length > 0) {
-                randomRoomId = candidates[Math.floor(Math.random() * candidates.length)];
-            } else {
-                const fallback = allRoomIds.filter(r => r !== winnerRoomId);
-                randomRoomId = fallback[Math.floor(Math.random() * fallback.length)];
-            }
-            
+       
             const moveResult = await moveLoserToRandomRoom(loserUser.id, randomRoomId);
             if (!moveResult) {
                 console.error('Failed to move loser to', randomRoomId);
