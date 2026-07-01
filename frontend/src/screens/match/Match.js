@@ -23,6 +23,7 @@ import CurrentPlayerInfo from "./components/CurrentPlayerInfo";
 import DeckSection from "./components/DeckSection";
 import MatchBoardMap from "./components/MatchBoardMap";
 import { getRandomFreeRoom } from "./utils/roomHelpers";
+import { handlePlayerFight, handleNpcFight} from "./utils/fightHelpers";
 
 // para alerta de errores
 import { toast } from "react-toastify";
@@ -1286,193 +1287,85 @@ if (!match) {
 
             // Si el defensor es un NPC
             if (isDefenderNPC) {
-                try {
-                    if (attackerWins) {
-                        // El jugador ganó contra el bot
-                        console.log('Player won against NPC. Defender is NiallCampbell:', fightDefender?.isNiallCampbell);
-                        
-                        // Si es NiallCampbell, roba de la pila de descarte
-                        if (fightDefender?.isNiallCampbell) {
-                            console.log('Drawing from discard pile for beating Niall Campbell...');
-                            await fetch(`/api/v1/matches/${matchId}/${fightAttacker?.id}/playerWinsNiallCampbell`, {
-                                method: "POST",
-                                headers: {
-                                    Authorization: `Bearer ${jwt}`,
-                                    Accept: 'application/json',
-                                    'Content-Type': 'application/json',
-                                },
-                            }).then(r => r.json()).then(data => {
-                                // Actualizamos inmediatamente el mazo; la mano se sincroniza por WebSocket
-                                setDeck(data.deck);
-                            });
-                        } else {
-                            // Si es un NPC normal, roba 2 cartas de recompensa
-                            console.log('Drawing 2 reward cards for beating regular NPC...');
-                            await drawCardForWinner(fightAttacker?.id);
-                            await drawCardForWinner(fightAttacker?.id);
-                        }
-                        
-                        // Mover al jugador ganador a la habitación donde estaba el bot
-                        if (defenderRoomId) {
-                            console.log('Moving winner to defender room:', defenderRoomId);
-                            await movePlayerToRoom(fightAttacker?.user?.id, defenderRoomId);
-                        }
-                        
-                        // Enviar al bot perdedor a una habitación aleatoria
-                        const botRandomRoomId = getRandomFreeRoom(match, defenderRoomId);
-                        
-                        console.log('Moving NPC loser to random room:', botRandomRoomId);
-                        await fetch(`/api/v1/matches/${matchId}/npc/location`, {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `Bearer ${jwt}`,
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                npcId: fightDefender.id,
-                                roomId: botRandomRoomId
-                            })
-                        });
-                        
-                        // Actualizar el estado del match después de mover al NPC
-                        await fetchMatchAndPlayers();
-                        
-                        // Incrementar fuerza del bot perdedor
-                        await fetch(`/api/v1/matches/${matchId}/npc-strength`, {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `Bearer ${jwt}`,
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                npcId: fightDefender.id,
-                                strength: (fightDefender?.strength || 1) + 1
-                            })
-                        });
-                    } else {
-                        // El jugador perdió contra el bot: mover solo al jugador a habitación aleatoria e incrementar fuerza del jugador
-                        console.log('Player lost against NPC. Moving player to random room and increasing player strength...');
-                        
-                        const randomRoomIdPlayer = getRandomFreeRoom(match, defenderRoomId);
-                
-                        console.log('Moving player loser to random room:', randomRoomIdPlayer);
-                        await moveLoserToRandomRoom(currentUser.id, randomRoomIdPlayer);
-                        
-                        // Incrementar fuerza del jugador perdedor
-                        await fetch(`/api/v1/matches/${matchId}/player-strength`, {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `Bearer ${jwt}`,
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                userId: currentUser.id,
-                                strength: (currentPlayer?.[0]?.strength || 1) + 1
-                            })
-                        });
 
-                        if ((handCards?.length || 0) > 0 || (bagCards?.length || 0) > 0) {
-                            setIsNpcLossModalOpen(true);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error handling NPC fight result:', error);
-                }
-                
-                setIsFightModalOpen(false);
-                setFightDefender(null);
-                setFightAttacker(null);
-                setPendingTargetRoom(null);
-                cleanVotingStates();
-                return;
+                await handleNpcFight({
+                    attackerWins,
+                    fightAttacker,
+                    fightDefender,
+                    match,
+                    defenderRoomId,
+                    currentPlayer,
+                    handCards,
+                    bagCards,
+                    drawCardForWinner,
+                    movePlayerToRoom,
+                    moveLoserToRandomRoom,
+                    getRandomFreeRoom,
+                    fetchMatchAndPlayers,
+                    setDeck,
+                    setIsNpcLossModalOpen,
+                    matchId,
+                    jwt,
+                });
+
+                return; 
             }
-
+                
             // Si no hay perdedor identificado, no mover
             if (!loserUser) {
-                setIsFightModalOpen(false);
-                setFightDefender(null);
-                setFightAttacker(null);
-                setPendingTargetRoom(null);
-                cleanVotingStates();
                 return;
             }
-        
-            const winnerPlayer = match?.players?.find(p => p.user?.id === (winnerUser?.id || winnerUser?.user?.id));
-            const winnerRoomIdRaw = winnerPlayer?.currentRoom?.id || winnerPlayer?.roomId || null;
-            const winnerRoomId = normalizeRoomId(winnerRoomIdRaw);
 
-            const randomRoomId = getRandomFreeRoom(match, winnerRoomId);
-
-       
-            const moveResult = await moveLoserToRandomRoom(loserUser.id, randomRoomId);
-            if (!moveResult) {
-                console.error('Failed to move loser to', randomRoomId);
-                alert('No se pudo mover al perdedor. Revisa la consola para más detalles.');
-            } else {
-                console.log('Loser moved to', randomRoomId, moveResult);
-                
-                // Si el perdedor es el jugador del turno actual, quitar todos los puntos de acción
-                if (loserUser.id === match.currentTurnUserId) {
-                    try {
-                        await fetch(`/api/v1/matches/${matchId}/consume-all-action-points/${loserUser.id}`, {
-                            method: 'POST',
+            await handlePlayerFight({
+                attackerWins,
+                fightAttacker,
+                fightDefender,
+                match,
+                currentUser,
+                moveLoserToRandomRoom,
+                movePlayerToRoom,
+                drawCardForWinner,
+                getRandomFreeRoom,
+                normalizeRoomId,
+                defenderRoomId,
+                fetchConsumeAllActionPoints: async (userId) => {
+                    await fetch(
+                        `/api/v1/matches/${matchId}/consume-all-action-points/${userId}`,
+                        {
+                            method: "POST",
                             headers: {
-                                'Authorization': `Bearer ${jwt}`,
-                                'Content-Type': 'application/json',
-                            }
-                        });
-                        console.log('All action points consumed for loser:', loserUser.id);
-                    } catch (err) {
-                        console.error('Error consuming all action points for loser:', err);
-                    }
-                }
-            }
+                                Authorization: `Bearer ${jwt}`,
+                                "Content-Type": "application/json",
+                            },
+                        }
+                    );
+                },
+                notifyFightResolved: async (
+                    winnerId,
+                    winnerPlayerId,
+                    loserPlayerId
+                ) => {
 
-            // Si ganó el atacante, muévelo a la antigua sala del defensor
-            if (attackerWins && defenderRoomId) {
-                const moveWinner = await movePlayerToRoom(fightAttacker?.user?.id, defenderRoomId);
-                if (!moveWinner) {
-                    console.error('Failed to move attacker (winner) to defender room', defenderRoomId);
-                } else {
-                    console.log('Attacker moved to defender room', defenderRoomId, moveWinner);
-
-                }
-            }
-
-            const winnerPlayerId = attackerWins ? fightAttacker?.id : fightDefender?.id;
-            const loserPlayerId = attackerWins ? fightDefender?.id : fightAttacker?.id;
-            if (winnerPlayerId) {
-                const drawSuccess = await drawCardForWinner(winnerPlayerId);
-                if (drawSuccess) {
-                    console.log('Ganador robó una carta');
-                    
-                    // Publicar evento de resolución de pelea para que todos lo reciban
-                    await fetch(`/api/v1/matches/${matchId}/notify-fight-resolved`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${jwt}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            matchId: matchId,
-                            winnerId: winnerUser?.id,
-                            winnerPlayerId: winnerPlayerId,
-                            loserPlayerId: loserPlayerId
-                        })
-                    }).catch(e => console.warn('Could not notify fight resolved:', e));
-
-                    // Abrir modal de robo si es el usuario actual el ganador
-                    if (currentUser.id === fightAttacker?.user?.id && attackerWins) {
-                        setStealLoserPlayerId(loserPlayerId);
-                        setIsStealModalOpen(true);
-                    } else if (currentUser.id === fightDefender?.user?.id && !attackerWins) {
-                        setStealLoserPlayerId(loserPlayerId);
-                        setIsStealModalOpen(true);
-                    }
-                } else {
-                    console.log('No se pudo robar una carta para el ganador');
-                }
-            }
+                    await fetch(
+                        `/api/v1/matches/${matchId}/notify-fight-resolved`,
+                        {
+                            method: "POST",
+                            headers: {
+                                Authorization: `Bearer ${jwt}`,
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                matchId,
+                                winnerId,
+                                winnerPlayerId,
+                                loserPlayerId,
+                            }),
+                        }
+                    );
+                },
+                setStealLoserPlayerId,
+                setIsStealModalOpen,
+            });      
 
         } finally {
             setIsFightModalOpen(false);
