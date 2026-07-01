@@ -172,6 +172,7 @@
 
 /* -------------------- parte de las cartas del jugador -------------------- */
 .player-section{
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -294,9 +295,12 @@
 
 .match-board {
     display: flex;
-    gap: 20px;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: 0;
+    align-items: center;
     justify-content: center;
+    min-height: 100vh;
+    position: relative;
 }
 
 
@@ -329,7 +333,10 @@
 .player-and-decks-section{
     display: flex;
     flex-direction: column;
-    gap: 10px;  
+    gap: 10px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
 }
 
 .current-player-info {
@@ -488,20 +495,20 @@
 }
 
 .end-turn-button{
-    margin-left: 050px;
-    position: absolute;
-    left: 87%;                
-    transform: translateX(-50%);
-    margin-top: -80px;
-    padding: 15px 35px; 
-    font-size: 22px;
+    margin: 0;
+    padding: 10px 18px;
+    font-size: 16px;
     background: #c0392b;
     color: white;
     border: none;
     border-radius: 8px;
-    max-width: 500px;
-    min-width: 230px;
-    cursor: pointer
+    cursor: pointer;
+    position: absolute;
+    top: -54px;
+    right: 10px;
+    z-index: 20;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 /* Ocultar elementos en modo espectador */
