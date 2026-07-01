@@ -181,20 +181,46 @@ export default function JoinMatch() {
     </div>
 
     {/* Modal para lobby privado */}
-    <Modal isOpen={showModal} toggle={() => setShowModal(false)}>
-      <ModalHeader toggle={() => setShowModal(false)}>Join Private Lobby</ModalHeader>
-      <ModalBody>
-        <p>Introduce el código del lobby privado:</p>
+    <Modal
+      isOpen={showModal}
+      toggle={() => setShowModal(false)}
+      centered
+      backdrop="static"
+      className="join-private-modal"
+    >
+      <ModalHeader
+        toggle={() => setShowModal(false)}
+        className="join-private-modal-header"
+      >
+        Join Private Lobby
+      </ModalHeader>
+
+      <ModalBody className="join-private-modal-body">
+        <p>Enter the private lobby code:</p>
+
         <Input
+          className="join-private-input"
           type="text"
           value={privateCode}
           onChange={(e) => setPrivateCode(e.target.value)}
-          placeholder="Ej: AB12CD34"
+          placeholder="Example: AB12CD34"
         />
       </ModalBody>
-      <ModalFooter>
-        <Button color="success" onClick={handleJoinPrivate}>Join</Button>
-        <Button color="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+
+      <ModalFooter className="join-private-modal-footer">
+        <Button
+          className="join-private-confirm-btn"
+          onClick={handleJoinPrivate}
+        >
+          Join
+        </Button>
+
+        <Button
+          className="join-private-cancel-btn"
+          onClick={() => setShowModal(false)}
+        >
+          Cancel
+        </Button>
       </ModalFooter>
     </Modal>
 

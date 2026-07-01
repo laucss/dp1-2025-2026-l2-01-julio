@@ -30,8 +30,8 @@ INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (17
 INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
 VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,4,'WAITING',NULL,NULL,6,3,3,false,null);
 
-INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
-VALUES (5,'Fiesta ',NULL, 'WAITING',NULL,NULL,5,3,3,false,null);
+INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
+VALUES (5,'Fiesta ',NULL, 7, 'WAITING',NULL,NULL,5,3,3,false,null);
 
 INSERT INTO match(id,name,code,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
 VALUES (4,'nerea!','DEF345', 'WAITING',NULL,NULL,5,3,4,true,null);
@@ -136,7 +136,10 @@ INSERT INTO player (id, action_points, match_id, strength, user_id)
                  (20,4,7,null,11),
                  (21,8,7,null,12),
                  (22,7,7,null,13),
-                 (23,10,7,null,14);
+                 (23,10,7,null,14),
+                 (24,null,5,null,7),
+                 (25,null,5,null,8),
+                 (26,null,5,null,9);
 
 UPDATE match SET winner_id = 14 WHERE id = 3;
 UPDATE match SET winner_id = 18 WHERE id = 6;
