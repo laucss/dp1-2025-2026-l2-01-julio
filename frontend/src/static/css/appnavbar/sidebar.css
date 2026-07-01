@@ -6,7 +6,7 @@
   right: -300px;
   width: 300px;
   height: 100%;
-  background-color: #c75a00; /* darker navbar orange */
+  background-color: #cf8d42; /* darker navbar orange */
   color: #fff;
   transition: right 0.3s ease-in-out;
   z-index: 1050;
