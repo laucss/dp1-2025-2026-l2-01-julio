@@ -37,11 +37,11 @@ export default function DeckSection({
                 </button>
 
                 <div className="discard-pile-section">
-                    {deck.discardedCards.length > 0 ? (
+                    {deck.discardedCards?.length > 0 ? (
                         <img
                             src={`/resources${
                                 deck.discardedCards[
-                                    deck.discardedCards.length - 1
+                                    deck.discardedCards?.length - 1
                                 ].frontImage
                             }`}
                             alt="Última carta descartada"

@@ -105,7 +105,7 @@ export default function WaitingRoom() {
       headers: { Authorization: `Bearer ${jwt}` },
     });
     navigate("/lobbies");
-  };
+  }
 
   
   const stopSpectating = async () => {
@@ -114,7 +114,7 @@ export default function WaitingRoom() {
       headers: { Authorization: `Bearer ${jwt}` },
     });
     navigate("/lobbies");
-  };
+  }
 
   const startGame = async () => {
     await fetch(`/api/v1/lobbies/${matchId}/start`, {
@@ -122,7 +122,7 @@ export default function WaitingRoom() {
       headers: { Authorization: `Bearer ${jwt}` },
     });
     navigate(`/match/${matchId}`);
-  };
+  }
 
   const isCreator = currentUser && lobby.creatorId === currentUser.id
   const canStart = lobby.players && lobby.players.length >= lobby.minPlayers

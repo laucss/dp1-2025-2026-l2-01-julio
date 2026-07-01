@@ -99,6 +99,7 @@ function App() {
           <Route path="/achievements/" exact={true} element={<PrivateRoute><AchievementList/></PrivateRoute>} /> 
           <Route path="/achievements/:achievementId" exact={true} element={<PrivateRoute><AchievementEdit/></PrivateRoute>} /> 
           <Route path="/matches" element={<PrivateRoute><MatchList /></PrivateRoute>} />
+          <Route path="/match/:matchId" element={<PrivateRoute><Match /></PrivateRoute>} />
         </>)
     }
     if (role === "PLAYER") {
@@ -129,7 +130,7 @@ function App() {
         <Route path="/friends" element={<PrivateRoute><Friends /></PrivateRoute>} />
         <Route path="/ranking" element={<PrivateRoute><Ranking /></PrivateRoute>} />
         <Route path="/rules" element={<PrivateRoute><Rules /></PrivateRoute>} />
-        <Route path="/matchs/new" element={<PrivateRoute><CreateMatch/></PrivateRoute>}></Route>
+        <Route path="/matches/new" element={<PrivateRoute><CreateMatch/></PrivateRoute>}></Route>
         <Route path="/lobbies" element={<PrivateRoute><JoinMatch/></PrivateRoute>}></Route>
         <Route path="/lobby/:matchId" element={<PrivateRoute><WaitingLobby /></PrivateRoute>} />
         <Route path="/history/:userId" element={<PrivateRoute><History /></PrivateRoute>} />

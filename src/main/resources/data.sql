@@ -61,7 +61,7 @@ INSERT INTO player (id, action_points, match_id, strength, user_id)
                  (22,7,7,null,13),
                  (23,10,7,null,14),
                  (24,null,5,null,16),
-                 (25,3,2,null,6),
+                 (25,3,2,null,9),
                  (26,4,2,null,8),
                  (27,2,2,null,10);
 
