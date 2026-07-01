@@ -18,7 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 import jakarta.persistence.EntityManager;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
