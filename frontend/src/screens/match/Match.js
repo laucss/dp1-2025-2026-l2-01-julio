@@ -1257,33 +1257,32 @@ if (!match) {
     return <div>Cargando partida...</div>;
 }
 
+    const clearFightState = async () => {
+            setIsFightModalOpen(false);
+            setFightDefender(null);
+            setFightAttacker(null);
+            setPendingTargetRoom(null);
+
+            await cleanVotingStates();
+        };
 
     const handleFightResult = async (currentUserWon) => {
         try {
             console.log('Fight resolved. currentUserWon=', currentUserWon, 'fightDefender=', fightDefender, 'fightAttacker=', fightAttacker);
             const isCurrentAttacker = currentUser.id === fightAttacker?.user?.id;
-            const isCurrentDefender = currentUser.id === fightDefender?.user?.id;
+           
 
             // Solo el atacante orquesta los movimientos para evitar duplicados
             if (!isCurrentAttacker) {
-                setIsFightModalOpen(false);
-                setFightDefender(null);
-                setFightAttacker(null);
-                setPendingTargetRoom(null);
-                cleanVotingStates();
+                await clearFightState();
                 return;
             }
-
             const defenderRoomId = fightDefender?.currentRoom?.id || fightDefender?.roomId || fightDefender?.room?.id || pendingTargetRoom;
-
             // currentUserWon aquí representa si el atacante ganó (porque solo el atacante ejecuta esto)
             const attackerWins = currentUserWon;
-            
             // Obtener el perdedor (puede ser jugador o NPC)
             const isDefenderNPC = !fightDefender?.user;
             const loserUser = attackerWins ? fightDefender?.user : fightAttacker?.user;
-            const loser = attackerWins ? fightDefender : fightAttacker;
-            const winnerUser = attackerWins ? fightAttacker?.user : (fightDefender?.user || fightDefender);
 
             // Si el defensor es un NPC
             if (isDefenderNPC) {
@@ -1368,11 +1367,7 @@ if (!match) {
             });      
 
         } finally {
-            setIsFightModalOpen(false);
-            setFightDefender(null);
-            setFightAttacker(null);
-            setPendingTargetRoom(null);
-            cleanVotingStates();
+            await clearFightState();    
         }
     }
 
