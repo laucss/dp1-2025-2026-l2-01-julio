@@ -10,6 +10,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth.payload.response.MessageResponse;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
@@ -106,7 +108,6 @@ public class MatchController {
         return m;
     }
 
-    
 
     @GetMapping("/all-Matches")
     public Page<MatchHistorialDTO> getAllMatches(@ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
@@ -192,7 +193,6 @@ public class MatchController {
         MatchDTO match = ms.leaveMatch(matchId, userId);
         return ResponseEntity.ok(match);
     }
-
 
 
     @PostMapping()
@@ -556,5 +556,19 @@ public class MatchController {
         EscapeAttemptResultDTO result = ms.escapeAttempt(matchId, userId, rollDice);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/{matchId}/spectate")
+    public ResponseEntity<MatchDTO> spectateGame (@PathVariable Integer matchId) {
+        MatchDTO m = ms.spectateGame(matchId);
+        return ResponseEntity.ok(m); 
+    }
+
+    @DeleteMapping("/{matchId}/StopSpectating")
+    public ResponseEntity<MessageResponse> stopSpectating (@PathVariable Integer matchId) {
+        ms.stopSpectating(matchId);
+        return new ResponseEntity<>(new MessageResponse("Stopped spectating game " + matchId + "."), HttpStatus.OK);
+    }
+
+
 
 }

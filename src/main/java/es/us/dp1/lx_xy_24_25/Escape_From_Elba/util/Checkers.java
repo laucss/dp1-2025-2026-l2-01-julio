@@ -6,12 +6,14 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.*;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest.FriendRequestService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -21,10 +23,13 @@ public class Checkers {
     private final CardRepository cardRepository; 
     private final PlayerRepository playerRepository;
 
-    public Checkers(LobbyRepository lobbyRepository, PlayerRepository playerRepository, CardRepository cardRepository) {
+    private final FriendRequestService friendRequestService;
+
+    public Checkers(LobbyRepository lobbyRepository, PlayerRepository playerRepository, CardRepository cardRepository, FriendRequestService friendRequestService) {
         this.lobbyRepository = lobbyRepository;
         this.playerRepository = playerRepository;
         this.cardRepository = cardRepository; 
+        this.friendRequestService = friendRequestService; 
     }
 
     private static final Integer TOTAL_CARDS_TO_DRAW = 7; // máximo número de cartas que puedes robar por turno 
@@ -56,6 +61,16 @@ public class Checkers {
             throw new PlayerNotInTheGame("The player is not in the lobby");
         }
     }
+
+    public void checkCanSpectateGame(Match match, Integer userId){
+        List<User> friends = friendRequestService.findFriendsByUserId(userId); 
+        List<User> players = match.getPlayers().stream().map(p -> p.getUser()).toList(); 
+        boolean isFriendOfAllThePlayers = friends.containsAll(players); 
+        if(match.getIsPrivate() && !isFriendOfAllThePlayers) {
+            throw new GameIsNotPublicException("You cannot spectate de match because is private and you are not friend of all the players");
+        }
+    }
+
 
     // CARTAS 
     public void checkCardExists(Card card) {

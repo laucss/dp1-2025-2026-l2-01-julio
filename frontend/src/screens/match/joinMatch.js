@@ -74,7 +74,7 @@ export default function JoinMatch() {
 
     const handleSpectate = async (match) => {
     try {
-      const response = await fetch(`/api/v1/lobbies/${match.id}/join`, {
+      const response = await fetch(`/api/v1/matches/${match.id}/spectate`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -84,21 +84,20 @@ export default function JoinMatch() {
       });
 
       if (response.ok) {
-        navigate(`/lobby/${match.id}`);
+        const data = await response.json()
+        if (data.status === 'WAITING') {
+          navigate(`/lobby/${match.id}`)
+        } if (data.status === 'PLAYING')  {
+          navigate(`/macthes/${match.id}`)
+        } 
+        
       } else {
         let text = "";
         try { text = await response.text(); } catch {}
-        const lower = (text || "").toLowerCase();
-        if (response.status === 400 && (lower.includes("llena") || lower.includes("full"))) {
-          setShowFullMatchModal(true);
-        } else if (response.status === 400 && (lower.includes("comenzado") || lower.includes("empezado") || lower.includes("correct status"))) {
-          setShowStartedMatchModal(true);
-        } else {
-          alert(" No se pudo unir al lobby: " + (text || "Error desconocido"));
+          alert(" No se pudo unir a la partida: " + (text || "Error desconocido"));
         }
-      }
     } catch (error) {
-      alert(" Error al conectar con el servidor.");
+        alert(" Error al conectar con el servidor.");
     }
   }
 
