@@ -23,7 +23,7 @@ import AchievementUserList from "./screens/achievements/achievementUserList";
 import Rules from "./screens/rules/Rules";
 import CreateMatch from "./screens/match/createMatch";
 import JoinMatch from "./screens/match/joinMatch";
-import MatchList from "./screens/prueba";
+import MatchList from "./screens/admin/matchList";
 import WaitingLobby from "./screens/match/waitingLobby";
 import Match from "./screens/match/Match";
 import Ranking from "./screens/statistics/Ranking";
@@ -109,6 +109,7 @@ function App() {
           <Route path="users/:username/achievements" element={<PrivateRoute><AchievementUserList /></PrivateRoute>} />
           <Route path="users/:username/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
           <Route path="/match/:matchId" element={<PrivateRoute><Match /></PrivateRoute>} />
+          
         </>)
     }    
   })
@@ -130,10 +131,10 @@ function App() {
         <Route path="/friends" element={<PrivateRoute><Friends /></PrivateRoute>} />
         <Route path="/ranking" element={<PrivateRoute><Ranking /></PrivateRoute>} />
         <Route path="/rules" element={<PrivateRoute><Rules /></PrivateRoute>} />
+        <Route path="/history/:userId" element={<PrivateRoute><History /></PrivateRoute>} />
         <Route path="/matches/new" element={<PrivateRoute><CreateMatch/></PrivateRoute>}></Route>
         <Route path="/lobbies" element={<PrivateRoute><JoinMatch/></PrivateRoute>}></Route>
         <Route path="/lobby/:matchId" element={<PrivateRoute><WaitingLobby /></PrivateRoute>} />
-        <Route path="/history/:userId" element={<PrivateRoute><History /></PrivateRoute>} />
       </>
     )
   }

@@ -19,37 +19,37 @@ export default function MatchList() {
   const [totalPages, setTotalPages] = useState(0);
 
   const fetchMatches = async (currentPage = 0) => {
-    try {
-      const response = await fetch(
-        `/api/v1/matches/all-Matches?page=${currentPage}&size=3`,
-        { headers: { Authorization: `Bearer ${jwt}` } }
-      );
+      try {
+          const response = await fetch(
+              `/api/v1/matches/all-Matches?filter=${filter}&page=${currentPage}&size=3`,
+              {
+                  headers: {
+                      Authorization: `Bearer ${jwt}`,
+                  },
+              }
+          );
 
-      if (!response.ok) throw new Error("Error al cargar las partidas");
+          if (!response.ok)
+              throw new Error("Error al cargar las partidas");
 
-      const data = await response.json();
+          const data = await response.json();
 
-      const filtered =
-        filter === "all"
-          ? data.content
-          : filter === "inProgress"
-          ? data.content.filter(m => !m.duration)
-          : data.content.filter(m => m.duration);
+          setMatches(data.content);
+          setTotalPages(data.totalPages);
 
-      setMatches(filtered);
-      setTotalPages(data.totalPages);
-    } catch (error) {
-      setMessage(error.message);
-      setVisible(true);
-    }
+      } catch (error) {
+          setMessage(error.message);
+          setVisible(true);
+      }
   };
+
 
   useEffect(() => {
     fetchMatches(page);
   }, [filter, page]);
 
   const formatDuration = (duration) => {
-    if (!duration) return "En curso";
+    if (!duration) return "In progress";
     const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
     if (!match) return duration;
     return `${match[1] ? match[1] + "h " : ""}${match[2] ? match[2] + "m" : ""}`;
@@ -76,11 +76,10 @@ export default function MatchList() {
 
   const optionStyle = (active) => ({
     padding: "8px 12px",
-    borderRadius: "6px",
     cursor: "pointer",
     background: active ? AQUA : "white",
     color: active ? "#003b3a" : "#000",
-    marginBottom: "4px",
+    borderBottom: "1px solid #ddd",
   });
 
   const modal = getErrorModal(setVisible, visible, message);
@@ -98,7 +97,7 @@ export default function MatchList() {
           textShadow: ` 0 0 18px ${AQUA_GLOW}`,
         }}
       >
-        Historial
+        Matches history
       </h1>
 
       {modal}
@@ -107,7 +106,7 @@ export default function MatchList() {
       <div
         style={{
           position: "absolute",
-          top: "160px",
+          top: 60,
           left: "24px",
           width: "220px",
           zIndex: 100,
@@ -123,19 +122,19 @@ export default function MatchList() {
           }}
           onClick={() => setOpenFilter(!openFilter)}
         >
-          Filtrar por ▾
+          Filter by ▾
         </Button>
 
         {openFilter && (
           <div style={{ marginTop: "8px" }}>
             <div style={optionStyle(filter === "all")} onClick={() => { setFilter("all"); setPage(0); setOpenFilter(false); }}>
-              Todas
+              All matches
             </div>
             <div style={optionStyle(filter === "inProgress")} onClick={() => { setFilter("inProgress"); setPage(0); setOpenFilter(false); }}>
-              Partidas en curso
+              In progress matches
             </div>
             <div style={optionStyle(filter === "finished")} onClick={() => { setFilter("finished"); setPage(0); setOpenFilter(false); }}>
-              Partidas finalizadas
+              Finished matches
             </div>
           </div>
         )}
@@ -154,60 +153,105 @@ export default function MatchList() {
           gap: "28px",
         }}
       >
-        {matches.map(match => (
+       {matches.length === 0 ? (
           <div
-            key={match.id}
             style={{
               borderRadius: "22px",
-              padding: "32px",
+              padding: "48px 32px",
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: "center",
+              alignItems: "center",
               background: "#ebfdff",
               border: `3px solid ${AQUA}`,
               boxShadow: `0 0 20px ${AQUA_GLOW}`,
+              minHeight: "180px",
             }}
           >
-            <div>
-              <strong style={{ fontSize: "1.2rem" }}>
-                Nombre: {match.name}
-              </strong>
+            <span
+              style={{
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                color: "#555",
+              }}
+            >
+              No matches to display
+            </span>
+          </div>
+        ) : (
+          matches.map(match => (
+            <div
+              key={match.id}
+              style={{
+                borderRadius: "22px",
+                padding: "32px",
+                display: "flex",
+                justifyContent: "space-between",
+                background: "#ebfdff",
+                border: `3px solid ${AQUA}`,
+                boxShadow: `0 0 20px ${AQUA_GLOW}`,
+              }}
+            >
+              <div>
+                <strong style={{ fontSize: "1.2rem" }}>
+                  Name: {match.name}
+                </strong>
 
-              <div style={{ marginTop: "16px" }}>
-                Jugadores:
-                <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
-                  {match.players?.map(p => avatar(p.user))}
+                <div style={{ marginTop: "16px" }}>
+                  Players:
+                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                    {match.players?.map(p => avatar(p.user))}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ textAlign: "right" }}>
+                <div>Duration: {formatDuration(match.duration)}</div>
+
+                <div
+                  style={{
+                    marginTop: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <strong style={{ marginRight: 4 }}>Creator:</strong>
+                  {match.creator?.user ? (
+                    <>
+                      {avatar(match.creator.user, 34)}
+                      <span style={{ marginLeft: 8 }}>
+                        {match.creator.user.username}
+                      </span>
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <strong style={{ marginRight: 4 }}>Winner:</strong>
+                  {match.winner?.user ? (
+                    <>
+                      {avatar(match.winner.user, 34)}
+                      <span style={{ marginLeft: 8 }}>
+                        {match.winner.user.username}
+                      </span>
+                    </>
+                  ) : (
+                    "—"
+                  )}
                 </div>
               </div>
             </div>
-
-            <div style={{ textAlign: "right" }}>
-              <div>Duración: {formatDuration(match.duration)}</div>
-              <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: 8 }}>
-                <strong style={{ marginRight: 4 }}>Creador:</strong>
-                {match.creator?.user ? (
-                  <>
-                    {avatar(match.creator.user, 34)}
-                    <span style={{ marginLeft: 8 }}>{match.creator.user.username}</span>
-                  </>
-                ) : (
-                  "—"
-                )}
-              </div>
-
-              <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: 8 }}>
-                <strong style={{ marginRight: 4 }}>Ganador:</strong>
-                {match.winner?.user ? (
-                  <>
-                    {avatar(match.winner.user, 34)}
-                    <span style={{ marginLeft: 8 }}>{match.winner.user.username}</span>
-                  </>
-                ) : (
-                  "—"
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* PAGINACIÓN */}

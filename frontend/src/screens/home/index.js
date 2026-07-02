@@ -290,7 +290,7 @@ export default function Home(){
                 </button>
                 ) : (
                 <>      
-                    <button className='create-button' onClick={() => navigate('/matchs/new')}>
+                    <button className='create-button' onClick={() => navigate('/matches/new')}>
                         Create Match  
                     </button> 
                     <button className='join-button'onClick={() => navigate('/lobbies')}>

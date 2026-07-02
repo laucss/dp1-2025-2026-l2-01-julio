@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
@@ -22,14 +23,22 @@ public class MatchHistorialDTO {
 
     private PlayerInGameDTO winner;
 
+    private Boolean abandoned;
+
+
 
     public MatchHistorialDTO() {
     }
+
+
 
     public MatchHistorialDTO(Match match) {
         this.name = match.getName();
         this.players = match.getPlayers().stream().map(p-> new PlayerInGameDTO(p)).toList();
         this.duration = match.getDuration();
+        this.abandoned = false;
+
+        
 
         // Buscar creator en la lista de players usando creatorId
         if (match.getCreatorId() != null) {
