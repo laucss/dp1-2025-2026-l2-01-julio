@@ -23,7 +23,7 @@
 
 .back-arrow-btn {
     position: absolute;
-    top: 00px;
+    top: 80px;
     left: 50px;
     font-size: 5rem;
     background: transparent;
@@ -36,14 +36,14 @@
 }
 
 .back-arrow-btn:hover {
-    color: #ffcc00;
+    color: #5ec3f6;
 }
 
 /* Cuadro del listado */
 .lobbies-box {
   
-  background: #ebfdff;
-  border: 6px solid #22a8b7;
+  background: #eee8e4;
+  border: 6px solid #d58a5b;
   border-radius: 20px;
   padding: 2rem 2.5rem;
   box-shadow: 0 0 20px rgba(9, 141, 123, 0.25);
@@ -56,7 +56,7 @@
 /* Título */
 .lobbies-box h1 {
   margin-bottom: 1.5rem;
-  color: #003844;
+  color: #d58a5b;
   font-weight: 700;
 }
 
@@ -94,9 +94,9 @@
 .join-private-btn {
   margin: 16px auto 1.5rem;
   display: block;
-  background-color: #008388;
+  background-color: #5ec3f6;
   color: white;
-  border: none;
+  border: 3px solid#429dcb;
   border-radius: 8px;
   padding: 0.7rem 1.5rem;
   font-weight: bold;
@@ -111,17 +111,17 @@
 
 .btn.join-private-btn,
 .lobbies-box .join-private-btn {
-  background-color: #22a8b7 !important;
+  background-color: #5ec3f6 !important;
   color: #ffffff !important;
-  border: none !important;
+ border: 3px solid#429dcb;
 }
 .btn.join-private-btn:hover,
 .lobbies-box .join-private-btn:hover {
-  background-color: #1aa0ae !important;
+  background-color: #5ec3f6 !important;
 }
 
 .pagination-group .btn {
-  background-color: #008695;
+  background-color: #5ec3f6;
   color: #ffffff;
   border: none;
   margin: 0 4px;
@@ -138,14 +138,14 @@
 
 .lobbies-box .btn.btn-success,
 .lobbies-box button.btn-success {
-  background-color: #22a8b7 !important;
-  border-color: #22a8b7 !important;
+  background-color: #d58a5b !important;
+  border-color: #ab5f2f !important;
   color: #ffffff !important;
 }
 .lobbies-box .btn.btn-success:hover,
 .lobbies-box button.btn-success:hover {
-  background-color: #1aa0ae !important;
-  border-color: #1aa0ae !important;
+  background-color: #e39a68 !important;
+  border-color: #e39a68 !important;
 }
 .lobbies-box .btn.btn-success:disabled,
 .lobbies-box button.btn-success:disabled {
@@ -162,21 +162,92 @@
   color: #ffffff !important;
 }
 
-.modal-content {
-  background-color: rgba(15, 35, 95, 0.95);
-  border-radius: 15px;
-  border: 2px solid rgba(255, 200, 0, 0.3);
+
+/* ===========================
+   JOIN PRIVATE MODAL
+=========================== */
+
+.join-private-modal .modal-content{
+    background: rgba(255,255,255,.95);
+    border: 4px solid #a7661b;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,.35);
 }
 
-.modal-header {
-  border-bottom: 1px solid rgba(255, 200, 0, 0.2);
+.join-private-modal-header{
+    background: #d58a5b;
+    color: #F8F3E6;
+    border: 4px solid #a7661b;
+    font-weight: bold;
+    font-size: 1.5rem;
 }
 
-.modal-body {
-  color: #fff;
-  font-size: 16px;
+.join-private-modal-body{
+    background: #f7e6d1;
+    text-align: center;
+    padding: 2rem;
+    border: 4px solid #a7661b;
+    color: #4d3118;
+    font-size: 1.15rem;
 }
 
-.modal.fade.show {
-  background-color: rgba(0, 0, 0, 0.7);
+.join-private-input{
+    margin-top: 20px;
+    text-align: center;
+    font-size: 1.2rem;
+    border: 2px solid #a7661b;
+    border-radius: 10px;
+}
+
+.join-private-modal-footer{
+    background: #f7e6d1;
+    border-top: none;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.join-private-confirm-btn{
+    background: #5ec3f6 !important;
+    border: 3px solid #429dcb !important;
+    color: #F8F3E6 !important;
+    font-weight: bold;
+    min-width: 120px;
+}
+
+.join-private-confirm-btn:hover{
+    background: #a2d7f1 !important;
+    border-color: #a2d7f1 !important;
+}
+
+.join-private-cancel-btn{
+    background: #8a8a8a !important;
+    border: 3px solid #6a6a6a !important;
+    color: white !important;
+    min-width: 120px;
+}
+
+.join-private-cancel-btn:hover{
+    background: #6d6d6d !important;
+}
+
+
+
+.join-private-modal {
+    background: transparent !important;
+}
+
+.join-private-modal.modal-dialog {
+    background: transparent !important;
+}
+
+.join-private-modal .modal-content {
+    background: #f7e6d1 !important;
+    border: 4px solid #a7661b !important;
+    border-radius: 20px !important;
+}
+
+.modal-dialog {
+    background: transparent !important;
 }

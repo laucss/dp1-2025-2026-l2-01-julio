@@ -41,7 +41,7 @@
     width: 100%;
     padding: 8px;
     border-radius: 6px;
-    border: 1px solid #008388;
+    border: 1px solid #a7661b;
     font-size: 1rem;
     margin-bottom: 1rem;
 }
@@ -56,9 +56,9 @@
 }
 
 .player-count-container button {
-    background-color: #008388;
+    background-color: #d58a5b;
     color: #fff;
-    border: 2px solid #d8fffb;
+    border: 2px solid #c07b2a;
     border-radius: 10px;
     width: 45px;
     height: 45px;
@@ -69,7 +69,7 @@
 }
 
 .player-count-container button:hover {
-    background-color: #0f9b8f;
+    background-color: #e39a68;
 }
 
 .player-count-container span {
@@ -89,9 +89,9 @@
 }
 
 .npc-count-container button {
-    background-color: #008388;
+    background-color: #d58a5b;
     color: #fff;
-    border: 2px solid #d8fffb;
+    border: 2px solid #c07b2a;
     border-radius: 50%; /* hace el botón circular */
     width: 50px;
     height: 50px;
@@ -105,14 +105,14 @@
 }
 
 .npc-count-container button:hover {
-    background-color: #0f9b8f;
+    background-color: #d58a5b;
 }
 
 /* Reusable circular button (for player +/-, npc +/-, etc.) */
 .circle-btn {
-    background-color: #008388;
+    background-color: #d58a5b;
     color: #fff;
-    border: 2px solid #d8fffb;
+    border: 2px solid #c07b2a;
     border-radius: 50%;
     width: 50px;
     height: 50px;
@@ -170,9 +170,9 @@
 
 /* === BOTÓN CREAR === */
 .lobby-creation-content button[type="submit"] {
-    background-color: #008388;
+    background-color: #5ec3f6;
     color: #fff;
-    border: 3px solid#d8fffb;
+    border: 3px solid#429dcb;
 ;
     border-radius: 10px;
     padding: 0.8rem 0;  /* más ancho sin hacerlo más alto */
@@ -185,9 +185,9 @@
 }
 
 .lobby-creation-content button[type="cancel"] {
-    background-color: #dd1e1e;
+    background-color: #d15151;
     color: #fff;
-    border: 3px solid #ffffff;
+    border: 1px solid #9d1b1b;
     border-radius: 10px;
     padding: 0.8rem ;  /* más ancho sin hacerlo más alto */
     font-size: 1.2rem;
@@ -200,11 +200,11 @@
 }
 
 .lobby-creation-content button[type="submit"]:hover {
-    background-color: #0f9b8f;
+    background-color: #a2d7f1;
 }
 
 .lobby-creation-content button[type="cancel"] :hover {
-    background-color: #9d0000;
+    background-color: #5d0303;
 }
 
 /* === MENSAJE FINAL === */
@@ -216,8 +216,8 @@
 }
 
 .creation-box {
-    background: #ebfdff;
-    border: 6px solid #22a8b7;
+    background: #eee8e4;
+    border: 6px solid #d58a5b;
     border-radius: 20px;
     padding: 30px;
     box-shadow: 0 0 20px rgba(9, 141, 123, 0.6);
@@ -227,11 +227,11 @@
 }
 
 .lobby-creation-content {
-    color: #003b3a;
+    color: #d58a5b;
 }
 
 .lobby-creation-content h1 {
-    color: #003b3a;
+    color: #d58a5b;
 }
 
 .lobbies-overlay {

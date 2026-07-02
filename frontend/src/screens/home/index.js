@@ -2,6 +2,7 @@ import React from 'react';
 import { useState, useEffect, useRef } from "react";
 import '../../App.css';
 import '../../static/css/home/home.css';
+import titleImage from '../../static/images/title.png';
 import { useNavigate } from 'react-router-dom';
 import tokenService from "../../services/token.service";
 import useFetchState from '../../util/useFetchState';
@@ -280,7 +281,7 @@ export default function Home(){
 
     return(
         <div className="home-page-container">
-            <img src="/title.png" alt="Título" className="home-title-image" />
+            <img src={titleImage} alt="Título" className="home-title-image" />
             {jwt ? (
                 <div className='home-buttons'>
                 {((Array.isArray(currentMatch) && currentMatch.length>0) || (typeof currentMatch === 'number' && currentMatch>0) || (typeof currentMatch === 'string' && currentMatch.length>0)) ? (
