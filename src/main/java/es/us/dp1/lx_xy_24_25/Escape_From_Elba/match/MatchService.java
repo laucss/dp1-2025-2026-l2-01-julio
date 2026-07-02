@@ -38,6 +38,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.LoseAgainstNpcRequestDT
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
@@ -68,6 +69,7 @@ public class MatchService {
     LobbyWebsocketController lobbyWebsocketController;
     MatchWebsocketController matchWebsocketController;
     Checkers checkers; 
+    LobbyService lobbyService;
 
     MatchRepository matchRepo;
     PlayerRepository playerRepo;
@@ -79,7 +81,7 @@ public class MatchService {
     public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, 
             RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
             PlayerService playerService, LobbyWebsocketController lobbyWebsocketController,
-            MatchWebsocketController matchWebsocketController, NpcRepository npcRepository, Checkers checkers, UserService userService) {
+            MatchWebsocketController matchWebsocketController, NpcRepository npcRepository, Checkers checkers, UserService userService, LobbyService lobbyService) {
         this.matchRepo = mrepo;
         this.playerRepo = playerRepo;
         this.roomRepository = roomRepository;
@@ -93,6 +95,7 @@ public class MatchService {
         this.matchWebsocketController = matchWebsocketController;
         this.checkers = checkers; 
         this.userService = userService; 
+        this.lobbyService = lobbyService;
     }
 
     @Transactional(readOnly = true)
@@ -235,24 +238,12 @@ public class MatchService {
         m.setTurnNumber(0);
         matchRepo.save(m);
         
-        LobbyUpdateDTO update = createLobbyUpdate(m, "START", "");
+        LobbyUpdateDTO update = lobbyService.createLobbyUpdate(m, "START", "");
         lobbyWebsocketController.notifyGameStarted(matchId, update);
         
         return m;
     }
     
-    @Transactional
-    private LobbyUpdateDTO createLobbyUpdate(Match match, String action, String username) {
-        List<LobbyUpdateDTO.PlayerLobbyDTO> players = new ArrayList<>();
-        for (Player p : match.getPlayers()) {
-            players.add(new LobbyUpdateDTO.PlayerLobbyDTO(
-                p.getUser().getId(),
-                p.getUser().getUsername(),
-                p.getUser().getAvatar()
-            ));
-        }
-        return new LobbyUpdateDTO(match.getId(), players, action, username);
-    }
 
     //Función para decidir el orden de los jugadores en la partida según la tirada de dados.
     @Transactional
@@ -1155,6 +1146,9 @@ public class MatchService {
         spectators.add(currentUser); 
         m.setSpectators(spectators); 
         matchRepo.save(m); 
+        // Notificar a todos en el lobby que alguien se unió
+        LobbyUpdateDTO update = lobbyService.createLobbyUpdate(m, "SPECTATOR_JOIN", currentUser.getUsername());
+        lobbyWebsocketController.notifyPlayerJoined(m.getId(), update);
         return new MatchDTO(m); 
     }
 
@@ -1166,6 +1160,9 @@ public class MatchService {
         spectators.remove(currentUser); 
         m.setSpectators(spectators); 
         matchRepo.save(m); 
+        // Notificar a todos en el lobby que alguien se unió
+        LobbyUpdateDTO update = lobbyService.createLobbyUpdate(m, "SPECTATOR_LEAVE", currentUser.getUsername());
+        lobbyWebsocketController.notifyPlayerJoined(m.getId(), update);
     }
 
 

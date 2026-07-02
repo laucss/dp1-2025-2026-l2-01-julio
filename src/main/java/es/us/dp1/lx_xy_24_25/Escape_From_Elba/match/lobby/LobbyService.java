@@ -187,7 +187,8 @@ public class LobbyService {
 
     }
     
-    private LobbyUpdateDTO createLobbyUpdate(Match match, String action, String username) {
+    @Transactional
+    public LobbyUpdateDTO createLobbyUpdate(Match match, String action, String username) {
         List<LobbyUpdateDTO.PlayerLobbyDTO> players = new ArrayList<>();
         for (Player p : match.getPlayers()) {
             players.add(new LobbyUpdateDTO.PlayerLobbyDTO(
@@ -196,7 +197,15 @@ public class LobbyService {
                 p.getUser().getAvatar()
             ));
         }
-        return new LobbyUpdateDTO(match.getId(), players, action, username);
+        List<LobbyUpdateDTO.UserLobbyDTO> spectators = new ArrayList<>();
+        for (User u : match.getSpectators()) {
+            spectators.add(new LobbyUpdateDTO.UserLobbyDTO(
+                u.getId(),
+                u.getUsername(),
+                u.getAvatar()
+            ));
+        }
+        return new LobbyUpdateDTO(match.getId(), players, spectators, action, username);
     }
 
 

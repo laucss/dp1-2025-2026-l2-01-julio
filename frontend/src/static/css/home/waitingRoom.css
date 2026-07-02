@@ -1,3 +1,12 @@
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden; /* Evita cualquier tipo de scroll global */
+}
+
 .waiting-invite-text-small {
   font-size: 1rem;
   color: #4a4a8a;
@@ -19,7 +28,7 @@
 
 .waiting-room-overlay {
   background-color: rgba(0, 0, 0, 0.4);
-  height: 100%;
+  height: 100vh;
   width: 100%;
 
   display: flex;
@@ -38,7 +47,8 @@
   backdrop-filter: blur(5px);
   color: #000000;
   max-width: 500px;
-  position: relative;
+  position: relative; 
+  overflow: visible; 
 }
 
 
@@ -53,21 +63,18 @@
   color: #444;
 }
 
-.player-table {
+.player-table, .mt-4 {
   width: 100%;
   margin-top: 1.5rem;
   border-radius: 20px;  
   overflow: hidden;
+  border-collapse: separate;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff; 
 }
 
-.mt-4{
-  width: 100%;
-  margin-top: 1.5rem;
-  border-radius: 20px;  
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
+
+
 
 /* Modal styles for OnlineFriendsModal */
 .modal-overlay {
@@ -214,35 +221,37 @@
   font-weight: 600;
 }
 
-.invite-friends-btn {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 48px;
-  height: 48px;
+/* Estilos de los botones puros */
+.invite-friends-btn, .spectators-btn {
+  width: 100% !important;
+  height: 100% !important;
   border-radius: 50%;
-  background: #28a745;
   color: white;
   border: none;
-  font-size: 22px;
+  font-size: 20px;
   cursor: pointer;
-  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+}
+
+.invite-friends-btn {
+  background: #28a745; /* Verde */
 }
 
 .spectators-btn {
-  position: absolute;
-  top: 18px;
-  right: 425px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #565fc6;
-  color: white;
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  z-index: 10;
+  background: #7367f0; /* Tu color azul/morado para el ojo */
 }
+
+.btn-success {
+  background-color: #22a8b7 !important;
+  border-color: #22a8b7 !important;
+  color: #ffffff !important;
+  font-weight: bold;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
 
 .modal-overlay {
   position: fixed;
@@ -284,21 +293,27 @@
 /* El contenedor que envuelve la caja del lobby y los espectadores */
 .waiting-room-layout {
   display: flex;
-  flex-direction: row; /* Los pone uno al lado del otro */
-  align-items: flex-start; /* Alinea los techos de ambas cajas */
-  gap: 20px; /* Separación horizontal entre el lobby y el panel */
-  justify-content: center; /* Mantiene el conjunto centrado en la pantalla */
+  flex-direction: row;     /* Coloca la caja y el panel uno al lado del otro */
+  align-items: flex-start; /* Alinea los techos de los elementos */
+  justify-content: center; /* Mantiene el conjunto centrado en pantalla */
+  position: relative;      /* Clave para coordenadas internas */
 }
 
-/* Panel de espectadores estilizado similar a tu lobby */
+
 .spectators-panel {
-  background-color: rgba(255, 255, 255, 0.9); /* O el color blanco semi-transparente de tu lobby */
+  position: absolute;
+  /* Coloca el panel justo al lado derecho del lobby con una separación de 20px */
+  top: 0;
+  left: calc(100% + 20px); 
+  
+  background-color: rgba(255, 255, 255, 0.9);
   border-radius: 20px;
   padding: 25px;
-  width: 250px; /* Un ancho prudente para la lista */
+  width: 250px;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(4px);
-  animation: fadeInRight 0.3s ease-out; /* Animación opcional para una entrada suave */
+  animation: fadeInRight 0.3s ease-out;
+  z-index: 99;
 }
 
 .spectators-panel h3 {
@@ -310,22 +325,81 @@
 
 .spectator-item {
   background: #ffffff;
-  padding: 10px;
+  padding: 10px 15px;      /* Un poco más de margen interno a los lados */
   margin-bottom: 8px;
   border-radius: 10px;
   border: 1px solid #e6e6e6;
-  text-align: center;
   font-weight: 500;
+  
+  /* NUEVOS AJUSTES PARA SEPARAR EL AVATAR DEL TEXTO */
+  display: flex;           /* Alinea los elementos internos en fila */
+  align-items: center;     /* Centra verticalmente la foto y el texto */
+  justify-content: center; /* Alinea todo al inicio hacia la izquierda */
+  gap: 12px;               /* CONTROL DE SEPARACIÓN: Ajusta este número (por ejemplo, 12px o 16px) a tu gusto */
 }
 
 /* Opcional: Animación de entrada */
 @keyframes fadeInRight {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(10px); /* Se desliza sutilmente desde la derecha */
   }
   to {
     opacity: 1;
     transform: translateX(0);
   }
 }
+
+
+
+.spectators-button-wrapper,
+.invite-button-wrapper {
+  position: relative;      /* Necesario para posicionar la insignia roja */
+  width: 45px;
+  height: 45px;
+  flex-shrink: 0;          /* Evita que se deformen o achiquen */
+}
+
+.spectators-btn {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important; /* Quitamos márgenes que puedan mover el botón del centro */
+}
+
+.spectators-count-badge {
+  position: absolute;
+  top: -4px;            /* Sube un poco por encima del botón */
+  right: -4px;          /* Se desplaza a la derecha del botón */
+  background-color: #ff4d4f; /* Rojo de notificación */
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  border-radius: 50%;   /* Círculo perfecto */
+  width: 20px;
+  height: 20px;
+  
+  /* Centrado perfecto del número dentro de la esfera roja */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Detalles visuales */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  border: 1px solid #ffffff; /* Borde blanco para que resalte sobre el fondo */
+  z-index: 10;          /* Lo sitúa por encima del botón */
+  pointer-events: none; /* Los clicks pasan a través hacia el botón del ojo */
+}
+
+/* Contenedor principal en la esquina superior derecha */
+.right-controls-wrapper {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  flex-direction: column; /* Alineación en vertical (uno encima de otro) */
+  gap: 12px;              /* Espaciado de separación entre ambos botones */
+  align-items: center;
+  z-index: 10;
+}
+
