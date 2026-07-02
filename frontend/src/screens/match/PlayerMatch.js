@@ -457,8 +457,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             setPlayer(data.players)
             setDeck(data.deck)
             const me = data.players.find(p => p.user.id === currentUser.id);
-            if (me) setActionPoints(me.actionPoints);
-
+            if (me) {
+                setActionPoints(me.actionPoints)
+                setStrength(me.strength)
+            }
         } catch (error) {
             console.error(error);
         }

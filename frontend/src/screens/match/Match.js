@@ -9,7 +9,6 @@ const jwt = tokenService.getLocalAccessToken();
 const currentUser = tokenService.getUser();
 
 export default function Match() {
-    console.log('entrando')
     const matchId = getIdFromUrl(2);
     const navigate = useNavigate();
     const [match, setMatch] = useState(null);
