@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import '../../static/css/match/startDiceModal.css';
-import tokenService from '../../services/token.service';
-import getIdFromUrl from '../../util/getIdFromUrl';
+import '../../../static/css/match/startDiceModal.css';
+import tokenService from '../../../services/token.service';
+import getIdFromUrl from '../../../util/getIdFromUrl';
 
 export default function StartDiceModal({ isOpen, onClose, onDiceRolled, matchData }) {
     const jwt = tokenService.getLocalAccessToken();
@@ -47,8 +47,8 @@ export default function StartDiceModal({ isOpen, onClose, onDiceRolled, matchDat
             }
 
             // Verificar si todos los jugadores han lanzado los dados
-            const totalPlayers = updatedMatch.players?.length || 0;
-            const playersWithDiceRolls = updatedMatch.diceRolls ? Object.keys(updatedMatch.diceRolls).length : 0;
+            // const totalPlayers = updatedMatch.players?.length || 0;
+            // const playersWithDiceRolls = updatedMatch.diceRolls ? Object.keys(updatedMatch.diceRolls).length : 0;
             
             // Solo cerrar el modal si todos los jugadores han lanzado
             if (allPlayersRolled) { // CAMBIÉ ESTO -----------------------------------------------------------------------------------------------------

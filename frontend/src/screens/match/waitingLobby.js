@@ -7,7 +7,7 @@ import useFetchState from "../../util/useFetchState";
 import "../../static/css/home/waitingRoom.css";
 import { Button, Table } from "reactstrap";
 import tokenService from "../../services/token.service";
-import OnlineFriendsModal from "./OnlineFriendsModal";
+import OnlineFriendsModal from "./modals/OnlineFriendsModal";
 import { FaRegEye } from "react-icons/fa";
 
 import { toast } from "react-toastify";

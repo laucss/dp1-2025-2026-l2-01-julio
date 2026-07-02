@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import '../../static/css/match/weaponModal.css'
-import tokenService from "../../services/token.service"
-import getIdFromUrl from "../../util/getIdFromUrl"
+import '../../../static/css/match/weaponModal.css'
+import tokenService from "../../../services/token.service"
+import getIdFromUrl from "../../../util/getIdFromUrl"
 
 // para mostrar las excepciones
 import { toast } from "react-toastify"

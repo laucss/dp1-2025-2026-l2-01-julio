@@ -1,21 +1,19 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect } from "react"
 import {useNavigate} from "react-router-dom";
-import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import '../../static/css/match/Match.css';
-import useFetchState from "../../util/useFetchState";
-import DiscardPhaseModal from "./DiscardPhaseModal";
-import ActionsModal from "./ActionsModal";
+import DiscardPhaseModal from "./modals/DiscardPhaseModal";
+import ActionsModal from "./modals/ActionsModal";
 import ChatBox from "./chatBox";
 import { FaComments } from "react-icons/fa";
-import FightModal from "./FightModal";
-import StartDiceModal from "./StartDiceModal";
-import StealCardModal from "./StealCardModal";
-import NpcLossDiscardModal from "./NpcLossDiscardModal";
-import EscapeDiceModal from "./EscapeDiceModal";
-import VotingModal from "./VotingModal";
+import FightModal from "./modals/FightModal";
+import StartDiceModal from "./modals/StartDiceModal";
+import StealCardModal from "./modals/StealCardModal";
+import NpcLossDiscardModal from "./modals/NpcLossDiscardModal";
+import EscapeDiceModal from "./modals/EscapeDiceModal";
+import VotingModal from "./modals/VotingModal";
 
-import { normalizeRoomId, areRoomsAdjacent } from "./utils/roomUtils";
+import { normalizeRoomId } from "./utils/roomUtils";
 import { getPlayerColor } from "./utils/playersUtil";
 import CurrentPlayerInfo from "./components/CurrentPlayerInfo";
 import DeckSection from "./components/DeckSection";
@@ -24,7 +22,7 @@ import { getRandomFreeRoom } from "./utils/roomHelpers";
 import { handlePlayerFight, handleNpcFight} from "./utils/fightHelpers";
 
 // para alerta de errores
-import { toast } from "react-toastify";
+import { toast } from "react-toastify"
 
 export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt }){
     const navigate = useNavigate();
@@ -37,17 +35,11 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
     // CARTAS
     const [deck, setDeck] = useState([])
-    const [discardPile, setDiscardPile] = useState([])
     const [handCards, setHandCards] = useState([])
     const [bagCards, setBagCards] = useState([])
     const [otherPlayersBags, setOtherPlayersBags] = useState({}) 
     const [numCardsDrawn, setNumCardsDrawn] = useState(0)
-    const [bagOpen, setBagOpen] = useState(false)
     const [discardPhaseOpen, setDiscardPhaseOpen] = useState(false)
-
-    // DADOS 
-    const [whiteDice, setWhiteDice] = useState("1")
-    const [blackDice, setBlackDice] = useState("1")
 
     const [chatOpen, setChatOpen] = useState(false)
     const [actionPoints, setActionPoints] = useState(0)
@@ -58,9 +50,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [moveNpcMode, setMoveNpcMode] = useState(false)
     const [selectedNpcId, setSelectedNpcId] = useState(null)
     const [selectedNpcIndex, setSelectedNpcIndex] = useState(null)
-
-    const [message, setMessage] = useState(null);
-    const [visible, setVisible] = useState(false);
 
     const [isDiceModalOpen, setIsDiceModalOpen] = useState(true);
     const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
@@ -80,14 +69,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [proposingUsername, setProposingUsername] = useState('');
     const [votingResult, setVotingResult] = useState(null);
     
-    // CARGAR DATOS PARTIDA 
-    const [adjacencies, setAdjacencies] = useFetchState(
-        [],
-        `/api/v1/matches/adjacencies`,
-        jwt,
-        setMessage,
-        setVisible
-    );
 
     // CARGAR DATOS JUGADORES 
     useEffect(() => {
@@ -272,8 +253,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
                 if (deckInfo) {
                     setDeck(deckInfo);
-                    const discarded = Array.isArray(deckInfo.discardedCards) ? deckInfo.discardedCards : [];
-                    setDiscardPile(discarded);
                 }
             };
 
@@ -510,13 +489,11 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 setHandCards(Array.isArray(data.hand.cards) ? data.hand.cards : [])
                 setBagCards(Array.isArray(data.bag.cards) ? data.bag.cards : [])
                 setDeck(data.deck || [])
-                setDiscardPile(Array.isArray(data.deck?.discardedCards) ? data.deck.discardedCards : [])
                 return data
             } 
         } catch (error) {
             console.log('error', error)
-            setMessage("Could not get the cards.");
-            setVisible(true);
+            toast.error(error);
         }
     }
 

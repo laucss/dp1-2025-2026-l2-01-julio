@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import tokenService from "../../services/token.service";
+import tokenService from "../../../services/token.service";
 
 export default function OnlineFriendsModal({ onClose, lobby }) {
   const jwt = tokenService.getLocalAccessToken();

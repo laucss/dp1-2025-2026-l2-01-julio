@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import '../../static/css/match/fightModal.css';
-import Fight from '../../static/images/Fight.png';
-import tokenService from '../../services/token.service';
-import getIdFromUrl from '../../util/getIdFromUrl';
+import '../../../static/css/match/fightModal.css';
+import Fight from '../../../static/images/Fight.png';
+import tokenService from '../../../services/token.service';
+import getIdFromUrl from '../../../util/getIdFromUrl';
 import WeaponModal from './WeaponModal';
 
 export default function FightModal({ isOpen, onClose, defender, attacker, onResolve, stompClient, bagCards = [], matchData, votingResult, proposingUserId, onVotingResultProcessed }) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import '../../static/css/match/discardModal.css';
+import '../../../static/css/match/discardModal.css';
 import tokenService from "../../services/token.service";
 import getIdFromUrl from "../../util/getIdFromUrl";
 
@@ -12,6 +12,9 @@ import {restrictToWindowEdges} from '@dnd-kit/modifiers';
 import { SortableContext } from '@dnd-kit/sortable';
 import SortableCard from './dnd-kit/SortableCard';
 
+// para alerta de errores
+import { toast } from "react-toastify"
+
 const jwt = tokenService.getLocalAccessToken();
 
 export default function BagModal({isVisible, hand, bag, deck, onClose, player, onSave}){
@@ -23,10 +26,6 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
 
     const[deckCards, setDeckCards] = useState([])
 
-    const[currentPlayer, setCurrentPlayer] = useState({})
-
-    const [message, setMessage] = useState(null);
-    const [visible, setVisible] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -41,8 +40,7 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
         setHandCards(hand)
         setBagCards(bag)
         setDeckCards(deck)
-        setCurrentPlayer(player)
-    }, [isVisible])
+    }, [bag, deck, hand, isVisible])
 
     if (!isVisible) return null
 
@@ -80,14 +78,12 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
                 onSave()
 
             } else {
-                setMessage("Word not valid, try another")
-                setVisible(true);
+                toast.error("Word not valid, try another")
             }}
 
         } catch (error) {
             console.error("Error during confirm:", error)
-            setMessage("An error occurred. Could not confirm discard.")
-            setVisible(true)
+            toast.error("An error occurred. Could not confirm discard.")
                 
         }}
 
@@ -145,8 +141,7 @@ export default function BagModal({isVisible, hand, bag, deck, onClose, player, o
             
         } catch (error) {
             console.error("Error during validation or update:", error);
-            setMessage("An error occurred. Could not confirm discard.");
-            setVisible(true);
+            toast.error("An error occurred. Could not confirm discard.", error);
             
         }
         

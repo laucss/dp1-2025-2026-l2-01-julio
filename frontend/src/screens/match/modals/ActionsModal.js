@@ -1,5 +1,5 @@
 import React from "react";
-import "../../static/css/match/actionsModal.css";
+import "../../../static/css/match/actionsModal.css";
 
 export default function ActionsModal({ isOpen, onClose, moveToAdyacent, moveToRoomWithWord, onMoveNpcRequested, onAttemptEscape, canAttemptEscape }) {
     if (!isOpen) return null;
