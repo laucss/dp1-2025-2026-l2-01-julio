@@ -20,7 +20,7 @@ export default function CreateLobby() {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/v1/matches/lobbies", {
+      const response = await fetch("/api/v1/lobbies", {
         method: "POST",
         headers: {
             Authorization: `Bearer ${jwt}`,

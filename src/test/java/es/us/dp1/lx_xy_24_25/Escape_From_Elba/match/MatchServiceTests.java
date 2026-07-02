@@ -48,6 +48,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 
 @ExtendWith(MockitoExtension.class)
@@ -81,6 +82,9 @@ public class MatchServiceTests {
     private PlayerService playerService;
 
     @Mock
+    private UserService userService;
+
+    @Mock
     private LobbyWebsocketController lobbyWebsocketController;
 
     @Mock
@@ -106,7 +110,8 @@ public class MatchServiceTests {
             lobbyWebsocketController,
             matchWebsocketController,
             npcRepository,
-            checkers
+            checkers,
+            userService
         );
     }
 

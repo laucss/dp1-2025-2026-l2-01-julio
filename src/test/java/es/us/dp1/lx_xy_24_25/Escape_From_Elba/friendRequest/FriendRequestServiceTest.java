@@ -143,7 +143,7 @@ public class FriendRequestServiceTest {
                 .thenReturn(requests);
 
         List<FriendRequest> foundRequests =
-                this.friendRequestService.findFriendsByUserId(CURRENT_USER_ID);
+                this.friendRequestService.findFriendRequestsByUserId(CURRENT_USER_ID);
 
         assertEquals(requests, foundRequests);
         verify(friendRequestRepository).findAllFriendsByUserId(CURRENT_USER_ID);
@@ -175,7 +175,7 @@ public class FriendRequestServiceTest {
                 .thenReturn(requests);
 
         List<User> foundUsers =
-                this.friendRequestService.findFriendsByPlayerId(CURRENT_USER_ID);
+                this.friendRequestService.findFriendsByUserId(CURRENT_USER_ID);
 
         assertEquals(expectedUsers, foundUsers);
         verify(friendRequestRepository).findAllFriendsByUserId(CURRENT_USER_ID);

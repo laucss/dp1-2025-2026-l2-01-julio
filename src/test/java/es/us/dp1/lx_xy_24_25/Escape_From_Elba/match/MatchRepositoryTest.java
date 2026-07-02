@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.AuthoritiesRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserRepository;
@@ -24,6 +25,9 @@ class MatchRepositoryTest {
 
     @Autowired
     private MatchRepository matchRepository;
+
+    @Autowired
+    private LobbyRepository lobbyRepository;
 
     @Autowired
     private AuthoritiesRepository authoritiesRepository;
@@ -61,7 +65,7 @@ class MatchRepositoryTest {
         privateMatch.setCode("ABC123");
         matchRepository.save(privateMatch);
 
-        Optional<Match> found = matchRepository.findPrivateLobbyByCode("abc123");
+        Optional<Match> found = lobbyRepository.findPrivateLobbyByCode("abc123");
         assertThat(found).isPresent();
         assertThat(found.get().getCode()).isEqualTo("ABC123");
     }
@@ -146,7 +150,7 @@ class MatchRepositoryTest {
         privateMatch.setStatus(MatchStatus.WAITING);
         matchRepository.save(privateMatch);
 
-        List<Match> privateLobbies = matchRepository.findPrivateLobbies();
+        List<Match> privateLobbies = lobbyRepository.findPrivateLobbies();
         assertThat(privateLobbies).isNotEmpty();
         assertThat(privateLobbies).allMatch(m -> m.getIsPrivate() && m.getStatus() == MatchStatus.WAITING);
     }

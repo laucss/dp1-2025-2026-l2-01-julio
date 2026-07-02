@@ -7,7 +7,7 @@
         5: { x: 480, y: 97 },   // Roof v
         6: { x: 585, y: 55 },   // East Tower v 
         7: { x: 124, y: 138 },   // Corridor 1 v
-        8: { x: 283, y: 118 },   // Cafe v
+        8: { x: 260, y: 135 },   // Cafe v
         9: { x: 125, y: 140 },   // Corridor 2 v
         10: { x: 515, y: 140 },  // Corridor 2 (dup) v
         11: { x: 384, y: 138 },  // Parlor v
@@ -22,7 +22,7 @@
         20: { x: 125, y: 301 },  // Corridor 6 v
         21: { x: 190, y: 314 },  // Arbor v
         22: { x: 445, y: 320 },  // Farm v
-        23: { x: 514, y: 303 },  // Corridor 7 v
+        23: { x: 515, y: 303 },  // Corridor 7 v
         24: { x: 580, y: 310 },  // Meal Room v
         25: { x: 125, y: 362 },  // Corridor 8 v
         26: { x: 255, y: 402 },  // Bar v

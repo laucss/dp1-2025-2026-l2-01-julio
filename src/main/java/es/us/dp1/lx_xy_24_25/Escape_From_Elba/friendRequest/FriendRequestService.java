@@ -51,17 +51,12 @@ public class FriendRequestService {
     }
 
     @Transactional(readOnly = true)
-    public List<FriendRequest> findFriendsByUserId(Integer userId) {
-        return friendRequestRepository.findAllFriendsByUserId(userId);
-    }
-
-    @Transactional(readOnly = true)
     public Boolean isPendingOrFriendsUsers(Integer user1Id, Integer user2Id) {
         return friendRequestRepository.findPendingOrFriendsUsers(user1Id, user2Id).isPresent();
     }
 
     @Transactional(readOnly = true)
-    public List<User> findFriendsByPlayerId(Integer userId) {
+    public List<User> findFriendsByUserId(Integer userId) {
         return friendRequestRepository.findAllFriendsByUserId(userId).stream()
                 .map(f -> {
                     User receiver = f.getReceiver();

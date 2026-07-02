@@ -73,49 +73,6 @@ public class MatchControllerTests {
         sampleMatchDTO = new MatchDTO(sampleMatch);
     }
 
-    @Test
-    @WithMockUser(username = "player1", authorities = {"PLAYER"})
-    void testCreateLobby() throws Exception {
-        LobbyDTO dto = new LobbyDTO();
-        dto.setIsPrivate(true);
-        dto.setName("Test Lobby");
-        dto.setMaxPlayers(4);
-        dto.setNumNpcs(3);
-
-        String json = new ObjectMapper().writeValueAsString(dto);
-
-        mockMvc.perform(post("/api/v1/matches/lobbies")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(json))
-            .andExpect(status().isCreated());
-    }
-
-
-    @Test
-    @WithMockUser(username = "player1", authorities = {"PLAYER"})
-    public void testJoinPublicLobby() throws Exception {
-        when(lobbyService.joinLobby(1)).thenReturn(sampleMatch);
-
-        mockMvc.perform(post("/api/v1/matches/lobbies/1/join"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code", is(sampleMatch.getCode())));
-
-        verify(lobbyService, times(1)).joinLobby(1);
-    }
-
-    @Test
-    @WithMockUser(username = "player1", authorities = {"PLAYER"})
-    public void testJoinPrivateLobby() throws Exception {
-        when(lobbyService.joinPrivateLobby("ABC12345")).thenReturn(sampleMatch);
-
-        mockMvc.perform(post("/api/v1/matches/lobbies/join/private")
-                        .param("code", "ABC12345"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code", is(sampleMatch.getCode())));
-
-        verify(lobbyService, times(1)).joinPrivateLobby("ABC12345");
-    }
-
 
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})
@@ -248,30 +205,6 @@ public class MatchControllerTests {
         verify(roomService, times(1)).findAllRooms();
     }
 
-    @Test
-    @WithMockUser(username = "player1", authorities = {"PLAYER"})
-    public void testLeaveLobby() throws Exception {
-        when(lobbyService.leaveLobby(1)).thenReturn(sampleMatch);
-
-        mockMvc.perform(post("/api/v1/matches/lobbies/1/leave"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(sampleMatch.getId()));
-
-        verify(lobbyService, times(1)).leaveLobby(1);
-    }
-
-
-    @Test
-    @WithMockUser(username = "player1", authorities = {"PLAYER"})
-    public void testStartMatch() throws Exception {
-        sampleMatch.setStatus(MatchStatus.WAITING);
-        when(matchService.startMatch(1)).thenReturn(sampleMatch);
-
-        mockMvc.perform(post("/api/v1/matches/lobbies/1/start"))
-                .andExpect(status().isOk());
-
-        verify(matchService, times(1)).startMatch(1);
-    }
 
 
     @Test

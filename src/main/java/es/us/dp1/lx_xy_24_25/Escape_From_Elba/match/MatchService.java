@@ -49,6 +49,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 
 
@@ -61,6 +63,7 @@ public class MatchService {
     HandService handService; 
     BagService bagService;
     PlayerService playerService; 
+    UserService userService;
     Random ran = new Random();
     LobbyWebsocketController lobbyWebsocketController;
     MatchWebsocketController matchWebsocketController;
@@ -76,7 +79,7 @@ public class MatchService {
     public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, 
             RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
             PlayerService playerService, LobbyWebsocketController lobbyWebsocketController,
-            MatchWebsocketController matchWebsocketController, NpcRepository npcRepository, Checkers checkers) {
+            MatchWebsocketController matchWebsocketController, NpcRepository npcRepository, Checkers checkers, UserService userService) {
         this.matchRepo = mrepo;
         this.playerRepo = playerRepo;
         this.roomRepository = roomRepository;
@@ -89,6 +92,7 @@ public class MatchService {
         this.lobbyWebsocketController = lobbyWebsocketController;
         this.matchWebsocketController = matchWebsocketController;
         this.checkers = checkers; 
+        this.userService = userService; 
     }
 
     @Transactional(readOnly = true)
@@ -116,7 +120,7 @@ public class MatchService {
     public Match getMatchById(Integer matchId){
         Optional<Match> m= matchRepo.findById(matchId);
         if(!m.isPresent())
-            throw new IllegalArgumentException("Match not found");
+            throw new ResourceNotFoundException("Match not found");
         return m.get();
     }
 
@@ -1041,8 +1045,7 @@ public class MatchService {
 
     @Transactional
     public EscapeAttemptResultDTO escapeAttempt( Integer matchId, Integer userId, Integer rolldiceResult) {
-        Match m = matchRepo.findById(matchId)
-                .orElseThrow(() -> new IllegalArgumentException("Match not found"));
+        matchRepo.findById(matchId).orElseThrow(() -> new IllegalArgumentException("Match not found"));
         Player p = playerRepo.findByMatchAndUser(matchId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
 
@@ -1115,8 +1118,8 @@ public class MatchService {
 
 
 
-        @Transactional
-        List<Room> getAvailableRoomsForPlayer(Integer matchId) {
+    @Transactional
+    public List<Room> getAvailableRoomsForPlayer(Integer matchId) {
         List<Player> players = getMatchById(matchId).getPlayers();
         List<Npc> npcs = getMatchById(matchId).getNpcs();
         List<Room> roomsOcupied = new ArrayList<>();
@@ -1137,6 +1140,35 @@ public class MatchService {
         return rooms;
 
     } 
+
+    @Transactional
+    public MatchDTO spectateGame(Integer matchId) {
+        Match m = getMatchById(matchId); 
+        User currentUser = userService.findCurrentUser(); 
+        // checkear si esta ya en la partida como jugador o como espectador 
+        if (m.getPlayers().stream().anyMatch(p -> p.getUser().getId().equals(currentUser.getId())) || m.getSpectators().contains(currentUser)){
+            return new MatchDTO(m); 
+        }
+        // si es privado, tiene que ser amigo de todos los jugadores para poder observar
+        checkers.checkCanSpectateGame(m, currentUser.getId());
+        List<User> spectators = m.getSpectators(); 
+        spectators.add(currentUser); 
+        m.setSpectators(spectators); 
+        matchRepo.save(m); 
+        return new MatchDTO(m); 
+    }
+
+    @Transactional
+    public void stopSpectating(Integer matchId) {
+        Match m = getMatchById(matchId); 
+        User currentUser = userService.findCurrentUser(); 
+        List<User> spectators = m.getSpectators(); 
+        spectators.remove(currentUser); 
+        m.setSpectators(spectators); 
+        matchRepo.save(m); 
+    }
+
+
 }
 
 

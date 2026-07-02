@@ -98,7 +98,7 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET,"/api/v1/rooms/**").authenticated()
                 
                 // API restringida para jugadores
-                .requestMatchers(HttpMethod.POST, "/api/v1/matches/lobbies").hasAnyAuthority(PLAYER)
+                .requestMatchers(HttpMethod.POST, "/api/v1/lobbies").hasAnyAuthority(PLAYER, ADMIN)
                 .requestMatchers(HttpMethod.PUT, "/api/v1/matches/{id}/discardConfirmed").hasAnyAuthority(PLAYER)
                 .requestMatchers(HttpMethod.GET,"/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck").hasAnyAuthority(PLAYER, ADMIN)
                 .requestMatchers(HttpMethod.POST,"/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck").hasAnyAuthority(PLAYER, ADMIN)
@@ -125,6 +125,7 @@ public class SecurityConfiguration {
 
 
                 // API restringida para jugadores o administradores
+                .requestMatchers("/api/v1/lobbies/**").hasAnyAuthority(PLAYER, ADMIN)
                 .requestMatchers("/api/v1/matches/**").hasAnyAuthority(PLAYER, ADMIN)
                 .requestMatchers(HttpMethod.POST,"/api/v1/bag/validate").permitAll()
                 

@@ -13,6 +13,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Max;
@@ -70,6 +71,8 @@ public class MatchDTO {
     @NotNull
     private Boolean isPrivate;
 
+    private List<User> spectators; 
+
     public MatchDTO() {
     }
 
@@ -91,6 +94,7 @@ public class MatchDTO {
         //this.deck = new DeckInGameDTO(match.getDeck());
         this.winner = match.getWinner();
         this.isPrivate = match.getIsPrivate();
+        this.spectators = match.getSpectators(); 
     }
 
     public MatchDTO(Match match, DeckInGame deck, List<PlayerInGameDTO> players ) {
@@ -111,6 +115,7 @@ public class MatchDTO {
         this.deck = new DeckInGameDTO(deck);
         this.winner = match.getWinner();
         this.isPrivate = match.getIsPrivate();
+        this.spectators = match.getSpectators(); 
     }
     
 }

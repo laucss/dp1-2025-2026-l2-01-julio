@@ -22,13 +22,11 @@ INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (16
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (3, 'FSS8078', 'fss8078@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar_default.png');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (17, 'XNT3290', 'xnt3290@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar_default.png');
 
-
-
 -- Match
 
--- Partida no iniciada, no empezada aún
+-- Partidas no iniciada, no empezada aún
 INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
-VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,4,'WAITING',NULL,NULL,6,3,3,false,null);
+VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,4,'WAITING',NULL,NULL,3,3,3,false,null);
 
 INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
 VALUES (5,'Fiesta ',NULL, 7, 'WAITING',NULL,NULL,5,3,3,false,null);
@@ -38,16 +36,15 @@ VALUES (4,'nerea!','DEF345', 'WAITING',NULL,NULL,5,3,4,true,null);
 
 -- Partida en progreso 
 INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (2,'Partida en curso','ABC123',7,'PLAYING','2025-10-26 20:00:00',NULL,5,3,3,true);
+VALUES (2,'Partida en curso','ABC123',7,'PLAYING','2025-10-26 20:00:00',NULL,5,3,3,false);
 
--- Partida finalizada
-INSERT INTO match(
-  id,name,code,creator_id,status,start_time,end_time,
-  max_players,min_players,num_npcs,is_private)
-VALUES
-(3,'Tinkissss','XYZ789',15,'FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true),
-(6,'Monster high',NULL,6,'FINISHED','2025-10-25 18:35:00','2025-10-25 19:00:00',6,3,3,false),
-(7,'Katseye','GHI456',11,'FINISHED','2025-11-24 16:00:00','2025-11-24 17:15:00',5,3,3,true);
+-- Partidas finalizadas
+INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
+VALUES (3,'Tinkissss','XYZ789',15,'FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true),
+        (6,'Monster high',NULL,6,'FINISHED','2025-10-25 18:35:00','2025-10-25 19:00:00',6,3,3,false),
+        (7,'Katseye','GHI456',11,'FINISHED','2025-11-24 16:00:00','2025-11-24 17:15:00',5,3,3,true);
+
+
 
 -- Cartas 
 INSERT INTO cards(id,front_image, back_image,letter ) 
@@ -146,6 +143,8 @@ UPDATE match SET winner_id = 18 WHERE id = 6;
 UPDATE match SET winner_id = 20 WHERE id = 7;
 
 
+-- Habitaciones
+
 INSERT INTO Room (id, name, black_dice, white_dice) 
         VALUES (1, 'North Tower', 1, 1), 
                (2, 'Caesar Room',1,2), 
@@ -185,6 +184,7 @@ INSERT INTO Room (id, name, black_dice, white_dice)
                (36, 'South Tower', 6, 6),
                (37, 'Safe Area', null, null);
 
+-- Adyacencias de las habitaciones
 INSERT INTO room_adjacency_list (room_id, adjacency_list_id) 
         VALUES (1,2),
                (1,7),

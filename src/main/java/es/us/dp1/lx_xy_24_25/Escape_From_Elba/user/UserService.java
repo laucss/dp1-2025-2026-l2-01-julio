@@ -32,21 +32,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 
 @Service
 public class UserService {
 
 	private UserRepository userRepository;
-	private MatchService matchService;
+	private MatchRepository matchRepository;
 
 	@PersistenceContext
 	private EntityManager entityManager;
 
 	@Autowired
-	public UserService(UserRepository userRepository, MatchService matchService) {
+	public UserService(UserRepository userRepository, MatchRepository matchRepository) {
 		this.userRepository = userRepository;
-		this.matchService = matchService;
+		this.matchRepository = matchRepository;
 	}
 
 	@Transactional
@@ -116,12 +117,12 @@ public class UserService {
 
 		// buscamos aquellas partidas creadas y ganadas por él para eliminarlas o modificarlas
 		List<Match> matchesCreatedByUser = userRepository.findMatchesCreatedByUser(id);
-		matchesCreatedByUser.stream().forEach(m -> matchService.delete(m.getId()));
+		matchesCreatedByUser.stream().forEach(m -> matchRepository.deleteById(m.getId()));
 
 		List<Match> matchesWonByUser = userRepository.findMatchesWonByUser(id);
 		for (Match m : matchesWonByUser) {
 			m.setWinner(null);
-			matchService.save(m);
+			matchRepository.save(m);
 		}
 
 		// no pilla bien la edición del ganador a null, por lo que lo forzamos y limpiamos
