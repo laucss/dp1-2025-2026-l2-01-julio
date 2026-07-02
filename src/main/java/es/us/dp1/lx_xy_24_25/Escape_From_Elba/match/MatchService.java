@@ -3,12 +3,14 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +38,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.LoseAgainstNpcRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchHistorialDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
@@ -68,18 +71,20 @@ public class MatchService {
     LobbyWebsocketController lobbyWebsocketController;
     MatchWebsocketController matchWebsocketController;
     Checkers checkers; 
+    AbandonedMatchService abandonedMatchService;
 
     MatchRepository matchRepo;
     PlayerRepository playerRepo;
     RoomRepository roomRepository;
     NpcRepository npcRepository;
     RoomService roomService;
+    AbandonedMatchRepository abandonedMatchRepository;
 
     @Autowired
-    public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, 
+    public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, AbandonedMatchRepository abandonedMatchRepository, 
             RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
             PlayerService playerService, LobbyWebsocketController lobbyWebsocketController,
-            MatchWebsocketController matchWebsocketController, NpcRepository npcRepository, Checkers checkers, UserService userService) {
+            MatchWebsocketController matchWebsocketController, NpcRepository npcRepository, Checkers checkers, UserService userService, AbandonedMatchService abandonedMatchService) {
         this.matchRepo = mrepo;
         this.playerRepo = playerRepo;
         this.roomRepository = roomRepository;
@@ -93,6 +98,8 @@ public class MatchService {
         this.matchWebsocketController = matchWebsocketController;
         this.checkers = checkers; 
         this.userService = userService; 
+        this.abandonedMatchRepository = abandonedMatchRepository;
+        this.abandonedMatchService = abandonedMatchService;
     }
 
     @Transactional(readOnly = true)
@@ -154,39 +161,68 @@ public class MatchService {
     //Para devolver el listado de todo el historial de partidas finalizadas y en curso
     @Transactional(readOnly = true) 
     public Page<Match> getFinishedAndInProgressMatches(Integer page, Integer size) {
-        return matchRepo.findFinishedAndInProgress(PageRequest.of(page,size));
+        return matchRepo.findFinishedAndInProgress(PageRequest.of(page,size, Sort.by(Sort.Direction.DESC, "startTime")));
     }
 
     //Para devolver el listado de partidas en curso 
     @Transactional(readOnly = true)
-    public List<Match> getInProgressMatches() {
-        return matchRepo.findInProgress();
+    public Page<Match> getInProgressMatches(Integer page, Integer size) {
+        return matchRepo.findInProgress(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
     }
 
 
     //Para devolver el listado de partidas finalizadas
     @Transactional(readOnly = true)
     public Page<Match> getFinishedMatches(Integer page, Integer size) {
-        return matchRepo.findFinished(PageRequest.of(page,size));
-    }
+            return matchRepo.findFinished(PageRequest.of(page,size, Sort.by(Sort.Direction.DESC, "startTime")));
+        }
 
+
+        //Para devolver el listado de partidas jugadas o abandonadas por un usuario
+     @Transactional(readOnly = true)
+    public Page<MatchHistorialDTO> getAllMatchesByUser(Integer userId, Integer page, Integer size) {
+
+            Page<Match> matches = matchRepo.findMatchesPlayedOrAbandonedByUser(
+                userId,
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime"))
+            );
+
+            return matches.map(match -> {
+
+                MatchHistorialDTO dto = new MatchHistorialDTO(match);
+
+                dto.setAbandoned(
+                    abandonedMatchRepository.existsByMatchIdAndUserId(match.getId(), userId)
+                );
+
+                return dto;
+            });
+        }
+
+    
 
     //Para devolver el listado de partidas jugadas por un usuario
     @Transactional(readOnly = true)
     public Page<Match> getMatchesPlayedByUser(Integer userId, Integer page, Integer size) {
-        return matchRepo.findMatchesPlayedByUser(userId, PageRequest.of(page, size));
+        return matchRepo.findMatchesPlayedByUser(userId, PageRequest.of(page, size,Sort.by(Sort.Direction.DESC, "startTime")));
     }
 
     //Para devolver el listado de partidas creadas por un usuario 
     @Transactional(readOnly = true)
     public Page<Match> getMatchesPlayedAndCreatedByUser(Integer userId, Integer page, Integer size) {
-        return matchRepo.findMatchesPlayedAndCreatedByUser(userId, PageRequest.of(page, size));
+        return matchRepo.findMatchesPlayedAndCreatedByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
     }
 
     //Para devolver el listado de partidas ganadas por un usuario 
     @Transactional(readOnly = true)
     public Page<Match> getMatchesWonByUser(Integer userId, Integer page, Integer size) {
-        return matchRepo.findMatchesWonByUser(userId, PageRequest.of(page, size));
+        return matchRepo.findMatchesWonByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
+    }
+
+    //Para devolver el listado de partidas abandonadas por un usuario
+    @Transactional(readOnly = true)
+    public Page<Match> getMatchesAbandonedByUser(Integer userId, Integer page, Integer size) {
+        return abandonedMatchRepository.findMatchesAbandonedByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
     }
 
 
@@ -405,13 +441,15 @@ public class MatchService {
                 .orElseThrow(() -> new IllegalArgumentException("Match not found"));
         Player p = playerRepo.findByMatchAndUser(matchId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
-        
+        User u = userService.findUser(userId);
         
         //Guardamos el orden del turno del jugador que se va
         Integer leavingPlayerOrder = p.getOrderInMatch();
         //Guardamos si el jugador que se va tiene el turno actual
         Boolean isLeavingPlayerCurrentTurn = m.getCurrentTurnUserId().equals(userId);
 
+
+        abandonedMatchService.saveAbandonedMatch(u, m);
         m.getPlayers().remove(p);
 
         if (isLeavingPlayerCurrentTurn){

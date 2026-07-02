@@ -36,6 +36,9 @@ function Sidebar({ isOpen, toggle, user}) {
                 <NavItem>
                   <NavLink  tag={Link} to="/matches" onClick={toggle}>Matches</NavLink>
                 </NavItem>
+                 <NavItem>
+                    <NavLink tag={Link} to={`/history/${user.id}`} onClick={toggle}>History </NavLink>
+                  </NavItem>
               </>
           )
         }   
@@ -58,6 +61,7 @@ function Sidebar({ isOpen, toggle, user}) {
                   <NavItem>
                     <NavLink tag={Link} to={`/users/${user.id}/statistics`} onClick={toggle}>Statistics</NavLink>
                   </NavItem>
+
           
                 </>
             )
@@ -76,9 +80,6 @@ function Sidebar({ isOpen, toggle, user}) {
           {profileLinks}
           {adminLinks}
           <NavItem>
-            <NavLink tag={Link} to={`/history/${user.id}`} onClick={toggle}>
-              History
-            </NavLink>
           </NavItem>
           <NavLink tag={Link} to={`/ranking`} onClick={toggle}>
               Ranking

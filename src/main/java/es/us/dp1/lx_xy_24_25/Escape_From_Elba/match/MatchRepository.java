@@ -21,7 +21,7 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
        // Devuelve todas las partidas en progreso (he hecho una propiedad del estilo en match)
        @Query("SELECT m FROM Match m WHERE m.startTime IS NOT NULL AND m.endTime IS NULL")
-       List<Match> findInProgress();
+       Page<Match> findInProgress(Pageable pageable);
 
        //Devuelve todas las partidas finalizadas
        @Query("SELECT m FROM Match m WHERE m.endTime IS NOT NULL")
@@ -46,6 +46,10 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
        @Query("SELECT CASE WHEN COUNT(m) > 0 THEN MAX(m.id) ELSE NULL END " +
               "FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NULL")
        Integer userInMatch(Integer userId);
+
+       //Devuelve todas las partidas jugadas o abandonadas por un usuario
+       @Query("SELECT DISTINCT m FROM Match m WHERE ( m.endTime IS NOT NULL AND EXISTS ( SELECT p FROM Player p WHERE p.match = m AND p.user.id = :userId ) ) OR EXISTS ( SELECT a FROM AbandonedMatch a WHERE a.match = m AND a.user.id = :userId ) ")
+       Page<Match> findMatchesPlayedOrAbandonedByUser(Integer userId, Pageable pageable);
 
        //Devuelves todas las partidas jugadas por un usuario 
        @Query("SELECT m FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NOT NULL")
