@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import tokenService from '../../services/token.service';
-import '../../static/css/match/StealCardModal.css';
+import tokenService from '../../../services/token.service';
+import '../../../static/css/match/StealCardModal.css';
 
 export default function StealCardModal({
   isOpen,

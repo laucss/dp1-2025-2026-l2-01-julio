@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import tokenService from '../../services/token.service'
-import getIdFromUrl from '../../util/getIdFromUrl'
-import '../../static/css/match/votingModal.css'
+import tokenService from '../../../services/token.service'
+import getIdFromUrl from '../../../util/getIdFromUrl'
+import '../../../static/css/match/votingModal.css'
 
 // para alerta de errores
 import { toast } from "react-toastify";
@@ -17,7 +17,7 @@ export default function VotingModal({ isOpen, onClose, userProposingWeapon, weap
     const [votes, setVotes] = useState(0)
 
     // Calcular cuántos jugadores hay en total y cuántos han votado
-    const totalPlayers = matchData?.players?.length-1 || 0; //  se resta uno para excluir al jugador que propuso el arma
+    // const totalPlayers = matchData?.players?.length-1 || 0; //  se resta uno para excluir al jugador que propuso el arma
 
     // Reiniciar estados cuando se abre una nueva votación
     useEffect(() => {

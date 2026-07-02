@@ -1,22 +1,18 @@
-import { useEffect, useState } from "react"
-import '../../static/css/match/discardModal.css';
-import tokenService from "../../services/token.service";
-import getIdFromUrl from "../../util/getIdFromUrl";
-
-import { useMemo } from 'react';
+import { useEffect, useState } from "react" // useMemo
+import '../../../static/css/match/discardModal.css';
+import tokenService from "../../../services/token.service";
+import getIdFromUrl from "../../../util/getIdFromUrl";
 
 import { toast } from "react-toastify";
 
 // imports del dnd-kit (librería para el arrastre de cartas)
-import {DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import Card from "./dnd-kit/Card";
-import BagZone from "./dnd-kit/BagZone";
-import DiscardZone from "./dnd-kit/DiscardZone";
-import { arrayMove } from '@dnd-kit/sortable';
-import {restrictToWindowEdges} from '@dnd-kit/modifiers';
-import { SortableContext } from '@dnd-kit/sortable';
-import SortableCard from './dnd-kit/SortableCard';
-import { closestCenter } from '@dnd-kit/core';
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
+import { arrayMove, SortableContext } from '@dnd-kit/sortable';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+import Card from "../dnd-kit/Card";
+import BagZone from "../dnd-kit/BagZone";
+import DiscardZone from "../dnd-kit/DiscardZone";
+import SortableCard from "../dnd-kit/SortableCard";
 
 
 const jwt = tokenService.getLocalAccessToken();
@@ -27,17 +23,11 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
     const[cardsToDiscard, setCardsToDiscard] = useState([])
     const[deckCards, setDeckCards] = useState({})
     const[bagCards, setBagCards] = useState([])
-    const[playerTurnId, setPlayerTurnId] = useState(null)
 
     // qué carta se está arrastrando 
     const [activeCard, setActiveCard] = useState(null);
 
-    const[currentPlayer, setCurrentPlayer] = useState({})
-
-    const [message, setMessage] = useState(null);
-    const [visible, setVisible] = useState(false);
-
-    const overlayCard = useMemo(() => activeCard, [activeCard]);
+    // const overlayCard = useMemo(() => activeCard, [activeCard]);
 
     // esto es para intentar hacer más rápido el movimiento de arrastrar
     const sensors = useSensors(
@@ -53,8 +43,6 @@ export default function DiscardPhaseModal({isVisible, hand, bag, deck, onClose, 
         setBagCards(bag)
         setCardsToDiscard([])
         setDeckCards(deck)
-        setCurrentPlayer(player)
-        setPlayerTurnId()
     }, [isVisible, bag, hand, deck, player])
 
     if (!isVisible) return null
