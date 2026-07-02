@@ -66,7 +66,8 @@ public class ExceptionHandlerController {
 		MoreThan7CardsDrawnException.class,
 		EmptyWeaponException.class,
 		MoreVotesThanPlayersException.class,
-		InvalidMovementException.class
+		InvalidMovementException.class,
+		GameIsNotPublicException.class
 	})
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	public ResponseEntity<ErrorMessage> handleBadRequestExceptions(RuntimeException ex, WebRequest request) {
