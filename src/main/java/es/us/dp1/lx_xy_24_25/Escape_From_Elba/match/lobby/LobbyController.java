@@ -38,8 +38,8 @@ public class LobbyController {
         this.ms = ms;
     }
 
-    @GetMapping("/private/{matchId}")
-    public Optional<Match> getPrivateGame(@ParameterObject String code){
+    @GetMapping("/private")
+    public Optional<Match> getPrivateGame(@RequestParam  String code){
         return ls.getPrivateLobby(code);
     }
 

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import tokenService from "../../services/token.service";
 import '../../static/css/match/listingLobbies.css';
 import { Button, ButtonGroup, Table, Modal, ModalHeader, ModalBody, ModalFooter, Input } from "reactstrap";
+import { toast } from "react-toastify";
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -72,34 +73,60 @@ export default function JoinMatch() {
     }
   }
 
-    const handleSpectate = async (match) => {
+  const handleSpectate = async (match = null) => {
     try {
-      const response = await fetch(`/api/v1/matches/${match.id}/spectate`, {
+      let selectedMatch = match
+
+      if (!selectedMatch && privateCode) {
+        const response = await fetch(`/api/v1/lobbies/private?code=${privateCode}`, {
+          headers: { Authorization: `Bearer ${jwt}` },
+        })
+
+        if (!response.ok) {
+          const text = await response.text()
+          toast.error(text || "No se encontró la partida.")
+          return
+        }
+
+        selectedMatch = await response.json()
+      }
+
+      const response = await fetch(`/api/v1/matches/${selectedMatch.id}/spectate`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${jwt}`,
-          Accept: 'application/json',
+          Accept: "application/json",
           "Content-Type": "application/json",
         },
-      });
+      })
 
       if (response.ok) {
         const data = await response.json()
-        if (data.status === 'WAITING') {
-          navigate(`/lobby/${match.id}`)
-        } if (data.status === 'PLAYING')  {
-          navigate(`/macthes/${match.id}`)
-        } 
-        
-      } else {
-        let text = "";
-        try { text = await response.text(); } catch {}
-          alert(" No se pudo unir a la partida: " + (text || "Error desconocido"));
+
+        if (data.status === "WAITING") {
+          navigate(`/lobby/${selectedMatch.id}`)
+        } else if (data.status === "PLAYING") {
+          navigate(`/matches/${selectedMatch.id}`)
         }
+      } else {
+        let errorMessage = "No se pudo observar la partida."
+
+        try {
+          const error = await response.json()
+          errorMessage = error.message || errorMessage
+        } catch {
+          try {
+            errorMessage = await response.text()
+          } catch {}
+        }
+
+        toast.error(errorMessage)
+      }
     } catch (error) {
-        alert(" Error al conectar con el servidor.");
+      toast.error("Error al conectar con el servidor.")
     }
   }
+
 
  
   const handleJoinPrivate = async () => {
@@ -267,6 +294,12 @@ export default function JoinMatch() {
       </ModalBody>
 
       <ModalFooter className="join-private-modal-footer">
+        <Button
+          className="join-private-confirm-btn"
+          onClick={() => handleSpectate()}
+        >
+          Spectate
+        </Button>
         <Button
           className="join-private-confirm-btn"
           onClick={handleJoinPrivate}
