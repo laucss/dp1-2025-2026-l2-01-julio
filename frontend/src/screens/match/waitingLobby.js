@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaUserPlus } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
-import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import "../../static/css/home/waitingRoom.css";
 import { Button, Table } from "reactstrap";

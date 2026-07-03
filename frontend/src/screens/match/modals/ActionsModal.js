@@ -31,7 +31,7 @@ export default function ActionsModal({ isOpen, onClose, moveToAdyacent, moveToRo
                     Intentar escapar
                 </button>
 
-                <button className="close-btn" onClick={onClose}>Cerrar</button>
+                <button className="actions-close-btn" onClick={onClose}>Cerrar</button>
             </div>
         </div>
     );

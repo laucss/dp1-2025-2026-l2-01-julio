@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import tokenService from "../../../services/token.service";
+import "../../../static/css/home/waitingRoom.css";
 
 export default function OnlineFriendsModal({ onClose, lobby }) {
   const jwt = tokenService.getLocalAccessToken();
@@ -127,7 +128,7 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
           )}
         </div>
 
-        <button className="close-btn" onClick={onClose}>
+        <button className="friends-close-btn" onClick={onClose}>
           Close
         </button>
       </div>
