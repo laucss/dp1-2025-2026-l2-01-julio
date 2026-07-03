@@ -3,7 +3,6 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby;
 import java.util.List;
 import java.util.Optional;
 
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

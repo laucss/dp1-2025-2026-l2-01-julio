@@ -26,7 +26,7 @@ INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (17
 
 -- Partidas no iniciada, no empezada aún
 INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
-VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,4,'WAITING',NULL,NULL,3,3,3,false,null);
+VALUES (1,'Fiesta para todos!!! ÚNETE!',NULL,4,'WAITING',NULL,NULL,5,3,3,false,null);
 
 INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private,winner_id)
 VALUES (5,'Fiesta ',NULL, 16, 'WAITING',NULL,NULL,5,3,3,false,null);

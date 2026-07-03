@@ -8,10 +8,12 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.*;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest.FriendRequestService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,12 +26,15 @@ public class Checkers {
     private final PlayerRepository playerRepository;
 
     private final FriendRequestService friendRequestService;
+    private final UserService userService;
 
-    public Checkers(LobbyRepository lobbyRepository, PlayerRepository playerRepository, CardRepository cardRepository, FriendRequestService friendRequestService) {
+    public Checkers(LobbyRepository lobbyRepository, PlayerRepository playerRepository, CardRepository cardRepository, 
+        FriendRequestService friendRequestService,  UserService userService) {
         this.lobbyRepository = lobbyRepository;
         this.playerRepository = playerRepository;
         this.cardRepository = cardRepository; 
         this.friendRequestService = friendRequestService; 
+        this.userService = userService; 
     }
 
     private static final Integer TOTAL_CARDS_TO_DRAW = 7; // máximo número de cartas que puedes robar por turno 
@@ -40,6 +45,13 @@ public class Checkers {
             throw new GameIsNotALobbyException("The game is not in the correct status");
         }
     }
+
+    public void checkGameIsNotPlaying(Match match){
+        if(match.getStatus().equals(MatchStatus.PLAYING)){
+            throw new AlreadyPlayingException("The game is already playing, you cannot take that action");
+        }
+    }
+
 
 
     public void checkNumberOfPlayers(Match match){
@@ -102,7 +114,6 @@ public class Checkers {
             throw new MoreThan7CardsDrawnException("You cannot draw more than " + TOTAL_CARDS_TO_DRAW + " cards in your turn"); 
         }
 
-         
 
     }
      

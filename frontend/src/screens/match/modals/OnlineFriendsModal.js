@@ -3,6 +3,7 @@ import tokenService from "../../../services/token.service";
 import "../../../static/css/home/waitingRoom.css";
 
 export default function OnlineFriendsModal({ onClose, lobby }) {
+  // el lobby es el match vaya 
   const jwt = tokenService.getLocalAccessToken();
   const currentUser = tokenService.getUser();
   const matchId = window.location.pathname.split("/").pop();
@@ -16,7 +17,7 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
     try {
       const userId = currentUser?.id;
 
-      const res = await fetch(`/api/v1/friendRequests/${userId}`, {
+      const res = await fetch(`/api/v1/friendRequests/${userId}/${lobby.id}`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
 
@@ -30,14 +31,13 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
       else if (Array.isArray(result.data?.data)) friendsArray = result.data.data;
 
       const mapped = friendsArray.map(f => {
-        const isSender = f.sender?.id === userId;
-        const friend = isSender ? f.receiver : f.sender;
+        const friend = f.friend
 
         return {
-          id: f.id,
-          userId: friend?.id,
+          id: friend?.id,
           displayName: friend?.username,
           avatar: friend?.avatar,
+          isFriendOfAllPlayers: friend?.isFriendOfAllPlayers
         };
       });
 
@@ -54,25 +54,28 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
 
 
   const isFriendInLobby = (friend) => {
-    return players.some(p => p.user?.id === friend.userId);
+    return players.some(p => p.user?.id === friend.id);
   };
 
-  const handleInvite = async (friend) => {
+  const handleInvite = async (friend, spectator) => {
     setInviteStatus(s => ({ ...s, [friend.id]: "loading" }));
-
+    console.log('friendid',friend.id,)
     try {
-      const res = await fetch("/api/v1/notifications/invite", {
+      const res = await fetch("/api/v1/invitations/invite", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${jwt}`,
         },
+        
         body: JSON.stringify({
           senderId: currentUser.id,
-          receiverId: friend.userId,
+          receiverId: friend.id,
           matchId,
+          spectator
         }),
       });
+      
 
       if (res.ok) {
         setInviteStatus(s => ({ ...s, [friend.id]: "success" }));
@@ -82,21 +85,20 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
     } catch {
       setInviteStatus(s => ({ ...s, [friend.id]: "error" }));
     }
-  };
+  }
 
+  console.log(friends);
   return (
     <div className="modal-overlay">
       <div className="modal-card enlarged-modal">
         <h2>Online Friends</h2>
 
         <div className="friends-list-scroll">
-
           {friends?.length === 0 ? (
             <p className="no-friends">No online friends</p>
           ) : (
             friends.map(f => (
               <div key={f.id} className="friend-mini-container">
-
                 <div className="friend-avatar-name">
                   {f.avatar ? (
                     <img src={f.avatar} alt="avatar" className="friend-avatar" />
@@ -106,19 +108,56 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
                   <span className="friend-name">{f.displayName}</span>
                 </div>
 
-                {isFriendInLobby(f) ? (
-                  <span className="waiting-invite-text-small">Joined</span>
-                ) : inviteStatus[f.id] === "success" ? (
-                  <span className="waiting-invite-text-small">Waiting...</span>
-                ) : (
-                  <button
-                    className="invite-btn"
-                    onClick={() => handleInvite(f)}
-                    disabled={inviteStatus[f.id] === "loading"}
-                  >
-                    {inviteStatus[f.id] === "loading" ? "Sending..." : "Invite"}
-                  </button>
-                )}
+                <div className="friend-actions">
+                  {!lobby.isPrivate ? (
+                    <>
+                      <button
+                        className="invite-btn"
+                        onClick={() => handleInvite(f, false)}
+                      >
+                        Player
+                      </button>
+
+                      <button
+                        className="invite-btn"
+                        onClick={() => handleInvite(f, true)}
+                      >
+                        Spectator
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {isFriendInLobby(f) ? (
+                        <span className="waiting-invite-text-small">
+                          Joined
+                        </span>
+                      ) : inviteStatus[f.id] === "success" ? (
+                        <span className="waiting-invite-text-small">
+                          Waiting...
+                        </span>
+                      ) : (
+                        <button
+                          className="invite-btn"
+                          onClick={() => handleInvite(f, false)}
+                          disabled={inviteStatus[f.id] === "loading"}
+                        >
+                          {inviteStatus[f.id] === "loading"
+                            ? "Sending..."
+                            : "Invite"}
+                        </button>
+                      )}
+
+                      {f.isFriendOfAllPlayers && (
+                        <button
+                          className="invite-btn"
+                          onClick={() => handleInvite(f, true)}
+                        >
+                          Spectator
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
 
                 {inviteStatus[f.id] === "error" && (
                   <span className="invite-error">Error inviting</span>

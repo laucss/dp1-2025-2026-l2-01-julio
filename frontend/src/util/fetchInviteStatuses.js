@@ -3,7 +3,7 @@ export async function fetchInviteStatuses(friends, matchId, jwt, currentUserId) 
   const statuses = {};
   for (const friend of friends) {
     try {
-      const res = await fetch(`/api/v1/notifications?receiverId=${friend.userId}&matchId=${matchId}&senderId=${currentUserId}`, {
+      const res = await fetch(`/api/v1/invitations?receiverId=${friend.userId}&matchId=${matchId}&senderId=${currentUserId}`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
       const data = await res.json();

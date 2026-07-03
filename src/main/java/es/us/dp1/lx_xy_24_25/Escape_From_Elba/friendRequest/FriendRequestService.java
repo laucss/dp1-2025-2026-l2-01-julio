@@ -1,5 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.AlreadyCreatedException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +23,15 @@ public class FriendRequestService {
     FriendRequestRepository friendRequestRepository;
     UserRepository userRepository;
     FriendWebsocketController friendWebsocketController;
+    MatchRepository matchRepository; 
 
     @Autowired
-    public FriendRequestService(FriendRequestRepository friendRequestRepository, UserRepository userRepository, FriendWebsocketController friendWebsocketController) {
+    public FriendRequestService(FriendRequestRepository friendRequestRepository, UserRepository userRepository, 
+        FriendWebsocketController friendWebsocketController,  MatchRepository matchRepository) {
         this.friendRequestRepository = friendRequestRepository;
         this.userRepository = userRepository;
         this.friendWebsocketController = friendWebsocketController;
+        this.matchRepository = matchRepository; 
     }
 
     @Transactional(readOnly = true)
@@ -143,6 +149,24 @@ public class FriendRequestService {
         
         // Notificar a ambos usuarios que la amistad fue eliminada
         friendWebsocketController.notifyFriendRequestDeleted(user1Id, user2Id, friendRequestId);
+    }
+
+    @Transactional
+    public List<FriendsInvitationDTO> getFriendsByUserIdToInvite(Integer userId, Integer matchId) {
+        Match match = matchRepository.findById(matchId).orElseThrow(() -> new ResourceNotFoundException("Match not found"));
+        List<User> userFriends = findFriendsByUserId(userId); 
+        List<User> players = match.getPlayers().stream().map(p -> p.getUser()).toList(); 
+        if (match.getIsPrivate()) { // si es privada, hay que ver que cada amigo del que invita sea amigo del restode jugadores
+            List<FriendsInvitationDTO> result = new ArrayList<>(); 
+            for (User friend : userFriends){
+                List<User> friends = findFriendsByUserId(friend.getId());
+                boolean isFriendOfAllThePlayers = friends.containsAll(players); 
+                result.add(new FriendsInvitationDTO(friend, isFriendOfAllThePlayers)); 
+            }
+            return result;         
+        } else {
+            return userFriends.stream().map(u -> new FriendsInvitationDTO(u)).toList();
+        }
     }
     
 }
