@@ -5,22 +5,27 @@ INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (1,
 
 -- Ten player users, named player1 with passwor 0wn3r
 INSERT INTO authorities(id,authority) VALUES (2,'PLAYER');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (4,'player1','player1@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (5,'player2','player2@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (4,'player1','player1@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar1.jpg');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (5,'player2','player2@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar2.jpg');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (6,'player3','player3@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (7,'player4','player4@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (8,'player5','player5@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (7,'player4','player4@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar1.jpg');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (8,'player5','player5@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar2.jpg');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (9,'player6','player6@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (10,'player7','player7@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (11,'player8','player8@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (10,'player7','player7@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar1.jpg');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (11,'player8','player8@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar2.jpg');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (12,'player9','player9@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (13,'player10','player10@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (2, 'CYB6650','cyb6650@example.com','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (13,'player10','player10@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar1.jpg');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (2, 'CYB6650','cyb6650@example.com','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS',2,25,'/Avatar2.jpg');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (14,'QSS7721','qss7721@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (15,'QFL3393','qfl3393@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (16, 'SBJ4592', 'sbj4592@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (15,'QFL3393','qfl3393@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar1.jpg');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (16, 'SBJ4592', 'sbj4592@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar2.jpg');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (3, 'FSS8078', 'fss8078@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar_default.png');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (17, 'XNT3290', 'xnt3290@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e', 2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (18,'player11','player11@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar2.jpg');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (19,'player12','player12@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (20,'player13','player13@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar1.jpg');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (21,'player14','player14@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar2.jpg');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (22,'player15','player15@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
 
 -- Match
 
@@ -38,12 +43,36 @@ VALUES (4,'nerea!','DEF345', 'WAITING',NULL,NULL,5,3,4,true,null);
 INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
 VALUES (2,'Partida en curso','ABC123',7,'PLAYING','2025-10-26 20:00:00',NULL,5,3,3,false);
 
+-- Más partidas en progreso
+
+INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
+VALUES
+        (8,'Escape Masters','JKL111',8,'PLAYING','2025-10-27 16:15:00',NULL,5,3,4,false),
+
+        (9,'Operation Elba','MNO222',16,'PLAYING','2025-10-28 18:30:00',NULL,6,3,3,true),
+
+        (10,'Night Escape',NULL,20,'PLAYING','2025-10-29 20:00:00',NULL,4,3,2,false),
+
+        (11,'The Last Prisoners','PQR333',22,'PLAYING','2025-10-30 19:10:00',NULL,5,3,5,true);
+
 -- Partidas finalizadas
 INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
 VALUES (3,'Tinkissss','XYZ789',15,'FINISHED','2025-10-26 18:00:00','2025-10-26 19:00:00',4,3,3,true),
         (6,'Monster high',NULL,6,'FINISHED','2025-10-25 18:35:00','2025-10-25 19:00:00',6,3,3,false),
         (7,'Katseye','GHI456',11,'FINISHED','2025-11-24 16:00:00','2025-11-24 17:15:00',5,3,3,true);
 
+INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
+VALUES (12,'Escape Legends','STU444',4,'FINISHED','2025-10-15 17:00:00','2025-10-15 18:20:00',5,3,4,false),
+
+        (13,'Prison Break','VWX555',8,'FINISHED','2025-10-17 19:00:00','2025-10-17 20:05:00',6,3,3,true),
+
+        (14,'Island Survivors',NULL,10,'FINISHED','2025-10-18 21:15:00','2025-10-18 22:00:00',4,3,2,false),
+
+        (15,'Hidden Tunnels','YZA666',12,'FINISHED','2025-10-20 16:30:00','2025-10-20 17:50:00',5,3,4,true),
+
+        (16,'Secret Mission',NULL,15,'FINISHED','2025-10-22 18:00:00','2025-10-22 19:25:00',5,3,3,false),
+
+        (17,'Final Escape','BCD777',17,'FINISHED','2025-10-24 15:45:00','2025-10-24 17:10:00',6,3,5,true);
 
 
 -- Cartas 
@@ -138,10 +167,61 @@ INSERT INTO player (id, action_points, match_id, strength, user_id)
                  (25,null,5,null,8),
                  (26,null,5,null,9);
 
+INSERT INTO player (id, action_points, match_id, strength, user_id)
+                VALUES
+                (27,9,8,NULL,8),
+                (28,11,8,NULL,10),
+                (29,8,8,NULL,12),
+
+                (30,12,9,NULL,14),
+                (31,7,9,NULL,15),
+                (32,6,9,NULL,16),
+
+                (33,10,10,NULL,17),
+                (34,8,10,NULL,20),
+                (35,5,10,NULL,21),
+
+                (36,13,11,NULL,22),
+                (37,7,11,NULL,11),
+                (38,9,11,NULL,13);
+
+INSERT INTO player (id, action_points, match_id, strength, user_id)
+        VALUES
+        (39,15,12,NULL,4),
+        (40,11,12,NULL,5),
+        (41,8,12,NULL,6),
+
+        (42,14,13,NULL,8),
+        (43,10,13,NULL,9),
+        (44,7,13,NULL,10),
+
+        (45,16,14,NULL,10),
+        (46,12,14,NULL,11),
+        (47,9,14,NULL,12),
+
+        (48,13,15,NULL,12),
+        (49,10,15,NULL,13),
+        (50,8,15,NULL,14),
+
+        (51,18,16,NULL,15),
+        (52,11,16,NULL,16),
+        (53,9,16,NULL,17),
+
+        (54,17,17,NULL,17),
+        (55,13,17,NULL,4),
+        (56,10,17,NULL,7),
+        (57,2,2,NULL,18),
+        (58,3,2,NULL,19);
+
 UPDATE match SET winner_id = 14 WHERE id = 3;
 UPDATE match SET winner_id = 18 WHERE id = 6;
 UPDATE match SET winner_id = 20 WHERE id = 7;
-
+UPDATE match SET winner_id = 39 WHERE id = 12;
+UPDATE match SET winner_id = 42 WHERE id = 13;
+UPDATE match SET winner_id = 45 WHERE id = 14;
+UPDATE match SET winner_id = 48 WHERE id = 15;
+UPDATE match SET winner_id = 51 WHERE id = 16;
+UPDATE match SET winner_id = 54 WHERE id = 17;
 
 -- Habitaciones
 

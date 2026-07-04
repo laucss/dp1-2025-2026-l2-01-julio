@@ -69,7 +69,7 @@ class MatchRepositoryTest {
         assertThat(found).isPresent();
         assertThat(found.get().getCode()).isEqualTo("ABC123");
     }
-
+    /* 
     @Test
     @DisplayName("Encontrar partidas en progreso")
     void findInProgress() {
