@@ -165,23 +165,26 @@ public class FriendRequestService {
         List<User> players = match.getPlayers().stream().map(Player::getUser).toList();
 
         List<Integer> playerIds = players.stream().map(User::getId).toList();
+
         EnumSet<MatchStatus> activeStatuses = EnumSet.of(
             MatchStatus.WAITING,
             MatchStatus.PLAYING,
             MatchStatus.VOTING
         );
-        
+
         List<FriendsInvitationDTO> result = new ArrayList<>();
 
         for (User friend : userFriends) {
-            boolean isInLobby = friend.getPlayers().stream().map(Player::getMatch).map(Match::getStatus).anyMatch(activeStatuses::contains);
+            boolean isPlaying = friend.getPlayers().stream().map(Player::getMatch).map(Match::getStatus).anyMatch(activeStatuses::contains);
+            boolean isSpectating = friend.getSpectatingMatches().stream().map(Match::getStatus).anyMatch(activeStatuses::contains);
+
+            boolean isInLobby = isPlaying || isSpectating;
 
             if (match.getIsPrivate()) {
                 boolean isFriendOfAllPlayers = friendRequestRepository.countFriendsAmongPlayers(friend.getId(), playerIds) == playerIds.size();
-                result.add(new FriendsInvitationDTO(friend,isFriendOfAllPlayers,isInLobby));
-
+                result.add(new FriendsInvitationDTO(friend, isFriendOfAllPlayers, isInLobby));
             } else {
-                result.add(new FriendsInvitationDTO(friend,isInLobby));
+                result.add(new FriendsInvitationDTO(friend, isInLobby));
             }
         }
 

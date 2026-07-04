@@ -1,9 +1,11 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.user;
+import java.util.ArrayList;
 //cambio para merge en FSS8078
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import jakarta.persistence.CascadeType;
@@ -12,6 +14,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -42,6 +45,9 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Player> players;
+
+    @ManyToMany(mappedBy = "spectators")
+    private List<Match> spectatingMatches = new ArrayList<>();
 
     @Min(1)
     @Max(100)
