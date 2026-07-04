@@ -24,6 +24,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -100,8 +102,12 @@ public class Match extends NamedEntity {
     private List<Npc> npcs = new ArrayList<>();
 
     // Espectadores 
-    @OneToMany
-    @JoinColumn(name = "match_id")
+    @ManyToMany
+    @JoinTable(
+        name = "match_spectators",
+        joinColumns = @JoinColumn(name = "match_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
     private List<User> spectators = new ArrayList<>(); 
 
     @Transient // transient porque no se guardan en la base de datos 

@@ -53,6 +53,13 @@ public class FriendRequestRestController {
         return new ResponseEntity<>(friends, HttpStatus.OK);
     }
 
+    @GetMapping("{userId}/{matchId}")
+    @Operation(summary = "Get friends by user id to invite to match", 
+        description = "Get all friends of a user by user id and if is private it return if each friend is also friend of the rest of the players in the match.")
+    public ResponseEntity<List<FriendsInvitationDTO>> getFriendsByUserIdToInvite(@PathVariable("userId") Integer userId, @PathVariable("matchId") Integer matchId) {
+        return new ResponseEntity<>(friendRequestService.getFriendsByUserIdToInvite(userId, matchId), HttpStatus.OK);
+    }
+
     @GetMapping("{userId}/pending")
     @Operation(summary = "Get pending requests by user id", description = "Get all pending friend requests of a user by user id.")
     public ResponseEntity<List<MiniRequestDTO>> getPendingRequestsByUserId(@PathVariable("userId") Integer userId) {

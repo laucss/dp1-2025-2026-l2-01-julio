@@ -5,6 +5,9 @@ import tokenService from './services/token.service';
 import jwt_decode from "jwt-decode";
 import Sidebar from './Sidebar';
 import { FaBars } from 'react-icons/fa'
+import { IoNotifications } from "react-icons/io5";
+import '../src/static/css/appnavbar/navbar.css'
+import NotificationsModal from './NotificationsModal';
 
 function AppNavbar() {
     const [roles, setRoles] = useState([]);
@@ -13,6 +16,14 @@ function AppNavbar() {
     const jwt = tokenService.getLocalAccessToken();
     const [collapsed, setCollapsed] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+
+    const [showNotifications, setShowNotifications] = useState(false);
+      
+      const handleNotificationsClick = () => {
+        setShowNotifications(true);
+      };
+      const handleCloseNotifications = () => setShowNotifications(false);
     
     const toggleNavbar = () => setCollapsed(!collapsed);
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -39,6 +50,9 @@ function AppNavbar() {
         
             profileLinks = (
                 <>
+                    <NavItem>
+                        <NavLink style={{ color: "white", cursor: "pointer" }} onClick={toggleSidebar}><IoNotifications/></NavLink>
+                    </NavItem> 
                     <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
                     {/* TODO: provisional hasta poner logout en AppNavbar cuando  eres admin */}
                     <NavItem>
@@ -52,6 +66,23 @@ function AppNavbar() {
         if (role === "PLAYER") {
             profileLinks = (
                 <>
+                    <NavItem>
+                        <NavLink
+                            style={{ color: "white", cursor: "pointer", marginRight: "20px" }}
+                            onClick={handleNotificationsClick}
+                        >
+                            <div className="notification-container">
+                            <IoNotifications size={20} />
+                            {notifications.length > 0 && (
+                                <span className="notification-badge">
+                                {notifications.length}
+                                </span>
+                            )}
+                            </div>
+                            Notifications 
+                        </NavLink>
+                    </NavItem>
+                    <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
                     <NavItem>
                         <NavLink style={{ color: "white", cursor: "pointer" }} onClick={toggleSidebar}><FaBars/></NavLink>
                     </NavItem> 
@@ -106,6 +137,8 @@ function AppNavbar() {
 
             <Sidebar isOpen={sidebarOpen} toggle={toggleSidebar} user={user} />
             {sidebarOpen && <div className="sidebar-overlay" onClick={toggleSidebar}></div>}
+            
+            <NotificationsModal isOpen={showNotifications} onClose={handleCloseNotifications} />
 
         </div>
     );

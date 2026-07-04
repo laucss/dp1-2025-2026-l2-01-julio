@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 
 @Service
 public class UserService {

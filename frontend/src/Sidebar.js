@@ -12,6 +12,7 @@ function Sidebar({ isOpen, toggle, user}) {
   const jwt = tokenService.getLocalAccessToken();
   const [roles, setRoles] = useState(jwt ? jwt_decode(jwt).authorities : []);
   const [showNotifications, setShowNotifications] = useState(false);
+  
   const handleNotificationsClick = () => {
     setShowNotifications(true);
     toggle();

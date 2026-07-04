@@ -22,7 +22,7 @@ export default function NotificationsModal({ isOpen, onClose }) {
       try {
         const controller = new AbortController();
         setLoading(true);
-        const res = await fetch(`/api/v1/notifications?receiverId=${user.id}`, {
+        const res = await fetch(`/api/v1/notifications`, {
           headers: { Authorization: `Bearer ${jwt}` },
           signal: controller.signal,
         });
@@ -53,53 +53,38 @@ export default function NotificationsModal({ isOpen, onClose }) {
 
   const handleAccept = async (id) => {
     setLoading(true);
-    const res = await fetch(`/api/v1/notifications/${id}/accept`, {
+
+    const res = await fetch(`/api/v1/invitations/${id}/accept`, {
       method: "POST",
       headers: { Authorization: `Bearer ${jwt}` },
     });
+
     if (res.ok) {
-      // Intentar leer el body con la notificación aceptada
-      let acceptedNotif = null;
-      try { acceptedNotif = await res.json(); } catch (e) { acceptedNotif = null; }
+      const invitation = await res.json();
 
-      // Obtener el matchId de la notificación (respuesta o estado previo)
-      const notif = acceptedNotif || notifications.find(notif => notif.id === id);
+      console.log(invitation);
+      console.log(invitation.match);
 
-      // Compatibilidad máxima: buscar cualquier campo de id de lobby
-      const lobbyId = notif?.matchId || notif?.lobbyId || notif?.idLobby || notif?.match?.id;
-      console.log('Notification accepted:', notif);
-      console.log('Detected lobby id:', lobbyId);
+      const matchId = invitation.match;
 
-      // Actualizar lista en estado (quitar la invitación atendida)
       setNotifications(n => n.filter(notif => notif.id !== id));
       setError(null);
 
-      if (lobbyId) {
-        window.location.href = `/lobby/${lobbyId}`;
+      if (matchId) {
+        window.location.href = `/lobby/${matchId}`;
       } else {
-        setError('Lobby ID not found in the invitation.');
-        setErrorModalMessage('Lobby ID not found in the invitation.');
+        setError("Match ID not found in the invitation.");
+        setErrorModalMessage("Match ID not found in the invitation.");
         setShowErrorModal(true);
       }
-    } else {
-      let text = "";
-      try { text = await res.text(); } catch {}
-      const lower = (text || "").toLowerCase();
-      const message = lower.includes("comenzado") || lower.includes("empezado")
-        ? "The match you want to join has already started."
-        : lower.includes("llena") || lower.includes("full")
-          ? "The match you want to join is full."
-          : "Could not accept the invitation";
-      setError(message);
-      setErrorModalMessage(message);
-      setShowErrorModal(true);
     }
+
     setLoading(false);
   };
 
   const handleReject = async (id) => {
     setLoading(true);
-    const res = await fetch(`/api/v1/notifications/${id}/reject`, {
+    const res = await fetch(`/api/v1/invitations/${id}/reject`, {
       method: "POST",
       headers: { Authorization: `Bearer ${jwt}` },
     });
@@ -110,6 +95,40 @@ export default function NotificationsModal({ isOpen, onClose }) {
     }
     setLoading(false);
   };
+
+  const handleAcceptFriendRequest = async (requestId) => {
+    try {
+      await fetch(`api/v1/friendRequests/accept`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestId),
+      });
+
+    } catch (error) {
+      // setErrorMessage(error.message);
+    }
+  }
+
+  const handleRejectFriendRequest = async (requestId)  =>{
+    try {
+      const response = await fetch(`api/v1/friendRequests/reject`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestId),
+      });
+      
+    } catch (error) {
+      // setErrorMessage(error.message);
+    }
+  }
 
   if (!isOpen) return null;
   if (!user) {
@@ -124,6 +143,31 @@ export default function NotificationsModal({ isOpen, onClose }) {
     );
   }
 
+  const getNotificationText = (notification) => {
+    switch (notification.type) {
+      case "FRIEND_REQUEST":
+        return (
+          <>
+            <b>{notification.sender.username}</b> has sent you a friend request.
+          </>
+        );
+      case "MATCH_INVITATION_AS_PLAYER":
+        return (
+          <>
+            <b>{notification.sender.username}</b> has invited you to join a match as a player.
+          </>
+        );
+      case "MATCH_INVITATION_AS_SPECTATOR":
+        return (
+          <>
+            <b>{notification.sender.username}</b> has invited you to spectate a match.
+          </>
+        );
+      default:
+        return "Unknown notification.";
+    }
+  }
+
   return (
     <div className="notifications-modal-overlay">
       <div className="notifications-modal-card">
@@ -136,10 +180,10 @@ export default function NotificationsModal({ isOpen, onClose }) {
           ) : (
             notifications.map(n => (
               <div key={n.id} className="notification-item">
-                <span>Player <b>{n.sender.username}</b> has invited you to play a match.</span>
+                <span>{getNotificationText(n)}</span>
                 <div className="notif-actions">
-                  <button className="notif-accept" onClick={() => handleAccept(n.id)}>Accept</button>
-                  <button className="notif-reject" onClick={() => handleReject(n.id)}>Reject</button>
+                  <button className="notif-accept" onClick={() => n.type === 'FRIEND_REQUEST' ? handleAcceptFriendRequest(n.id) : handleAccept(n.id)}>Accept</button>
+                  <button className="notif-reject" onClick={() => n.type === 'FRIEND_REQUEST' ? handleRejectFriendRequest(n.id) : handleReject(n.id)}>Reject</button>
                 </div>
               </div>
             ))

@@ -1,5 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,13 @@ import org.springframework.stereotype.Service;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.AlreadyCreatedException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations.InvitationMatch;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations.InvitationRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations.InvitationStatus;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +29,17 @@ public class FriendRequestService {
     FriendRequestRepository friendRequestRepository;
     UserRepository userRepository;
     FriendWebsocketController friendWebsocketController;
+    MatchRepository matchRepository;
+    InvitationRepository invitationRepository;  
 
     @Autowired
-    public FriendRequestService(FriendRequestRepository friendRequestRepository, UserRepository userRepository, FriendWebsocketController friendWebsocketController) {
+    public FriendRequestService(FriendRequestRepository friendRequestRepository, UserRepository userRepository, 
+        FriendWebsocketController friendWebsocketController,  MatchRepository matchRepository, InvitationRepository invitationRepository) {
         this.friendRequestRepository = friendRequestRepository;
         this.userRepository = userRepository;
         this.friendWebsocketController = friendWebsocketController;
+        this.matchRepository = matchRepository; 
+        this.invitationRepository = invitationRepository; 
     }
 
     @Transactional(readOnly = true)
@@ -67,10 +81,11 @@ public class FriendRequestService {
                 }).toList();
     }
 
+    // TODO: mirar si quitamos esta funcion pq es ridicula se repite vaya
     @Transactional(readOnly = true)
     public List<FriendRequest> findAcceptedFriendRequestsByUserId(Integer userId) {
         return friendRequestRepository.findAllFriendsByUserId(userId);
-}
+    }
 
     @Transactional(readOnly = true)
     public User findPlayerById(Integer playerId) throws ResourceNotFoundException {
@@ -143,6 +158,42 @@ public class FriendRequestService {
         
         // Notificar a ambos usuarios que la amistad fue eliminada
         friendWebsocketController.notifyFriendRequestDeleted(user1Id, user2Id, friendRequestId);
+    }
+
+   @Transactional
+    public List<FriendsInvitationDTO> getFriendsByUserIdToInvite(Integer userId, Integer matchId) {
+        Match match = matchRepository.findById(matchId)
+            .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
+
+        List<User> userFriends = findFriendsByUserId(userId);
+        List<User> players = match.getPlayers().stream().map(Player::getUser).toList();
+        List<Integer> playerIds = players.stream().map(User::getId).toList();
+
+        EnumSet<MatchStatus> activeStatuses = EnumSet.of(
+            MatchStatus.WAITING,
+            MatchStatus.PLAYING,
+            MatchStatus.VOTING
+        );
+
+        List<FriendsInvitationDTO> result = new ArrayList<>();
+
+        for (User friend : userFriends) {
+            boolean pendingInvitation = invitationRepository.findPendingInvitationByUserIdAndMatchId(friend.getId(), matchId).isPresent();            
+            boolean isPlaying = friend.getPlayers().stream().map(Player::getMatch).map(Match::getStatus).anyMatch(activeStatuses::contains);
+            boolean isSpectating = friend.getSpectatingMatches().stream().map(Match::getStatus).anyMatch(activeStatuses::contains);
+
+            boolean isInLobby = isPlaying || isSpectating;
+
+            if (match.getIsPrivate()) {
+                boolean isFriendOfAllPlayers =friendRequestRepository.countFriendsAmongPlayers(friend.getId(), playerIds)== playerIds.size();
+
+                result.add(new FriendsInvitationDTO(friend,isFriendOfAllPlayers,isInLobby,pendingInvitation));
+            } else {
+                result.add(new FriendsInvitationDTO(friend,isInLobby,pendingInvitation));
+            }
+        }
+
+        return result;
     }
     
 }

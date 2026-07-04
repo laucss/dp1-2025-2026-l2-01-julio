@@ -53,7 +53,7 @@ export default function Home(){
 
         const fetchInvitations = async () => {
             try {
-                const res = await fetch(`/api/v1/notifications?receiverId=${user.id}`, {
+                const res = await fetch(`/api/v1/invitations?receiverId=${user.id}`, {
                     headers: { Authorization: `Bearer ${jwt}` },
                 });
                 if (!res.ok) throw new Error("Failed to fetch invitations");
