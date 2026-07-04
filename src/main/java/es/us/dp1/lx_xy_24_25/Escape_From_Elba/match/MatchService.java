@@ -1043,19 +1043,41 @@ public class MatchService {
             }
         }
 
-        // Obtener nombre de la sala sin espacios
-        String roomName = targetRoom.getName().toLowerCase().replaceAll("\\s+", "");
+        // Obtener las palabras que forman la sala destino 
+        String[] roomWords = targetRoom.getName().toLowerCase().split("\\s+");
 
-        // Intentar formar la palabra con las letras disponibles
-        String remaining = availableLetters;
-        for (char c : roomName.toCharArray()) {
-            if (remaining.indexOf(c) >= 0) {
-                remaining = remaining.replaceFirst(String.valueOf(c), "");
-            } else {
-                throw new RuntimeException("No se puede formar '" + targetRoom.getName() + 
-                    "' con las letras disponibles en la bolsa");
+        Boolean canFormAnyWord = false;
+
+        for (String roomWord : roomWords){
+
+            //Hacemos una copia de las letras de nuestra bolsa
+            String remaining = availableLetters;
+            boolean canFormThisWord = true;
+
+            //Recorremos cada letra de la palabra de la sala destino
+            for (char c : roomWord.toCharArray()) {
+                //El método indexOf devuelve -1 si no encuentra la letra en la cadena, si la encuentra devuelve la posición de la letra en la cadena
+                if (remaining.indexOf(c) >= 0) {
+                    //Si la letra está en la cadena, la eliminamos de la cadena para no usarla de nuevo
+                    remaining = remaining.replaceFirst(String.valueOf(c), "");
+                } else {
+                    //Si la letra no está en la cadena, no podemos formar la palabra
+                    canFormThisWord = false;
+                    break;
+                }
             }
+            if (canFormThisWord) {
+                canFormAnyWord = true;
+                break;
+            }
+
+
+        if (!canFormAnyWord) {
+            throw new RuntimeException(
+                "No se puede formar ninguna palabra del nombre de la sala '" +
+                targetRoom.getName() + "' con las letras disponibles en la bolsa");
         }
+                }
 
         // Si llegamos aquí, el movimiento es válido
         Room currentRoom = player.getRoom();
