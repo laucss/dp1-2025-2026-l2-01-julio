@@ -33,6 +33,9 @@ export default function JoinMatch() {
       }
 
       const data = await response.json();
+      console.log(data);
+console.log(data.content);
+console.log(data.content.length);
       // Expecting a Page response with `content` and `totalPages`
       setLobbies(Array.isArray(data.content) ? data.content : []);
       setTotalPages(typeof data.totalPages === 'number' ? data.totalPages : 0);
@@ -106,7 +109,7 @@ export default function JoinMatch() {
         if (data.status === "WAITING") {
           navigate(`/lobby/${selectedMatch.id}`)
         } else if (data.status === "PLAYING") {
-          navigate(`/matches/${selectedMatch.id}`)
+          navigate(`/match/${selectedMatch.id}`)
         }
       } else {
         let errorMessage = "No se pudo observar la partida."
@@ -259,9 +262,9 @@ export default function JoinMatch() {
 
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
         <ButtonGroup className="pagination-group">
-          <Button disabled={page === 0} onClick={() => setPage(page - 1)}>◀</Button>
+            <Button disabled={page === 0} onClick={() => setPage((currentPage) => currentPage - 1)}>◀</Button>
           <Button disabled>{page + 1} / {totalPages}</Button>
-          <Button disabled={page >= Math.max(0, totalPages - 1)} onClick={() => setPage(page + 1)}>▶</Button>
+            <Button disabled={page >= Math.max(0, totalPages - 1)} onClick={() => setPage((currentPage) => currentPage + 1)}>▶</Button>
         </ButtonGroup>
       </div>
     </div>

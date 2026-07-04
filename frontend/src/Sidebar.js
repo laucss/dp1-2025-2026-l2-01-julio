@@ -56,6 +56,9 @@ function Sidebar({ isOpen, toggle, user}) {
                       Friends
                     </NavLink>
                   </NavItem>
+                   <NavItem>
+                    <NavLink tag={Link} to={`/history/${user.id}`} onClick={toggle}>History </NavLink>
+                  </NavItem>
                   <NavItem>
                     <NavLink tag={Link} to={`/users/${user.id}/achievements`} onClick={toggle}>Achievement</NavLink>
                   </NavItem>

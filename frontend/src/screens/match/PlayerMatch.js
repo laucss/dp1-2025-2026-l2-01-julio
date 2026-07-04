@@ -932,6 +932,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     };
 
     const currentPlayerTurn = match?.players?.find(p => p.user.id === match.currentTurnUserId);
+    const isRoomSelectionActive = moveNpcMode || moveToAdyacentRoom || moveToRoomWithWord;
+    const roomSelectionMessage = moveNpcMode
+        ? (selectedNpcIndex === null ? 'Select the NPC you want to move' : 'Select the room')
+        : 'Select the room';
 
     const canDraw = match?.currentTurnUserId === currentUser?.id &&
                 match?.currentTurnPhase === "DRAW" &&
@@ -1091,10 +1095,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 />
             </div>
 
-            {moveNpcMode && match?.currentTurnUserId === currentUser?.id && (
+            {isRoomSelectionActive && match?.currentTurnUserId === currentUser?.id && (
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: '60px', zIndex: 30 }}>
                     <div style={{ padding: '14px 42px', background: '#d200005e', color: '#fff', borderRadius: '10px', fontWeight: '700', fontSize: '20px', minWidth: '280px', textAlign: 'center', transform: 'translateX(20px)' }}>
-                        {selectedNpcIndex === null ? 'Select the NPC you want to move' : 'Select the room'}
+                        {roomSelectionMessage}
                     </div>
                 </div>
             )}
