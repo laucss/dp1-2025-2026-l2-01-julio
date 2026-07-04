@@ -44,7 +44,7 @@ public class InvitationController {
     }
 
     @PostMapping("/{id}/accept")
-    public ResponseEntity<InvitationStatus> acceptInvite(@PathVariable Integer id) {
+    public ResponseEntity<InvitationMatch> acceptInvite(@PathVariable Integer id) {
         return ResponseEntity.ok(invitationService.acceptInvite(id));
     }
 

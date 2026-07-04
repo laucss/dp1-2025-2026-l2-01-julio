@@ -1,6 +1,7 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.AlreadyCreatedException
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -73,10 +76,11 @@ public class FriendRequestService {
                 }).toList();
     }
 
+    // TODO: mirar si quitamos esta funcion pq es ridicula se repite vaya
     @Transactional(readOnly = true)
     public List<FriendRequest> findAcceptedFriendRequestsByUserId(Integer userId) {
         return friendRequestRepository.findAllFriendsByUserId(userId);
-}
+    }
 
     @Transactional(readOnly = true)
     public User findPlayerById(Integer playerId) throws ResourceNotFoundException {
@@ -153,20 +157,35 @@ public class FriendRequestService {
 
     @Transactional
     public List<FriendsInvitationDTO> getFriendsByUserIdToInvite(Integer userId, Integer matchId) {
-        Match match = matchRepository.findById(matchId).orElseThrow(() -> new ResourceNotFoundException("Match not found"));
-        List<User> userFriends = findFriendsByUserId(userId); 
-        List<User> players = match.getPlayers().stream().map(p -> p.getUser()).toList(); 
-        if (match.getIsPrivate()) { // si es privada, hay que ver que cada amigo del que invita sea amigo del restode jugadores
-            List<FriendsInvitationDTO> result = new ArrayList<>(); 
-            for (User friend : userFriends){
-                List<User> friends = findFriendsByUserId(friend.getId());
-                boolean isFriendOfAllThePlayers = friends.containsAll(players); 
-                result.add(new FriendsInvitationDTO(friend, isFriendOfAllThePlayers)); 
+
+        Match match = matchRepository.findById(matchId)
+            .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
+
+        List<User> userFriends = findFriendsByUserId(userId);
+        List<User> players = match.getPlayers().stream().map(Player::getUser).toList();
+
+        List<Integer> playerIds = players.stream().map(User::getId).toList();
+        EnumSet<MatchStatus> activeStatuses = EnumSet.of(
+            MatchStatus.WAITING,
+            MatchStatus.PLAYING,
+            MatchStatus.VOTING
+        );
+        
+        List<FriendsInvitationDTO> result = new ArrayList<>();
+
+        for (User friend : userFriends) {
+            boolean isInLobby = friend.getPlayers().stream().map(Player::getMatch).map(Match::getStatus).anyMatch(activeStatuses::contains);
+
+            if (match.getIsPrivate()) {
+                boolean isFriendOfAllPlayers = friendRequestRepository.countFriendsAmongPlayers(friend.getId(), playerIds) == playerIds.size();
+                result.add(new FriendsInvitationDTO(friend,isFriendOfAllPlayers,isInLobby));
+
+            } else {
+                result.add(new FriendsInvitationDTO(friend,isInLobby));
             }
-            return result;         
-        } else {
-            return userFriends.stream().map(u -> new FriendsInvitationDTO(u)).toList();
         }
+
+        return result;
     }
     
 }

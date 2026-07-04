@@ -57,9 +57,7 @@ public class FriendRequestRestController {
     @Operation(summary = "Get friends by user id to invite to match", 
         description = "Get all friends of a user by user id and if is private it return if each friend is also friend of the rest of the players in the match.")
     public ResponseEntity<List<FriendsInvitationDTO>> getFriendsByUserIdToInvite(@PathVariable("userId") Integer userId, @PathVariable("matchId") Integer matchId) {
-        List<FriendsInvitationDTO> result = friendRequestService.getFriendsByUserIdToInvite(userId, matchId);
-        return ResponseEntity.ok(result);
-        //return new ResponseEntity<>(friendRequestService.getFriendsByUserIdToInvite(userId, matchId), HttpStatus.OK);
+        return new ResponseEntity<>(friendRequestService.getFriendsByUserIdToInvite(userId, matchId), HttpStatus.OK);
     }
 
     @GetMapping("{userId}/pending")

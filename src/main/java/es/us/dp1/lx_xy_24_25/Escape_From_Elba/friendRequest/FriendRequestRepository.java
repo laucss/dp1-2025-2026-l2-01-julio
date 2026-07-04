@@ -30,4 +30,7 @@ public interface FriendRequestRepository extends CrudRepository<FriendRequest, I
     //Busca si dos usuarios concretos (user1Id y user2Id) tienen una solicitud pendiente o ya son amigos (ACCEPTED)
     @Query(value = "SELECT fr FROM FriendRequest fr WHERE ((fr.sender.id = :user1Id AND fr.receiver.id = :user2Id) OR (fr.sender.id = :user2Id AND fr.receiver.id = :user1Id)) AND (fr.status = 'PENDING' OR fr.status = 'ACCEPTED')")
     Optional<FriendRequest> findPendingOrFriendsUsers(@Param("user1Id") Integer user1Id, @Param("user2Id") Integer user2Id);
+
+    @Query("SELECT COUNT(fr) FROM FriendRequest fr WHERE fr.status = 'ACCEPTED' AND ((fr.sender.id = :friendId AND fr.receiver.id IN :playerIds) OR (fr.receiver.id = :friendId AND fr.sender.id IN :playerIds))")
+    long countFriendsAmongPlayers(@Param("friendId") Integer friendId, @Param("playerIds") List<Integer> playerIds);
 }

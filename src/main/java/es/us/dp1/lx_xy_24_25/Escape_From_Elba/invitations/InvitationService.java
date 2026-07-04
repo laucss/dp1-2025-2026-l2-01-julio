@@ -20,7 +20,7 @@ import java.util.Optional;
 @Service
 public class InvitationService {
 
-    private InvitationRepository InvitationRepository;
+    private InvitationRepository invitationRepository;
     private UserRepository userRepository;
     private MatchRepository matchRepository; 
     private MatchService matchService; 
@@ -28,9 +28,9 @@ public class InvitationService {
     public Checkers checkers; 
 
     @Autowired
-    public InvitationService ( InvitationRepository InvitationRepository, UserRepository userRepository, MatchRepository matchRepository,
+    public InvitationService ( InvitationRepository invitationRepository, UserRepository userRepository, MatchRepository matchRepository,
             Checkers checkers, MatchService matchService, LobbyService lobbyService){
-        this.InvitationRepository = InvitationRepository;
+        this.invitationRepository = invitationRepository;
         this.matchRepository = matchRepository; 
         this.userRepository = userRepository; 
         this.checkers = checkers; 
@@ -48,7 +48,7 @@ public class InvitationService {
             .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
 
         // Verificar si ya existe una invitación pendiente entre estos dos jugadores específicos
-        Optional<InvitationMatch> existingInvite = InvitationRepository.findBySenderIdAndReceiverIdAndStatus(
+        Optional<InvitationMatch> existingInvite = invitationRepository.findBySenderIdAndReceiverIdAndStatus(
             inviteRequest.getSenderId(), inviteRequest.getReceiverId(), InvitationStatus.PENDING
         );
         
@@ -64,23 +64,23 @@ public class InvitationService {
         invitation.setStatus(InvitationStatus.PENDING);
         invitation.setSpectator(inviteRequest.isSpectator());
         invitation.setCreatedAt(LocalDateTime.now());
-        return InvitationRepository.save(invitation);
+        return invitationRepository.save(invitation);
     }
 
     public List<InvitationMatch> getPendingInvitations(Integer receiverId) {
-        return InvitationRepository.findByReceiverIdAndStatus(receiverId, InvitationStatus.PENDING);
+        return invitationRepository.findByReceiverIdAndStatus(receiverId, InvitationStatus.PENDING);
     }
 
     public Optional<InvitationMatch> getInvitationBetweenUsers(Integer senderId, Integer receiverId, Integer matchId) {
-        return InvitationRepository.findBySenderIdAndReceiverIdAndMatchIdAndStatus(senderId, receiverId, matchId, InvitationStatus.PENDING);
+        return invitationRepository.findBySenderIdAndReceiverIdAndMatchIdAndStatus(senderId, receiverId, matchId, InvitationStatus.PENDING);
     }
 
     public InvitationMatch getInvitation(Integer id) {
-        return InvitationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Invitation not found"));
+        return invitationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Invitation not found"));
     }
 
     @Transactional
-    public InvitationStatus acceptInvite(Integer invitationId) {
+    public InvitationMatch acceptInvite(Integer invitationId) {
         InvitationMatch invitation = getInvitation(invitationId);
         
         Match match = invitation.getMatch();
@@ -112,18 +112,18 @@ public class InvitationService {
 
 
 
-        InvitationRepository.save(invitation); 
-        return invitation.getStatus();
+        invitationRepository.save(invitation); 
+        return invitation;
     }
 
     public InvitationMatch rejectInvite(InvitationMatch Invitation) {
         Invitation.setStatus(InvitationStatus.REJECTED);
-        return InvitationRepository.save(Invitation);
+        return invitationRepository.save(Invitation);
     }
 
     public void rejectOtherInvitesForMatch(Integer receiverId, Integer matchId, Integer acceptedInvitationId) {
         // Obtener todas las invitaciones pendientes para este receiver en esta partida
-        List<InvitationMatch> pendingInvites = InvitationRepository.findByReceiverIdAndMatchIdAndStatus(
+        List<InvitationMatch> pendingInvites = invitationRepository.findByReceiverIdAndMatchIdAndStatus(
             receiverId, matchId, InvitationStatus.PENDING
         );
         

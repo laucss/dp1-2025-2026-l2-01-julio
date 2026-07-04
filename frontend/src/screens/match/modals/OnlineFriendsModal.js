@@ -30,16 +30,13 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
       else if (Array.isArray(result.data?.content)) friendsArray = result.data.content;
       else if (Array.isArray(result.data?.data)) friendsArray = result.data.data;
 
-      const mapped = friendsArray.map(f => {
-        const friend = f.friend
-
-        return {
-          id: friend?.id,
-          displayName: friend?.username,
-          avatar: friend?.avatar,
-          isFriendOfAllPlayers: friend?.isFriendOfAllPlayers
-        };
-      });
+      const mapped = friendsArray.map(f => ({
+        id: f.friend.id,
+        displayName: f.friend.username,
+        avatar: f.friend.avatar,
+        isFriendOfAllPlayers: f.friendOfAllPlayers,
+        isInLobby: f.inLobby
+      }));
 
       setFriends(mapped);
     } catch (err) {
@@ -87,7 +84,6 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
     }
   }
 
-  console.log(friends);
   return (
     <div className="modal-overlay">
       <div className="modal-card enlarged-modal">
@@ -109,20 +105,30 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
                 </div>
 
                 <div className="friend-actions">
-                  {!lobby.isPrivate ? (
+                  {f.isInLobby ? (
+                    <span className="waiting-invite-text-small">
+                      In a lobby
+                    </span>
+                  ) : !lobby.isPrivate ? (
                     <>
                       <button
                         className="invite-btn"
                         onClick={() => handleInvite(f, false)}
+                        disabled={inviteStatus[f.id] === "loading"}
                       >
-                        Player
+                        {inviteStatus[f.id] === "loading"
+                          ? "Sending..."
+                          : "Player"}
                       </button>
 
                       <button
                         className="invite-btn"
                         onClick={() => handleInvite(f, true)}
+                        disabled={inviteStatus[f.id] === "loading"}
                       >
-                        Spectator
+                        {inviteStatus[f.id] === "loading"
+                          ? "Sending..."
+                          : "Spectator"}
                       </button>
                     </>
                   ) : (
@@ -136,24 +142,29 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
                           Waiting...
                         </span>
                       ) : (
-                        <button
-                          className="invite-btn"
-                          onClick={() => handleInvite(f, false)}
-                          disabled={inviteStatus[f.id] === "loading"}
-                        >
-                          {inviteStatus[f.id] === "loading"
-                            ? "Sending..."
-                            : "Invite"}
-                        </button>
-                      )}
+                        <>
+                          <button
+                            className="invite-btn"
+                            onClick={() => handleInvite(f, false)}
+                            disabled={inviteStatus[f.id] === "loading"}
+                          >
+                            {inviteStatus[f.id] === "loading"
+                              ? "Sending..."
+                              : "Invite"}
+                          </button>
 
-                      {f.isFriendOfAllPlayers && (
-                        <button
-                          className="invite-btn"
-                          onClick={() => handleInvite(f, true)}
-                        >
-                          Spectator
-                        </button>
+                          {f.isFriendOfAllPlayers && (
+                            <button
+                              className="invite-btn"
+                              onClick={() => handleInvite(f, true)}
+                              disabled={inviteStatus[f.id] === "loading"}
+                            >
+                              {inviteStatus[f.id] === "loading"
+                                ? "Sending..."
+                                : "Spectator"}
+                            </button>
+                          )}
+                        </>
                       )}
                     </>
                   )}

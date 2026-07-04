@@ -15,13 +15,18 @@ public class FriendsInvitationDTO {
     // este boolean es para que si la partida es privada, se checkee si es amigo de todos en la partida
     private boolean isFriendOfAllPlayers; 
 
-    public FriendsInvitationDTO(User user, boolean isFriendOfAllPlayers){
+    // booleano que indica si el jugador al que quiere invitar está en un lobby o jugando
+    private boolean isInLobby; 
+
+    public FriendsInvitationDTO(User user, boolean isFriendOfAllPlayers, boolean isInLobby){
         this.friend = user; 
         this.isFriendOfAllPlayers = isFriendOfAllPlayers; 
+        this.isInLobby = isInLobby; 
     }
 
-    public FriendsInvitationDTO(User user){
+    public FriendsInvitationDTO(User user, boolean isInLobby){
         this.friend = user; 
+        this.isInLobby = isInLobby; 
     }
     
 }
