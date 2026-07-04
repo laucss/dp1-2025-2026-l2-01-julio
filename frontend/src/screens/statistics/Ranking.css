@@ -37,6 +37,7 @@
 /* ===============================
    PODIUM
 ================================ */
+
 .podium {
   display: flex;
   justify-content: center;
@@ -46,30 +47,36 @@
 }
 
 .podium-item {
-  width: 140px;
+  width: 155px;
   background: white;
   border-radius: 16px;
-  padding: 12px;
+  padding: 16px 14px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
+
 .podium-item.first {
-  height: 220px;
+  height: 250px;
   border: 3px solid #f4c430;
 }
 
 .podium-item.second {
-  height: 180px;
+  height: 225px;
   border: 3px solid #b0bec5;
 }
 
 .podium-item.third {
-  height: 160px;
+  height: 210px;
   border: 3px solid #cd7f32;
 }
 
-/* Trophy icon for podium positions */
+/* Trophy icon */
 .trophy-icon {
   font-size: 26px;
   margin-right: 8px;
@@ -77,15 +84,15 @@
 }
 
 .podium-item.first .trophy-icon {
-  color: #f4c430; /* gold */
+  color: #f4c430;
 }
 
 .podium-item.second .trophy-icon {
-  color: #b0bec5; /* silver */
+  color: #b0bec5;
 }
 
 .podium-item.third .trophy-icon {
-  color: #cd7f32; /* bronze */
+  color: #cd7f32;
 }
 
 .podium-rank {
@@ -97,23 +104,40 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  margin: 8px 0;
+  margin: 10px 0;
   object-fit: cover;
 }
 
+
 .podium-name {
+  display: block;
   font-weight: 700;
+  margin-top: 6px;
+  line-height: 1.2;
 }
 
 .podium-score {
-  font-weight: 700;
-  margin-top: 4px;
-  color: #444;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 10px auto 0;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #ffd166, #ffb703);
+  color: #003b3a;
+  font-weight: 900;
+  font-size: 1.15rem;
+  line-height: 1;
+  border: 3px solid rgba(0, 59, 58, 0.12);
+  box-shadow: 0 8px 18px rgba(255, 177, 3, 0.22);
+  box-sizing: border-box;
 }
 
 /* ===============================
    LIST
 ================================ */
+
 .ranking-list {
   list-style: none;
   padding: 0;
@@ -166,6 +190,7 @@
 /* ===============================
    PAGINATION
 ================================ */
+
 .pagination-controls {
   display: flex;
   justify-content: center;
@@ -174,7 +199,6 @@
   margin-top: 20px;
 }
 
-/* Green-aqua circular arrow buttons for pagination */
 .pagination-controls .pagination-arrow,
 .pagination-controls .btn.pagination-arrow {
   background: #22a8b7;
@@ -211,22 +235,33 @@
 /* ===============================
    RESPONSIVE
 ================================ */
+
 @media (max-width: 768px) {
   .podium {
     gap: 12px;
   }
 
   .podium-item {
-    width: 110px;
+    width: 120px;
+  }
+
+  .podium-item.first {
+    height: 235px;
+  }
+
+  .podium-item.second {
+    height: 210px;
+  }
+
+  .podium-item.third {
+    height: 195px;
   }
 }
-
 
 /* ===============================
    DISABLE HOVER SCALE / MOVE
 ================================ */
 
-/* Card */
 .ranking-card,
 .ranking-card:hover,
 .ranking-card:focus,
@@ -235,13 +270,11 @@
   transition: none !important;
 }
 
-/* Any child element */
 .ranking-card * {
   transform: none !important;
   transition: none !important;
 }
 
-/* Disable hover lift on list items if any lib applies it */
 .ranking-item:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 30px rgba(34,168,183,0.22);
@@ -250,4 +283,14 @@
 .podium-item:hover {
   transform: none !important;
   box-shadow: inherit;
+}
+
+.ranking-loading {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #008e98;
 }

@@ -12,6 +12,7 @@ const jwt = tokenService.getLocalAccessToken();
 export default function Ranking() {
   const [message, setMessage] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [users, setUsers] = useFetchState(
     [],
@@ -20,6 +21,7 @@ export default function Ranking() {
     setMessage,
     setVisible
   );
+
 
   const [statsMap, setStatsMap] = useState({});
   const [sortedUsers, setSortedUsers] = useState([]);
@@ -34,7 +36,12 @@ export default function Ranking() {
     let cancelled = false;
 
     const fetchStats = async () => {
-      if (!users.length) return;
+      if (!users.length) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
 
       const map = {};
 
@@ -60,11 +67,15 @@ export default function Ranking() {
               (map[a.id]?.totalVictories || 0)
           )
         );
+        setLoading(false);
       }
     };
 
     fetchStats();
-    return () => (cancelled = true);
+
+    return () => {
+      cancelled = true;
+    };
   }, [users]);
 
   /* ===============================
@@ -84,10 +95,17 @@ export default function Ranking() {
 
   const modal = getErrorModal(setVisible, visible, message);
 
+
+
   return (
     <div className="ranking-page-container">
       <Card className="ranking-card">
         <h2 className="ranking-title">Ranking</h2>
+
+        {loading ? (
+          <div className="ranking-loading">Loading...</div>
+        ) : (
+          <>
 
         {/* ===============================
             PODIUM
@@ -195,6 +213,8 @@ export default function Ranking() {
             ▶
           </Button>
         </div>
+          </>
+        )}
       </Card>
 
       {modal}
