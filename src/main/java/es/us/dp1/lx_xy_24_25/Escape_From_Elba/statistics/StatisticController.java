@@ -3,6 +3,8 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics;
 
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,6 +73,11 @@ public class StatisticController {
         Gdto.setLongestMatchDuration(statisticService.getLongestMatchDuration());
         Gdto.setShortestMatchDuration(statisticService.getShortestMatchDuration());
         return ResponseEntity.ok(Gdto);
+    }
+
+    @GetMapping("/ranking")
+    public ResponseEntity<List<RankingDTO>> getRanking() {
+        return ResponseEntity.ok(statisticService.getRanking());
     }
     
 }

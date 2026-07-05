@@ -12,6 +12,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 
 @Service
 public class StatisticService {
@@ -19,11 +21,13 @@ public class StatisticService {
     
     private PlayerRepository playerRepository;
     private MatchService matchService;
+    private UserService userService;
 
     @Autowired
-    public StatisticService( PlayerRepository playerRepository, MatchService matchService) {
+    public StatisticService( PlayerRepository playerRepository, MatchService matchService, UserService userService) {
         this.playerRepository = playerRepository;
         this.matchService = matchService;
+        this.userService = userService;
     }
 
     //puntos de accion totales de un usuario
@@ -33,16 +37,8 @@ public class StatisticService {
 
     //Todas las victorias de un usuario
     public Integer getTotalVictoriesByUser(Integer currentUserId) {
-        List<Player> players = playerRepository.findByUserId(currentUserId);
-        int victories = 0;
-        for (Player player : players) {
-            if (player.getMatch() != null && player.getMatch().getWinner() != null) {
-                if (player.getId().equals(player.getMatch().getWinner().getId())) {
-                    victories++;
-                }
-            }
-        }
-        return victories;
+        Integer victories = playerRepository.getTotalVictoriesByUser(currentUserId);
+        return victories != null ? victories : 0;
     }
 
     //partidas jugadas por un usuario
@@ -226,4 +222,24 @@ public class StatisticService {
         ? (victories * 100.0) / matches
         : 0.0;
 }
+
+
+
+// Devuelve el ranking de usuarios basado en victorias
+    public List<RankingDTO> getRanking() {
+
+        List<User> users = (List<User>) userService.findAll();
+
+        return users.stream()
+            .map(user -> new RankingDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getAvatar(),
+                getTotalVictoriesByUser(user.getId())
+            ))
+            .sorted((a, b) ->
+                Integer.compare(b.getTotalVictories(), a.getTotalVictories()))
+            .toList();
+    }
+
 }
