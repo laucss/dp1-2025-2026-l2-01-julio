@@ -35,4 +35,10 @@ public interface PlayerRepository extends CrudRepository<Player, Integer> {
     @Query("SELECT SUM(p.roomsVisited) FROM Player p WHERE p.user.id = :userId")
     Integer getTotalRoomsVisitedByUser(Integer userId);
 
+    @Query("SELECT SUM(p.battlesPlayed) FROM Player p WHERE p.user.id = :userId")
+    Integer getBattlesPlayedByUser(Integer userId);
+
+    @Query("SELECT COUNT(p) FROM Player p WHERE p.user.id = :userId AND p.match.winner.id = p.id")
+	Integer getTotalVictoriesByUser(Integer userId);
+
 }

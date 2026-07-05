@@ -89,29 +89,33 @@ class UserRestController {
 		return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
 	}
 
+
 	@PutMapping(value = "{userId}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<UpdateResponse> update(@PathVariable("userId") Integer id, @RequestBody @Valid User user) {
-		RestPreconditions.checkNotNull(userService.findUser(id), "User", "ID", id);
-		if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-        }else{
-			user.setPassword(userService.findUser(id).getPassword());
-		}
-		User updatedUser = this.userService.updateUser(user, id);
-		String newToken = jwtUtils.generateTokenFromUsername(updatedUser.getUsername(), updatedUser.getAuthority());
+	public ResponseEntity<UpdateResponse> update(@PathVariable("userId") Integer id,@RequestBody @Valid UpdateUserDTO dto) {
+	
+		User updatedUser = userService.updateUser(id, dto);
+
+		String newToken = jwtUtils.generateTokenFromUsername(
+			updatedUser.getUsername(),
+			updatedUser.getAuthority()
+		);
+
 		List<String> roles = List.of(updatedUser.getAuthority().getAuthority());
+
 		UpdateResponse responseBody = new UpdateResponse(
-            newToken,
-            updatedUser.getId(),
-            updatedUser.getUsername(),
+			newToken,
+			updatedUser.getId(),
+			updatedUser.getUsername(),
 			updatedUser.getAvatar(),
-            roles,
+			roles,
 			updatedUser.getEmail(),
 			updatedUser.getAge()
-        );
+		);
+
 		return new ResponseEntity<>(responseBody, HttpStatus.OK);
-	}
+
+			}
 
 	@DeleteMapping(value = "{userId}")
 	@ResponseStatus(HttpStatus.OK)

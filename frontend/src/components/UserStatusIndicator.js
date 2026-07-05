@@ -15,13 +15,17 @@ const statusText = {
 
 export default function UserStatusIndicator({ status }) {
   const normalized = (status || '').toUpperCase();
+  const color = statusColor[normalized] || '#999';
   return (
     <div className="user-status-indicator">
       <span
         className="status-dot"
-        style={{ backgroundColor: statusColor[normalized] || '#999' }}
+        style={{ backgroundColor: color }}
         title={statusText[normalized] || 'Desconocido'}
       />
+      <span className="status-label" style={{ color }}>
+        {statusText[normalized] || 'Desconocido'}
+      </span>
     </div>
   );
 }

@@ -98,12 +98,6 @@ export default function SpectatorMatch({ initialMatch, matchId, currentUser, jwt
                     <button className="leave-match-button" onClick={stopSpectating} style={{ background: '#e74c3c', color: 'white' }}>
                         Leave Match
                     </button>
-                    <div className="match-chat-icon">
-                        <div className="match-chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
-                            <FaComments size={30} color="white" />
-                        </div>
-                    </div>
-                    {chatOpen && <ChatBox matchId={matchId} />}
                 </div>
             </div>
         </div>

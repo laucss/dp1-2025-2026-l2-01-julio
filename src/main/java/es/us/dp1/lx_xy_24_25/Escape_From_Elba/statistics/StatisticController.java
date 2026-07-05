@@ -3,6 +3,8 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics;
 
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,16 +33,33 @@ public class StatisticController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserStatisticsDTO> getUserStatistics(@PathVariable Integer userId) {
-    UserStatisticsDTO dto = new UserStatisticsDTO();
-    dto.setTotalVictories(statisticService.getTotalVictoriesByUser(userId));
-    dto.setMatchesPlayed(statisticService.getMatchesPlayedByUser(userId));
-    dto.setTotalTimePlayed(statisticService.getTotalTimePlayedByUserFOR(userId));
-    Integer actionPoints = statisticService.getTotalAccionPointsByUser(userId);
-    dto.setTotalActionPoints(actionPoints != null ? actionPoints : 0);
-    dto.setBattlesWon(statisticService.getBattlesWonByUser(userId));
-    dto.setRoomsVisited(statisticService.getTotalRoomsVisitedByUser(userId));
-    return ResponseEntity.ok(dto);
-}
+        UserStatisticsDTO dto = new UserStatisticsDTO();
+        Integer victories = statisticService.getTotalVictoriesByUser(userId);
+        Integer matches = statisticService.getMatchesPlayedByUser(userId);
+        Integer totalTime = statisticService.getTotalTimePlayedByUserFOR(userId);
+        Integer actionPoints = statisticService.getTotalAccionPointsByUser(userId);
+        Integer battlesWon = statisticService.getBattlesWonByUser(userId);
+        Integer rooms = statisticService.getTotalRoomsVisitedByUser(userId);
+        actionPoints = actionPoints != null ? actionPoints : 0;
+        rooms = rooms != null ? rooms : 0;
+        totalTime = totalTime != null ? totalTime : 0;
+        dto.setTotalVictories(victories);
+        dto.setMatchesPlayed(matches);
+        dto.setTotalTimePlayed(totalTime);
+        dto.setTotalActionPoints(actionPoints);
+        dto.setBattlesWon(battlesWon);
+        dto.setRoomsVisited(rooms);
+        dto.setWinRate(matches > 0 ? (victories * 100.0) / matches : 0.0);
+        dto.setAverageTimePerMatch(matches > 0 ? totalTime.doubleValue() / matches : 0.0);
+        dto.setAverageActionPointsPerMatch(matches > 0 ? actionPoints.doubleValue() / matches : 0.0);
+        dto.setAverageRoomsVisitedPerMatch(matches > 0 ? rooms.doubleValue() / matches : 0.0);
+        dto.setBattlesWonPerMatch(matches > 0 ? dto.getBattlesWon().doubleValue() / matches : 0.0);
+        Integer totalBattlesPlayed =statisticService.getBattlesPlayedByUser(userId);
+        dto.setTotalBattlesPlayed(totalBattlesPlayed);
+        dto.setMaxRoomsVisitedInMatch(statisticService.getMaxRoomsVisitedInMatch(userId));
+        dto.setPlayerType(statisticService.getPlayerType(userId));
+        return ResponseEntity.ok(dto);
+    }
 
 
     @GetMapping("/general")
@@ -50,7 +69,15 @@ public class StatisticController {
         Gdto.setTotalMatchesPlayed(statisticService.getTotalMatchesPlayed());
         Gdto.setTotalBattlesDisputed(statisticService.getTotalBattlesDisputed());
         Gdto.setAverageRoomsVisitedPerMatch(statisticService.getAverageRoomsVisitedPerMatch());
+        Gdto.setAverageMatchDuration(statisticService.getAverageMatchDuration());
+        Gdto.setLongestMatchDuration(statisticService.getLongestMatchDuration());
+        Gdto.setShortestMatchDuration(statisticService.getShortestMatchDuration());
         return ResponseEntity.ok(Gdto);
+    }
+
+    @GetMapping("/ranking")
+    public ResponseEntity<List<RankingDTO>> getRanking() {
+        return ResponseEntity.ok(statisticService.getRanking());
     }
     
 }

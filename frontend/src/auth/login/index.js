@@ -4,10 +4,12 @@ import FormGenerator from "../../components/formGenerator/formGenerator";
 import tokenService from "../../services/token.service";
 import "../../static/css/auth/authButton.css";
 import { loginFormInputs } from "./form/loginFormInputs";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [message, setMessage] = useState(null)
-  const loginFormRef = React.createRef();      
+  const loginFormRef = React.createRef(); 
+  const navigate = useNavigate();     
   
 
   async function handleSubmit({ values }) {
@@ -42,9 +44,19 @@ export default function Login() {
           <></>
         )}
 
-        <h1 style={{marginBottom: '-200px'}}>Login</h1>
+        <button 
+          className="back-arrow-btn"
+          onClick={() => navigate('/')}
+        >
+          ￩
+      </button>
+
+
 
         <div className="auth-form-container">
+          
+          <h1 className="auth-title">Login</h1>
+
           <FormGenerator
             ref={loginFormRef}
             inputs={loginFormInputs}

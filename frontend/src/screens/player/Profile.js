@@ -17,6 +17,8 @@ const Profile = ({ }) => {
       id: null,
       username: "",
       password: "",
+      email: "",
+      age: "",
       authority: null,
       avatar: Avatar_default,
     };
@@ -67,7 +69,14 @@ const Profile = ({ }) => {
 
     const handleSubmit = (e) => {
     e.preventDefault();
-    const body = { ...user, password: password, authority: { id: 2, authority: "PLAYER" } };
+    const body = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      age: user.age === "" || user.age === null ? null : Number(user.age),
+      avatar: selectedAvatarUrl,
+      password: password,
+    };
       fetch(`/api/v1/users/${user.id}`, {
       method: "PUT",
       headers: {
@@ -77,7 +86,13 @@ const Profile = ({ }) => {
       },
       body: JSON.stringify(body),
     })
-    .then((response) => response.json())
+    .then(async (response) => {
+      const json = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(json.message || "There was an error while updating the profile.");
+      }
+      return json;
+    })
     .then((json) => {
       if (json.message) {
         setMessage(json.message);
@@ -118,6 +133,40 @@ const Profile = ({ }) => {
           </div>
           <div className="custom-form-input">
             <FormGroup row className="mb-3">
+              <Label for="email" sm={3} className="custom-form-label">
+                Email:
+              </Label>
+              <Input
+                type="email"
+                required
+                name="email"
+                id="email"
+                value={user.email || ""}
+                onChange={handleChange}
+                className="custom-input-text"
+              />
+            </FormGroup>
+          </div>
+          <div className="custom-form-input">
+            <FormGroup row className="mb-3">
+              <Label for="age" sm={3} className="custom-form-label">
+                Age:
+              </Label>
+              <Input
+                type="number"
+                required
+                name="age"
+                id="age"
+                min="1"
+                max="100"
+                value={user.age || ""}
+                onChange={handleChange}
+                className="custom-input-text"
+              />
+            </FormGroup>
+          </div>
+          <div className="custom-form-input">
+            <FormGroup row className="mb-3">
               <Label for="password" sm={3} className="custom-form-label">
                 Password:
               </Label>
@@ -133,10 +182,10 @@ const Profile = ({ }) => {
           </div>
           
           <div className="profile-actions">
-            <Button className="play-btn">
+            <Button type="submit" className="play-btn">
               Save Changes
             </Button>
-            <Button className="remove-btn" tag={Link} to="/">
+            <Button type="button" className="remove-btn" tag={Link} to="/">
               Cancel
             </Button>
           </div>

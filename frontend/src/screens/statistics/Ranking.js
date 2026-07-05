@@ -12,66 +12,30 @@ const jwt = tokenService.getLocalAccessToken();
 export default function Ranking() {
   const [message, setMessage] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [users, setUsers] = useFetchState(
     [],
-    `/api/v1/users`,
+    `/api/v1/statistics/ranking`,
     jwt,
     setMessage,
     setVisible
   );
 
-  const [statsMap, setStatsMap] = useState({});
-  const [sortedUsers, setSortedUsers] = useState([]);
+
 
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 5;
 
-  /* ===============================
-     Fetch stats & sort users
-  =============================== */
   useEffect(() => {
-    let cancelled = false;
-
-    const fetchStats = async () => {
-      if (!users.length) return;
-
-      const map = {};
-
-      await Promise.all(
-        users.map(async (user) => {
-          try {
-            const res = await fetch(`/api/v1/statistics/${user.id}`, {
-              headers: { Authorization: `Bearer ${jwt}` },
-            });
-            map[user.id] = res.ok ? await res.json() : {};
-          } catch {
-            map[user.id] = {};
-          }
-        })
-      );
-
-      if (!cancelled) {
-        setStatsMap(map);
-        setSortedUsers(
-          [...users].sort(
-            (a, b) =>
-              (map[b.id]?.totalVictories || 0) -
-              (map[a.id]?.totalVictories || 0)
-          )
-        );
-      }
-    };
-
-    fetchStats();
-    return () => (cancelled = true);
+    setLoading(false);
   }, [users]);
 
   /* ===============================
      Podium & list
   =============================== */
-  const podium = sortedUsers.slice(0, 3);
-  const restUsers = sortedUsers.slice(3);
+const podium = users.slice(0, 3);
+const restUsers = users.slice(3);
 
   const totalPages =
     restUsers.length === 0
@@ -84,10 +48,17 @@ export default function Ranking() {
 
   const modal = getErrorModal(setVisible, visible, message);
 
+
+
   return (
     <div className="ranking-page-container">
       <Card className="ranking-card">
         <h2 className="ranking-title">Ranking</h2>
+
+        {users.length === 0 ? (
+          <div className="ranking-loading">Loading...</div>
+        ) : (
+          <>
 
         {/* ===============================
             PODIUM
@@ -104,7 +75,7 @@ export default function Ranking() {
               />
               <span className="podium-name">{podium[1].username}</span>
               <span className="podium-score">
-                {statsMap[podium[1].id]?.totalVictories || 0}
+                {podium[1].totalVictories}
               </span>
             </div>
           )}
@@ -120,7 +91,7 @@ export default function Ranking() {
               />
               <span className="podium-name">{podium[0].username}</span>
               <span className="podium-score">
-                {statsMap[podium[0].id]?.totalVictories || 0}
+                {podium[0].totalVictories}
               </span>
             </div>
           )}
@@ -136,7 +107,7 @@ export default function Ranking() {
               />
               <span className="podium-name">{podium[2].username}</span>
               <span className="podium-score">
-                {statsMap[podium[2].id]?.totalVictories || 0}
+                {podium[2].totalVictories || 0}
               </span>
             </div>
           )}
@@ -163,7 +134,7 @@ export default function Ranking() {
               </div>
 
               <span className="victories-badge">
-                {statsMap[user.id]?.totalVictories || 0}
+                {user.totalVictories || 0}
               </span>
             </li>
           ))}
@@ -195,6 +166,8 @@ export default function Ranking() {
             ▶
           </Button>
         </div>
+          </>
+        )}
       </Card>
 
       {modal}

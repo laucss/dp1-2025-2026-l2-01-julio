@@ -72,6 +72,18 @@ public class AchievementService {
             Integer battlesWon=statisticService.getBattlesWonByUser(user.getId());
             unlocked=battlesWon>=achievement.getThreshold();
         }
+        else if(achievement.metric == Metric.WIN_RATE){
+            Double winRate =statisticService.getWinRateByUser(user.getId());
+            unlocked =winRate >= achievement.getThreshold();
+        }
+        else if(achievement.metric == Metric.TOTAL_BATTLES_PLAYED){
+            Integer battles =statisticService.getBattlesPlayedByUser(user.getId());
+            unlocked =battles >= achievement.getThreshold();
+        }
+        else if(achievement.metric ==Metric.MAX_ROOMS_VISITED_IN_MATCH){
+            Integer rooms =statisticService.getMaxRoomsVisitedInMatch(user.getId());
+            unlocked =rooms >= achievement.getThreshold();
+        }
         else if(achievement.metric==Metric.ROOMS_VISITED){
             Integer roomsVisited=statisticService.getTotalRoomsVisitedByUser(user.getId());
             unlocked=roomsVisited>=achievement.getThreshold();

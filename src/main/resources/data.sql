@@ -185,33 +185,29 @@ INSERT INTO player (id, action_points, match_id, strength, user_id)
                 (37,7,11,NULL,11),
                 (38,9,11,NULL,13);
 
-INSERT INTO player (id, action_points, match_id, strength, user_id)
+INSERT INTO player (id, action_points, match_id, strength, user_id, battles_won, battles_played, rooms_visited)
         VALUES
-        (39,15,12,NULL,4),
-        (40,11,12,NULL,5),
-        (41,8,12,NULL,6),
+        (39,15,12,NULL,4,5,8,18),
+        (40,11,12,NULL,5,2,5,12),
+        (41,8,12,NULL,6,1,3,8),
+        (42,14,13,NULL,8,6,9,20),
+        (43,10,13,NULL,9,3,6,14),
+        (44,7,13,NULL,10,2,5,9),
+        (45,16,14,NULL,10,8,12,22),
+        (46,12,14,NULL,11,4,7,15),
+        (47,9,14,NULL,12,2,4,10),
+        (48,13,15,NULL,12,5,8,17),
+        (49,10,15,NULL,13,3,6,13),
+        (50,8,15,NULL,14,1,3,7),
+        (51,18,16,NULL,15,7,10,25),
+        (52,11,16,NULL,16,3,5,12),
+        (53,9,16,NULL,17,2,4,9),
+        (54,17,17,NULL,17,9,12,28),
+        (55,13,17,NULL,4,2,4,10),
+        (56,10,17,NULL,7,3,5,11),
+        (57,2,2,NULL,18,0,0,2),
+        (58,3,2,NULL,19,1,2,4);
 
-        (42,14,13,NULL,8),
-        (43,10,13,NULL,9),
-        (44,7,13,NULL,10),
-
-        (45,16,14,NULL,10),
-        (46,12,14,NULL,11),
-        (47,9,14,NULL,12),
-
-        (48,13,15,NULL,12),
-        (49,10,15,NULL,13),
-        (50,8,15,NULL,14),
-
-        (51,18,16,NULL,15),
-        (52,11,16,NULL,16),
-        (53,9,16,NULL,17),
-
-        (54,17,17,NULL,17),
-        (55,13,17,NULL,4),
-        (56,10,17,NULL,7),
-        (57,2,2,NULL,18),
-        (58,3,2,NULL,19);
 
 UPDATE match SET winner_id = 14 WHERE id = 3;
 UPDATE match SET winner_id = 18 WHERE id = 6;
@@ -429,10 +425,10 @@ INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (7,'If you play more than 20 minutes',20.1,'https://cdn-icons-png.flaticon.com/512/850/850960.png','TOTAL_PLAY_TIME','FACIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (8,'If you play more than 60 minutes',60.1,'https://cdn-icons-png.flaticon.com/512/850/850960.png','TOTAL_PLAY_TIME','INTERMEDIO');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (9,'If you play more than 120 minutes',120.1,'https://cdn-icons-png.flaticon.com/512/850/850960.png','TOTAL_PLAY_TIME','DIFICIL');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (10,'If you accumulate 50 action points',50.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','FACIL');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (11,'If you accumulate 100 action points',100.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','INTERMEDIO');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (12,'If you accumulate 200 action points',200.0,'https:/cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','DIFICIL');
-INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (13,'If you win 10 battles',10.0,'https://cdn-icons-png.flaticon.com/512/1732/1732476.png','BATTLES_WON','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (10,'If you accumulate 25 action points',25.0,'https://cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','FACIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (11,'If you accumulate 100 action points',100.0,'https://cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','INTERMEDIO');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (12,'If you accumulate 200 action points',200.0,'https://cdn-icons-png.flaticon.com/512/603/603855.png','ACTION_POINTS_EARNED','DIFICIL');
+INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (13,'If you win 5 battles',5.0,'https://cdn-icons-png.flaticon.com/512/1732/1732476.png','BATTLES_WON','FACIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (14,'If you win 25 battles',25.0,'https://cdn-icons-png.flaticon.com/512/1732/1732476.png','BATTLES_WON','INTERMEDIO');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (15,'If you win 50 battles',50.0,'https://cdn-icons-png.flaticon.com/512/1732/1732476.png','BATTLES_WON','DIFICIL');
 INSERT INTO achievement(id,description,threshold,badge_image,metric,tier) VALUES (16,'If you visit 10 rooms',10.0,'https://cdn-icons-png.flaticon.com/512/11117/11117864.png','ROOMS_VISITED','FACIL');

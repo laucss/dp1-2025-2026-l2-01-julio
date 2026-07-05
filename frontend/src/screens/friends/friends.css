@@ -378,3 +378,26 @@
   color: #555; /* gris igual que otros modales */
   line-height: 1.3;
 }
+
+.invitations-button {
+    position: relative;
+}
+
+.notification-dot {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    background: #e53935;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    border: 2px solid white;
+    box-shadow: 0 0 6px rgba(0,0,0,.25);
+}

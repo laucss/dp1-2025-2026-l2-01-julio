@@ -1,34 +1,69 @@
 .auth-page-container {
-  height: 100vh;
+  position: relative;
+  min-height: 100vh;
   width: 100%;
+
   display: flex;
-  flex-direction: column;
-  margin-top: 0;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
+  flex-direction: column;
+
   background-image: url("../../images/menuBackGround.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-.auth-form-container{
-  background-color: rgb(101, 194, 247);
-  padding: 5vh;
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
-    max-height: auto;
-    max-width: 650px;
-    margin-top: 30vh;
-    margin-bottom: 30vh;
-    height: 90%;
-    width: 90%;
-    border-radius: 25px;
+.auth-form-container {
+  background-color: #eee8e4;
+  border: 3px solid #d58a5b;
+  border-radius: 25px;
+  padding: 40px;
+  box-shadow: 5px 5px 15px rgba(0,0,0,.3);
+
+  width: 90%;
+  max-width: 650px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-title {
+  margin: 0 0 35px 0;
+  font-size: 4rem;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0,0,0,.5);
+  -webkit-text-stroke: 1px #d58a5b;
 }
 
 .auth-page-container h1 {
   text-align: center;
   font-size: 5em;
+  color: #ffffff;
+  margin-top: 40px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+   -webkit-text-stroke: 1px #d58a5b;
+
 }
+
+.auth-page-container h2 {
+  text-align: center;
+  font-size: 2em;
+  color: #d58a5b;
+  margin-top: 20px;
+  
+}
+
+.auth-page-container h3 {
+  text-align: center;
+  font-size: 5em;
+  color: #eee8e4;
+  margin-top: 40px;
+
+
+}
+
 
 .options-row {
   display: flex;
@@ -36,6 +71,36 @@
   align-items: center;
   width: 100%;
   margin-top: 30px;
+  color: #000000;
+}
+
+.back-arrow-btn {
+    position: absolute;
+    top: 35px;
+    left: 25px;
+
+    background-color: #22a8b7;
+    color: white;
+    border: 2px solid #075e54;
+    border-radius: 8px;
+    width: 42px;
+    height: 36px;
+    font-size: 1.3rem;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: 0.2s;
+}
+
+.back-arrow-btn:hover {
+    background-color: #1b8a96;
+}
+
+.auth-page-container {
+    position: relative;
 }
 
 @media screen and (max-width: 768px) {

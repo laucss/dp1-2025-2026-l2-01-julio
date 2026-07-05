@@ -6,7 +6,7 @@ import "../../static/css/home/waitingRoom.css";
 import { Button, Table } from "reactstrap";
 import tokenService from "../../services/token.service";
 import OnlineFriendsModal from "./modals/OnlineFriendsModal";
-import { FaRegEye } from "react-icons/fa";
+import { FaRegEye, FaRegCopy } from "react-icons/fa";
 
 import { toast } from "react-toastify";
 
@@ -17,6 +17,7 @@ export default function WaitingRoom() {
   const jwt = tokenService.getLocalAccessToken()
   const currentUser = tokenService.getUser()
   const [lobby, setLobby] = useState({})
+  const [copiedCode, setCopiedCode] = useState(false)
 
   const [showFriendsModal, setShowFriendsModal] = useState(false)
   const [stompClient, setStompClient] = useState(null)
@@ -30,6 +31,7 @@ export default function WaitingRoom() {
       });
 
       const data = await res.json();
+      console.log("Fetched lobby data:", data);
       setLobby(data);
     };
 
@@ -101,6 +103,18 @@ export default function WaitingRoom() {
 
   const handleOpenFriendsModal = () => {
     setShowFriendsModal(true);
+  };
+
+  const handleCopyCode = async () => {
+    if (!lobby.code) return;
+
+    try {
+      await navigator.clipboard.writeText(lobby.code);
+      setCopiedCode(true);
+      window.setTimeout(() => setCopiedCode(false), 1500);
+    } catch (error) {
+      toast.error("Could not copy the lobby code.");
+    }
   };
 
   const handleCloseFriendsModal = () => {
@@ -189,6 +203,56 @@ return (
             </div>
             
             <h1>Wait for the match to start...</h1>
+
+            {lobby.isPrivate && lobby.code && (
+              <div
+                className="private-lobby-code"
+                style={{
+                  marginBottom: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "12px",
+                  flexWrap: "wrap",
+                }}
+              >
+                <div
+                  style={{
+                    border: "2px solid #5ec3f6",
+                    borderRadius: "0",
+                    padding: "10px 16px",
+                    background: "rgb(255, 255, 255)",
+                    color: "#000000",
+                    fontWeight: 700,
+                    fontSize: "16px",
+                    lineHeight: "1",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Code: {lobby.code}
+                </div>
+                <Button
+                  type="button"
+                  onClick={handleCopyCode}
+                  style={{
+                    backgroundColor: "#f2f2f2",
+                    border: "2px solid #5ec3f6",
+                    color: "#222",
+                    padding: "10px 16px",
+                    fontSize: "16px",
+                    lineHeight: "1",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  aria-label="Copy lobby code"
+                  title="Copy lobby code"
+                >
+                  {copiedCode ? <span style={{ fontWeight: 700 }}>Copied</span> : <FaRegCopy />}
+                </Button>
+              </div>
+            )}
 
             <Table className="mt-4">
               <thead>

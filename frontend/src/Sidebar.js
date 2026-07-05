@@ -26,6 +26,9 @@ function Sidebar({ isOpen, toggle, user}) {
             adminLinks = (
                 <>
                   <NavItem>
+                    <NavLink tag={Link} to={`/users/${user.id}`} onClick={toggle}>Edit Profile</NavLink>
+                  </NavItem>
+                  <NavItem>
                     <NavLink tag={Link} to="/friends" onClick={toggle}> Friends</NavLink>
                 </NavItem>
                 <NavItem>
@@ -55,6 +58,9 @@ function Sidebar({ isOpen, toggle, user}) {
                     <NavLink tag={Link} to="/friends" onClick={toggle}>
                       Friends
                     </NavLink>
+                  </NavItem>
+                   <NavItem>
+                    <NavLink tag={Link} to={`/history/${user.id}`} onClick={toggle}>History </NavLink>
                   </NavItem>
                   <NavItem>
                     <NavLink tag={Link} to={`/users/${user.id}/achievements`} onClick={toggle}>Achievement</NavLink>
