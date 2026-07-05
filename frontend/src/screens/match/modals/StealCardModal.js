@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import tokenService from '../../../services/token.service';
 import '../../../static/css/match/StealCardModal.css';
+import { toast } from 'react-toastify';
 
 export default function StealCardModal({
   isOpen,
@@ -78,6 +79,8 @@ export default function StealCardModal({
       });
 
       if (res.ok) {
+        const card = await res.json()
+        if (!card.id){ toast.info("The player has no cards to steal")}
         console.log('Carta robada exitosamente');
         await onSteal();
       } else {

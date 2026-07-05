@@ -104,6 +104,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, async (msg) => {
             const fightUpdate = JSON.parse(msg.body);
             
+            console.log('fightreuslt', fightUpdate)
             if (fightUpdate.action === 'START') {
                 try {
                     const response = await fetch(`/api/v1/matches/${matchId}`, {
@@ -135,11 +136,14 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 }
             } else if (fightUpdate.action === 'RESOLVE') {
                 const winnerId = fightUpdate.winnerId;
-                const winnerPlayerId = fightUpdate.winnerPlayerId;
-                const loserPlayerId = fightUpdate.loserPlayerId;
+                const loserId = fightUpdate.loserId;
+                const fightType = fightUpdate.fightResultType
 
-                if (currentUser.id === winnerId && winnerPlayerId && loserPlayerId) {
-                    setStealLoserPlayerId(loserPlayerId);
+                console.log('winnerId', winnerId)
+                console.log('currentPlayer.id', currentPlayer.id)
+
+                if (currentPlayer.id === winnerId &&  fightType === 'PLAYER_BEATS_PLAYER') {
+                    setStealLoserPlayerId(loserId);
                     setIsStealModalOpen(true);
                 }
             }
@@ -1045,6 +1049,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     }
 
+    console.log('actionspoints', currentPlayer)
     return (
         <div className="match-container">
             <StartDiceModal

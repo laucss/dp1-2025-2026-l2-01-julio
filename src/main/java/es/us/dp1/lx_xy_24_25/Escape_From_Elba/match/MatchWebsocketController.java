@@ -10,7 +10,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.DiceTotalsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightDiceUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightResolvedDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.FightResolvedDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.HandUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
@@ -19,7 +19,6 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ReadyStateUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.WeaponsUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 
 @Controller
 public class MatchWebsocketController {

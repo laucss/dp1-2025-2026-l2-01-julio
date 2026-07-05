@@ -39,6 +39,8 @@ export async function handlePlayerFight({
         const winnerUser = attackerWins ? fightAttacker.user : fightDefender.user;
         const loserPlayerId = attackerWins ? fightDefender.id : fightAttacker.id;
 
+        console.log('currentUser', currentUser.id)
+        console.log('winnerUser', winnerUser.id)
         if (currentUser.id === winnerUser.id) {
             console.log('ENTRENDO EN BEATS PLAYER', currentUser.id === winnerUser.id)
             setStealLoserPlayerId(loserPlayerId);
@@ -90,15 +92,18 @@ export async function handleNpcFight({
 
         const data = await response.json()
         console.log('card returned', data)
-        if (data.fightResultType === 'PLAYER_BEATS_NIALL' && !data.card?.id) {
-            toast.info('no recibes ninguna carta porque no hay ninguna en el monton de descartes')
-        }
 
         // Fase interactiva visual en React: si el humano pierde y tiene cartas, abrir descarte
         const humanWins = npcIsAttacker ? !attackerWins : attackerWins;
 
+        if (data.fightResultType === 'PLAYER_BEATS_NIALL' && humanWins) {
+            toast.info('no recibes ninguna carta porque no hay ninguna en el monton de descartes')
+        }
+
         if (!humanWins && (handCards.length > 0 || bagCards.length > 0)) {
             setIsNpcLossModalOpen(true);
+        } else if (!humanWins && (handCards.length === 0 && bagCards.length === 0) && data.fightResultType === 'NPC_BEATS_PLAYER'){
+            toast.info("you've lost but because you dont have any card, you cannot discard")
         }
 
     } catch (err) {

@@ -12,6 +12,14 @@ import lombok.Setter;
 @Setter
 public class FightResolvedDTO {
 
+    private String action = "RESOLVE"; // Para distinguir de otros eventos de fight
+
+    private Integer matchId;
+
+    private Integer winnerId;
+
+    private Integer loserId;
+
     // si por ejemplo, gana contra npcs recibe directamente la carta
     private CardDTO card; 
 
@@ -20,14 +28,22 @@ public class FightResolvedDTO {
     private FightResultType fightResultType; 
 
 
-    public FightResolvedDTO(Card card, FightResultType fightResultType){
+    public FightResolvedDTO(Integer matchId, Integer winnerId, Integer loserId, Card card, FightResultType fightResultType){
         this.card = new CardDTO(card);
         this.fightResultType = fightResultType; 
+        this.winnerId = winnerId; 
+        this.loserId = loserId; 
+        this.matchId = matchId;
     }
 
-    public FightResolvedDTO(FightResultType fightResultType){
-        this.fightResultType = fightResultType; 
+    public FightResolvedDTO(Integer matchId, Integer winnerId, Integer loserId, FightResultType fightResultType){
+        this.fightResultType = fightResultType;
+        this.winnerId = winnerId; 
+        this.loserId = loserId; 
+        this.matchId = matchId;
     }
+
+    public FightResolvedDTO(){}
 
 
     

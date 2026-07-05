@@ -25,21 +25,15 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth.payload.response.MessageResponse;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.DiceTotalsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightDiceUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightResolvedDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.LoseAgainstNpcRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchHistorialDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MoveNpcToRoomDTO;
@@ -47,7 +41,6 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MoveToRoomDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ReadyStateUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.WeaponsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
@@ -500,6 +493,7 @@ public class MatchController {
     }
         */
 
+    /* 
     @PostMapping("/{matchId}/notify-fight-resolved")
     @Operation(summary = "Notify fight resolved", description = "Notifies all players when a fight is resolved and winner can steal a card.")
     public ResponseEntity<Void> notifyFightResolved(
@@ -508,6 +502,7 @@ public class MatchController {
         matchWebsocketController.notifyFightResolved(matchId, fightResolved);
         return ResponseEntity.ok().build();
     }
+        */
 
     @PutMapping("/{matchId}/player-strength")
     @Operation(summary = "Update player strength", description = "Updates the strength of a player and notifies all players.")
