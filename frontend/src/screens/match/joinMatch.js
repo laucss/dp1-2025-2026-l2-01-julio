@@ -33,9 +33,6 @@ export default function JoinMatch() {
       }
 
       const data = await response.json();
-      console.log(data);
-console.log(data.content);
-console.log(data.content.length);
       // Expecting a Page response with `content` and `totalPages`
       setLobbies(Array.isArray(data.content) ? data.content : []);
       setTotalPages(typeof data.totalPages === 'number' ? data.totalPages : 0);

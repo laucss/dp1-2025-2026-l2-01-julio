@@ -5,10 +5,12 @@ import FormGenerator from "../../components/formGenerator/formGenerator";
 import { registerFormPlayer } from "./form/registerFormPlayer";
 import { registerFormAdmin } from "./form/registerFormAdmin";
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
   let [type, setType] = useState(null);
   let [authority, setAuthority] = useState(null);
+  const navigate = useNavigate();
 
   const registerFormRef = useRef();
 
@@ -75,8 +77,15 @@ export default function Register() {
   if (type) {
     return (
       <div className="auth-page-container">
-        <h1 style={{marginBottom: '-200px'}}>Register</h1>
+        <button 
+          className="back-arrow-btn"
+          onClick={() => navigate('/')}
+        >
+          ￩
+        </button>
+
         <div className="auth-form-container">
+          <h1 className="auth-title">Register</h1>
           <FormGenerator
             ref={registerFormRef}
             inputs={
@@ -95,6 +104,13 @@ export default function Register() {
   } else {
     return (
       <div className="auth-page-container">
+        <button 
+          className="back-arrow-btn"
+          onClick={() => navigate('/')}
+        >
+          ￩
+        </button>
+
         <div className="auth-form-container">
           <h1>Register</h1>
           <h2 className="text-center text-md">

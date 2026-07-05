@@ -18,7 +18,7 @@ const Logout = () => {
   return (
     <div className="auth-page-container">
       <div className="auth-form-container">
-        <h2 className="text-center text-md" style={{color:'black'}}>
+        <h2 className="text-center text-md">
           Are you sure you want to log out?
         </h2>
         <div className="options-row">
