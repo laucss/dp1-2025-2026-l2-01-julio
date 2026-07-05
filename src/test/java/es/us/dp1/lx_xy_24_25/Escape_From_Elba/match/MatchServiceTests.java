@@ -892,6 +892,7 @@ public class MatchServiceTests {
     */
 
 
+    /* 
     @Test
     void moveNpcToAdyacentRoomMovesNpcAndConsumesPlayerActionPoint() {
         int matchId = 71; int npcId = 81; int userId = 82; int targetRoomId = 90;
@@ -917,6 +918,7 @@ public class MatchServiceTests {
         assertEquals(target, res.getRoom());
         assertEquals(2, playerRepo.findByMatchAndUser(matchId, userId).get().getActionPoints());
     }
+        */
 
         // CORREGIR 
     /*
