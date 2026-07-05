@@ -918,7 +918,7 @@ public class MatchService {
     }
 
     @Transactional
-    public Npc moveNpcToAdyacentRoom(Integer matchId, Integer npcId, Integer targetRoomId, Integer userId) {
+    public Npc moveNpcToRoom(Integer matchId, Integer npcId, Integer targetRoomId, Integer userId) {
         Match match = matchRepo.findById(matchId)
             .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
 
@@ -946,12 +946,7 @@ public class MatchService {
         if (player.getActionPoints() <= 0) {
             throw new NoActionPointsException("Move not allowed: player has no action points left"); }
 
-        //Comprobamos que la sala destino es adyacente a la sala actual del npc
-        List<Room> adjacent = currentRoomNpc.getAdjacencyList();
-        boolean canMove = adjacent.stream()
-                .anyMatch(r -> r.getId().equals(targetRoom.getId()));
-        if (!canMove) {
-            throw new RuntimeException("Movimiento no permitido: la sala destino no es adyacente"); }
+        
 
         //Actualizamos la sala del npc y los puntos de acción del jugador
 
@@ -1071,13 +1066,15 @@ public class MatchService {
                 break;
             }
 
+        }
+
 
         if (!canFormAnyWord) {
             throw new RuntimeException(
                 "No se puede formar ninguna palabra del nombre de la sala '" +
                 targetRoom.getName() + "' con las letras disponibles en la bolsa");
         }
-                }
+                
 
         // Si llegamos aquí, el movimiento es válido
         Room currentRoom = player.getRoom();
