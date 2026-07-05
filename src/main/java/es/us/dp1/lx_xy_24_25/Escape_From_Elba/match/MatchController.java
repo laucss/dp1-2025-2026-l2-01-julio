@@ -313,8 +313,8 @@ public class MatchController {
 
     
     @PutMapping("/{matchId}/moveNpc")
-    public ResponseEntity<MatchDTO> moveNpcToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveNpcToRoomDTO data){
-        ms.moveNpcToAdyacentRoom(matchId, data.getNpcId(), data.getRoomId(), data.getUserId()); 
+    public ResponseEntity<MatchDTO> moveNpcToRoom (@PathVariable Integer matchId, @RequestBody MoveNpcToRoomDTO data){
+        ms.moveNpcToRoom(matchId, data.getNpcId(), data.getRoomId(), data.getUserId()); 
         Match match = ms.getMatchById(matchId);
         
         return ResponseEntity.ok(new MatchDTO(match)); 
