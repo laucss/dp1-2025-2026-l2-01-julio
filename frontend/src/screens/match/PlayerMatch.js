@@ -338,11 +338,13 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         calculateActionPoints()
     }, [handCards]);
 
+    /*
     useEffect(() => {
         if (!currentPlayer || !currentPlayer.hand || !currentPlayer.bag) return;
         setHandCards(currentPlayer.hand.cards || []);
         setBagCards(currentPlayer.bag.cards || []);
     }, [currentPlayer]);
+    */
 
     useEffect(() => {
         if (!isDiceModalOpen || match?.currentTurnPhase !== null) return;
@@ -842,7 +844,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
 
         try {
-            const res = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/lose-against-npc`, {
+            const res = await fetch(`/api/v1/fights/${matchId}/${currentPlayer.id}/lose-against-npc`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${jwt}`,
@@ -987,46 +989,59 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
     const handleFightResult = async (currentUserWon) => {
         try {
-            const isCurrentAttacker = currentUser.id === fightAttacker?.user?.id;
-           
-            if (!isCurrentAttacker) {
-                await clearFightState();
-                return;
+            const npcIsAttacker = !fightAttacker?.user;
+
+            if (npcIsAttacker) {
+                const isCurrentDefender = currentUser.id === fightDefender?.user?.id;
+                if (!isCurrentDefender) {
+                    await clearFightState();
+                    return;
+                }
+            } else {
+                const isCurrentAttacker = currentUser.id === fightAttacker?.user?.id;
+                if (!isCurrentAttacker) {
+                    await clearFightState();
+                    return;
+                }
             }
+
             const defenderRoomId = fightDefender?.currentRoom?.id || fightDefender?.roomId || fightDefender?.room?.id || pendingTargetRoom;
             const attackerWins = currentUserWon;
-            const isDefenderNPC = !fightDefender?.user;
-            const loserUser = attackerWins ? fightDefender?.user : fightAttacker?.user;
+            
+            const isNpcFight = !fightAttacker?.user || !fightDefender?.user;
 
-            if (isDefenderNPC) {
+            if (isNpcFight) {
                 await handleNpcFight({
-                    attackerWins, fightAttacker, fightDefender, match, defenderRoomId, currentPlayer,
-                    handCards, bagCards, drawCardForWinner, movePlayerToRoom, moveLoserToRandomRoom,
-                    getRandomFreeRoom, fetchMatchAndPlayers, setDeck, setIsNpcLossModalOpen, matchId, jwt,
+                    matchId,
+                    jwt,
+                    attackerWins,
+                    fightAttacker,
+                    fightDefender,
+                    npcIsAttacker, 
+                    defenderRoomId,
+                    handCards,
+                    bagCards,
+                    setIsNpcLossModalOpen
                 });
-                return; 
+                return;
             }
-                
-            if (!loserUser) return;
-
+            
             await handlePlayerFight({
-                attackerWins, fightAttacker, fightDefender, match, currentUser, moveLoserToRandomRoom,
-                movePlayerToRoom, drawCardForWinner, getRandomFreeRoom, normalizeRoomId, defenderRoomId,
-                fetchConsumeAllActionPoints: async (userId) => {
-                    await fetch(`/api/v1/matches/${matchId}/consume-all-action-points/${userId}`, {
-                        method: "POST", headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" },
-                    });
-                },
-                notifyFightResolved: async (winnerId, winnerPlayerId, loserPlayerId) => {
-                    await fetch(`/api/v1/matches/${matchId}/notify-fight-resolved`, {
-                        method: "POST", headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" },
-                        body: JSON.stringify({ matchId, winnerId, winnerPlayerId, loserPlayerId }),
-                    });
-                },
-                setStealLoserPlayerId, setIsStealModalOpen,
-            });      
+                matchId,
+                jwt,
+                attackerWins,
+                fightAttacker,
+                fightDefender,
+                defenderRoomId,
+                currentUser,
+                setStealLoserPlayerId,
+                setIsStealModalOpen
+            });
+
+        } catch (err) {
+            console.error("Error al procesar el resultado de la pelea:", err);
         } finally {
-            await clearFightState();    
+            await clearFightState();
         }
     }
 

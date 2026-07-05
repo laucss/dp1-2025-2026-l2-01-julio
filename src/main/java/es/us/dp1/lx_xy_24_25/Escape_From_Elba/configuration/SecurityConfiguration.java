@@ -143,6 +143,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/v1/statistics/**").authenticated()
 
                 .requestMatchers("/api/v1/match/{matchId}/chat/**").hasAnyAuthority(PLAYER, ADMIN)
+                .requestMatchers("/api/v1/fights/**").authenticated()
                 
                 // El resto denegado
                 .anyRequest().denyAll()

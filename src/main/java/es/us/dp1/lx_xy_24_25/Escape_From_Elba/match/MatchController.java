@@ -261,6 +261,7 @@ public class MatchController {
 
     }
 
+    /* 
     @PostMapping("/{matchId}/{playerId}/playerWinsNiallCampbell")
     public ResponseEntity<DrawCardResultDTO> playerWinsNiallCampbell (@PathVariable Integer matchId, @PathVariable Integer playerId){
         Card card = ms.playerWinsNiallCampbell(matchId, playerId);
@@ -277,6 +278,7 @@ public class MatchController {
         return ResponseEntity.ok(result);
 
     }
+    */
 
     @GetMapping("/{matchId}/{playerId}/getAllCards")
     public ResponseEntity<AllCardsStatusDTO> getAllCards (@PathVariable Integer matchId, @PathVariable Integer playerId){
@@ -454,6 +456,7 @@ public class MatchController {
         return ResponseEntity.ok().build();
     }
 
+    /* 
     @PostMapping("/{matchId}/{winnerId}/steal-card-from/{loserId}")
     @Operation(summary = "Steal card from another player", description = "Winner steals a card from loser, either from hand (random/selected) or bag (selected). Returns updated card states for both players.")
     public ResponseEntity<Map<String, AllCardsStatusDTO>> stealCardFromPlayer(@PathVariable Integer matchId, @PathVariable Integer winnerId,@PathVariable Integer loserId, @Valid @RequestBody StealCardRequestDTO request) {
@@ -476,7 +479,9 @@ public class MatchController {
             return ResponseEntity.internalServerError().build();
         }
     }
+        */
 
+    /* 
     @PostMapping("/{matchId}/{playerId}/lose-against-npc")
     @Operation(summary = "Player loses against NPC", description = "Player chooses a card to discard after losing to an NPC.")
     public ResponseEntity<AllCardsStatusDTO> playerLosesAgainstNpc(@PathVariable Integer matchId, @PathVariable Integer playerId, @Valid @RequestBody LoseAgainstNpcRequestDTO request) {
@@ -493,6 +498,7 @@ public class MatchController {
             return ResponseEntity.internalServerError().build();
         }
     }
+        */
 
     @PostMapping("/{matchId}/notify-fight-resolved")
     @Operation(summary = "Notify fight resolved", description = "Notifies all players when a fight is resolved and winner can steal a card.")

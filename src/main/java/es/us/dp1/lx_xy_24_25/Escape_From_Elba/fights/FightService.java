@@ -1,0 +1,365 @@
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchWebsocketController;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.LoseAgainstNpcRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StealCardRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+
+
+
+@Service
+public class FightService {
+
+    MatchService matchService;
+    DeckService deckService; 
+    HandService handService; 
+    BagService bagService;
+    PlayerService playerService; 
+    MatchWebsocketController matchWebsocketController;
+    Checkers checkers; 
+
+    MatchRepository matchRepo;
+    PlayerRepository playerRepo;
+    RoomRepository roomRepository;
+    NpcRepository npcRepository;
+    RoomService roomService;
+
+    @Autowired
+    public FightService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository,
+            RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
+            PlayerService playerService, MatchWebsocketController matchWebsocketController, NpcRepository npcRepository, 
+            Checkers checkers, MatchService matchService) {
+        this.matchRepo = mrepo;
+        this.playerRepo = playerRepo;
+        this.roomRepository = roomRepository;
+        this.npcRepository = npcRepository;
+        this.roomService = roomService;
+        this.deckService = deckService;
+        this.handService = handService;
+        this.bagService = bagService; 
+        this.playerService = playerService;
+        this.matchWebsocketController = matchWebsocketController;
+        this.checkers = checkers; 
+        this.matchService = matchService;
+    }
+
+
+
+    @Transactional
+    public FightResolvedDTO processFightResolution(FightResultRequestDTO result) {
+        matchRepo.findById(result.getMatchId()).orElseThrow(() -> new ResourceNotFoundException("Match not found"));
+
+        if (result.isNpcFight()) {
+            // el npc gana al player en dos casos: 
+            //      1. el npc ataca y gana como atacante 
+            //      2. el player ataca pero pierde 
+            if ((result.isAttackerWins() && result.isNpcAttacker()) || (!result.isAttackerWins() && !result.isNpcAttacker())) { 
+                return npcBeatsPlayer(result);
+            } else  { // el jugador gana al npc en el resto de situaciones
+                return playerBeatsNpc(result);
+            }
+        } else {
+            return playerBeatsPlayer(result);    
+        }
+
+    }
+
+
+
+    // ------------------------------------------- FUNCIONES LLEVADAS A CABO EN LAS PELEAS -------------------------------------------------------------------
+
+    /*
+     * JUGADOR GANA A JUGADOR 
+     * Contexto: es una pelea entre dos jugadores activos, quien gana roba una carta del perdedor
+     * La carta que puede robar el ganador puede ser de la mano o de la bolsa del perdedor, si es de la bolsa la elige deliberadamente, 
+     * si es de la mano es aleatoriamente  
+     * 
+     * la carta robada siempre va a la mano del ganador y si el perdedor es el jugador con el turno actual, pierde todos sus puntos de acción
+     * 
+     * fromWhere indica si la carta robada es de la mano ("hand") o de la bolsa ("bag")
+     * 
+     * el winnerId y el loserId son los ids de los players no de los users
+     */
+
+
+
+    @Transactional
+    public CardDTO playerStealFromPlayer(StealCardRequestDTO request, Integer matchId) {
+        // checkeamos que ambos jugadores existen en la partida
+        Integer loserId = playerService.findById(request.getLoserId()).getId(); 
+        Player winner = playerService.findById(request.getWinnerId());
+
+        // quitamos la carta de la mano o bolsa del perdedor y se la añadimos a la mano del ganador
+        Card card = request.getCard() == null ? null : request.getCard();
+
+        if (request.getFromWhere().equals("hand")){ 
+            // Selección aleatoria de carta de la mano del perdedor
+            HandInGame loserHand = handService.findPlayerHand(matchId, loserId);
+            List<Card> loserHandCards = loserHand.getCards();
+            if (loserHandCards == null || loserHandCards.isEmpty()) {
+                throw new IllegalStateException("Loser has no cards in hand to steal");
+            }
+            card = loserHandCards.get((int) Math.floor(Math.random() * loserHandCards.size()));
+            handService.removeCardFromPlayerHand(card, matchId, loserId);
+            handService.addCardToPlayerHand(card, matchId, winner.getId());
+
+        } else if (request.getFromWhere().equals("bag")){ 
+            bagService.removeCardFromPlayerBag(request.getCard(), matchId, loserId);
+            handService.addCardToPlayerHand(request.getCard(), matchId, winner.getId()); 
+        
+        } else {
+            throw new IllegalArgumentException("fromWhere must be 'hand' or 'bag'");
+        }
+        // Actualizar estadísticas de batallas
+        updatePlayerStatistics(winner);
+
+        AllCardsStatusDTO winnerCards = matchService.getAllCards(matchId, winner.getId());
+        AllCardsStatusDTO loserCards = matchService.getAllCards(matchId, loserId);
+        
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, winnerCards, loserCards);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
+        
+        return new CardDTO(card);
+
+    }
+
+
+    @Transactional
+    public FightResolvedDTO playerBeatsPlayer(FightResultRequestDTO result){
+        Player winner = result.isAttackerWins() ? playerService.findById(result.getAttackerId()) : playerService.findById(result.getDefenderId()); 
+        Player loser = result.isAttackerWins() ? playerService.findById(result.getDefenderId()) : playerService.findById(result.getAttackerId()); 
+        playerLoses(loser, result.getMatchId()); 
+
+        Room defenderRoom = roomService.findById(result.getDefenderRoomId());
+        winner.setRoom(defenderRoom);
+        playerRepo.save(winner);
+
+        PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(winner);
+        matchWebsocketController.notifyPlayerLocationUpdate(result.getMatchId(), locationUpdate);
+
+        // si el jugador activo (el que ataca en este caso, pierde entonces sus puntos de accion se quedan a cero)
+        if (loser.getId().equals(result.getAttackerId())){
+            loserLoseActionPoints(loser, result.getMatchId());
+        }
+        // Actualizar estadísticas de batallas del jugador
+        updatePlayerStatistics(winner);
+
+        return new FightResolvedDTO(FightResultType.PLAYER_BEATS_PLAYER);
+    }
+
+     
+    @Transactional
+    public void playerLosesAgainstNpc(Integer matchId, Integer playerId, LoseAgainstNpcRequestDTO request){
+        String fromWhere = request.getFromWhere();
+        Integer cardId = request.getCardId();
+
+        // Validar parámetros
+        if (fromWhere == null || (!"hand".equals(fromWhere) && !"bag".equals(fromWhere))) {
+            throw new IllegalArgumentException("fromWhere must be 'hand' or 'bag'");
+        }
+        if (cardId == null) {
+            throw new IllegalArgumentException("cardId cannot be null");
+        }
+
+        // Buscar la carta en mano o bolsa según corresponda
+        Card cardRef = null;
+        if ("hand".equals(fromWhere)) {
+            HandInGame hand = handService.findPlayerHand(matchId, playerId);
+            cardRef = hand.getCards().stream()
+                .filter(c -> c.getId() != null && c.getId().equals(cardId))
+                .findFirst()
+                .orElse(null);
+            handService.removeCardFromPlayerHand(cardRef, matchId, playerId);
+        } else {
+            BagInGame bag = bagService.findPlayerBag(matchId, playerId);
+            cardRef = bag.getCards().stream()
+                .filter(c -> c.getId() != null && c.getId().equals(cardId))
+                .findFirst()
+                .orElse(null);
+            bagService.removeCardFromPlayerBag(cardRef, matchId, playerId); 
+        }
+
+        if (cardRef == null) {
+            throw new IllegalArgumentException("Card not found in " + fromWhere);
+        }
+
+        // añadimos la carta seleccionada al mazo de descartes
+        deckService.addCardToDiscardedPile(matchId, cardRef);
+
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = matchService.getAllCards(matchId, playerId);
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
+
+    }
+
+    
+
+    @Transactional
+    public void playerLoses(Player loser, Integer matchId){
+        loser.setStrength(loser.getStrength() +1);
+        Room randomRoom = roomService.getRandomRoom();
+        loser.setRoom(randomRoom);
+        playerRepo.save(loser);
+
+        PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(loser);
+        matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
+
+        StrengthUpdateDTO strengthUpdate = new StrengthUpdateDTO(
+                loser.getId(),
+                loser.getUser().getId(),
+                loser.getUser().getUsername(),
+                loser.getStrength(),
+                System.currentTimeMillis()
+            );
+        matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);
+
+
+    }
+
+    @Transactional
+    public void npcLoses(Npc loser, Player winner, Integer matchId, Integer roomId){
+        loser.setStrength(loser.getStrength() +1);
+        Room randomRoom = roomService.getRandomRoom();
+        loser.setRoom(randomRoom);
+        npcRepository.save(loser);
+        
+        Room defenderRoom = roomService.findById(roomId);
+        winner.setRoom(defenderRoom);
+        playerRepo.save(winner);
+
+        PlayerLocationUpdateDTO locationPlayerUpdate = new PlayerLocationUpdateDTO(winner);
+        matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationPlayerUpdate);
+
+        NpcLocationUpdateDTO locationNpcUpdate = new NpcLocationUpdateDTO(loser);
+        matchWebsocketController.notifyNpcLocationUpdate(matchId, locationNpcUpdate);
+    }
+
+    @Transactional
+    public FightResolvedDTO npcBeatsPlayer(FightResultRequestDTO result){
+        Player player = !result.isAttackerWins() && !result.isNpcAttacker() ? playerService.findById(result.getAttackerId()) : playerService.findById(result.getDefenderId());
+        
+        Integer npcId = result.isAttackerWins() && result.isNpcAttacker() ? result.getAttackerId() : result.getDefenderId(); 
+        npcRepository.findById(npcId).orElseThrow(() -> new ResourceNotFoundException("Npc not found")); 
+
+        playerLoses(player, result.getMatchId()); 
+
+        return new FightResolvedDTO(FightResultType.NPC_BEATS_PLAYER);
+
+    }
+
+    @Transactional
+    public FightResolvedDTO playerBeatsNpc(FightResultRequestDTO result){
+        Player player = result.isAttackerWins() && !result.isNpcAttacker() ? playerService.findById(result.getAttackerId()) : playerService.findById(result.getDefenderId());
+        
+        Integer npcId = !result.isAttackerWins() && result.isNpcAttacker() ? result.getAttackerId() : result.getDefenderId(); 
+        Npc loser = npcRepository.findById(npcId).orElseThrow(() -> new ResourceNotFoundException("Npc not found"));
+        
+        Integer matchId = result.getMatchId();
+        npcLoses(loser, player, result.getMatchId(), result.getDefenderRoomId());
+
+        // Actualizar estadísticas de batallas del jugador
+        updatePlayerStatistics(player);
+
+        if (loser.getIsNiallCampbell()){ 
+            return playerBeatsNiallCampbell(player, matchId); // si es niall campbell, el jugador recibe la carta que haya como primera en la baraja de descartes
+            
+        } else { // si es un npc normal, recibe una carta de la baraja
+            return playerBeatsNormalNPC(player, matchId); 
+        } 
+
+    }
+
+    @Transactional
+    public void loserLoseActionPoints(Player loser, Integer matchId){
+        ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
+                loser.getId(),
+                loser.getUser().getId(),
+                loser.getUser().getUsername(),
+                loser.getActionPoints(),
+                System.currentTimeMillis()
+            );
+            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+    }
+
+    @Transactional
+    public FightResolvedDTO playerBeatsNiallCampbell(Player player, Integer matchId){
+        Card discardedCard = deckService.getAndRemoveLastDiscardedCard(matchId);  
+
+        if (discardedCard != null){
+            // no hay carta descartada que dar al jugador
+            handService.addCardToPlayerHand(discardedCard, matchId, player.getId());
+        } else {
+            discardedCard = new Card(); 
+        }
+
+        // Si no hay carta descartada, retorna null sin robar nada
+        // DeckInGame deck = deckService.findDeckById(matchId);
+        // HandInGame hand = handService.findPlayerHand(matchId, player.getId());
+        // DrawCardResultDTO result = new DrawCardResultDTO(discardedCard, deck, hand);
+
+        // Notificar por WebSocket el estado actualizado de cartas (incluye deck/discard)
+        AllCardsStatusDTO playerCards = matchService.getAllCards(matchId, player.getId());
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
+
+        return new FightResolvedDTO(discardedCard, FightResultType.PLAYER_BEATS_NIALL); 
+
+    }
+
+    @Transactional
+    public FightResolvedDTO playerBeatsNormalNPC(Player player, Integer matchId){
+        Card stolenCard = deckService.drawCard(matchId);
+        deckService.findDeckById(matchId);
+
+        handService.addCardToPlayerHand(stolenCard, matchId,  player.getId());
+
+        // Notificar cambios de cartas por WebSocket
+        AllCardsStatusDTO playerCards = matchService.getAllCards(matchId, player.getId());
+        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
+        matchWebsocketController.notifyCardsUpdate(matchId, update);
+        return new FightResolvedDTO(stolenCard,FightResultType.PLAYER_BEATS_NPC);   
+    }
+    
+    @Transactional
+    public void updatePlayerStatistics(Player player){
+        // Actualizar estadísticas de batallas del jugador
+        int battlesWon = Optional.ofNullable(player.getBattlesWon()).orElse(0);
+        int battlesPlayed = Optional.ofNullable(player.getBattlesPlayed()).orElse(0);
+        player.setBattlesWon(battlesWon + 1);
+        player.setBattlesPlayed(battlesPlayed + 1);
+        playerRepo.save(player);
+
+    }
+}

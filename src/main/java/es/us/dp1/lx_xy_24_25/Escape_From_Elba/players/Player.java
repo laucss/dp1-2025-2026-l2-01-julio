@@ -39,7 +39,7 @@ public class Player extends BaseEntity {
 	@JsonIgnore
 	private Match match;
 
-	@OneToOne
+	@ManyToOne
 	@JsonManagedReference
 	@JoinColumn(name = "room_id")
 	private Room room;
@@ -67,11 +67,6 @@ public class Player extends BaseEntity {
         
 	//private Statistic statistic;
 
-	@Transient // transient porque no se guardan en la base de datos 
-	private HandInGame hand; 
-
-	@Transient
-	private BagInGame bag; 
 
 
 

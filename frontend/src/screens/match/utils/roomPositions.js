@@ -8,8 +8,8 @@
         6: { x: 585, y: 55 },   // East Tower v 
         7: { x: 124, y: 138 },   // Corridor 1 v
         8: { x: 260, y: 135 },   // Cafe v
-        9: { x: 125, y: 140 },   // Corridor 2 v
-        10: { x: 515, y: 140 },  // Corridor 2 (dup) v
+        9: { x: 320, y: 125 },   // Corridor 2 v
+        10: { x: 320, y: 125 },  // Corridor 2 (dup) v
         11: { x: 384, y: 138 },  // Parlor v
         12: { x: 514, y: 138 },  // Corridor 3 v 
         13: { x: 62, y: 235 },  // Ball Room v

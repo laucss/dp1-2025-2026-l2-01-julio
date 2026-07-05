@@ -1,9 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations.InvitationStatus;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
