@@ -412,7 +412,14 @@ public class MatchService {
 
         // Guuardardamos hora de fin y el ganador
         m.setEndTime(LocalDateTime.now());
-        m.setWinner(winner);
+        if (winner != null) {
+            if (!m.getPlayers().contains(winner)) {
+                throw new IllegalArgumentException("Winner is not a player in this match");
+            }
+            m.setWinner(winner);
+        } else {
+            m.setWinner(null);
+        }
 
         if (m.getStartTime() != null) {
             long durationSeconds = java.time.Duration.between(m.getStartTime(), m.getEndTime()).toSeconds();
