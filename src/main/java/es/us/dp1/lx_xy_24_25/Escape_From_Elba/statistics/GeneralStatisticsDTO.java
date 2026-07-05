@@ -11,5 +11,8 @@ public class GeneralStatisticsDTO extends BaseEntity {
     private Integer totalMatchesPlayed;
     private Integer totalBattlesDisputed;
     private Double averageRoomsVisitedPerMatch;
+    private Double averageMatchDuration;
+    private Integer longestMatchDuration;
+    private Integer shortestMatchDuration;
     // getters y setters
 }
