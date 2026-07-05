@@ -89,6 +89,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/developers").permitAll()
                 .requestMatchers("/api/v1/plan").permitAll()
+                .requestMatchers("/api/v1/statistics/ranking").permitAll()
 
                 // API restringida para usuarios autenticados
                 .requestMatchers(HttpMethod.GET,"/api/v1/achievements").authenticated()

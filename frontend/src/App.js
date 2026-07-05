@@ -119,6 +119,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/rules" element={<Rules />} />
+        
       </>
     )
   } else {

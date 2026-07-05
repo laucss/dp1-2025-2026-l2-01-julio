@@ -31,4 +31,7 @@ public interface UserRepository extends  CrudRepository<User, Integer>{
 	List<Match> findMatchesWonByUser(Integer userId);
 
 
+
+
+
 }
