@@ -231,7 +231,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                 setWhiteRolled(true);
             }
             
-            await fetch(`/api/v1/matches/${matchId}/notify-fight-dice`, {
+            await fetch(`/api/v1/fights/${matchId}/notify-fight-dice`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${jwt}`,
@@ -246,7 +246,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                 })
             });
 
-            await fetch(`/api/v1/matches/${matchId}/notify-dice-totals`, {
+            await fetch(`/api/v1/fights/${matchId}/notify-dice-totals`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${jwt}`,
@@ -277,7 +277,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
             setButtonStateDefender(newState);
         }
         
-        await fetch(`/api/v1/matches/${matchId}/notify-ready-state`, {
+        await fetch(`/api/v1/fights/${matchId}/notify-ready-state`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${jwt}`,
@@ -316,7 +316,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
             setTotalDefender(newTotal);
         }
         
-        await fetch(`/api/v1/matches/${matchId}/notify-fight-weapons`, {
+        await fetch(`/api/v1/fights/${matchId}/notify-fight-weapons`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${jwt}`,

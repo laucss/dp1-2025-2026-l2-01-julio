@@ -1,7 +1,8 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.FightResultType;
 import io.micrometer.common.lang.NonNull;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

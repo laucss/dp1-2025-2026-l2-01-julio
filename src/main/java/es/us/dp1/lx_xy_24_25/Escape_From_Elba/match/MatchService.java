@@ -32,13 +32,13 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsDrawnExce
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsInHand;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.LoseAgainstNpcRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.LoseAgainstNpcRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchHistorialDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;

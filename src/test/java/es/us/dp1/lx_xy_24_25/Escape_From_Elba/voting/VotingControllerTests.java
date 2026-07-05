@@ -26,6 +26,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.AlreadyVotedException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreVotesThanPlayersException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs.VoteDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs.VotingDTO;
 
 @SpringBootTest
 @AutoConfigureMockMvc

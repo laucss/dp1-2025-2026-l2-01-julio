@@ -1,7 +1,10 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs;
 
 import java.util.List;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.Voting;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.VotingResult;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.VotingStatus;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -451,6 +451,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     }
 
+    /*
     const movePlayerToRoom = async (userId, roomId) => {
         try {
             const response = await fetch(`/api/v1/matches/${matchId}/move`, {
@@ -478,6 +479,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             return null;
         }
     }
+        */
 
     const fetchCards = async () => {
         try {
@@ -551,6 +553,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }    
     }
 
+    /*
     const drawCardForWinner = async (winnerId) => {
         try {
             const response = await fetch(`/api/v1/matches/${matchId}/${winnerId}/drawRewardCard`, {
@@ -576,6 +579,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     }
 
+    */
     const getPlayerInRoom = (roomId) => {
         const targetRoomNormalized = normalizeRoomId(roomId);
         return match?.players?.find(p => {
@@ -613,7 +617,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     };
 
     const notifyFight = async ({ attackerId, attackerUsername, defenderId, defenderUsername, roomId, isBot = false }) => {
-        await fetch(`/api/v1/matches/${matchId}/notify-fight`, {
+        await fetch(`/api/v1/fights/${matchId}/notify-fight`, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${jwt}`,
@@ -813,6 +817,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         if (moveToAdyacentRoom === true) return handleAdjacentMove(roomId);
     }
 
+    /*
     const moveLoserToRandomRoom = async (userId, roomId) => {
         try {
             const response = await fetch(`/api/v1/matches/${matchId}/moveLoser`, {
@@ -840,6 +845,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             return null;
         }
     }
+        */
 
     const handleNpcLossDiscard = async ({ cardId, fromWhere }) => {
         if (!cardId || !fromWhere || !currentPlayer?.id) {

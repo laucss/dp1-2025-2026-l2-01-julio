@@ -1,7 +1,12 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs;
 
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class WeaponsUpdateDTO {
     private Integer matchId;
     private Integer playerId;
@@ -21,24 +26,6 @@ public class WeaponsUpdateDTO {
         this.totalAttacker = totalAttacker;
         this.totalDefender = totalDefender;
     }
-
-    public Integer getMatchId() { return matchId; }
-    public void setMatchId(Integer matchId) { this.matchId = matchId; }
-
-    public Integer getPlayerId() { return playerId; }
-    public void setPlayerId(Integer playerId) { this.playerId = playerId; }
-
-    public String getPlayerRole() { return playerRole; }
-    public void setPlayerRole(String playerRole) { this.playerRole = playerRole; }
-
-    public List<WeaponData> getWeapons() { return weapons; }
-    public void setWeapons(List<WeaponData> weapons) { this.weapons = weapons; }
-
-    public Integer getTotalAttacker() { return totalAttacker; }
-    public void setTotalAttacker(Integer totalAttacker) { this.totalAttacker = totalAttacker; }
-
-    public Integer getTotalDefender() { return totalDefender; }
-    public void setTotalDefender(Integer totalDefender) { this.totalDefender = totalDefender; }
 
     public static class WeaponData {
         private String name;

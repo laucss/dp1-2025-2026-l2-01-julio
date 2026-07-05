@@ -16,15 +16,17 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightResolvedDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightResultRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.LoseAgainstNpcRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.LoseAgainstNpcRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcRepository;
@@ -230,6 +232,7 @@ public class FightService {
     @Transactional
     public void playerLoses(Player loser, Integer matchId){
         loser.setStrength(loser.getStrength() +1);
+        loser.setActionPoints(0);
         Room randomRoom = roomService.getRandomRoom();
         loser.setRoom(randomRoom);
         playerRepo.save(loser);

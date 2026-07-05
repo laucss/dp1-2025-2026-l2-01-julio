@@ -1,5 +1,7 @@
-package es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting;
+package es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.Vote;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.VoteValue;
 import lombok.Getter;
 import lombok.Setter;
 
