@@ -23,5 +23,10 @@ public class CardsUpdateDTO {
         this.loser = loser;
     }
 
+    public CardsUpdateDTO(Integer matchId, AllCardsStatusDTO winner) {
+        this.matchId = matchId;
+        this.winner = winner;
+    }
+
     public CardsUpdateDTO() {}
 }

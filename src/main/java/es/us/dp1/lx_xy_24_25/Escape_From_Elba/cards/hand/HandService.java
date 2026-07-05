@@ -108,7 +108,6 @@ public class HandService {
      * Método que quita una carta de la mano del jugador 
      */
 
-
     @Transactional
     public Card removeCardFromPlayerHand(Card card, Integer matchId, Integer playerId){
         if (card == null) {

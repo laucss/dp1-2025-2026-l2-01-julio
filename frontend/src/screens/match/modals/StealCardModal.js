@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import tokenService from '../../../services/token.service';
 import '../../../static/css/match/StealCardModal.css';
+import { toast } from 'react-toastify';
 
 export default function StealCardModal({
   isOpen,
@@ -59,23 +60,27 @@ export default function StealCardModal({
 
   const stealCard = async (card, sourceToUse) => {
     try {
-      const cardIdToSend = sourceToUse === 'hand'
+      const cardToSend = sourceToUse === 'hand'
         ? null
-        : (typeof card === 'object' ? card?.id : card);
-      console.log('📤 Enviando al backend:', { cardId: cardIdToSend, fromWhere: sourceToUse });
-      const res = await fetch(`/api/v1/matches/${matchId}/${winnerId}/steal-card-from/${loserId}`, {
+        : card;
+      console.log('📤 Enviando al backend:', { card: cardToSend, fromWhere: sourceToUse });
+      const res = await fetch(`/api/v1/fights/${matchId}/steal-card-from-player`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${jwt}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          cardId: cardIdToSend,
-          fromWhere: sourceToUse
+          card: cardToSend,
+          fromWhere: sourceToUse,
+          winnerId: winnerId,
+          loserId: loserId
         })
       });
 
       if (res.ok) {
+        const card = await res.json()
+        if (!card.id){ toast.info("The player has no cards to steal")}
         console.log('Carta robada exitosamente');
         await onSteal();
       } else {
@@ -95,8 +100,8 @@ export default function StealCardModal({
 
   const handleSelectCard = async (card) => {
     if (!source || !card) return;
-    console.log('🎯 Carta seleccionada:', card);
-    console.log('📦 Source:', source);
+    console.log(' Carta seleccionada:', card);
+    console.log(' Source:', source);
     setLoading(true);
     await stealCard(card, source);
   };

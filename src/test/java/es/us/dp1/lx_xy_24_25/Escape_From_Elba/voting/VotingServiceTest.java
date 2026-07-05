@@ -29,6 +29,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchWebsocketController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs.VoteDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs.VotingDTO;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

@@ -1,10 +1,8 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
-import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import jakarta.transaction.Transactional;
 

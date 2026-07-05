@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs.VoteDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs.VotingDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs.VotingResultDTO;
+
 
 @RestController
 @RequestMapping("/api/v1/voting")

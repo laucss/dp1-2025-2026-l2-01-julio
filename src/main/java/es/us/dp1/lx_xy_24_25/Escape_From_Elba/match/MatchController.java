@@ -25,31 +25,19 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.auth.payload.response.MessageResponse;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.DiceTotalsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightDiceUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightResolvedDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.FightUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.LoseAgainstNpcRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchHistorialDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MoveNpcToRoomDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MoveToRoomDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ReadyStateUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.WeaponsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
@@ -263,13 +251,16 @@ public class MatchController {
 
     } 
 
+    /* 
     @PostMapping("/{matchId}/{playerId}/drawRewardCard")
     public ResponseEntity<DrawCardResultDTO> drawRewardCard (@PathVariable Integer matchId, @PathVariable Integer playerId){
         DrawCardResultDTO result = ms.playerDrawsRewardCard(matchId, playerId);
         return ResponseEntity.ok(result);
 
     }
+        */
 
+    /* 
     @PostMapping("/{matchId}/{playerId}/playerWinsNiallCampbell")
     public ResponseEntity<DrawCardResultDTO> playerWinsNiallCampbell (@PathVariable Integer matchId, @PathVariable Integer playerId){
         Card card = ms.playerWinsNiallCampbell(matchId, playerId);
@@ -286,6 +277,7 @@ public class MatchController {
         return ResponseEntity.ok(result);
 
     }
+    */
 
     @GetMapping("/{matchId}/{playerId}/getAllCards")
     public ResponseEntity<AllCardsStatusDTO> getAllCards (@PathVariable Integer matchId, @PathVariable Integer playerId){
@@ -329,6 +321,7 @@ public class MatchController {
         return ResponseEntity.ok(new MatchDTO(match)); 
     }
 
+    /* 
     @PutMapping("/{matchId}/moveLoser")
     public ResponseEntity<MatchDTO> moveLoserToRandomRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
         ms.moveLoserPlayer(matchId, data.getUserId(), data.getRoomId()); 
@@ -364,6 +357,7 @@ public class MatchController {
         
         return ResponseEntity.ok(new MatchDTO(match)); 
     }
+        */
 
     @PutMapping("/{matchId}/moveByLetters")
     public ResponseEntity<MatchDTO> moveByFormingRoomName(@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data) {
@@ -398,26 +392,7 @@ public class MatchController {
         return ResponseEntity.ok(actionPoints);
     }
 
-    @PostMapping("/{matchId}/notify-fight")
-    @Operation(summary = "Notify fight", description = "Notifies all players when a fight is initiated.")
-    public ResponseEntity<Void> notifyFight(@PathVariable Integer matchId, @RequestBody FightUpdateDTO fightUpdate) {
-        matchWebsocketController.notifyFightUpdate(matchId, fightUpdate);
-        return ResponseEntity.ok().build();
-    }
 
-    @PostMapping("/{matchId}/notify-fight-dice")
-    @Operation(summary = "Notify fight dice", description = "Notifies all players when a dice is rolled during a fight.")
-    public ResponseEntity<Void> notifyFightDice(@PathVariable Integer matchId, @RequestBody FightDiceUpdateDTO diceUpdate) {
-        matchWebsocketController.notifyFightDiceUpdate(matchId, diceUpdate);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/{matchId}/notify-dice-totals")
-    @Operation(summary = "Notify dice totals", description = "Notifies all players when dice totals are updated during a fight.")
-    public ResponseEntity<Void> notifyDiceTotals(@PathVariable Integer matchId, @RequestBody DiceTotalsUpdateDTO totalsUpdate) {
-        matchWebsocketController.notifyDiceTotalsUpdate(matchId, totalsUpdate);
-        return ResponseEntity.ok().build();
-    }
 
     @PostMapping("/{matchId}/notify-action-points")
     @Operation(summary = "Notify action points", description = "Notifies all players when action points are updated.")
@@ -449,20 +424,8 @@ public class MatchController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{matchId}/notify-ready-state")
-    @Operation(summary = "Notify ready state", description = "Notifies all players when a player changes their ready state during a fight.")
-    public ResponseEntity<Void> notifyReadyState(@PathVariable Integer matchId, @RequestBody ReadyStateUpdateDTO readyStateUpdate) {
-        matchWebsocketController.notifyReadyStateUpdate(matchId, readyStateUpdate);
-        return ResponseEntity.ok().build();
-    }
 
-    @PostMapping("/{matchId}/notify-fight-weapons")
-    @Operation(summary = "Notify weapons update", description = "Notifies all players when a player adds or removes weapons during a fight.")
-    public ResponseEntity<Void> notifyFightWeapons(@PathVariable Integer matchId, @RequestBody WeaponsUpdateDTO weaponsUpdate) {
-        matchWebsocketController.notifyWeaponsUpdate(matchId, weaponsUpdate);
-        return ResponseEntity.ok().build();
-    }
-
+    /* 
     @PostMapping("/{matchId}/{winnerId}/steal-card-from/{loserId}")
     @Operation(summary = "Steal card from another player", description = "Winner steals a card from loser, either from hand (random/selected) or bag (selected). Returns updated card states for both players.")
     public ResponseEntity<Map<String, AllCardsStatusDTO>> stealCardFromPlayer(@PathVariable Integer matchId, @PathVariable Integer winnerId,@PathVariable Integer loserId, @Valid @RequestBody StealCardRequestDTO request) {
@@ -485,7 +448,9 @@ public class MatchController {
             return ResponseEntity.internalServerError().build();
         }
     }
+        */
 
+    /* 
     @PostMapping("/{matchId}/{playerId}/lose-against-npc")
     @Operation(summary = "Player loses against NPC", description = "Player chooses a card to discard after losing to an NPC.")
     public ResponseEntity<AllCardsStatusDTO> playerLosesAgainstNpc(@PathVariable Integer matchId, @PathVariable Integer playerId, @Valid @RequestBody LoseAgainstNpcRequestDTO request) {
@@ -502,7 +467,9 @@ public class MatchController {
             return ResponseEntity.internalServerError().build();
         }
     }
+        */
 
+    /* 
     @PostMapping("/{matchId}/notify-fight-resolved")
     @Operation(summary = "Notify fight resolved", description = "Notifies all players when a fight is resolved and winner can steal a card.")
     public ResponseEntity<Void> notifyFightResolved(
@@ -511,6 +478,7 @@ public class MatchController {
         matchWebsocketController.notifyFightResolved(matchId, fightResolved);
         return ResponseEntity.ok().build();
     }
+        */
 
     @PutMapping("/{matchId}/player-strength")
     @Operation(summary = "Update player strength", description = "Updates the strength of a player and notifies all players.")
