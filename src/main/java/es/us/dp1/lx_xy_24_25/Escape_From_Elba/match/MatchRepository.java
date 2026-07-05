@@ -44,7 +44,8 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
 
        // Devuelve el ID de la partida donde el usuario está
        @Query("SELECT CASE WHEN COUNT(m) > 0 THEN MAX(m.id) ELSE NULL END " +
-              "FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NULL")
+              "FROM Match m LEFT JOIN m.players p LEFT JOIN m.spectators s " +
+              "WHERE (p.user.id = :userId OR s.id = :userId) AND m.endTime IS NULL")
        Integer userInMatch(Integer userId);
 
        //Devuelve todas las partidas jugadas o abandonadas por un usuario
