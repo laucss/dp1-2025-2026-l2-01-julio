@@ -2,6 +2,22 @@ import React, { useState } from 'react';
 import './Statistics.css';
 import tokenService from "../../services/token.service";
 import useFetchState from '../../util/useFetchState';
+import {
+    FaTrophy,
+    FaGamepad,
+    FaClock,
+    FaBolt,
+    FaHome,
+    FaCrosshairs,
+    FaUser,
+    FaDoorOpen,
+    FaCrown,
+    FaUsers,
+    FaHourglassHalf,
+    FaMapMarkedAlt,
+    FaMedal,
+    FaChartLine
+} from "react-icons/fa";
 
 const jwt = tokenService.getLocalAccessToken();
 const currentUser = tokenService.getUser();
@@ -64,13 +80,17 @@ export default function Statistics() {
                     <div className="statistics-container">
 
                         <div className="stat-card">
-                            <div className="stat-icon">🏆</div>
+                            <div className="stat-icon">
+                                <FaCrown />
+                            </div>
                             <h2>Victories</h2>
                             <p className="stat-value">{data.totalVictories}</p>
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">📈</div>
+                            <div className="stat-icon">
+                                <FaChartLine />
+                            </div>
                             <h2>Win Rate</h2>
                             <p className="stat-value">
                                 {Number(data.winRate || 0).toFixed(2)}%
@@ -78,7 +98,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">🎭</div>
+                            <div className="stat-icon">
+                                <FaUser />
+                            </div>
                             <h2>Player Type</h2>
                             <p className="stat-value">
                                 {data.playerType}
@@ -86,7 +108,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">⚔️</div>
+                            <div className="stat-icon">
+                                <FaMedal />
+                            </div>
                             <h2>Total Battles</h2>
                             <p className="stat-value">
                                 {data.totalBattlesPlayed}
@@ -94,13 +118,17 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">🎮</div>
+                            <div className="stat-icon">
+                                <FaGamepad />
+                            </div>
                             <h2>Matches Played</h2>
                             <p className="stat-value">{data.matchesPlayed}</p>
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">⏱️</div>
+                            <div className="stat-icon">
+                                <FaClock />
+                            </div>
                             <h2>Total Time Played</h2>
                             <p className="stat-value">
                                 {data.totalTimePlayed} min
@@ -108,7 +136,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">⌛</div>
+                            <div className="stat-icon">
+                                <FaHourglassHalf />
+                            </div>
                             <h2>Avg Time/Match</h2>
                             <p className="stat-value">
                                 {Number(data.averageTimePerMatch || 0).toFixed(2)} min
@@ -116,7 +146,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">⚔️</div>
+                            <div className="stat-icon">
+                                <FaCrosshairs />
+                            </div>
                             <h2>Battles Won/Match</h2>
                             <p className="stat-value">
                                 {Number(data.battlesWonPerMatch || 0).toFixed(2)}
@@ -124,7 +156,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">🏠</div>
+                            <div className="stat-icon">
+                                <FaHome />
+                            </div>
                             <h2>Max Rooms In Match</h2>
                             <p className="stat-value">
                                 {data.maxRoomsVisitedInMatch}
@@ -132,7 +166,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">⚡</div>
+                            <div className="stat-icon">
+                                <FaBolt />
+                            </div>
                             <h2>Action Points</h2>
                             <p className="stat-value">
                                 {data.totalActionPoints}
@@ -140,7 +176,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">⚡</div>
+                            <div className="stat-icon">
+                                <FaBolt />
+                            </div>
                             <h2>Avg Action Points/Match</h2>
                             <p className="stat-value">
                                 {Number(data.averageActionPointsPerMatch || 0).toFixed(2)}
@@ -148,7 +186,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">🎯</div>
+                            <div className="stat-icon">
+                                <FaTrophy />
+                            </div>
                             <h2>Battles Won</h2>
                             <p className="stat-value">
                                 {data.battlesWon}
@@ -156,7 +196,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">🚪</div>
+                            <div className="stat-icon">
+                                <FaMapMarkedAlt />
+                            </div>
                             <h2>Rooms Visited</h2>
                             <p className="stat-value">
                                 {data.roomsVisited}
@@ -164,7 +206,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">🚪</div>
+                            <div className="stat-icon">
+                                <FaDoorOpen />
+                            </div>
                             <h2>Avg Rooms/Match</h2>
                             <p className="stat-value">
                                 {Number(data.averageRoomsVisitedPerMatch || 0).toFixed(2)}
@@ -178,7 +222,9 @@ export default function Statistics() {
                     <div className="statistics-container-avg">
 
                         <div className="stat-card">
-                            <div className="stat-icon">👥</div>
+                            <div className="stat-icon">
+                                <FaUsers />
+                            </div>
                             <h2>Average Players/Match</h2>
                             <p className="stat-value">
                                 {Number(data.averagePlayersPerMatch || 0).toFixed(2)}
@@ -186,7 +232,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">📈</div>
+                            <div className="stat-icon">
+                                <FaClock />
+                            </div>
                             <h2>Longest Match</h2>
                             <p className="stat-value">
                                 {data.longestMatchDuration} min
@@ -194,7 +242,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">📉</div>
+                            <div className="stat-icon">
+                                <FaHourglassHalf />
+                            </div>
                             <h2>Shortest Match</h2>
                             <p className="stat-value">
                                 {data.shortestMatchDuration} min
@@ -202,7 +252,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">🎮</div>
+                            <div className="stat-icon">
+                                <FaGamepad />
+                            </div>
                             <h2>Total Matches Played</h2>
                             <p className="stat-value">
                                 {data.totalMatchesPlayed}
@@ -210,7 +262,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">🎯</div>
+                            <div className="stat-icon">
+                                <FaTrophy />
+                            </div>
                             <h2>Total Battles Disputed</h2>
                             <p className="stat-value">
                                 {data.totalBattlesDisputed}
@@ -218,7 +272,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">🚪</div>
+                            <div className="stat-icon">
+                                <FaDoorOpen />
+                            </div>
                             <h2>Average Rooms Visited/Match</h2>
                             <p className="stat-value">
                                 {Number(data.averageRoomsVisitedPerMatch || 0).toFixed(2)}
@@ -226,7 +282,9 @@ export default function Statistics() {
                         </div>
 
                         <div className="stat-card">
-                            <div className="stat-icon">⏱️</div>
+                            <div className="stat-icon">
+                                <FaClock />
+                            </div>
                             <h2>Average Match Duration</h2>
                             <p className="stat-value">
                                 {Number(data.averageMatchDuration || 0).toFixed(2)} min
