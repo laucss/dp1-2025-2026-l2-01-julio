@@ -199,12 +199,21 @@ public class MatchController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{matchId}/end")
-    public ResponseEntity<MatchDTO> endMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer winnerId) {
+    @PutMapping("/{matchId}/finish/{winnerId}")
+    public ResponseEntity<MatchDTO> finishMatch(
+            @PathVariable Integer matchId,
+            @PathVariable Integer winnerId) {
+
         Player winner = playerService.findById(winnerId);
-        MatchDTO ended = ms.endMatch(matchId,winner);
-        return ResponseEntity.ok(ended);
+        return ResponseEntity.ok(ms.endMatch(matchId, winner));
     }
+
+    @PutMapping("/{matchId}/end")
+    public ResponseEntity<MatchDTO> endMatch(@PathVariable Integer matchId) {
+
+    MatchDTO ended = ms.endMatch(matchId, null);
+    return ResponseEntity.ok(ended);
+}
 
     @PutMapping("/{matchId}/leaveMatch")
     public ResponseEntity<MatchDTO> leaveMatch(@PathVariable("matchId") Integer matchId, @RequestBody @Valid Integer userId) {

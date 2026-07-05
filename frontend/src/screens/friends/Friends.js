@@ -66,6 +66,12 @@ export default function Friends() {
   setInviteLoading(true);
 
   const currentUsername = tokenService.getUser?.()?.username;
+
+    if (!inviteUsername.trim()) {
+      setInviteError("Please enter a username.");
+      setInviteLoading(false);
+      return;
+  }
   if (inviteUsername.trim().toLowerCase() === currentUsername?.toLowerCase()) {
     setInviteError("You can not send an invitation to yourself.");
     setInviteLoading(false);
@@ -375,15 +381,20 @@ export default function Friends() {
         <button className="main-button" onClick={openInviteModal}>
           Send Invitation
         </button>
-        <button
-          className="main-button"
-          onClick={() => {
-            setShowReceivedModal(true);
-            getAndSetReceivedRequests(tokenService.getUser?.()?.id);
+        <button className="main-button invitations-button" onClick={() => {
+                setShowReceivedModal(true);
+                getAndSetReceivedRequests(tokenService.getUser?.()?.id);
           }}
         >
           Invitations
+
+          {allReceived?.length > 0 && (
+            <span className="notification-dot">
+              {allReceived.length}
+            </span>
+          )}
         </button>
+
       </div>
 
       <div className="friends-search">
