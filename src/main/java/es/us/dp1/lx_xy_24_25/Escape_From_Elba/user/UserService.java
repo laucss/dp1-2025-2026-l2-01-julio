@@ -33,20 +33,23 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class UserService {
 
 	private UserRepository userRepository;
 	private MatchRepository matchRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	@PersistenceContext
 	private EntityManager entityManager;
 
 	@Autowired
-	public UserService(UserRepository userRepository, MatchRepository matchRepository) {
+	public UserService(UserRepository userRepository, MatchRepository matchRepository, PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.matchRepository = matchRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Transactional
@@ -101,14 +104,24 @@ public class UserService {
 		return userRepository.findAllByAuthority(auth);
 	}
 
-	@Transactional
-	public User updateUser(@Valid User user, Integer idToUpdate) {
-		User toUpdate = findUser(idToUpdate);
-		BeanUtils.copyProperties(user, toUpdate, "id");
-		userRepository.save(toUpdate);
 
-		return toUpdate;
+	@Transactional
+	public User updateUser(Integer id, UpdateUserDTO dto) {
+
+		User user = findUser(id);
+
+		user.setUsername(dto.getUsername());
+		user.setEmail(dto.getEmail());
+		user.setAge(dto.getAge());
+		user.setAvatar(dto.getAvatar());
+
+		if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+			user.setPassword(passwordEncoder.encode(dto.getPassword()));
+		}
+
+		return userRepository.save(user);
 	}
+		
 
 	@Transactional
 	public void deleteUser(Integer id) {
@@ -136,18 +149,6 @@ public class UserService {
 		
 		this.userRepository.delete(toDelete);
 	}
-
-    /*public void ensureAllUsersHavePlayer() {
-    List<User> users = userRepository.findAll();
-    for (User user : users) {
-        if (playerRepository.findByUser(user).isEmpty()) {
-            Player player = new Player();
-            player.setUser(user);
-			player.setAuthority(user.getAuthority());
-            playerRepository.save(player);
-        }
-    }
-}*/
 
 
 }
