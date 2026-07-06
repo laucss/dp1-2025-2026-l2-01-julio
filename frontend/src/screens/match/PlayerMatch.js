@@ -304,13 +304,32 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.strength`, (msg) => {
             const strengthUpdate = JSON.parse(msg.body);
+            
             if (strengthUpdate.userId === currentPlayer.user?.id) {
                 setStrength(Math.min(6, strengthUpdate.strength));
+            } else if (strengthUpdate.npcId) {
+                setMatch((prevMatch) => {
+                    if (!prevMatch || !prevMatch.npcs) return prevMatch;
+                    return {
+                        ...prevMatch,
+                        npcs: prevMatch.npcs.map((npc) => {
+                            if (npc.id === strengthUpdate.npcId) {
+                                return {
+                                    ...npc,
+                                    strength: strengthUpdate.strength 
+                                };
+                            }
+                            return npc;
+                        })
+                    };
+                });
             }
         });
 
-        return () => subscription.unsubscribe();
-    }, [stompClient, matchId, currentPlayer]);
+        return () => {
+            if (subscription) subscription.unsubscribe();
+        };
+    }, [stompClient, currentPlayer, matchId]);
 
     useEffect(() => {
         if (player && Array.isArray(player)){

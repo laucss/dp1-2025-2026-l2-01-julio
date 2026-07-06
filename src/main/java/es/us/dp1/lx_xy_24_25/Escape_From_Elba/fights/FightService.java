@@ -268,6 +268,9 @@ public class FightService {
 
         NpcLocationUpdateDTO locationNpcUpdate = new NpcLocationUpdateDTO(loser);
         matchWebsocketController.notifyNpcLocationUpdate(matchId, locationNpcUpdate);
+
+        StrengthUpdateDTO strengthUpdate = new StrengthUpdateDTO(loser.getId(),loser.getStrength(),System.currentTimeMillis());
+        matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);
     }
 
     @Transactional
