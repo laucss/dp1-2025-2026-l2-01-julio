@@ -62,6 +62,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [fightDefender, setFightDefender] = useState(null);
     const [fightAttacker, setFightAttacker] = useState(null);
     const [pendingTargetRoom, setPendingTargetRoom] = useState(null);
+    const [fightQueue, setFightQueue] = useState([]);
     const [isStealModalOpen, setIsStealModalOpen] = useState(false);
     const [stealLoserPlayerId, setStealLoserPlayerId] = useState(null);
     const [isNpcLossModalOpen, setIsNpcLossModalOpen] = useState(false);
@@ -128,19 +129,20 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                         }
                         
                         if (attacker && defender) {
-                             console.log("ANTES", isFightModalOpen);
-                            setFightAttacker(attacker);
-                            setFightDefender(defender);
-                            setPendingTargetRoom(fightUpdate.roomId || fightUpdate.roomName);
-                            setIsFightModalOpen(true);
-                             console.log("DESPUÉS", isFightModalOpen);
+                            // EN LUGAR DE ABRIR EL MODAL DIRECTAMENTE, LO ENCOLAMOS
+                            const newFight = {
+                                attacker,
+                                defender,
+                                roomId: fightUpdate.roomId || fightUpdate.roomName
+                            };
+                            setFightQueue(prevQueue => [...prevQueue, newFight]);
                         }
-                        console.log("Abriendo modal", attacker, defender);
                     }
                 } catch (error) {
                     console.error('Error fetching fresh match data for fight:', error);
                 }
             } else if (fightUpdate.action === 'RESOLVE') {
+                setIsFightModalOpen(false)
                 const winnerId = fightUpdate.winnerId;
                 const loserId = fightUpdate.loserId;
                 const fightType = fightUpdate.fightResultType
@@ -397,6 +399,24 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         const intervalId = setInterval(fetchMatchUpdate, 2000);
         return () => clearInterval(intervalId);
     }, [isDiceModalOpen, match?.currentTurnPhase, matchId]);
+
+    useEffect(() => {
+        // Si el modal de pelea ya está abierto, o si hay fases de resolución activas (robo, descarte), esperamos.
+        if (isFightModalOpen || isStealModalOpen || isNpcLossModalOpen || discardPhaseOpen) return;
+
+        if (fightQueue.length > 0) {
+            // Obtenemos la siguiente pelea de la cola
+            const nextFight = fightQueue[0];
+            
+            setFightAttacker(nextFight.attacker);
+            setFightDefender(nextFight.defender);
+            setPendingTargetRoom(nextFight.roomId);
+            setIsFightModalOpen(true);
+
+            // Sacamos la pelea procesada de la cola
+            setFightQueue(prevQueue => prevQueue.slice(1));
+        }
+    }, [fightQueue, isFightModalOpen, isStealModalOpen, isNpcLossModalOpen, discardPhaseOpen]);
 
     const cleanVotingStates = async () => {
         setVotingResult(null);
@@ -747,11 +767,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             const otherPlayer = getPlayerInRoom(roomId);
 
             if (otherPlayer && !isSafeArea) {
-                setPendingTargetRoom(roomId);
-                setFightDefender(otherPlayer);
-                setIsFightModalOpen(true);
                 resetMoveMode(false);
-
                 await notifyFight({
                     attackerId: currentUser.id,
                     attackerUsername: currentUser.username,
@@ -765,12 +781,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             const botInRoom = getNpcInRoom(roomId);
 
             if (botInRoom && !isSafeArea) {
-                setPendingTargetRoom(roomId);
-                setFightDefender(botInRoom);
-                setFightAttacker(currentPlayer);
-                setIsFightModalOpen(true);
                 resetMoveMode(false);
-
                 try {
                     const consumeResponse = await fetch(
                         `/api/v1/matches/${matchId}/consume-action-point/${currentUser.id}`,
@@ -1039,14 +1050,24 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
             if (npcIsAttacker) {
                 const isCurrentDefender = currentUser.id === fightDefender?.user?.id;
+                // Si es contra un NPC y yo no soy el defensor, soy un mero espectador: salgo sin tocar nada
                 if (!isCurrentDefender) {
-                    await clearFightState();
-                    return;
+                    return; 
                 }
             } else {
+                // Pelea de Jugador contra Jugador (ej: Player 3 vs Player 1)
                 const isCurrentAttacker = currentUser.id === fightAttacker?.user?.id;
+                const isCurrentDefender = currentUser.id === fightDefender?.user?.id;
+
+                // SI NO SOY NI EL ATACANTE NI EL DEFENSOR DE ESTA PELEA ESPECÍFICA...
+                if (!isCurrentAttacker && !isCurrentDefender) {
+                    // Soy espectador (ej: Player 2 en la primera pelea). 
+                    // Salgo inmediatamente para que no colisione con mi cola de eventos.
+                    return; 
+                }
+
+                // Si soy el defensor de la pelea que acaba de resolverse (ej: Player 1)
                 if (!isCurrentAttacker) {
-                    await clearFightState();
                     return;
                 }
             }
@@ -1250,11 +1271,13 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 onClose={() => {
                     setIsStealModalOpen(false);
                     setStealLoserPlayerId(null);
+                    setIsFightModalOpen(false);
                 }}
                 onSteal={async () => {
                     await fetchCards();
                     setIsStealModalOpen(false);
                     setStealLoserPlayerId(null);
+                    setIsFightModalOpen(false);
                 }}
             />
 
@@ -1262,7 +1285,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 isOpen={isNpcLossModalOpen}
                 handCards={handCards}
                 bagCards={bagCards}
-                onClose={() => { setIsNpcLossModalOpen(false); setNpcLossModalTitle(); setNpcLossModalSubtitle(); }}
+                onClose={() => { setIsNpcLossModalOpen(false); setNpcLossModalTitle(); setNpcLossModalSubtitle(); setIsFightModalOpen(false); }}
                 title={npcLossModalTitle}
                 subtitle={npcLossModalSubtitle}
                 onDiscard={handleNpcLossDiscard}
