@@ -128,11 +128,14 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                         }
                         
                         if (attacker && defender) {
+                             console.log("ANTES", isFightModalOpen);
                             setFightAttacker(attacker);
                             setFightDefender(defender);
                             setPendingTargetRoom(fightUpdate.roomId || fightUpdate.roomName);
                             setIsFightModalOpen(true);
+                             console.log("DESPUÉS", isFightModalOpen);
                         }
+                        console.log("Abriendo modal", attacker, defender);
                     }
                 } catch (error) {
                     console.error('Error fetching fresh match data for fight:', error);
@@ -1021,6 +1024,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     }
 
     const clearFightState = async () => {
+        console.log("CLEAR FIGHT STATE");
         setIsFightModalOpen(false);
         setFightDefender(null);
         setFightAttacker(null);
@@ -1029,6 +1033,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     };
 
     const handleFightResult = async (currentUserWon) => {
+        
         try {
             const npcIsAttacker = !fightAttacker?.user;
 
@@ -1082,7 +1087,8 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         } catch (err) {
             console.error("Error al procesar el resultado de la pelea:", err);
         } finally {
-            await clearFightState();
+            //await clearFightState();
+            
         }
     }
 

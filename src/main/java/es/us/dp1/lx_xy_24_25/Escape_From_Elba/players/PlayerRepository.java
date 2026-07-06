@@ -41,4 +41,8 @@ public interface PlayerRepository extends CrudRepository<Player, Integer> {
     @Query("SELECT COUNT(p) FROM Player p WHERE p.user.id = :userId AND p.match.winner.id = p.id")
 	Integer getTotalVictoriesByUser(Integer userId);
 
+    //Consulta que devuelve los jugadores de una partida que se encuentran en una sala concreta
+    @Query("SELECT p FROM Player p WHERE p.match.id = :matchId AND p.room.id = :roomId")
+    List<Player> findByMatchAndRoom(Integer matchId, Integer roomId);
+
 }
