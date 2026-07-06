@@ -53,6 +53,17 @@ public class PlayerInGameDTO {
 
     }
 
+    //Se usa para el historial
+    public PlayerInGameDTO(User user) {
+        this.user = user;
+        this.id = null;           
+        this.strength = null;
+        this.actionPoints = null;
+        this.currentRoom = null;
+        this.hand = null;
+        this.bag = null;
+    }
+
 
     public PlayerInGameDTO() {
     }

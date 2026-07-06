@@ -18,7 +18,7 @@ public interface AbandonedMatchRepository extends CrudRepository<AbandonedMatch,
 
     boolean existsByMatchIdAndUserId(Integer matchId, Integer userId);
 
-    @Query(" SELECT a.match FROM AbandonedMatch a WHERE a.user.id = :userId")
+  @Query("SELECT a.match FROM AbandonedMatch a WHERE a.user.id = :userId ORDER BY a.match.startTime DESC")
     Page<Match> findMatchesAbandonedByUser(Integer userId, Pageable pageable);
 
     
