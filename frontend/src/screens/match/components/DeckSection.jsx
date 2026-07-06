@@ -45,7 +45,7 @@ export default function DeckSection({
                                 ].frontImage
                             }`}
                             alt="Última carta descartada"
-                            style={{ width: "150px", height: "auto" }}
+                            style={{ width: "150px", height: "190px" , border: "2px dashed #ccc" , borderRadius: "8px"}}
                         />
                     ) : (
                         <div className="dicard-pile">
@@ -55,20 +55,6 @@ export default function DeckSection({
                 </div>
             </div>
 
-            <div className="turn-banner">
-                {match?.currentTurnUserId === currentUser?.id ? (
-                    <div className="turn-message turn-mine">
-                        ¡Es tu turno!
-                    </div>
-                ) : (
-                    <div className="turn-message turn-others">
-                        Turno de:{" "}
-                        {match?.players?.find(
-                            (p) => p.user.id === match.currentTurnUserId
-                        )?.user.username || "Esperando..."}
-                    </div>
-                )}
-            </div>
         </>
     );
 }

@@ -1,5 +1,4 @@
 import React from 'react';
-import OtherPlayersPanel from './OthersPlayersSection';
 import { roomPositions } from '../utils/roomPositions';
 import { getPlayerColor } from '../utils/playersUtil';
 import { normalizeRoomId } from '../utils/roomUtils';
@@ -51,9 +50,7 @@ export default function MatchBoardMap({
   selectedNpcId,
   setSelectedNpcIndex,
   setSelectedNpcId,
-  isSpectator,
-  playersList,
-  otherPlayersBags,
+  isSpectator
 }) {
   const renderBoardAreas = () =>
     BOARD_AREAS.map(({ roomId, alt, ...area }) => (
@@ -152,6 +149,7 @@ export default function MatchBoardMap({
       );
     });
 
+  // console.log(otherPlayersHands)
   return (
     <div className="map-container">
       <div className="board-wrapper">
@@ -159,15 +157,6 @@ export default function MatchBoardMap({
         <img src="/ElbaBoard.png" useMap="#Map" className="Map" alt="Elba board" />
         {renderPlayerMarkers()}
         {renderNpcMarkers()}
-      </div>
-
-      <div style={{ position: 'absolute', right: 20, top: 20, width: '300px', maxHeight: '600px', zIndex: 15 }}>
-        <OtherPlayersPanel
-          playersList={playersList}
-          otherPlayersBags={otherPlayersBags}
-          getPlayerColor={getPlayerColor}
-          players={match?.players}
-        />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import tokenService from '../../../services/token.service'
 import getIdFromUrl from '../../../util/getIdFromUrl'
-import '../../../static/css/match/votingModal.css'
+import '../../../static/css/match/modals/votingModal.css'
 
 // para alerta de errores
 import { toast } from "react-toastify";

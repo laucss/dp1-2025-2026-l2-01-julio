@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import '../../../static/css/match/startDiceModal.css';
+import '../../../static/css/match/modals/startDiceModal.css';
 import tokenService from '../../../services/token.service';
 import getIdFromUrl from '../../../util/getIdFromUrl';
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import '../../../static/css/match/NpcLossDiscardModal.css';
+import '../../../static/css/match/modals/NpcLossDiscardModal.css';
 
 
 export default function NpcLossDiscardModal({

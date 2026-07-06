@@ -1,0 +1,116 @@
+/* Contenedor Principal del Panel (Rectángulo Horizontal) */
+.current-player-panel-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 2px solid #1e293b;
+    border-radius: 12px;
+    padding: 1.5vh 1.2vw; 
+    gap: 1.5vw; /* Espacio horizontal relativo entre avatar y la columna */
+    width: fit-content;
+    max-width: 40vw; /* Asegura que no se deforme en pantallas gigantes */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
+}
+
+/* Contenedor del Avatar (Círculo Responsivo) */
+.player-avatar-container {
+    border-radius: 50%;
+    width: 4vw;       /* Escala con la pantalla */
+    height: 4vw;      /* Mantiene la proporción 1:1 */
+    min-width: 65px;  /* Tamaño mínimo para portátiles pequeños */
+    min-height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.player-avatar-and-username{
+    flex-direction: column;
+    justify-items: center;
+}
+
+.current-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Columna de Datos de la Derecha */
+.player-data-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8vh; /* Distribución vertical exacta */
+    justify-content: center;
+    align-items: center;
+}
+
+.player-username {
+    font-size: 1.15rem; /* rem escala mejor que px entre pantallas */
+    font-weight: bold;
+    margin: 0;
+    color: #1e293b;
+}
+
+/* Fila de las dos tarjetas de puntos */
+.points-section-row {
+    display: flex;
+    flex-direction: row;
+    gap: 0.8vw;
+}
+
+/* Tarjetas individuales de Fuerza y Acción */
+.action-points-card {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    width: 6.5vw;       /* Ancho relativo */
+    min-width: 85px;    /* Evita que colapse en un portátil pequeño */
+    padding: 0.6vh 0.4vw;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.action-points-card h1 {
+    font-size: 1.6rem;
+    margin: 0;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+.action-points-card p {
+    font-size: 0.7rem;
+    margin: 2px 0 0 0;
+    color: #64748b;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Mensaje del Turno debajo de los Puntos */
+.panel-turn-container {
+    margin-top: 0.4vh;
+}
+
+.panel-turn-message {
+    padding: 0.5vh 1vw;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    width: fit-content;
+}
+
+/* Colores dinámicos dependiendo del estado del turno */
+.panel-turn-message.turn-mine {
+    background-color: #2ecc71;
+    color: #ffffff;
+}
+
+.panel-turn-message.turn-others {
+    background-color: #e74c3c;
+    color: #ffffff;
+}
