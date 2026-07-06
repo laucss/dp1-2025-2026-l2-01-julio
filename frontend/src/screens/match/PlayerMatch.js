@@ -1117,6 +1117,8 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                             strength={strength}
                             getPlayerColor={getPlayerColor}
                             players={match?.players}
+                            match={match}
+                            currentUser={currentUser}
                         />
                     </div>
 
@@ -1125,8 +1127,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                         drawCard={drawCard}
                         canDraw={canDraw}
                         deck={deck}
-                        match={match}
-                        currentUser={currentUser}
                     />
                 </div>
 
