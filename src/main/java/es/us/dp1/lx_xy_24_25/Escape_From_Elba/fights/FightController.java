@@ -91,6 +91,12 @@ public class FightController {
         matchWebsocketController.notifyWeaponsUpdate(matchId, weaponsUpdate);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{matchId}/{loserId}/{loserRoomDestination}/check-chains")
+    public ResponseEntity<?> checkAndTriggerChainFights(@PathVariable Integer matchId, @PathVariable Integer loserId, @PathVariable Integer loserRoomDestination) {
+        fs.checkAndTriggerChainFights(matchId, loserId, loserRoomDestination);
+        return ResponseEntity.ok().build();
+    }
       
     
 }

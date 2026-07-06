@@ -296,10 +296,7 @@ public class MatchController {
             .orElse(null);
         
         if (movedPlayer != null) {
-            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);
-            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
-            
-            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
+             ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
                 movedPlayer.getId(),
                 movedPlayer.getUser().getId(),
                 movedPlayer.getUser().getUsername(),
@@ -307,6 +304,10 @@ public class MatchController {
                 System.currentTimeMillis()
             );
             matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+
+            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);
+            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
+            
         }
         
         return ResponseEntity.ok(new MatchDTO(match)); 

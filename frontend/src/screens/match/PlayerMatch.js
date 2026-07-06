@@ -12,6 +12,7 @@ import StealCardModal from "./modals/StealCardModal";
 import NpcLossDiscardModal from "./modals/NpcLossDiscardModal";
 import EscapeDiceModal from "./modals/EscapeDiceModal";
 import VotingModal from "./modals/VotingModal";
+import ReturnedCardModal from "./modals/ReturnedCardModal";
 
 import { normalizeRoomId } from "./utils/roomUtils";
 import { getPlayerColor } from "./utils/playersUtil";
@@ -55,6 +56,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [selectedNpcId, setSelectedNpcId] = useState(null)
     const [selectedNpcIndex, setSelectedNpcIndex] = useState(null)
 
+    const [isReturnedCardModalOpen, setIsReturnedCardModalOpen] = useState(false); 
     const [isDiceModalOpen, setIsDiceModalOpen] = useState(true);
     const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
     const [isEscapeModalOpen, setIsEscapeModalOpen] = useState(false);
@@ -73,6 +75,9 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [proposingUserId, setProposingUserId] = useState(null);
     const [proposingUsername, setProposingUsername] = useState('');
     const [votingResult, setVotingResult] = useState(null);
+    const [returnedFightCard, setReturnedFightCard] = useState(null);
+    const [loserId, setLoserId] = useState(null);
+    const [loserRoomDestination, setLoserRoomDestionation] = useState(null); 
     
 
     // CARGAR DATOS JUGADORES 
@@ -109,6 +114,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, async (msg) => {
             const fightUpdate = JSON.parse(msg.body);
             
+            console.log('fightUpdate', fightUpdate)
             if (fightUpdate.action === 'START') {
                 try {
                     const response = await fetch(`/api/v1/matches/${matchId}`, {
@@ -118,39 +124,56 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     if (response.ok) {
                         const freshMatch = await response.json();
                         setMatch(freshMatch);
-                        
-                        const attacker = freshMatch.players?.find(p => p.user.id === fightUpdate.attackerId);
+                        let attacker =null
                         let defender = null;
-                        
-                        if (fightUpdate.isBot) {
+
+                        if (fightUpdate.isBot && (fightUpdate.attackerUsername === 'NPC' || fightUpdate.attackerUsername === 'Niall Campbell' )) {
+                            attacker = freshMatch.npcs?.find(n => n.id === fightUpdate.attackerId);
+                            defender = freshMatch.players?.find(p => p.user.id === fightUpdate.defenderId);
+                        } else if (fightUpdate.isBot && !(fightUpdate.attackerUsername === 'NPC' || fightUpdate.attackerUsername === 'Niall Campbell' )) {
+                            attacker =  freshMatch.players?.find(p => p.user.id === fightUpdate.attackerId);
                             defender = freshMatch.npcs?.find(n => n.id === fightUpdate.defenderId);
                         } else {
+                            attacker = freshMatch.players?.find(p => p.user.id === fightUpdate.attackerId);
                             defender = freshMatch.players?.find(p => p.user.id === fightUpdate.defenderId);
                         }
-                        
+                                                
                         if (attacker && defender) {
-                            // EN LUGAR DE ABRIR EL MODAL DIRECTAMENTE, LO ENCOLAMOS
-                            const newFight = {
-                                attacker,
-                                defender,
-                                roomId: fightUpdate.roomId || fightUpdate.roomName
-                            };
-                            setFightQueue(prevQueue => [...prevQueue, newFight]);
+                            console.log("ANTES", isFightModalOpen);
+                            setFightAttacker(attacker);
+                            setFightDefender(defender);
+                            setPendingTargetRoom(fightUpdate.roomId || fightUpdate.roomName);
+                            setIsFightModalOpen(true);
+                            console.log("DESPUÉS", isFightModalOpen);
                         }
+                        console.log("Abriendo modal", attacker, defender);
                     }
                 } catch (error) {
                     console.error('Error fetching fresh match data for fight:', error);
                 }
             } else if (fightUpdate.action === 'RESOLVE') {
-                setIsFightModalOpen(false)
                 const winnerId = fightUpdate.winnerId;
                 const loserId = fightUpdate.loserId;
+                setLoserId(fightUpdate.loserId)
+                setLoserRoomDestionation(fightUpdate.chainRoomId)
                 const fightType = fightUpdate.fightResultType
+                console.log('currentUser', currentPlayer.id) 
+                console.log('winnerUser', winnerId)
 
                 if (currentPlayer.id === winnerId &&  fightType === 'PLAYER_BEATS_PLAYER') {
+                    console.log('entrando en el websocket de pelea')
                     setStealLoserPlayerId(loserId);
                     setIsStealModalOpen(true);
                 }
+
+                if (currentPlayer.id === winnerId &&  fightType === 'PLAYER_BEATS_NPC') {
+                    console.log('entrando en el websocket de pelea')
+                    setReturnedFightCard(fightUpdate.card)
+                    setIsReturnedCardModalOpen(true);
+                }
+                // comprobar si pongo un npc encima de uno, le sale que tenga que descartar?
+
+                setIsFightModalOpen(false)
             }
         });
 
@@ -313,6 +336,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.strength`, (msg) => {
             const strengthUpdate = JSON.parse(msg.body);
             
+            console.log('strengthUpdate', strengthUpdate)
             if (strengthUpdate.userId === currentPlayer.user?.id) {
                 setStrength(Math.min(6, strengthUpdate.strength));
             } else if (strengthUpdate.npcId) {
@@ -743,10 +767,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 const movedNpc = data.npcs.find(n => n.id === npcIdToSend);
                 if (movedNpc) {
                     await notifyFight({
-                        attackerId: playerInRoom.user.id,
-                        attackerUsername: playerInRoom.user.username,
-                        defenderId: movedNpc.id,
-                        defenderUsername: movedNpc.isNiallCampbell ? "Niall Campbell" : "NPC",
+                        attackerId:movedNpc.id,
+                        attackerUsername: movedNpc.isNiallCampbell ? "Niall Campbell" : "NPC",
+                        defenderId: playerInRoom.user.id,
+                        defenderUsername: playerInRoom.user.username,
                         roomId,
                         isBot: true
                     });
@@ -1034,46 +1058,27 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         return <div>Cargando partida...</div>;
     }
 
-    const clearFightState = async () => {
-        console.log("CLEAR FIGHT STATE");
-        setIsFightModalOpen(false);
-        setFightDefender(null);
-        setFightAttacker(null);
-        setPendingTargetRoom(null);
-        await cleanVotingStates();
-    };
 
-    const handleFightResult = async (currentUserWon) => {
+    const handleFightResult = async (attackerWins) => {
         
         try {
             const npcIsAttacker = !fightAttacker?.user;
 
             if (npcIsAttacker) {
                 const isCurrentDefender = currentUser.id === fightDefender?.user?.id;
-                // Si es contra un NPC y yo no soy el defensor, soy un mero espectador: salgo sin tocar nada
                 if (!isCurrentDefender) {
-                    return; 
+                    await clearFightState();
+                    return;
                 }
             } else {
-                // Pelea de Jugador contra Jugador (ej: Player 3 vs Player 1)
                 const isCurrentAttacker = currentUser.id === fightAttacker?.user?.id;
-                const isCurrentDefender = currentUser.id === fightDefender?.user?.id;
-
-                // SI NO SOY NI EL ATACANTE NI EL DEFENSOR DE ESTA PELEA ESPECÍFICA...
-                if (!isCurrentAttacker && !isCurrentDefender) {
-                    // Soy espectador (ej: Player 2 en la primera pelea). 
-                    // Salgo inmediatamente para que no colisione con mi cola de eventos.
-                    return; 
-                }
-
-                // Si soy el defensor de la pelea que acaba de resolverse (ej: Player 1)
                 if (!isCurrentAttacker) {
+                    await clearFightState();
                     return;
                 }
             }
 
             const defenderRoomId = fightDefender?.currentRoom?.id || fightDefender?.roomId || fightDefender?.room?.id || pendingTargetRoom;
-            const attackerWins = currentUserWon;
             
             const isNpcFight = !fightAttacker?.user || !fightDefender?.user;
 
@@ -1102,7 +1107,9 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 defenderRoomId,
                 currentUser,
                 setStealLoserPlayerId,
-                setIsStealModalOpen
+                setIsStealModalOpen,
+                setReturnedFightCard,
+                setIsReturnedCardModalOpen
             });
 
         } catch (err) {
@@ -1112,6 +1119,30 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             
         }
     }
+
+    const handleCheckChainFights = async () => {
+        try {
+            // Avisamos al backend de que la interfaz está despejada 
+            // y puede comprobar si hay que encadenar combates
+            await fetch(`/api/v1/fights/${matchId}/${loserId}/${loserRoomDestination}/check-chains`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    "Content-Type": "application/json"
+                }
+            });
+        } catch (error) {
+            console.error("Error al comprobar peleas en cadena:", error);
+        }
+    }
+
+    const clearFightState = async () => {
+        setIsFightModalOpen(false);
+        setFightDefender(null);
+        setFightAttacker(null);
+        setPendingTargetRoom(null);
+        await cleanVotingStates();
+    };
 
     return (
         <div className="match-container">
@@ -1230,6 +1261,20 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 bagCards={bagCards}
             />
 
+            <DiscardPhaseModal
+                isVisible={discardPhaseOpen}
+                hand={handCards}
+                bag={bagCards}
+                deck={deck}
+                player={currentPlayer}
+                onClose={() => setDiscardPhaseOpen(false)}
+                updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
+                onSave={async () => {
+                    await fetchCards();
+                    setDiscardPhaseOpen(false);
+                }}
+            />
+
             <FightModal
                 isOpen={isFightModalOpen}
                 onClose={() => {
@@ -1246,21 +1291,17 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 votingResult={votingResult}
                 proposingUserId={proposingUserId}
                 onVotingResultProcessed={() => setVotingResult(null)}
-                onResolve={async (currentUserWon) => { handleFightResult(currentUserWon); }}
+                onResolve={async (attackerWins) => { handleFightResult(attackerWins); }}
             />
 
-            <DiscardPhaseModal
-                isVisible={discardPhaseOpen}
-                hand={handCards}
-                bag={bagCards}
-                deck={deck}
-                player={currentPlayer}
-                onClose={() => setDiscardPhaseOpen(false)}
-                updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
-                onSave={async () => {
-                    await fetchCards();
-                    setDiscardPhaseOpen(false);
+            <ReturnedCardModal
+                isOpen={isReturnedCardModalOpen}
+                onClose={async () => {
+                    setIsReturnedCardModalOpen(false);
+                    setIsFightModalOpen(false);
+                    await handleCheckChainFights()
                 }}
+                card={returnedFightCard}
             />
 
             <StealCardModal
@@ -1268,16 +1309,18 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 loserId={stealLoserPlayerId}
                 matchId={matchId}
                 winnerId={currentPlayer?.id}
-                onClose={() => {
+                onClose={async () => {
                     setIsStealModalOpen(false);
                     setStealLoserPlayerId(null);
                     setIsFightModalOpen(false);
+                    await handleCheckChainFights()
                 }}
                 onSteal={async () => {
                     await fetchCards();
                     setIsStealModalOpen(false);
                     setStealLoserPlayerId(null);
                     setIsFightModalOpen(false);
+                    await handleCheckChainFights()
                 }}
             />
 
@@ -1285,7 +1328,13 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 isOpen={isNpcLossModalOpen}
                 handCards={handCards}
                 bagCards={bagCards}
-                onClose={() => { setIsNpcLossModalOpen(false); setNpcLossModalTitle(); setNpcLossModalSubtitle(); setIsFightModalOpen(false); }}
+                onClose={async () => { 
+                    setIsNpcLossModalOpen(false);
+                    setNpcLossModalTitle(); 
+                    setNpcLossModalSubtitle(); 
+                    setIsFightModalOpen(false);
+                    await handleCheckChainFights()
+                 }}
                 title={npcLossModalTitle}
                 subtitle={npcLossModalSubtitle}
                 onDiscard={handleNpcLossDiscard}

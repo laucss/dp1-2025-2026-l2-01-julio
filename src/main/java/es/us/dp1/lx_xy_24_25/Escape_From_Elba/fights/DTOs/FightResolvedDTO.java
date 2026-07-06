@@ -22,8 +22,7 @@ public class FightResolvedDTO {
     private Integer loserId;
 
     private Integer chainRoomId;
-    private Integer movedPlayerId;
-    private Integer movedNpcId;
+
 
     // si por ejemplo, gana contra npcs recibe directamente la carta
     private CardDTO card; 
@@ -34,35 +33,26 @@ public class FightResolvedDTO {
 
 
     public boolean hasChainFight() {
-    return chainRoomId != null;
+        return chainRoomId != null;
     }
 
-    public FightResolvedDTO(Integer matchId, Integer winnerId, Integer loserId, Card card, FightResultType fightResultType){
+    public FightResolvedDTO(Integer matchId, Integer winnerId, Integer loserId, Integer chainRoomId, Card card, FightResultType fightResultType){
         this.card = new CardDTO(card);
         this.fightResultType = fightResultType; 
         this.winnerId = winnerId; 
         this.loserId = loserId; 
         this.matchId = matchId;
+        this.chainRoomId = chainRoomId; 
     }
 
-    public FightResolvedDTO(Integer matchId, Integer winnerId, Integer loserId, FightResultType fightResultType){
+    public FightResolvedDTO(Integer matchId, Integer winnerId, Integer loserId, Integer chainRoomId, FightResultType fightResultType){
         this.fightResultType = fightResultType;
         this.winnerId = winnerId; 
         this.loserId = loserId; 
         this.matchId = matchId;
+        this.chainRoomId = chainRoomId; 
     }
 
-        public void setPlayerChainFight(Integer roomId, Integer playerId) {
-        this.chainRoomId = roomId;
-        this.movedPlayerId = playerId;
-        this.movedNpcId = null;
-    }
-
-    public void setNpcChainFight(Integer roomId, Integer npcId) {
-        this.chainRoomId = roomId;
-        this.movedNpcId = npcId;
-        this.movedPlayerId = null;
-    }
 
     public FightResolvedDTO(){}
 
