@@ -27,6 +27,7 @@ import { handlePlayerFight, handleNpcFight} from "./utils/fightHelpers";
 
 // para alerta de errores
 import { toast } from "react-toastify"
+import EndMatchModal from "./modals/EndMatchModal";
 
 export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt }){
     const navigate = useNavigate();
@@ -103,6 +104,18 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             const turnUpdate = JSON.parse(msg.body);
             setCurrentTurnUserId(turnUpdate.currentTurnUserId);
             fetchMatchAndPlayers();
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
+    
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.end`, (msg) => {
+            const matchDto = JSON.parse(msg.body);
+            setMatch(matchDto)
+
         });
 
         return () => subscription.unsubscribe();
@@ -1043,18 +1056,9 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
     if (match?.status === "FINISHED") {
         return (
-            <div className="match-ended">
-                <div className="end-overlay">
-                    <div className="end-text-box">
-                        <h2>The match has ended</h2>
-                        {match?.winner?.user ? (
-                            <p style={{ fontWeight: 700, margin: '8px 0' }}>Winner: {match.winner.user.username}</p>
-                        ) : null}
-                        <p>Thanks for playing.</p>
-                        <button className="return-menu-button" onClick={() => navigate(`/`)}>Return to main menu</button>
-                    </div>
-                </div>
-            </div>
+            <EndMatchModal
+                match={match}
+            />
         );
     }
 

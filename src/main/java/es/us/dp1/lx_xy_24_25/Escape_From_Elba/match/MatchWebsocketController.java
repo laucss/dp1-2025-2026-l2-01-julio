@@ -13,6 +13,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.WeaponsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.HandUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
@@ -127,6 +128,12 @@ public class MatchWebsocketController {
         messagingTemplate.convertAndSend(
             "/topic/match." + matchId + ".weapon.voting.result",
             votingResult
+        );
+    }
+
+    public void notifyEndMatch(Integer matchId, MatchDTO matchDTO) {
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".end", matchDTO
         );
     }
 

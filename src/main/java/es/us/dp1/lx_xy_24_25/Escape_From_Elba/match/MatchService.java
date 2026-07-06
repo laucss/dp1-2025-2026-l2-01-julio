@@ -1,5 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -421,12 +422,13 @@ public class MatchService {
         }
 
         if (m.getStartTime() != null) {
-            long durationSeconds = java.time.Duration.between(m.getStartTime(), m.getEndTime()).toSeconds();
+            long durationSeconds = Duration.between(m.getStartTime(), m.getEndTime()).toSeconds();
         }
 
         deleteMatchCards(matchId); 
 
         matchRepo.save(m);
+        matchWebsocketController.notifyEndMatch(matchId, new MatchDTO(m));
 
         return new MatchDTO(m);
     }

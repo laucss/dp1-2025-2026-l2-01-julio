@@ -198,8 +198,7 @@ public class MatchController {
 
     @PutMapping("/{matchId}/end")
     public ResponseEntity<MatchDTO> endMatch(@PathVariable Integer matchId) {
-
-    MatchDTO ended = ms.endMatch(matchId, null);
+        MatchDTO ended = ms.endMatch(matchId, null);
     return ResponseEntity.ok(ended);
 }
 
