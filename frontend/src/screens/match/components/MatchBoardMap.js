@@ -54,6 +54,7 @@ export default function MatchBoardMap({
   isSpectator,
   playersList,
   otherPlayersBags,
+  otherPlayersHands
 }) {
   const renderBoardAreas = () =>
     BOARD_AREAS.map(({ roomId, alt, ...area }) => (
@@ -152,6 +153,7 @@ export default function MatchBoardMap({
       );
     });
 
+  // console.log(otherPlayersHands)
   return (
     <div className="map-container">
       <div className="board-wrapper">
@@ -161,12 +163,14 @@ export default function MatchBoardMap({
         {renderNpcMarkers()}
       </div>
 
-      <div style={{ position: 'absolute', right: 20, top: 20, width: '300px', maxHeight: '600px', zIndex: 15 }}>
+      <div style={{ position: 'absolute', right: 20, top: 20, width: '450px', maxHeight: '600px', zIndex: 15 }}>
         <OtherPlayersPanel
           playersList={playersList}
+          otherPlayersHands={otherPlayersHands}
           otherPlayersBags={otherPlayersBags}
           getPlayerColor={getPlayerColor}
           players={match?.players}
+          npcs={match.npcs}
         />
       </div>
     </div>

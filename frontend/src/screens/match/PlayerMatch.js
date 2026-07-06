@@ -38,6 +38,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [handCards, setHandCards] = useState([])
     const [bagCards, setBagCards] = useState([])
     const [otherPlayersBags, setOtherPlayersBags] = useState({}) 
+    const [otherPlayersHands, setOtherPlayersHands] = useState({}) 
     const [numCardsDrawn, setNumCardsDrawn] = useState(0)
     const [discardPhaseOpen, setDiscardPhaseOpen] = useState(false)
 
@@ -104,7 +105,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, async (msg) => {
             const fightUpdate = JSON.parse(msg.body);
             
-            console.log('fightreuslt', fightUpdate)
             if (fightUpdate.action === 'START') {
                 try {
                     const response = await fetch(`/api/v1/matches/${matchId}`, {
@@ -138,9 +138,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 const winnerId = fightUpdate.winnerId;
                 const loserId = fightUpdate.loserId;
                 const fightType = fightUpdate.fightResultType
-
-                console.log('winnerId', winnerId)
-                console.log('currentPlayer.id', currentPlayer.id)
 
                 if (currentPlayer.id === winnerId &&  fightType === 'PLAYER_BEATS_PLAYER') {
                     setStealLoserPlayerId(loserId);
@@ -244,7 +241,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 const hand = Array.isArray(info.hand?.cards) ? info.hand.cards : [];
                 const bag = Array.isArray(info.bag?.cards) ? info.bag.cards : [];
                 const deckInfo = info.deck;
-
+                console.log('manoh',hand)
                 if (currentPlayer?.id === info.playerId) {
                     setHandCards(hand.map(c => ({...c})));
                     setBagCards(bag.map(c => ({...c})));
@@ -253,6 +250,11 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                         ...prev,
                         [info.playerId]: bag
                     }));
+                    setOtherPlayersHands(prev => ({
+                        ...prev,
+                        [info.playerId]: hand
+                    }));
+
                 }
 
                 if (deckInfo) {
@@ -334,7 +336,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
     useEffect(() => {
         if (playersList.length > 0) {
-            fetchOtherPlayersBags()
+            fetchOtherPlayersCards()
         }
     }, [playersList]);
 
@@ -505,9 +507,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     }
 
-    const fetchOtherPlayersBags = async () => {
+    const fetchOtherPlayersCards = async () => {
         try {
             const bags = {}
+            const hands ={}
             for (const player of playersList) {
                 const response = await fetch(`/api/v1/matches/${matchId}/${player.id}/getAllCards`, {
                     method: "GET",
@@ -520,9 +523,11 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 if (response.ok) {
                     const data = await response.json()
                     bags[player.id] = Array.isArray(data.bag.cards) ? data.bag.cards : []
+                    hands[player.id] = Array.isArray(data.hand.cards) ? data.hand.cards : []
                 }
             }
             setOtherPlayersBags(bags)
+            setOtherPlayersHands(hands)
         } catch (error) {
             console.log('Error fetching other players bags:', error)
         }
@@ -867,7 +872,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 alert('No se pudo descartar la carta tras perder contra el NPC.');
             } else {
                 await fetchCards();
-                await fetchOtherPlayersBags();
+                await fetchOtherPlayersCards();
             }
         } catch (error) {
             console.error('Error discarding card after NPC loss:', error);
@@ -1059,7 +1064,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     }
 
-    console.log('actionspoints', currentPlayer)
     return (
         <div className="match-container">
             <StartDiceModal
@@ -1118,6 +1122,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     setSelectedNpcId={setSelectedNpcId}
                     playersList={playersList}
                     otherPlayersBags={otherPlayersBags}
+                    otherPlayersHands={otherPlayersHands}
                 />
             </div>
 
