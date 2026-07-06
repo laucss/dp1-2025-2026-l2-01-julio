@@ -18,8 +18,10 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightResolvedDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightResultRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.LoseAgainstNpcRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.StealCardRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchWebsocketController;
@@ -94,6 +96,27 @@ public class FightService {
         }
 
         matchWebsocketController.notifyFightResolved(result.getMatchId(), fightResult);
+
+        if (fightResult.hasChainFight()) {
+
+            Match match = matchService.getMatchById(result.getMatchId());
+            Room room = roomService.findById(fightResult.getChainRoomId());
+
+            if (fightResult.getMovedPlayerId() != null) {
+
+                Player movedPlayer = playerService.findById(fightResult.getMovedPlayerId());
+
+                checkForChainFightPlayer(movedPlayer, room, match);
+
+            } else if (fightResult.getMovedNpcId() != null) {
+
+                Npc movedNpc = npcRepository.findById(fightResult.getMovedNpcId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Npc not found"));
+
+                checkForChainFightNpc(movedNpc, room, match);
+            }
+        }
+
         return fightResult;
 
     }
@@ -162,14 +185,16 @@ public class FightService {
     public FightResolvedDTO playerBeatsPlayer(FightResultRequestDTO result){
         Player winner = result.isAttackerWins() ? playerService.findById(result.getAttackerId()) : playerService.findById(result.getDefenderId()); 
         Player loser = result.isAttackerWins() ? playerService.findById(result.getDefenderId()) : playerService.findById(result.getAttackerId()); 
-        playerLoses(loser, result.getMatchId()); 
+      
 
         Room defenderRoom = roomService.findById(result.getDefenderRoomId());
+        Room room = playerLoses(loser, result.getMatchId());
         winner.setRoom(defenderRoom);
         playerRepo.save(winner);
 
         PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(winner);
         matchWebsocketController.notifyPlayerLocationUpdate(result.getMatchId(), locationUpdate);
+
 
         // si el jugador activo (el que ataca en este caso, pierde entonces sus puntos de accion se quedan a cero)
         if (loser.getId().equals(result.getAttackerId())){
@@ -178,7 +203,16 @@ public class FightService {
         // Actualizar estadísticas de batallas del jugador
         updatePlayerStatistics(winner);
 
-        return new FightResolvedDTO(result.getMatchId(), winner.getId(), loser.getId(), FightResultType.PLAYER_BEATS_PLAYER);
+        FightResolvedDTO dto = new FightResolvedDTO(
+            result.getMatchId(),
+            winner.getId(),
+            loser.getId(),
+            FightResultType.PLAYER_BEATS_PLAYER
+        );
+
+        dto.setPlayerChainFight(room.getId(), loser.getId());
+
+        return dto;
     }
 
      
@@ -230,10 +264,10 @@ public class FightService {
     
 
     @Transactional
-    public void playerLoses(Player loser, Integer matchId){
+    public Room playerLoses(Player loser, Integer matchId){
         loser.setStrength(loser.getStrength() +1);
         loser.setActionPoints(0);
-        Room randomRoom = roomService.getRandomRoom();
+        Room randomRoom = roomService.getRandomFightRoom(loser.getRoom());
         loser.setRoom(randomRoom);
         playerRepo.save(loser);
 
@@ -249,17 +283,20 @@ public class FightService {
             );
         matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);
 
+        return randomRoom;
+
 
     }
 
     @Transactional
-    public void npcLoses(Npc loser, Player winner, Integer matchId, Integer roomId){
+    public Room  npcLoses(Npc loser, Player winner, Integer matchId, Integer roomId){
         loser.setStrength(loser.getStrength() +1);
-        Room randomRoom = roomService.getRandomRoom();
+        Room defenderRoom = roomService.findById(roomId);
+        Room randomRoom  = roomService.getRandomFightRoom(defenderRoom);
         loser.setRoom(randomRoom);
         npcRepository.save(loser);
         
-        Room defenderRoom = roomService.findById(roomId);
+       
         winner.setRoom(defenderRoom);
         playerRepo.save(winner);
 
@@ -268,6 +305,8 @@ public class FightService {
 
         NpcLocationUpdateDTO locationNpcUpdate = new NpcLocationUpdateDTO(loser);
         matchWebsocketController.notifyNpcLocationUpdate(matchId, locationNpcUpdate);
+
+        return randomRoom;
     }
 
     @Transactional
@@ -277,9 +316,19 @@ public class FightService {
         Integer npcId = result.isAttackerWins() && result.isNpcAttacker() ? result.getAttackerId() : result.getDefenderId(); 
         npcRepository.findById(npcId).orElseThrow(() -> new ResourceNotFoundException("Npc not found")); 
 
-        playerLoses(player, result.getMatchId()); 
+        Room room = playerLoses(player, result.getMatchId());
 
-        return new FightResolvedDTO(result.getMatchId(), npcId, player.getId(), FightResultType.NPC_BEATS_PLAYER);
+
+        FightResolvedDTO dto = new FightResolvedDTO(
+            result.getMatchId(),
+            npcId,
+            player.getId(),
+            FightResultType.NPC_BEATS_PLAYER
+        );
+
+        dto.setPlayerChainFight(room.getId(), player.getId());
+
+        return dto;
 
     }
 
@@ -291,17 +340,25 @@ public class FightService {
         Npc loser = npcRepository.findById(npcId).orElseThrow(() -> new ResourceNotFoundException("Npc not found"));
         
         Integer matchId = result.getMatchId();
-        npcLoses(loser, player, result.getMatchId(), result.getDefenderRoomId());
+
+        Room room = npcLoses(loser, player, result.getMatchId(), result.getDefenderRoomId());
+
+       
 
         // Actualizar estadísticas de batallas del jugador
         updatePlayerStatistics(player);
 
-        if (loser.getIsNiallCampbell()){ 
-            return playerBeatsNiallCampbell(player, npcId, matchId); // si es niall campbell, el jugador recibe la carta que haya como primera en la baraja de descartes
-            
-        } else { // si es un npc normal, recibe una carta de la baraja
-            return playerBeatsNormalNPC(player, npcId, matchId); 
-        } 
+        FightResolvedDTO dto;
+
+        if (loser.getIsNiallCampbell()) {
+            dto = playerBeatsNiallCampbell(player, npcId, matchId);
+        } else {
+            dto = playerBeatsNormalNPC(player, npcId, matchId);
+        }
+
+        dto.setNpcChainFight(room.getId(), loser.getId());
+
+        return dto;
 
     }
 
@@ -353,7 +410,108 @@ public class FightService {
         AllCardsStatusDTO playerCards = matchService.getAllCards(matchId, player.getId());
         CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
         matchWebsocketController.notifyCardsUpdate(matchId, update);
+        
         return new FightResolvedDTO(matchId, player.getId(), npcId, stolenCard,FightResultType.PLAYER_BEATS_NPC);   
+    }
+
+    @Transactional
+    private void checkForChainFightPlayer(Player movedPlayer,Room room, Match match) {
+        // Verificar si hay jugadores y NPCs en la misma sala
+        List<Player> players = playerRepo.findByMatchAndRoom(match.getId(), room.getId());
+        List<Npc> npcs = npcRepository.findByMatchAndRoom(match.getId(), room.getId());
+
+        // Habitación vacía
+        if (players.isEmpty() && npcs.isEmpty()) {
+            return;
+        }
+
+        // Jugador contra jugador
+        if (players.size() == 2) {
+
+            Player attacker = movedPlayer;
+
+            Player defender = players.stream()
+                .filter(p -> !p.getId().equals(movedPlayer.getId()))
+                .findFirst()
+                .orElse(null);
+
+            if (defender == null) {
+                return;
+            }
+
+            FightUpdateDTO update = new FightUpdateDTO(
+                match.getId(),
+                attacker.getUser().getId(),
+                attacker.getUser().getUsername(),
+                defender.getUser().getId(),
+                defender.getUser().getUsername(),
+                room.getId(),
+                "START",
+                false
+            );
+
+            matchWebsocketController.notifyFightUpdate(match.getId(), update);
+            return;
+        }
+
+        // Jugador contra NPC
+        if (players.size() == 1 && npcs.size() == 1) {
+
+            Player attacker = movedPlayer;
+            Npc defender = npcs.get(0);
+
+            FightUpdateDTO update = new FightUpdateDTO(
+                match.getId(),
+                attacker.getUser().getId(),
+                attacker.getUser().getUsername(),
+                defender.getId(),
+                defender.getIsNiallCampbell() ? "Niall Campbell" : "NPC",
+                room.getId(),
+                "START",
+                true
+            );
+
+            matchWebsocketController.notifyFightUpdate(match.getId(), update);
+
+            return;
+      
+        }
+    }
+
+    @Transactional
+    private void checkForChainFightNpc(Npc movedNpc, Room room, Match match) {
+
+        List<Player> players = playerRepo.findByMatchAndRoom(match.getId(), room.getId());
+        List<Npc> npcs = npcRepository.findByMatchAndRoom(match.getId(), room.getId());
+
+        // Habitación vacía
+        if (players.isEmpty() && npcs.isEmpty()) {
+            return;
+        }
+
+        if (npcs.size() == 2) {
+            return;
+        }
+
+        // NPC contra jugador
+        if (players.size() == 1 && npcs.size() == 1) {
+
+            Player defender = players.get(0);
+            Npc attacker = movedNpc;
+
+            FightUpdateDTO update = new FightUpdateDTO(
+                match.getId(),
+                attacker.getId(),
+                attacker.getIsNiallCampbell() ? "Niall Campbell" : "NPC",
+                defender.getUser().getId(),
+                defender.getUser().getUsername(),
+                room.getId(),
+                "START",
+                true
+            );
+
+            matchWebsocketController.notifyFightUpdate(match.getId(), update);
+        }
     }
     
     @Transactional

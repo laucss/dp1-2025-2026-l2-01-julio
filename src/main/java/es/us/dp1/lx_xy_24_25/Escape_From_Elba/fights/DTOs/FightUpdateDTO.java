@@ -18,15 +18,16 @@ public class FightUpdateDTO {
 
     public FightUpdateDTO() {}
 
-    public FightUpdateDTO(Integer matchId, Integer attackerId, String attackerUsername, 
-                          Integer defenderId, String defenderUsername, String roomName, String action) {
+    public FightUpdateDTO(Integer matchId,Integer attackerId,String attackerUsername,Integer defenderId,String defenderUsername,Integer roomId,String action,Boolean isBot) {
+
         this.matchId = matchId;
         this.attackerId = attackerId;
         this.attackerUsername = attackerUsername;
         this.defenderId = defenderId;
         this.defenderUsername = defenderUsername;
-        this.roomName = roomName;
+        this.roomId = roomId;
         this.action = action;
+        this.isBot = isBot;
     }
 
     

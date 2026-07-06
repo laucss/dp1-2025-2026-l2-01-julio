@@ -91,6 +91,62 @@ public class RoomService {
         return rooms.get(rand.nextInt(rooms.size()));
     }
 
+    public Room getRandomFightRoom(Room originRoom) {
+
+        List<Room> rooms = new ArrayList<>(roomRepository.findAll());
+
+        // Quitar la Safe Zone
+        rooms.removeIf(room -> room.getId().equals(37));
+        // Quitar las torres
+        rooms.removeAll(getAllTowers());
+        // Quitar la habitación de origen
+        if (originRoom != null) {
+            rooms.removeIf(room -> room.getId().equals(originRoom.getId()));
+        }
+        if (rooms.isEmpty()) {
+            throw new IllegalStateException("No available room for fight relocation");
+        }
+
+        Random rand = new Random();
+        return rooms.get(rand.nextInt(rooms.size()));
+    }
+
+    public Room getRandomUnoccupiedRoom(Match match) {
+        if (match == null) {
+            return getRandomRoom();
+        }
+
+        List<Room> rooms = new ArrayList<>(roomRepository.findAll());
+        rooms.removeAll(getAllTowers());
+
+        List<Integer> occupiedRoomIds = new ArrayList<>();
+
+        if (match.getPlayers() != null) {
+            for (Player player : match.getPlayers()) {
+                if (player != null && player.getRoom() != null && player.getRoom().getId() != null) {
+                    occupiedRoomIds.add(player.getRoom().getId());
+                }
+            }
+        }
+
+        if (match.getNpcs() != null) {
+            for (Npc npc : match.getNpcs()) {
+                if (npc != null && npc.getRoom() != null && npc.getRoom().getId() != null) {
+                    occupiedRoomIds.add(npc.getRoom().getId());
+                }
+            }
+        }
+
+        rooms.removeIf(room -> room.getId() != null && occupiedRoomIds.contains(room.getId()));
+
+        if (rooms.isEmpty()) {
+            throw new IllegalStateException("No free room available to move the player or NPC");
+        }
+
+        Random rand = new Random();
+        return rooms.get(rand.nextInt(rooms.size()));
+    }
+
     public List<RoomDTO> initializeRoomsForMatch(Match match) {
         List<Room> rooms = roomRepository.findAll();
         Room safeZone = roomRepository.findById(37).orElseThrow(() -> 
