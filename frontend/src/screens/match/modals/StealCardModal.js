@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import tokenService from '../../../services/token.service';
-import '../../../static/css/match/StealCardModal.css';
+import '../../../static/css/match/modals/StealCardModal.css';
 import { toast } from 'react-toastify';
 
 export default function StealCardModal({

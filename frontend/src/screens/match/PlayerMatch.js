@@ -18,6 +18,8 @@ import { getPlayerColor } from "./utils/playersUtil";
 import CurrentPlayerInfo from "./components/CurrentPlayerInfo";
 import DeckSection from "./components/DeckSection";
 import MatchBoardMap from "./components/MatchBoardMap";
+import OtherPlayersPanel from './components/OthersPlayersSection';
+import MatchButtons from './components/MatchButtons'
 import { getRandomFreeRoom } from "./utils/roomHelpers";
 import { handlePlayerFight, handleNpcFight} from "./utils/fightHelpers";
 
@@ -1139,10 +1141,33 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     selectedNpcId={selectedNpcId}
                     setSelectedNpcIndex={setSelectedNpcIndex}
                     setSelectedNpcId={setSelectedNpcId}
-                    playersList={playersList}
-                    otherPlayersBags={otherPlayersBags}
-                    otherPlayersHands={otherPlayersHands}
                 />
+
+                <div className="panel-players-and-buttons"> 
+                    <OtherPlayersPanel
+                        playersList={playersList}
+                        otherPlayersHands={otherPlayersHands}
+                        otherPlayersBags={otherPlayersBags}
+                        getPlayerColor={getPlayerColor}
+                        players={match?.players}
+                        npcs={match.npcs}
+                    />
+
+                    <MatchButtons
+                        match={match}
+                        currentUser={currentUser}
+                        actionPoints={actionPoints}
+                        setDiscardPhaseOpen={setDiscardPhaseOpen}
+                        setIsActionsModalOpen={setIsActionsModalOpen}
+                        leaveMatch={leaveMatch}
+                        endMatch={endMatch}
+                        chatOpen={chatOpen}
+                        setChatOpen={setChatOpen}
+                        ChatBox={ChatBox}
+                    />
+                </div>
+
+
             </div>
 
             {isRoomSelectionActive && match?.currentTurnUserId === currentUser?.id && (
@@ -1183,51 +1208,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                             ))}
                         </div>
                     </div>
-                </div>
-                <div className="buttons-section">
-                    <button className="leave-match-button"
-                        onClick={() => setDiscardPhaseOpen(true)}
-                        disabled={match.currentTurnUserId !== currentUser.id}
-                        title="Discard cards from hand"
-                    >
-                        Discard and bag
-                    </button>
-                    <button className="leave-match-button"
-                        title="Discard cards from hand"
-                        onClick={() => setIsActionsModalOpen(true)}
-                        disabled={match.currentTurnUserId !== currentUser.id || actionPoints === 0}
-                    >
-                        Actions
-                    </button>
-                    <ActionsModal
-                        isOpen={isActionsModalOpen}
-                        onClose={() => setIsActionsModalOpen(false)}
-                        moveToAdyacent={() => setMoveToAdyacentRoom(true)}
-                        moveToRoomWithWord={() => setMoveToRoomWithWord(true)}
-                        onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
-                        onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
-                        canAttemptEscape={[1, 6, 31, 36].includes(normalizeRoomId(currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id)))}
-                    />
-                    <button
-                        className="leave-match-button"
-                        onClick={leaveMatch}
-                        style={{ marginLeft: '15px', background: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
-                    >
-                        Leave Match
-                    </button>
-                    <button
-                        className="end-match-button"
-                        onClick={endMatch}
-                        style={{ display: ( match?.creatorId !== currentUser?.id) ? 'none' : 'block' }}
-                    >
-                        End match
-                    </button>
-                    <div className="match-chat-icon ">
-                        <div className="match-chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
-                            <FaComments size={30} color="white" />
-                        </div>
-                    </div>
-                    {chatOpen && <ChatBox matchId={matchId} />}
                 </div>
             </div>
 
