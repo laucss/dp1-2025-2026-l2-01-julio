@@ -1,13 +1,7 @@
 import React, { useState } from "react";
-import '../../../static/css/match/modals/startDiceModal.css';
-import tokenService from '../../../services/token.service';
-import getIdFromUrl from '../../../util/getIdFromUrl';
 
 export default function ReturnedCardModal({ isOpen, onClose, card }) {
-    const jwt = tokenService.getLocalAccessToken();
-    const currentUser = tokenService.getUser();
-    const matchId = getIdFromUrl(2);
-
+    if (!isOpen) return null;
     return (
         <div className="start-dice-modal-overlay">
             <div className="start-dice-modal-content">
@@ -27,6 +21,9 @@ export default function ReturnedCardModal({ isOpen, onClose, card }) {
                     <h2 className="start-dice-title">no recibes ninguna carta porque no hay ninguna en el monton de descartes</h2>
                 )
                 }
+                <button onClick={onClose} className="cancel-button">
+                    Close
+                </button>
                 
             </div>
         </div>

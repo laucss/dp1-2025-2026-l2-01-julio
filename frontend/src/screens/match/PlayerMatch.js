@@ -160,16 +160,20 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 console.log('currentUser', currentPlayer.id) 
                 console.log('winnerUser', winnerId)
 
-                if (currentPlayer.id === winnerId &&  fightType === 'PLAYER_BEATS_PLAYER') {
-                    console.log('entrando en el websocket de pelea')
-                    setStealLoserPlayerId(loserId);
-                    setIsStealModalOpen(true);
-                }
+                const currentUserId = currentPlayer?.user?.id;
 
-                if (currentPlayer.id === winnerId &&  fightType === 'PLAYER_BEATS_NPC') {
-                    console.log('entrando en el websocket de pelea')
-                    setReturnedFightCard(fightUpdate.card)
-                    setIsReturnedCardModalOpen(true);
+                if (currentUserId && currentUserId === winnerId) {
+                    if (fightType === 'PLAYER_BEATS_PLAYER') {
+                        console.log('entrando en el websocket de pelea JvJ')
+                        setStealLoserPlayerId(loserId);
+                        setIsStealModalOpen(true);
+                    }
+
+                    if (fightType === 'PLAYER_BEATS_NPC') {
+                        console.log('entrando en el websocket de pelea JvNpc')
+                        setReturnedFightCard(fightUpdate.card)
+                        setIsReturnedCardModalOpen(true);
+                    }
                 }
                 // comprobar si pongo un npc encima de uno, le sale que tenga que descartar?
 
