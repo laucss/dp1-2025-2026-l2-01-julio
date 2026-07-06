@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import '../../../static/css/match/discardModal.css';
+import '../../../static/css/match/modals/discardModal.css';
 import tokenService from "../../services/token.service";
 import getIdFromUrl from "../../util/getIdFromUrl";
 

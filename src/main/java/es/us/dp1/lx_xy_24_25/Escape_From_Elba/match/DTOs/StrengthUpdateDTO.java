@@ -10,6 +10,7 @@ public class StrengthUpdateDTO {
     private Integer userId;
     private String username;
     private Integer strength;
+    private Integer npcId; // para actualizar en el caso de que el perdedor sea un npc (así actualizamos el panel automaticamente)
     private Long timestamp;
 
     public StrengthUpdateDTO() {}
@@ -21,6 +22,13 @@ public class StrengthUpdateDTO {
         this.strength = strength;
         this.timestamp = timestamp;
     }
+
+    public StrengthUpdateDTO(Integer npcId, Integer strength, Long timestamp) {
+        this.npcId = npcId;
+        this.strength = strength;
+        this.timestamp = timestamp;
+    }
+
 
 
     @Override

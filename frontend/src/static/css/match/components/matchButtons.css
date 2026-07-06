@@ -1,0 +1,55 @@
+
+.buttons-section {
+    /*background: #eaff04;*/
+    min-height: 80px;      /* Un poco más de altura para que respiren los botones */
+    display: flex;
+    justify-content: center; /* Centra los botones de acción perfectamente */
+    align-items: center;
+    position: relative;      /* Referencia para el chat absoluto */
+    padding: 0 80px;         /* Espacio en los lados para que no choquen con el chat */
+    gap: 15px;               /* Espacio uniforme entre botones */
+    display:flex;
+    flex-direction:column;
+    margin-top: 10vh;
+}
+
+/* Forzamos que todos los botones de esta sección tengan el mismo tamaño */
+.buttons-section button {
+    margin: 0 !important;
+    min-width: 160px;       /* Ajusta este ancho según prefieras */
+    height: 45px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+
+.buttons-section button:hover {
+    transform: scale(1.05);
+}
+
+
+
+/* Posicionamiento fijo del icono de chat a la derecha */
+.match-chat-icon {
+    position: absolute;
+    right: 20px;
+    transform: translateY(-50%);
+    margin: 0 !important;
+    z-index: 10;
+    height: 20px;
+}
+
+.match-chat-icon-button {
+    background: #c0392b;
+    padding: 10px;
+    border-radius: 50%;
+    display: flex;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}

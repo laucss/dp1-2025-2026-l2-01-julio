@@ -12,7 +12,7 @@
 }
 
 .start-dice-modal-content {
-    background: #26095c;
+    background: #e5e1ec;
     border-radius: 20px;
     padding: 40px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
@@ -34,11 +34,10 @@
 }
 
 .start-dice-title {
-    color: white;
+    color: rgb(0, 0, 0);
     font-size: 28px;
     font-weight: bold;
     margin-bottom: 30px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .start-dice-container {
@@ -87,16 +86,16 @@
 }
 
 .throw-dice-button {
-    background: #ff236c;
+    background: #22a8b7;
     color: white;
     border: none;
-    border-radius: 50px;
+    border-radius: 30px;
     padding: 18px 40px;
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+    box-shadow: 0 5px 15px rgba(34,168,183,0.36);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 20px;
@@ -104,8 +103,8 @@
 
 .throw-dice-button:hover:not(.disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255, 107, 157, 0.6);
-    background: linear-gradient(135deg, #ff8bb3 0%, #d087a0 100%);
+    box-shadow: 0 4px 15px #1aa0ae;
+    background: linear-gradient(135deg, #1aa0ae 0%, #18686f 100%);
 }
 
 .throw-dice-button:active:not(.disabled) {
@@ -119,12 +118,11 @@
 }
 
 .dice-result-text {
-    color: white;
+    color: #358b93;
     font-size: 24px;
     font-weight: bold;
     margin-top: 20px;
     animation: fadeIn 0.5s ease-in;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes fadeIn {

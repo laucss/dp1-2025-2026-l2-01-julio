@@ -18,6 +18,9 @@ import { getPlayerColor } from "./utils/playersUtil";
 import CurrentPlayerInfo from "./components/CurrentPlayerInfo";
 import DeckSection from "./components/DeckSection";
 import MatchBoardMap from "./components/MatchBoardMap";
+import OtherPlayersPanel from './components/OthersPlayersSection';
+import MatchButtons from './components/MatchButtons'
+import PlayerCardsSection from "./components/PlayerCardsSection";
 import { getRandomFreeRoom } from "./utils/roomHelpers";
 import { handlePlayerFight, handleNpcFight} from "./utils/fightHelpers";
 
@@ -38,6 +41,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [handCards, setHandCards] = useState([])
     const [bagCards, setBagCards] = useState([])
     const [otherPlayersBags, setOtherPlayersBags] = useState({}) 
+    const [otherPlayersHands, setOtherPlayersHands] = useState({}) 
     const [numCardsDrawn, setNumCardsDrawn] = useState(0)
     const [discardPhaseOpen, setDiscardPhaseOpen] = useState(false)
 
@@ -104,7 +108,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, async (msg) => {
             const fightUpdate = JSON.parse(msg.body);
             
-            console.log('fightreuslt', fightUpdate)
             if (fightUpdate.action === 'START') {
                 try {
                     const response = await fetch(`/api/v1/matches/${matchId}`, {
@@ -141,9 +144,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 const winnerId = fightUpdate.winnerId;
                 const loserId = fightUpdate.loserId;
                 const fightType = fightUpdate.fightResultType
-
-                console.log('winnerId', winnerId)
-                console.log('currentPlayer.id', currentPlayer.id)
 
                 if (currentPlayer.id === winnerId &&  fightType === 'PLAYER_BEATS_PLAYER') {
                     setStealLoserPlayerId(loserId);
@@ -247,7 +247,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 const hand = Array.isArray(info.hand?.cards) ? info.hand.cards : [];
                 const bag = Array.isArray(info.bag?.cards) ? info.bag.cards : [];
                 const deckInfo = info.deck;
-
+                console.log('manoh',hand)
                 if (currentPlayer?.id === info.playerId) {
                     setHandCards(hand.map(c => ({...c})));
                     setBagCards(bag.map(c => ({...c})));
@@ -256,6 +256,11 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                         ...prev,
                         [info.playerId]: bag
                     }));
+                    setOtherPlayersHands(prev => ({
+                        ...prev,
+                        [info.playerId]: hand
+                    }));
+
                 }
 
                 if (deckInfo) {
@@ -305,13 +310,32 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.strength`, (msg) => {
             const strengthUpdate = JSON.parse(msg.body);
+            
             if (strengthUpdate.userId === currentPlayer.user?.id) {
                 setStrength(Math.min(6, strengthUpdate.strength));
+            } else if (strengthUpdate.npcId) {
+                setMatch((prevMatch) => {
+                    if (!prevMatch || !prevMatch.npcs) return prevMatch;
+                    return {
+                        ...prevMatch,
+                        npcs: prevMatch.npcs.map((npc) => {
+                            if (npc.id === strengthUpdate.npcId) {
+                                return {
+                                    ...npc,
+                                    strength: strengthUpdate.strength 
+                                };
+                            }
+                            return npc;
+                        })
+                    };
+                });
             }
         });
 
-        return () => subscription.unsubscribe();
-    }, [stompClient, matchId, currentPlayer]);
+        return () => {
+            if (subscription) subscription.unsubscribe();
+        };
+    }, [stompClient, currentPlayer, matchId]);
 
     useEffect(() => {
         if (player && Array.isArray(player)){
@@ -337,7 +361,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
     useEffect(() => {
         if (playersList.length > 0) {
-            fetchOtherPlayersBags()
+            fetchOtherPlayersCards()
         }
     }, [playersList]);
 
@@ -508,9 +532,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     }
 
-    const fetchOtherPlayersBags = async () => {
+    const fetchOtherPlayersCards = async () => {
         try {
             const bags = {}
+            const hands ={}
             for (const player of playersList) {
                 const response = await fetch(`/api/v1/matches/${matchId}/${player.id}/getAllCards`, {
                     method: "GET",
@@ -523,9 +548,11 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 if (response.ok) {
                     const data = await response.json()
                     bags[player.id] = Array.isArray(data.bag.cards) ? data.bag.cards : []
+                    hands[player.id] = Array.isArray(data.hand.cards) ? data.hand.cards : []
                 }
             }
             setOtherPlayersBags(bags)
+            setOtherPlayersHands(hands)
         } catch (error) {
             console.log('Error fetching other players bags:', error)
         }
@@ -870,7 +897,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 alert('No se pudo descartar la carta tras perder contra el NPC.');
             } else {
                 await fetchCards();
-                await fetchOtherPlayersBags();
+                await fetchOtherPlayersCards();
             }
         } catch (error) {
             console.error('Error discarding card after NPC loss:', error);
@@ -1065,7 +1092,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     }
 
-    console.log('actionspoints', currentPlayer)
     return (
         <div className="match-container">
             <StartDiceModal
@@ -1100,6 +1126,8 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                             strength={strength}
                             getPlayerColor={getPlayerColor}
                             players={match?.players}
+                            match={match}
+                            currentUser={currentUser}
                         />
                     </div>
 
@@ -1108,8 +1136,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                         drawCard={drawCard}
                         canDraw={canDraw}
                         deck={deck}
-                        match={match}
-                        currentUser={currentUser}
                     />
                 </div>
 
@@ -1122,9 +1148,42 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     selectedNpcId={selectedNpcId}
                     setSelectedNpcIndex={setSelectedNpcIndex}
                     setSelectedNpcId={setSelectedNpcId}
-                    playersList={playersList}
-                    otherPlayersBags={otherPlayersBags}
                 />
+
+                <div className="panel-players-and-buttons"> 
+                    <OtherPlayersPanel
+                        playersList={playersList}
+                        otherPlayersHands={otherPlayersHands}
+                        otherPlayersBags={otherPlayersBags}
+                        getPlayerColor={getPlayerColor}
+                        players={match?.players}
+                        npcs={match.npcs}
+                    />
+
+                    <MatchButtons
+                        match={match}
+                        currentUser={currentUser}
+                        actionPoints={actionPoints}
+                        setDiscardPhaseOpen={setDiscardPhaseOpen}
+                        setIsActionsModalOpen={setIsActionsModalOpen}
+                        leaveMatch={leaveMatch}
+                        endMatch={endMatch}
+                        chatOpen={chatOpen}
+                        setChatOpen={setChatOpen}
+                        ChatBox={ChatBox}
+                    />
+                </div>
+                <ActionsModal
+                        isOpen={isActionsModalOpen}
+                        onClose={() => setIsActionsModalOpen(false)}
+                        moveToAdyacent={() => setMoveToAdyacentRoom(true)}
+                        moveToRoomWithWord={() => setMoveToRoomWithWord(true)}
+                        onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
+                        onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
+                        canAttemptEscape={[1, 6, 31, 36].includes(normalizeRoomId(currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id)))}
+                    />
+
+
             </div>
 
             {isRoomSelectionActive && match?.currentTurnUserId === currentUser?.id && (
@@ -1145,73 +1204,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 </button>
             )}
 
-            <div className="player-section">
-                <div className="cards-section">
-                    <div className="player-hand">
-                        <div className="hand-cards">
-                            {Array.isArray(handCards) && handCards.map((carta) => (
-                                <div key={carta.id}>
-                                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="player-bag">
-                        <div className="bag-cards">
-                            {Array.isArray(bagCards) && bagCards.map((carta) => (
-                                <div key={carta.id}>
-                                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-                <div className="buttons-section">
-                    <button className="leave-match-button"
-                        onClick={() => setDiscardPhaseOpen(true)}
-                        disabled={match.currentTurnUserId !== currentUser.id}
-                        title="Discard cards from hand"
-                    >
-                        Discard and bag
-                    </button>
-                    <button className="leave-match-button"
-                        title="Discard cards from hand"
-                        onClick={() => setIsActionsModalOpen(true)}
-                        disabled={match.currentTurnUserId !== currentUser.id || actionPoints === 0}
-                    >
-                        Actions
-                    </button>
-                    <ActionsModal
-                        isOpen={isActionsModalOpen}
-                        onClose={() => setIsActionsModalOpen(false)}
-                        moveToAdyacent={() => setMoveToAdyacentRoom(true)}
-                        moveToRoomWithWord={() => setMoveToRoomWithWord(true)}
-                        onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
-                        onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
-                        canAttemptEscape={[1, 6, 31, 36].includes(normalizeRoomId(currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id)))}
-                    />
-                    <button
-                        className="leave-match-button"
-                        onClick={leaveMatch}
-                        style={{ marginLeft: '15px', background: '#e74c3c', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
-                    >
-                        Leave Match
-                    </button>
-                    <button
-                        className="end-match-button"
-                        onClick={endMatch}
-                        style={{ display: ( match?.creatorId !== currentUser?.id) ? 'none' : 'block' }}
-                    >
-                        End match
-                    </button>
-                    <div className="match-chat-icon ">
-                        <div className="match-chat-icon-button" onClick={() => setChatOpen(!chatOpen)}>
-                            <FaComments size={30} color="white" />
-                        </div>
-                    </div>
-                    {chatOpen && <ChatBox matchId={matchId} />}
-                </div>
-            </div>
+            <PlayerCardsSection
+                handCards={handCards}
+                bagCards={bagCards}
+            />
 
             <FightModal
                 isOpen={isFightModalOpen}
