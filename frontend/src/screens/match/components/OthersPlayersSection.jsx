@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import "../../../static/css/match/otherPlayersSection.css";
+import "../../../static/css/match/components/otherPlayersSection.css";
 
 export default function OtherPlayersPanel({
     playersList,

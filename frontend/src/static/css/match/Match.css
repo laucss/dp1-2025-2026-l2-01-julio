@@ -15,6 +15,8 @@
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    display: flex;
+    flex-direction: column;
 }
 .card{
     width: 110px;
@@ -23,121 +25,6 @@
 }
 
 
-/* -------------------- parte de las cartas del jugador -------------------- */
-.player-section{
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px;
-    background-color: rgb(237, 39, 39);
-    margin-bottom: 15px;
-    height: 295px;
-
-}
-
-.cards-section{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    gap: 20px;
-    padding: 10px;
-    /*background-color: rgb(21, 249, 0);*/
-    flex-wrap: wrap;
-    
-}
-
-.player-hand{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 20px;
-    padding: 10px;
-    background-color: rgb(253, 70, 70);
-    width: 48%;
-    height: 160px;
-    border-radius: 10px;
-    overflow: hidden;
-    overflow-y: auto;
-}
-
-.hand-cards{
-  flex: 1;
-  padding: 10px;
-
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  gap: 20px;
-  justify-content: center;
-  align-content: flex-start;
-
-  flex-wrap: nowrap; 
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-/* Esto es solo para poner más bonita la barra de scrollear*/
-.hand-cards::-webkit-scrollbar {
-  height: 8px;
-}
-
-.hand-cards::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.1);
-  border-radius: 4px;
-}
-
-.hand-cards::-webkit-scrollbar-thumb {
-  background-color: #fc8282;
-  border-radius: 4px;
-}
-
-
-.player-bag{
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 20px;
-    padding: 10px;
-    background-color: rgb(246, 135, 135);
-    flex-wrap: wrap;
-    width: 48%;
-    height: 160px;
-    border-radius: 10px;
-    overflow: hidden;
-    overflow-y: auto;
-}
-
-
-.bag-cards{
-  flex: 1;
-  padding: 10px;
-
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-  justify-content: center;
-  align-content: flex-start;
-
-  flex-wrap: nowrap; 
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-/* Esto es solo para poner más bonita la barra de scrollear*/
-.bag-cards::-webkit-scrollbar {
-  height: 8px;
-}
-
-.bag-cards::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.1);
-  border-radius: 4px;
-}
-
-.bag-cards::-webkit-scrollbar-thumb {
-  background-color: #fbd4d4;
-  border-radius: 4px;
-}
 
 .section-title{
     width: 100%;
@@ -147,13 +34,7 @@
 }
 
 .match-board {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0.5%;
-    position: relative;
+    flex: 1;
 }
 
 

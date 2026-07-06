@@ -2,7 +2,7 @@
 
 import { FaComments } from "react-icons/fa";
 import ChatBox from "../chatBox";
-import "../../../static/css/match/matchButtons.css";
+import "../../../static/css/match/components/matchButtons.css";
 
 export default function MatchButtons({
     match,

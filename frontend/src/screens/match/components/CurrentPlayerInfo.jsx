@@ -1,5 +1,5 @@
 import React from "react";
-import "../../../static/css/match/currentPlayerInfo.css"
+import "../../../static/css/match/components/currentPlayerInfo.css"
 
 export default function CurrentPlayerInfo({
     currentPlayer,

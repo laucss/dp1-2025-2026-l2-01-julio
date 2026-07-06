@@ -20,6 +20,7 @@ import DeckSection from "./components/DeckSection";
 import MatchBoardMap from "./components/MatchBoardMap";
 import OtherPlayersPanel from './components/OthersPlayersSection';
 import MatchButtons from './components/MatchButtons'
+import PlayerCardsSection from "./components/PlayerCardsSection";
 import { getRandomFreeRoom } from "./utils/roomHelpers";
 import { handlePlayerFight, handleNpcFight} from "./utils/fightHelpers";
 
@@ -1166,6 +1167,15 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                         ChatBox={ChatBox}
                     />
                 </div>
+                <ActionsModal
+                        isOpen={isActionsModalOpen}
+                        onClose={() => setIsActionsModalOpen(false)}
+                        moveToAdyacent={() => setMoveToAdyacentRoom(true)}
+                        moveToRoomWithWord={() => setMoveToRoomWithWord(true)}
+                        onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
+                        onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
+                        canAttemptEscape={[1, 6, 31, 36].includes(normalizeRoomId(currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id)))}
+                    />
 
 
             </div>
@@ -1188,28 +1198,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 </button>
             )}
 
-            <div className="player-section">
-                <div className="cards-section">
-                    <div className="player-hand">
-                        <div className="hand-cards">
-                            {Array.isArray(handCards) && handCards.map((carta) => (
-                                <div key={carta.id}>
-                                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="player-bag">
-                        <div className="bag-cards">
-                            {Array.isArray(bagCards) && bagCards.map((carta) => (
-                                <div key={carta.id}>
-                                    <img src={`/resources${carta.frontImage}`} alt={`Carta ${carta.letter}`} className="card" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <PlayerCardsSection
+                handCards={handCards}
+                bagCards={bagCards}
+            />
 
             <FightModal
                 isOpen={isFightModalOpen}
