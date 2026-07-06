@@ -57,7 +57,7 @@ public interface MatchRepository extends CrudRepository<Match, Integer> {
        Page<Match> findMatchesPlayedByUser(Integer userId, Pageable pageable);
 
        //Devuelves todas las partidas jugadas por un usuario y creadas por él
-       @Query("SELECT m FROM Match m JOIN m.players p WHERE p.user.id = :userId AND m.endTime IS NOT NULL AND m.creatorId = :userId")
+       @Query("SELECT m FROM Match m  WHERE m.endTime IS NOT NULL AND m.creatorId = :userId")
        Page<Match> findMatchesPlayedAndCreatedByUser( Integer userId, Pageable pageable);
 
        //Devuelve todas las partidas ganadas por un usuario

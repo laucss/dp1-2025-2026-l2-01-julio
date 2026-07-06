@@ -160,23 +160,30 @@ public class MatchService {
 
 //------------------FUNCIONES PARA EL HISTORIAL DE PARTIDAS ------------------------------------------------------
 
+    private MatchHistorialDTO toHistorialDTO(Match match) {
+     return new MatchHistorialDTO(match, userService.findUser(match.getCreatorId()));
+    }
     //Para devolver el listado de todo el historial de partidas finalizadas y en curso
     @Transactional(readOnly = true) 
-    public Page<Match> getFinishedAndInProgressMatches(Integer page, Integer size) {
-        return matchRepo.findFinishedAndInProgress(PageRequest.of(page,size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getFinishedAndInProgressMatches(Integer page, Integer size) {
+        return matchRepo.findFinishedAndInProgress(
+            PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")))
+            .map(this::toHistorialDTO);
     }
 
     //Para devolver el listado de partidas en curso 
     @Transactional(readOnly = true)
-    public Page<Match> getInProgressMatches(Integer page, Integer size) {
-        return matchRepo.findInProgress(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getInProgressMatches(Integer page, Integer size) {
+        return matchRepo.findInProgress(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")))
+            .map(this::toHistorialDTO)  ;
     }
 
 
     //Para devolver el listado de partidas finalizadas
     @Transactional(readOnly = true)
-    public Page<Match> getFinishedMatches(Integer page, Integer size) {
-            return matchRepo.findFinished(PageRequest.of(page,size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getFinishedMatches(Integer page, Integer size) {
+            return matchRepo.findFinished(PageRequest.of(page,size, Sort.by(Sort.Direction.DESC, "startTime")))
+                .map(this::toHistorialDTO);
         }
 
 
@@ -191,13 +198,14 @@ public class MatchService {
 
             return matches.map(match -> {
 
-                MatchHistorialDTO dto = new MatchHistorialDTO(match);
+            MatchHistorialDTO dto = toHistorialDTO(match);
+         
 
-                dto.setAbandoned(
-                    abandonedMatchRepository.existsByMatchIdAndUserId(match.getId(), userId)
-                );
+            dto.setAbandoned(
+                abandonedMatchRepository.existsByMatchIdAndUserId(match.getId(), userId)
+            );
 
-                return dto;
+            return dto;
             });
         }
 
@@ -205,26 +213,30 @@ public class MatchService {
 
     //Para devolver el listado de partidas jugadas por un usuario
     @Transactional(readOnly = true)
-    public Page<Match> getMatchesPlayedByUser(Integer userId, Integer page, Integer size) {
-        return matchRepo.findMatchesPlayedByUser(userId, PageRequest.of(page, size,Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getMatchesPlayedByUser(Integer userId, Integer page, Integer size) {
+        return matchRepo.findMatchesPlayedByUser(userId, PageRequest.of(page, size,Sort.by(Sort.Direction.DESC, "startTime")))
+            .map(this::toHistorialDTO);
     }
 
     //Para devolver el listado de partidas creadas por un usuario 
     @Transactional(readOnly = true)
-    public Page<Match> getMatchesPlayedAndCreatedByUser(Integer userId, Integer page, Integer size) {
-        return matchRepo.findMatchesPlayedAndCreatedByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getMatchesPlayedAndCreatedByUser(Integer userId, Integer page, Integer size) {
+        return matchRepo.findMatchesPlayedAndCreatedByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")))
+            .map(this::toHistorialDTO);
     }
 
     //Para devolver el listado de partidas ganadas por un usuario 
     @Transactional(readOnly = true)
-    public Page<Match> getMatchesWonByUser(Integer userId, Integer page, Integer size) {
-        return matchRepo.findMatchesWonByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getMatchesWonByUser(Integer userId, Integer page, Integer size) {
+        return matchRepo.findMatchesWonByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")))
+            .map(this::toHistorialDTO);
     }
 
     //Para devolver el listado de partidas abandonadas por un usuario
     @Transactional(readOnly = true)
-    public Page<Match> getMatchesAbandonedByUser(Integer userId, Integer page, Integer size) {
-        return abandonedMatchRepository.findMatchesAbandonedByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getMatchesAbandonedByUser(Integer userId, Integer page, Integer size) {
+        return abandonedMatchRepository.findMatchesAbandonedByUser(userId, PageRequest.of(page, size))
+            .map(this::toHistorialDTO);
     }
 
 

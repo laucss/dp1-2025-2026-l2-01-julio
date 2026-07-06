@@ -53,6 +53,7 @@ export default function History({ userId: propUserId, userName: propUserName }) 
       const res = await fetch(url, { headers: { Authorization: `Bearer ${jwt}` } });
       if (!res.ok) throw new Error("Error al cargar el historial");
       const data = await res.json();
+      console.log(data.content);
 
 
       // Expecting a Page response with .content and .totalPages
@@ -71,18 +72,55 @@ export default function History({ userId: propUserId, userName: propUserName }) 
   }, [filter, page, userId]);
 
   const formatDuration = (duration) => {
-    if (!duration) return "En curso";
-    const match = typeof duration === "string" && duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
-    if (match) return `${match[1] ? match[1] + "h " : ""}${match[2] ? match[2] + "m" : ""}`.trim();
-    if (typeof duration === "number") {
-      const totalSeconds = duration > 1000 ? Math.floor(duration / 1000) : Math.floor(duration);
-      const totalMinutes = Math.floor(totalSeconds / 60);
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
-      return `${hours ? hours + "h " : ""}${minutes ? minutes + "m" : ""}`.trim() || `${totalSeconds}s`;
-    }
-    return String(duration);
-  };
+      if (!duration) return "En curso";
+
+      // Duración en formato ISO-8601 (PT1H2M3.456S)
+      if (typeof duration === "string") {
+        const match = duration.match(
+          /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?$/
+        );
+
+        if (!match) return duration;
+
+        const hours = Number(match[1] || 0);
+        const minutes = Number(match[2] || 0);
+        const seconds = Math.floor(Number(match[3] || 0));
+
+        const parts = [];
+
+        if (hours > 0) parts.push(`${hours}h`);
+        if (minutes > 0) parts.push(`${minutes}m`);
+
+        // Mostrar segundos si existen o si la duración es menor de un minuto
+        if (seconds > 0 || (hours === 0 && minutes === 0)) {
+          parts.push(`${seconds}s`);
+        }
+
+        return parts.join(" ");
+      }
+
+      // Si algún día llega como número
+      if (typeof duration === "number") {
+        const totalSeconds =
+          duration > 1000 ? Math.floor(duration / 1000) : Math.floor(duration);
+
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const parts = [];
+
+        if (hours > 0) parts.push(`${hours}h`);
+        if (minutes > 0) parts.push(`${minutes}m`);
+        if (seconds > 0 || (hours === 0 && minutes === 0)) {
+          parts.push(`${seconds}s`);
+        }
+
+        return parts.join(" ");
+      }
+
+      return String(duration);
+    };
 
   const avatar = (user, size = 36) =>
     user && (
