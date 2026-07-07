@@ -55,7 +55,7 @@
 .chat-message {
   margin-bottom: 5px;
   padding: 5px;
-  background: #333;
+  background: #fdbc7f;
   border-radius: 6px;
 }
 
@@ -99,7 +99,7 @@
 }
 
 .chat-content {
-  background: #f1f1f1;
+  background: #c33a3a;
   padding: 6px 10px;
   border-radius: 8px;
   max-width: 70%;
@@ -124,5 +124,5 @@
 /* Hora junto al nombre */
 .chat-message .chat-time {
   font-size: 0.75em;
-  color: gray;
+  color: #ce6400;
 }

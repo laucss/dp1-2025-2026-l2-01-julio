@@ -6,12 +6,12 @@ import "../../../static/css/match/components/matchButtons.css";
 
 export default function MatchButtons({
     match,
+    matchId,
     currentUser,
     actionPoints,
     setDiscardPhaseOpen,
     setIsActionsModalOpen,
     leaveMatch,
-    endMatch,
     handleEndTurn,
     isEndingTurn,
     chatOpen,
@@ -72,7 +72,7 @@ export default function MatchButtons({
                     </div>
                 </div>
 
-                {chatOpen && <ChatBox matchId={match.id} />}
+                {chatOpen && <ChatBox matchId={matchId} />}
 
             </div>
 

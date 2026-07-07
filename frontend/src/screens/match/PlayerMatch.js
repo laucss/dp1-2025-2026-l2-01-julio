@@ -1252,6 +1252,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
                     <MatchButtons
                         match={match}
+                        matchId={matchId}
                         currentUser={currentUser}
                         actionPoints={actionPoints}
                         setDiscardPhaseOpen={setDiscardPhaseOpen}
@@ -1266,7 +1267,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                                 onConfirm: leaveMatch
                             })
                         }                   
-                        endMatch={endMatch}
                         handleEndTurn={handleEndTurn}
                         isEndingTurn={isEndingTurn}
                         chatOpen={chatOpen}

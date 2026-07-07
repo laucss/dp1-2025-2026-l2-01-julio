@@ -3,6 +3,8 @@ import { ChatApi } from "../../services/chatApi";
 import "../../static/css/match/chat.css";
 
 export default function ChatBox({ matchId }) {
+   console.log("MATCH ID RECIBIDO:", matchId);
+
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [error, setError] = useState(null);
@@ -23,9 +25,14 @@ export default function ChatBox({ matchId }) {
       setError("Error cargando mensajes.");
     }
   };
+  
 
   //Enviar mensaje
   const sendMessage = async () => {
+    console.log("text:", text);
+        console.log("matchId:", matchId);
+
+    
     if (!text.trim()) return;
 
     try {
