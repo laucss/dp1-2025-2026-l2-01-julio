@@ -13,6 +13,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.WeaponsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.HandUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
@@ -129,5 +130,13 @@ public class MatchWebsocketController {
             votingResult
         );
     }
+
+    public void notifyPlayerLeft(Integer matchId, MatchDTO match) {
+    System.out.println("ENVIANDO PLAYER LEFT POR WEBSOCKET");
+    messagingTemplate.convertAndSend(
+        "/topic/match." + matchId + ".playerLeft",
+        match
+    );
+}   
 
 }

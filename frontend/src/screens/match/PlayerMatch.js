@@ -102,6 +102,23 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         return () => subscription.unsubscribe();
     }, [stompClient, matchId]);
 
+
+        useEffect(() => {
+            console.log(stompClient);
+            console.log(stompClient?.active);
+            if (!stompClient || !stompClient.active) return;
+
+            const subscription = stompClient.subscribe(
+                `/topic/match.${matchId}.playerLeft`,
+                (msg) => {
+                    console.log("PLAYER LEFT", msg.body);
+                    fetchMatchAndPlayers();
+                }
+            );
+
+            return () => subscription.unsubscribe();
+        }, [stompClient, matchId]);
+
     useEffect(() => {
         if (!stompClient || !stompClient.active) return;
 
