@@ -15,7 +15,6 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,15 +28,13 @@ public class Checkers {
     private final PlayerRepository playerRepository;
 
     private final FriendRequestService friendRequestService;
-    private final UserService userService;
 
     public Checkers(LobbyRepository lobbyRepository, PlayerRepository playerRepository, CardRepository cardRepository, 
-        FriendRequestService friendRequestService,  UserService userService, MatchRepository matchRepository) {
+        FriendRequestService friendRequestService, MatchRepository matchRepository) {
         this.lobbyRepository = lobbyRepository;
         this.playerRepository = playerRepository;
         this.cardRepository = cardRepository; 
         this.friendRequestService = friendRequestService; 
-        this.userService = userService; 
         this.matchRepository = matchRepository; 
     }
 
@@ -117,7 +114,6 @@ public class Checkers {
         if (player != null && player.getCardsDrawnInTurn() >= TOTAL_CARDS_TO_DRAW){
             throw new MoreThan7CardsDrawnException("You cannot draw more than " + TOTAL_CARDS_TO_DRAW + " cards in your turn"); 
         }
-
 
     }
      

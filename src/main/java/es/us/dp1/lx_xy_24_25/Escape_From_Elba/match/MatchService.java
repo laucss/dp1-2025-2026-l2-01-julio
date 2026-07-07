@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
@@ -28,19 +26,13 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.BagNotValidException;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.InvalidMovementException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsDrawnException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsInHand;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.LoseAgainstNpcRequestDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchHistorialDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
@@ -69,7 +61,6 @@ public class MatchService {
     BagService bagService;
     PlayerService playerService; 
     UserService userService;
-    Random ran = new Random();
     LobbyWebsocketController lobbyWebsocketController;
     MatchWebsocketController matchWebsocketController;
     Checkers checkers; 
@@ -289,7 +280,6 @@ public class MatchService {
         Match match = matchRepo.findById(matchId)
                 .orElseThrow(() -> new IllegalArgumentException("Match not found"));
 
-
         Player player = playerRepo.findByMatchAndUser(matchId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
  
@@ -297,7 +287,6 @@ public class MatchService {
         if (player.getDiceOrder() != null) {
             throw new IllegalArgumentException("The player has already rolled the dice.");
         }
-
 
         player.setDiceOrder(diceRoll);
         playerRepo.save(player);
@@ -656,36 +645,7 @@ public class MatchService {
     }
 
 
-    
-
-    /* 
     @Transactional
-    public Player moveLoserPlayer(Integer matchId, Integer userId, Integer targetRoomId) {
-        Match match = matchRepo.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
-        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
-            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
-        }
-        //Recuperar el jugador dentro del match
-        Player player = playerRepo.findByMatchAndUser(matchId, userId)
-                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
-        //Recuperar la sala destino
-        Room targetRoom = roomRepository.findById(targetRoomId)
-            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
-        //Actualizar la sala y fuerza del jugador
-        Room currentRoom = player.getRoom();
-        if (currentRoom == null || !targetRoom.getId().equals(currentRoom.getId())) {
-            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);
-            player.setRoomsVisited(visited + 1);
-        }
-        player.setRoom(targetRoom);
-        player.setStrength(player.getStrength() + 1);
-        
-        //Guardar cambios
-        return playerRepo.save(player);
-    }
-        */
-
     public ActionPointsUpdateDTO consumeOneActionPoint(Integer matchId, Integer userId) {
         Player player = playerRepo.findByMatchAndUser(matchId, userId)
             .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
