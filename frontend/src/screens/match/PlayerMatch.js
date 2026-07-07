@@ -342,6 +342,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.actionPoints`, (msg) => {
             const actionPointsUpdate = JSON.parse(msg.body);
+            console.log('actionPointsUpdate', actionPointsUpdate)
             if (actionPointsUpdate.userId === currentPlayer.user?.id) {
                 setActionPoints(actionPointsUpdate.actionPoints);
             }
@@ -413,10 +414,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             setStrength(Math.min(6, currentPlayer.strength)) 
         }
         setNumCardsDrawn(0)
-        
-        if (currentTurnUserId && currentPlayer.user?.id === currentTurnUserId){ 
-            fetchActionPoints() 
-        }
+
     }, [currentTurnUserId, currentPlayer]);
 
     useEffect(() => {
@@ -641,25 +639,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     };
 
 
-    const notifyActionPoints = async (userId, actionPoints) => {
-        try {
-            await fetch(`/api/v1/matches/${matchId}/notify-action-points`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ matchId, userId, actionPoints })
-            });
-
-            if (userId === currentUser.id) {
-                setActionPoints(actionPoints);
-            }
-        } catch (err) {
-            console.error("Error notifying action points:", err);
-        }
-    };
-
    const handleNpcMove = async (roomId) => {
         if (selectedNpcIndex === null) {
             toast.error("Select an NPC first.");
@@ -733,11 +712,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             if (response.ok) {
                 const data = await response.json();
                 updatePlayerData(data); // Actualizamos el mapa y los jugadores con el nuevo estado
-
-                const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
-                if (movedPlayer) {
-                    await notifyActionPoints(currentUser.id, movedPlayer.actionPoints);
-                }
 
                 resetMoveMode(false);
             } else {
