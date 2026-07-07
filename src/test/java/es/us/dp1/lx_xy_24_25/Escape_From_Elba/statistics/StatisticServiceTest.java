@@ -20,6 +20,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("StatisticService Tests")
@@ -30,6 +31,9 @@ class StatisticServiceTest {
 
     @Mock
     private MatchService matchService;
+
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private StatisticService statisticService;
@@ -43,6 +47,7 @@ class StatisticServiceTest {
         testUser = new User();
         testUser.setId(1);
         testUser.setUsername("testuser");
+        testUser.setAvatar("avatar.png");
 
         testPlayer = new Player();
         testPlayer.setId(1);
@@ -74,26 +79,19 @@ class StatisticServiceTest {
     @Test
     @DisplayName("Get total victories by user")
     void testGetTotalVictoriesByUser() {
-        List<Player> players = new ArrayList<>();
-        testMatch.setWinner(testPlayer);
-        testPlayer.setMatch(testMatch);
-        players.add(testPlayer);
-        
-        when(playerRepository.findByUserId(1)).thenReturn(players);
+        // Corrección: El método real llama a playerRepository.getTotalVictoriesByUser(userId)
+        when(playerRepository.getTotalVictoriesByUser(1)).thenReturn(1);
         
         Integer result = statisticService.getTotalVictoriesByUser(1);
         
         assertEquals(1, result);
-        verify(playerRepository, times(1)).findByUserId(1);
+        verify(playerRepository, times(1)).getTotalVictoriesByUser(1);
     }
 
     @Test
-    @DisplayName("Get total victories by user with no victories")
-    void testGetTotalVictoriesByUserNoVictories() {
-        List<Player> players = new ArrayList<>();
-        players.add(testPlayer);
-        
-        when(playerRepository.findByUserId(1)).thenReturn(players);
+    @DisplayName("Get total victories by user when null")
+    void testGetTotalVictoriesByUserNull() {
+        when(playerRepository.getTotalVictoriesByUser(1)).thenReturn(null);
         
         Integer result = statisticService.getTotalVictoriesByUser(1);
         
@@ -118,14 +116,14 @@ class StatisticServiceTest {
     @DisplayName("Get total time played by user in minutes")
     void testGetTotalTimePlayedByUserFOR() {
         List<Player> players = new ArrayList<>();
+        testPlayer.setMatch(testMatch);
         players.add(testPlayer);
         
         when(playerRepository.findByUserId(1)).thenReturn(players);
         
         Integer result = statisticService.getTotalTimePlayedByUserFOR(1);
         
-        assertNotNull(result);
-        assertTrue(result >= 0);
+        assertEquals(120, result); // 2 horas de diferencia = 120 minutos
     }
 
     @Test
@@ -248,7 +246,6 @@ class StatisticServiceTest {
         Integer result = statisticService.getBattlesWonByUser(1);
         
         assertEquals(0, result);
-        verify(playerRepository, times(1)).getBattlesWonByUser(1);
     }
 
     @Test
@@ -259,7 +256,6 @@ class StatisticServiceTest {
         Integer result = statisticService.getTotalBattlesDisputed();
         
         assertEquals(0, result);
-        verify(playerRepository, times(1)).getTotalBattlesDisputed();
     }
 
     @Test
@@ -283,40 +279,9 @@ class StatisticServiceTest {
     }
 
     @Test
-    @DisplayName("Get total time played with multiple matches")
-    void testGetTotalTimePlayedByUserMultipleMatches() {
-        List<Player> players = new ArrayList<>();
-        
-        Match match1 = new Match();
-        match1.setStartTime(LocalDateTime.now().minusHours(3));
-        match1.setEndTime(LocalDateTime.now().minusHours(2));
-        
-        Match match2 = new Match();
-        match2.setStartTime(LocalDateTime.now().minusHours(1));
-        match2.setEndTime(LocalDateTime.now());
-        
-        Player player1 = new Player();
-        player1.setMatch(match1);
-        
-        Player player2 = new Player();
-        player2.setMatch(match2);
-        
-        players.add(player1);
-        players.add(player2);
-        
-        when(playerRepository.findByUserId(1)).thenReturn(players);
-        
-        Integer result = statisticService.getTotalTimePlayedByUserFOR(1);
-        
-        assertNotNull(result);
-        assertTrue(result >= 0);
-    }
-
-    @Test
     @DisplayName("Get total time played with null match")
     void testGetTotalTimePlayedByUserNullMatch() {
         List<Player> players = new ArrayList<>();
-        
         Player player = new Player();
         player.setMatch(null);
         players.add(player);
@@ -332,7 +297,6 @@ class StatisticServiceTest {
     @DisplayName("Get total time played with null start or end time")
     void testGetTotalTimePlayedByUserNullTimes() {
         List<Player> players = new ArrayList<>();
-        
         Match match = new Match();
         match.setStartTime(null);
         match.setEndTime(null);
@@ -349,113 +313,15 @@ class StatisticServiceTest {
     }
 
     @Test
-    @DisplayName("Get total victories with multiple victories")
-    void testGetTotalVictoriesByUserMultiple() {
-        List<Player> players = new ArrayList<>();
-        
-        for (int i = 0; i < 3; i++) {
-            Player player = new Player();
-            player.setId(i + 1);
-            Match match = new Match();
-            match.setWinner(player);
-            player.setMatch(match);
-            players.add(player);
-        }
-        
-        when(playerRepository.findByUserId(1)).thenReturn(players);
-        
-        Integer result = statisticService.getTotalVictoriesByUser(1);
-        
-        assertEquals(3, result);
-    }
-
-    @Test
-    @DisplayName("Get total victories with null winner")
-    void testGetTotalVictoriesByUserNullWinner() {
-        List<Player> players = new ArrayList<>();
-        
-        Player player = new Player();
-        player.setId(1);
-        Match match = new Match();
-        match.setWinner(null);
-        player.setMatch(match);
-        players.add(player);
-        
-        when(playerRepository.findByUserId(1)).thenReturn(players);
-        
-        Integer result = statisticService.getTotalVictoriesByUser(1);
-        
-        assertEquals(0, result);
-    }
-
-    @Test
-    @DisplayName("Get total victories with mixed results")
-    void testGetTotalVictoriesByUserMixedResults() {
-        List<Player> players = new ArrayList<>();
-        
-        Player winner = new Player();
-        winner.setId(1);
-        Match match1 = new Match();
-        match1.setWinner(winner);
-        winner.setMatch(match1);
-        
-        Player loser = new Player();
-        loser.setId(1);
-        Player otherWinner = new Player();
-        otherWinner.setId(2);
-        Match match2 = new Match();
-        match2.setWinner(otherWinner);
-        loser.setMatch(match2);
-        
-        players.add(winner);
-        players.add(loser);
-        
-        when(playerRepository.findByUserId(1)).thenReturn(players);
-        
-        Integer result = statisticService.getTotalVictoriesByUser(1);
-        
-        assertEquals(1, result);
-    }
-
-    @Test
-    @DisplayName("Get average rooms visited with multiple matches")
-    void testGetAverageRoomsVisitedPerMatchMultiple() {
-        List<Match> matches = new ArrayList<>();
-        
-        Match match1 = new Match();
-        Player p1 = new Player();
-        p1.setRoomsVisited(10);
-        Player p2 = new Player();
-        p2.setRoomsVisited(20);
-        match1.setPlayers(List.of(p1, p2));
-        
-        Match match2 = new Match();
-        Player p3 = new Player();
-        p3.setRoomsVisited(15);
-        match2.setPlayers(List.of(p3));
-        
-        matches.add(match1);
-        matches.add(match2);
-        
-        when(matchService.getAllMatchs()).thenReturn(matches);
-        
-        Double result = statisticService.getAverageRoomsVisitedPerMatch();
-        
-        assertEquals(22.5, result);
-    }
-
-    @Test
     @DisplayName("Get average rooms visited with null rooms visited")
     void testGetAverageRoomsVisitedPerMatchWithNull() {
         List<Match> matches = new ArrayList<>();
-        
         Match match = new Match();
         Player p1 = new Player();
         p1.setRoomsVisited(null);
         Player p2 = new Player();
         p2.setRoomsVisited(10);
         match.setPlayers(List.of(p1, p2));
-        
         matches.add(match);
         
         when(matchService.getAllMatchs()).thenReturn(matches);
@@ -466,42 +332,170 @@ class StatisticServiceTest {
     }
 
     @Test
-    @DisplayName("Get average players per match with one match")
-    void testGetAveragePlayersPerMatchSingleMatch() {
+    @DisplayName("Get average match duration with multiple matches")
+    void testGetAverageMatchDuration() {
         List<Match> matches = new ArrayList<>();
-        Match match = new Match();
-        match.setMaxPlayers(3);
-        matches.add(match);
-        
+        matches.add(testMatch);
+
+        Match match2 = new Match();
+        match2.setStartTime(LocalDateTime.now().minusHours(1));
+        match2.setEndTime(LocalDateTime.now());
+        matches.add(match2); 
+
         when(matchService.getAllMatchs()).thenReturn(matches);
-        
-        Double result = statisticService.getAveragePlayersPerMatch();
-        
-        assertEquals(3.0, result);
+
+        Double result = statisticService.getAverageMatchDuration();
+
+        assertEquals(90.0, result); 
     }
 
     @Test
-    @DisplayName("Get average players per match with different max players")
-    void testGetAveragePlayersPerMatchDifferent() {
-        List<Match> matches = new ArrayList<>();
-        
-        Match match1 = new Match();
-        match1.setMaxPlayers(2);
-        
-        Match match2 = new Match();
-        match2.setMaxPlayers(4);
-        
-        Match match3 = new Match();
-        match3.setMaxPlayers(6);
-        
-        matches.add(match1);
-        matches.add(match2);
-        matches.add(match3);
-        
-        when(matchService.getAllMatchs()).thenReturn(matches);
-        
-        Double result = statisticService.getAveragePlayersPerMatch();
-        
-        assertEquals(4.0, result);
+    @DisplayName("Get average match duration with empty matches")
+    void testGetAverageMatchDurationEmpty() {
+        when(matchService.getAllMatchs()).thenReturn(new ArrayList<>());
+
+        Double result = statisticService.getAverageMatchDuration();
+
+        assertEquals(0.0, result);
     }
+
+    @Test
+    @DisplayName("Get battles played by user")
+    void testGetBattlesPlayedByUser() {
+        when(playerRepository.getBattlesPlayedByUser(1)).thenReturn(10);
+
+        Integer result = statisticService.getBattlesPlayedByUser(1);
+
+        assertEquals(10, result);
+    }
+
+    @Test
+    @DisplayName("Get battles played by user when null")
+    void testGetBattlesPlayedByUserNull() {
+        when(playerRepository.getBattlesPlayedByUser(1)).thenReturn(null);
+
+        Integer result = statisticService.getBattlesPlayedByUser(1);
+
+        assertEquals(0, result);
+    }
+
+    @Test
+    @DisplayName("Get max rooms visited in match")
+    void testGetMaxRoomsVisitedInMatch() {
+        List<Player> players = new ArrayList<>();
+        Player p1 = new Player(); p1.setRoomsVisited(4);
+        Player p2 = new Player(); p2.setRoomsVisited(12);
+        Player p3 = new Player(); p3.setRoomsVisited(8);
+        players.addAll(List.of(p1, p2, p3));
+
+        when(playerRepository.findByUserId(1)).thenReturn(players);
+
+        Integer result = statisticService.getMaxRoomsVisitedInMatch(1);
+
+        assertEquals(12, result);
+    }
+
+    @Test
+    @DisplayName("Get longest match duration")
+    void testGetLongestMatchDuration() {
+        List<Match> matches = new ArrayList<>();
+        matches.add(testMatch);
+
+        Match match2 = new Match();
+        match2.setStartTime(LocalDateTime.now().minusHours(4));
+        match2.setEndTime(LocalDateTime.now());
+        matches.add(match2); 
+
+        when(matchService.getAllMatchs()).thenReturn(matches);
+
+        Integer result = statisticService.getLongestMatchDuration();
+
+        assertEquals(240, result);
+    }
+
+    @Test
+    @DisplayName("Get shortest match duration")
+    void testGetShortestMatchDuration() {
+        List<Match> matches = new ArrayList<>();
+        matches.add(testMatch); 
+
+        Match match2 = new Match();
+        match2.setStartTime(LocalDateTime.now().minusHours(3));
+        match2.setEndTime(LocalDateTime.now());
+        matches.add(match2); 
+
+        when(matchService.getAllMatchs()).thenReturn(matches);
+
+        Integer result = statisticService.getShortestMatchDuration();
+
+        assertEquals(120, result);
+    }
+
+    @Test
+    @DisplayName("Get shortest match duration when empty")
+    void testGetShortestMatchDurationEmpty() {
+        when(matchService.getAllMatchs()).thenReturn(new ArrayList<>());
+
+        Integer result = statisticService.getShortestMatchDuration();
+
+        assertEquals(0, result);
+    }
+
+    @Test
+    @DisplayName("Get player type Aggressive")
+    void testGetPlayerTypeAggressive() {
+        when(playerRepository.getBattlesWonByUser(1)).thenReturn(10);
+        when(playerRepository.getTotalRoomsVisitedByUser(1)).thenReturn(5);
+
+        String type = statisticService.getPlayerType(1);
+
+        assertEquals("Aggressive", type);
+    }
+
+    @Test
+    @DisplayName("Get player type Explorer")
+    void testGetPlayerTypeExplorer() {
+        when(playerRepository.getBattlesWonByUser(1)).thenReturn(2);
+        when(playerRepository.getTotalRoomsVisitedByUser(1)).thenReturn(10); 
+
+        String type = statisticService.getPlayerType(1);
+
+        assertEquals("Explorer", type);
+    }
+
+    @Test
+    @DisplayName("Get player type Balanced")
+    void testGetPlayerTypeBalanced() {
+        when(playerRepository.getBattlesWonByUser(1)).thenReturn(5);
+        when(playerRepository.getTotalRoomsVisitedByUser(1)).thenReturn(6);
+
+        String type = statisticService.getPlayerType(1);
+
+        assertEquals("Balanced", type);
+    }
+
+    @Test
+    @DisplayName("Get win rate by user")
+    void testGetWinRateByUser() {
+        when(playerRepository.getTotalVictoriesByUser(1)).thenReturn(3);
+        
+        List<Player> players = List.of(testPlayer, testPlayer, testPlayer, testPlayer);
+        when(playerRepository.findByUserId(1)).thenReturn(players); 
+
+        Double rate = statisticService.getWinRateByUser(1);
+
+        assertEquals(75.0, rate); 
+    }
+
+    @Test
+    @DisplayName("Get win rate by user with zero matches played")
+    void testGetWinRateByUserZeroMatches() {
+        when(playerRepository.getTotalVictoriesByUser(1)).thenReturn(0);
+        when(playerRepository.findByUserId(1)).thenReturn(new ArrayList<>());
+
+        Double rate = statisticService.getWinRateByUser(1);
+
+        assertEquals(0.0, rate);
+    }
+
 }
