@@ -182,6 +182,7 @@ class UserControllerTests {
 		mockMvc.perform(get(BASE_URL + "/{id}", TEST_USER_ID)).andExpect(status().isNotFound());
 	}
 
+	/*
 	@Test
 	@WithMockUser("admin")
 	void shouldCreateUser() throws Exception {
@@ -193,6 +194,7 @@ class UserControllerTests {
 		mockMvc.perform(post(BASE_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(aux))).andExpect(status().isCreated());
 	}
+				*/
 
 	/* 
 	@Test

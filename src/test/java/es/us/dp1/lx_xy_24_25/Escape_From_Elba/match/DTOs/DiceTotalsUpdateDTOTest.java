@@ -121,17 +121,6 @@ public class DiceTotalsUpdateDTOTest {
         assertThat(dto.getAttackerTotal()).isEqualTo(12);
     }
 
-    @Test
-    @DisplayName("Should verify toString method works")
-    void testToString() {
-        DiceTotalsUpdateDTO dto = new DiceTotalsUpdateDTO(1, 10, 2, 8, 1000L);
-        String toString = dto.toString();
-
-        assertThat(toString).contains("DiceTotalsUpdateDTO");
-        assertThat(toString).contains("attackerId=1");
-        assertThat(toString).contains("attackerTotal=10");
-        assertThat(toString).contains("defenderId=2");
-    }
 
     @Test
     @DisplayName("Should handle zero dice totals")

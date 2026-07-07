@@ -48,6 +48,13 @@ export default function CreateLobby() {
   return (
   <div className="center-box">
     <div className="lobbies-overlay">
+
+      <button 
+        className="back-arrow-btn"
+        onClick={() => navigate('/')}
+        >
+        ￩
+    </button>
   <div className="creation-box">
 
 

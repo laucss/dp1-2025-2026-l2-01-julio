@@ -79,8 +79,21 @@ function AppNavbar() {
             profileLinks = (
                 <>
                     <NavItem>
-                        <NavLink style={{ color: "white", cursor: "pointer" }} onClick={toggleSidebar}><IoNotifications/></NavLink>
-                    </NavItem> 
+                        <NavLink
+                            style={{ color: "white", cursor: "pointer", marginRight: "20px" }}
+                            onClick={handleNotificationsClick}
+                        >
+                        <div className="notification-container">
+                                <IoNotifications size={24} />
+                                {notifications.length > 0 && (
+                                    <span className="notification-badge">
+                                        {notifications.length}
+                                    </span>
+                                )}
+                            </div>
+                            Notifications 
+                        </NavLink>
+                    </NavItem>
                     <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
                     {/* TODO: provisional hasta poner logout en AppNavbar cuando  eres admin */}
                     <NavItem>
