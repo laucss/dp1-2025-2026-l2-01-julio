@@ -87,12 +87,18 @@ export default function AchievementEdit() {
 
     return ( 
         <div className="achievement-user-container"> 
-            <div className="auth-page-container"> 
+            <div className="achievement-auth-page-container"> 
+                <button 
+                    className="back-arrow-btn"
+                    onClick={() => navigate('/achievements')}
+                    >
+                    ￩
+                </button>
                 <div className="achievement-form-box">
                 <h2 className="text-center"> 
                     {achievement.id ? "Edit Achievement" : "Add Achievement"} 
                 </h2> 
-                <div className="auth-form-container"> 
+                <div className="achievement-auth-form-container"> 
                     {modal} 
                     <Form onSubmit={handleSubmit}> 
                         <div className="custom-form-input"> 
@@ -129,8 +135,8 @@ export default function AchievementEdit() {
                             </Input> 
                         </div>
                         <div className="custom-button-row"> 
-                            <button className="auth-button">Save</button> 
-                            <Link to={`/achievements`} className="auth-button" style={{ textDecoration: "none" }} > Cancel </Link> 
+                            <button className="achievement-auth-button">Save</button> 
+                            <Link to={`/achievements`} className="achievement-auth-button" style={{ textDecoration: "none" }} > Cancel </Link> 
                         </div> 
                     </Form> 
                 </div>

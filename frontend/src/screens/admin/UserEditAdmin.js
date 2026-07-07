@@ -7,6 +7,7 @@ import getErrorModal from "../../util/getErrorModal";
 import getIdFromUrl from "../../util/getIdFromUrl";
 import useFetchData from "../../util/useFetchData";
 import useFetchState from "../../util/useFetchState";
+import { useNavigate } from "react-router-dom"; 
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -31,6 +32,7 @@ export default function UserEditAdmin() {
     id
   );
   const auths = useFetchData(`/api/v1/users/authorities`, jwt);
+  const navigate = useNavigate(); 
 
   function handleChange(event) {
     const target = event.target;

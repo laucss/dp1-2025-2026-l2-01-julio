@@ -115,16 +115,15 @@
     opacity: 0.85;
 }
 
-.auth-page-container {
+.achievement-auth-page-container {
     width: 100%;
-    height: auto;
+    height: 100vh;
     min-height: auto;
 
     display: flex;
     justify-content: center; 
 
     align-items: center; 
-
     padding: 30px;
 }
 
@@ -151,7 +150,7 @@
     font-weight: 700;
 }
 
-.auth-form-container {
+.achievement-auth-form-container {
     width: 100%;
     height: auto;
 
@@ -185,21 +184,15 @@
 .custom-input {
     width: 100% !important;
     height: 50px;
-
     background: rgba(255,255,255,0.12) !important;
-
     border: 1px solid rgba(255,255,255,0.20) !important;
-
     color: white !important;
-
     border-radius: 12px !important;
-
     padding: 10px 15px !important;
 }
 
 .custom-input:focus {
     border-color: #ffd166 !important;
-
     box-shadow: 0 0 10px rgba(255,209,102,0.3) !important;
 }
 
@@ -209,33 +202,25 @@
 
 .custom-button-row {
     width: 95%;
-    
     margin: 20px auto 0 auto; 
-
     display: flex;
     justify-content: center;
     gap: 20px;
 }
 
-.auth-button {
+.achievement-auth-button {
     min-width: 180px;
-
     padding: 12px 25px;
-
     border-radius: 12px;
-
     background: rgba(255,255,255,0.15);
-
     border: 1px solid rgba(255,255,255,0.2);
-
     color: white;
-
     text-decoration: none;
-
     transition: all 0.3s ease;
+    text-align: center;
 }
 
-.auth-button:hover {
+.achievement-auth-button:hover {
     background: rgba(255,255,255,0.25);
 
     color: white;
@@ -290,3 +275,4 @@
     color: white;
     box-sizing: border-box;
 }
+

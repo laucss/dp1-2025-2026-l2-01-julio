@@ -71,9 +71,9 @@ export default function AchievementUserList() {
 
                     <Link to={`/achievements/${a.id}`}>
                         <Button
-                            color="warning"
+                            color="success"
                             size="sm"
-                            style={{ width: "100%" }}
+                            style={{ width: "60%", marginBottom: "2px" }}
                         >
                             Edit
                         </Button>
@@ -82,7 +82,7 @@ export default function AchievementUserList() {
                     <Button
                         color="danger"
                         size="sm"
-                        style={{ width: "100%" }}
+                        style={{ width: "60%" , marginTop: "2px"}}
                         onClick={() =>
                             deleteFromList(
                                 `/api/v1/achievements/${a.id}`,
