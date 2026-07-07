@@ -75,12 +75,16 @@ public class ActionsService {
         Player player = playerService.findByMatchIdAndUserId(matchId, userId);
         Room currentRoom = player.getRoom();
         if (currentRoom == null) {
-            throw new RuntimeException("Jugador no tiene sala asignada");
+            throw new RuntimeException("Player not assigned to a room");
+        }
+        //Comprobar que la sala destino no sea la misma que la sala actual del jugador
+        if (targetRoomId.equals(currentRoom.getId())) {
+            throw new RuntimeException("The destination room is the same as the current room of the player");
         }
         checkers.checkPlayerHasActionPoints(player);
         //Recuperar la sala destino
         Room targetRoom = roomRepository.findById(targetRoomId)
-            .orElseThrow(() -> new ResourceNotFoundException("Sala destino no encontrada"));
+            .orElseThrow(() -> new ResourceNotFoundException("Destination room not found"));
         //Validar si la sala destino es adyacente
         checkers.checkRoomIsAdyacent(currentRoom, targetRoom); 
         //Actualizar sus puntos de acción
@@ -128,15 +132,20 @@ public class ActionsService {
         }
         //Buscamos al npc que queremos mover de la partida
         Npc npc = npcRepository.findById(npcId)
-            .orElseThrow(() -> new RuntimeException("NPC no encontrado en la partida"));
+            .orElseThrow(() -> new RuntimeException("NPC not found"));
 
         //Obtenemos la habitación actual en la que se encuentra el npc
         Room currentRoomNpc = npc.getRoom();
         if (currentRoomNpc == null) {
-            throw new RuntimeException("NPC no tiene sala asignada"); }
+            throw new RuntimeException("NPC not assigned to a room"); }
 
         //Obtenemos la sala destino a la que queremos mover al npc
         Room targetRoom = roomService.findById(targetRoomId);
+
+        //Comprobamos que la sala destino no sea la misma que la sala actual del npc
+        if (targetRoom.getId().equals(currentRoomNpc.getId())) {
+            throw new RuntimeException("The destination room is the same as the current room of the NPC");
+        }
 
         //Comprobamos que el jugador tiene puntos de acción para poder mover al npc
         Player player = playerService.findByMatchIdAndUserId(matchId, userId);
@@ -173,7 +182,7 @@ public class ActionsService {
         // Obtener la bolsa del jugador y sus letras
         BagInGame playerBag = bagService.findPlayerBag(matchId, player.getId());
         if (playerBag == null || playerBag.getCards().isEmpty()) {
-            throw new RuntimeException("El jugador no tiene cartas en su bolsa");
+            throw new RuntimeException("The player does not have any cards in their bag");
         }
 
         // Recopilar todas las letras de la bolsa
@@ -211,8 +220,8 @@ public class ActionsService {
         }
         if (!canFormAnyWord) {
             throw new RuntimeException(
-                "No se puede formar ninguna palabra del nombre de la sala '" +
-                targetRoom.getName() + "' con las letras disponibles en la bolsa");
+                "You cannot form any word from the destination room name '" +
+                targetRoom.getName() + "' with the available letters in the bag");
         }
 
         player.setActionPoints(player.getActionPoints() - 1);

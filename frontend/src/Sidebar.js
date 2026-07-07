@@ -97,11 +97,6 @@ function Sidebar({ isOpen, toggle, user}) {
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink href="#" onClick={handleNotificationsClick}>
-              Notifications
-            </NavLink>
-          </NavItem>
-          <NavItem>
             <NavLink tag={Link} to="/logout" onClick={toggle}>
               Logout
             </NavLink>
