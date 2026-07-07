@@ -11,6 +11,7 @@ public class MoveToRoomDTO {
 
     private Integer roomId; 
 
+
     public MoveToRoomDTO(){
     }
 
@@ -18,5 +19,6 @@ public class MoveToRoomDTO {
         this.userId=userId; 
         this.roomId=roomId; 
     }
+
     
 }

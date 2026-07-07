@@ -161,8 +161,7 @@ public class LobbyService {
 
         Match m = lrepo.findById(matchId).orElseThrow(() -> new LobbyNotFound("Lobby no encontrado"));
         User currentUser = userService.findCurrentUser();
-        Player player = playerService.findByMatchIdAndUserId(m.getId(), currentUser.getId())
-                .orElseThrow(() -> new PlayerNotInTheGame("El jugador no está en este lobby"));
+        Player player = playerService.findByMatchIdAndUserId(m.getId(), currentUser.getId());
         
        
         if (m.getCreatorId().equals(currentUser.getId())) {

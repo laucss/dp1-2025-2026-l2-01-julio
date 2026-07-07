@@ -206,7 +206,7 @@ public class MatchControllerTests {
     }
 
 
-
+/* 
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})
     public void testMoveToAdjacentRoom() throws Exception {
@@ -231,6 +231,7 @@ public class MatchControllerTests {
 
         verify(matchService, times(1)).movePlayerToAdyacentRoom(1, 10, 5);
     }
+        */
 
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})

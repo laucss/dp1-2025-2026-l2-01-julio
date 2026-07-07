@@ -11,7 +11,8 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
     const matchId = getIdFromUrl(2);
     const isAttacker = currentUser?.id === attacker?.user?.id;
     const isDefender = currentUser?.id === defender?.user?.id;
-    const isDefenderBot = !defender?.user; // El defensor es un bot si no tiene .user
+    const isAttackerBot = !attacker?.user;
+    const isDefenderBot = !defender?.user;
 
     const [buttonStateAttacker, setButtonStateAttacker] = useState(false);
     const [buttonStateDefender, setButtonStateDefender] = useState(false);
@@ -163,16 +164,26 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         }
     }, [isOpen]);
 
-    // Lanzar dado automáticamente si el defensor es un bot
+    // Lanzar dado automáticamente si el hay un bot
     useEffect(() => {
-        if (isOpen && isDefenderBot && !blackRolled) {
+        if (!isOpen) return;
+
+        if (isAttackerBot && !whiteRolled) {
             const timer = setTimeout(() => {
-                rollDice('Negro');
-            }, 1000); // Esperar 1 segundo después de abrir el modal
+                rollDice('Blanco');
+            }, 1000);
+
             return () => clearTimeout(timer);
         }
-    }, [isOpen, isDefenderBot, blackRolled]);
 
+        if (isDefenderBot && !blackRolled) {
+            const timer = setTimeout(() => {
+                rollDice('Negro');
+            }, 1000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen, isAttackerBot, isDefenderBot, whiteRolled, blackRolled]);
     
     useEffect(() => {
         if (whiteRolled) {
@@ -192,22 +203,30 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
         if (buttonStateAttacker && buttonStateDefender && whiteRolled && blackRolled) {
             
             const attackerWins = totalAttacker >= totalDefender;  
-            const currentUserWon = attackerWins ? isAttacker : isDefender;
             setTimeout(() => {
-                onResolve(currentUserWon);
+                onResolve(attackerWins);
             }, 700);
         }
     }, [buttonStateAttacker, buttonStateDefender, whiteRolled, blackRolled, totalAttacker, totalDefender]);
 
     // Hacer que el bot haga ready automáticamente después de lanzar el dado
     useEffect(() => {
+        if (isAttackerBot && whiteRolled && !buttonStateAttacker) {
+            const timer = setTimeout(() => {
+                toggleReadyState('ATTACKER', false);
+            }, 1500);
+
+            return () => clearTimeout(timer);
+        }
+
         if (isDefenderBot && blackRolled && !buttonStateDefender) {
             const timer = setTimeout(() => {
                 toggleReadyState('DEFENDER', false);
-            }, 1500); // Esperar un poco después de lanzar el dado
+            }, 1500);
+
             return () => clearTimeout(timer);
         }
-    }, [isDefenderBot, blackRolled, buttonStateDefender]);
+    }, [isAttackerBot, isDefenderBot, whiteRolled, blackRolled, buttonStateAttacker, buttonStateDefender]);
 
     const rollDice = async (diceType) => {
         const roll = Math.floor(Math.random() * 6) + 1;
@@ -351,28 +370,54 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                     <div className='combat-top'> 
 
                         <div className='combat-panel'> {/*zona del atacante */}
-                            <div className='combat-header'> 
-                                <span>{attacker?.user?.username || 'Attacker'}</span>
-                                <img 
-                                    src={attacker.user.avatar}
-                                    alt={`${attacker.user.username}'s avatar`}
-                                    style={{ width: '40px', height: '40px', borderRadius: '50%' }}
-                                />
+                            <div className='combat-header'>
+                                <span>
+                                    {attacker?.user?.username || (attacker?.isNiallCampbell ? 'NiallCampbell' : `NPC ${attacker.id}`)}
+                                </span>
+
+                                {attacker?.user?.avatar ? (
+                                    <img
+                                        src={attacker.user.avatar}
+                                        alt={`${attacker.user.username}'s avatar`}
+                                        style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                                    />
+                                ) : (
+                                    <div
+                                        style={{
+                                            width: '40px',
+                                            height: '40px',
+                                            borderRadius: '50%',
+                                            backgroundColor: attacker?.isNiallCampbell ? '#ff0000' : '#666',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'white',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        {attacker?.isNiallCampbell ? 'N' : 'X'}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="total-box">{whiteRolled ? totalAttacker : '?'}</div>
 
-                            {/*FUERZA */}
+                            {/* FUERZA */}
                             <div className="calc-row">
-                                <div className="calc-box"> Strength: {attackerStrength}</div>
+                                <div className="calc-box">Strength: {attackerStrength}</div>
 
                                 <span className="calc-operator">+</span>
-                                        
+
                                 <button
                                     onClick={() => rollDice('Blanco')}
                                     className='dice-button'
                                     title="Dado Blanco"
-                                    disabled={!isAttacker || whiteRolled || (isDefenderBot && !blackRolled)}
+                                    disabled={
+                                        isAttackerBot ||
+                                        !isAttacker ||
+                                        whiteRolled ||
+                                        (isDefenderBot && !blackRolled)
+                                    }
                                 >
                                     <img
                                         src={`/Dice/B${whiteDice}.png`}
@@ -383,9 +428,10 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
 
                                 <span className="calc-operator">+</span>
 
-                                <div className="calc-box">Weapons: {getTotalWeaponsBonus(weaponsAttacker)}</div>
+                                <div className="calc-box">
+                                    Weapons: {getTotalWeaponsBonus(weaponsAttacker)}
+                                </div>
                             </div>
-                            
                         </div>
 
                         <div className='vs-container'>
@@ -394,7 +440,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
 
                         <div className='combat-panel'> {/*zona del oponente */}
                             <div className='combat-header'> 
-                                <span>{defender?.user?.username || (defender?.isNiallCampbell ? 'NiallCampbell' : 'NPC')}</span>
+                                <span>{defender?.user?.username || (defender?.isNiallCampbell ? 'NiallCampbell' : `NPC ${defender.id}`)}</span>
                                 {defender?.user?.avatar ? (
                                     <img 
                                         src={defender.user.avatar}
@@ -457,25 +503,25 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
 
                         <div className='action-column'>
                             <div className='actions'>
-                                <button 
+                                <button
                                     className="action-button"
                                     onClick={() => openWeaponModal('ATTACKER')}
-                                    disabled={!isAttacker}
+                                    disabled={!isAttacker || isAttackerBot}
                                     title={isAttacker ? "Weapon" : "Solo el atacante puede formar arma"}
                                 >
                                     Weapon
                                 </button>
                             </div>
-                            <button 
+
+                            <button
                                 className={`ready-button ${buttonStateAttacker ? 'green' : ''}`}
                                 onClick={() => toggleReadyState('ATTACKER', buttonStateAttacker)}
-                                disabled={!isAttacker}
+                                disabled={!isAttacker || isAttackerBot}
                                 title={isAttacker ? "Ready" : "Solo el atacante puede pulsar listo"}
                             >
                                 Ready
                             </button>
                         </div>
-
                         <div className='action-column'>
                             <div className='actions'>
                                 <button 

@@ -1,4 +1,3 @@
-import { toast } from "react-toastify"
 
 /**
  * RESUELVE UN COMBATE JUGADOR VS JUGADOR
@@ -66,10 +65,23 @@ export async function handleNpcFight({
     defenderRoomId,
     handCards,
     bagCards,
-    setIsNpcLossModalOpen
+    setIsNpcLossModalOpen,
+    setReturnedFightCard,
+    setIsReturnedCardModalOpen
 }) {
     console.log('attacker',fightAttacker)
     try {
+        const body = {
+            matchId,
+            attackerId: fightAttacker.id,
+            defenderId: fightDefender.id,
+            npcFight: true,
+            npcAttacker: npcIsAttacker,
+            attackerWins,
+            defenderRoomId
+        };
+
+        console.log("BODY ENVIADO:", body);
         // Mapeamos los IDs tal cual llegan desde la interfaz (manteniendo el rol de atacante/defensor original)
         const response = await fetch(`/api/v1/fights/${matchId}/fight/resolve`, {
             method: "PUT",
@@ -77,16 +89,11 @@ export async function handleNpcFight({
                 Authorization: `Bearer ${jwt}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                matchId: matchId,
-                attackerId: fightAttacker.id,
-                defenderId: fightDefender.id,
-                isNpcFight: true,
-                isNpcAttacker: npcIsAttacker,
-                attackerWins: attackerWins,
-                defenderRoomId: defenderRoomId
-            }),
+            body: JSON.stringify(body),
+            
         });
+
+        
 
         if (!response.ok) throw new Error("Error resolviendo la pelea NPC en el servidor");
 
@@ -96,15 +103,13 @@ export async function handleNpcFight({
         // Fase interactiva visual en React: si el humano pierde y tiene cartas, abrir descarte
         const humanWins = npcIsAttacker ? !attackerWins : attackerWins;
 
-        if (data.fightResultType === 'PLAYER_BEATS_NIALL' && humanWins && !data.card.id) {
-            toast.info('no recibes ninguna carta porque no hay ninguna en el monton de descartes')
+        if (data.fightResultType === 'PLAYER_BEATS_NPC' && humanWins) {
+            setReturnedFightCard(data.card)
+            setIsReturnedCardModalOpen(true);
         }
-
-        if (!humanWins && (handCards.length > 0 || bagCards.length > 0)) {
+        if (!humanWins) {
             setIsNpcLossModalOpen(true);
-        } else if (!humanWins && (handCards.length === 0 && bagCards.length === 0) && data.fightResultType === 'NPC_BEATS_PLAYER'){
-            toast.info("you've lost but because you dont have any card, you cannot discard")
-        }
+        } 
 
     } catch (err) {
         console.error("Error en handleNpcFight:", err);

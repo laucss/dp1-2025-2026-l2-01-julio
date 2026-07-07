@@ -1,10 +1,10 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGameDTO;
@@ -27,16 +26,11 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.BagNotValidException;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.InvalidMovementException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsDrawnException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsInHand;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.LoseAgainstNpcRequestDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchHistorialDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
@@ -67,7 +61,6 @@ public class MatchService {
     BagService bagService;
     PlayerService playerService; 
     UserService userService;
-    Random ran = new Random();
     LobbyWebsocketController lobbyWebsocketController;
     MatchWebsocketController matchWebsocketController;
     Checkers checkers; 
@@ -299,7 +292,6 @@ public class MatchService {
         Match match = matchRepo.findById(matchId)
                 .orElseThrow(() -> new IllegalArgumentException("Match not found"));
 
-
         Player player = playerRepo.findByMatchAndUser(matchId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
  
@@ -307,7 +299,6 @@ public class MatchService {
         if (player.getDiceOrder() != null) {
             throw new IllegalArgumentException("The player has already rolled the dice.");
         }
-
 
         player.setDiceOrder(diceRoll);
         playerRepo.save(player);
@@ -433,12 +424,13 @@ public class MatchService {
         }
 
         if (m.getStartTime() != null) {
-            long durationSeconds = java.time.Duration.between(m.getStartTime(), m.getEndTime()).toSeconds();
+            long durationSeconds = Duration.between(m.getStartTime(), m.getEndTime()).toSeconds();
         }
 
         deleteMatchCards(matchId); 
 
         matchRepo.save(m);
+        matchWebsocketController.notifyEndMatch(matchId, new MatchDTO(m));
 
         return new MatchDTO(m);
     }
@@ -667,129 +659,7 @@ public class MatchService {
     }
 
 
-    //Función para mover un jugador de una sala a otra adyacente
     @Transactional
-    public Player movePlayerToAdyacentRoom(Integer matchId, Integer userId, Integer targetRoomId) {
-        Match match = matchRepo.findById(matchId)
-                .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
-        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
-            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
-        }
-        matchRepo.save(match);
-        //Recuperar el jugador dentro del match
-        Player player = playerRepo.findByMatchAndUser(matchId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Player not found in the match"));
-        Room currentRoom = player.getRoom();
-        if (currentRoom == null) {
-            throw new RuntimeException("Player does not have a room assigned");
-        }
-        // checkear que el jugador tiene puntos de acción para poder moverse 
-        // TODO: revisar si tengo que usar la función de playerService de getPlayerActionPoints en vez de acceder directamente al atributo
-        if (player.getActionPoints() <= 0) {
-            throw new NoActionPointsException("Move not allowed: player has no action points left");
-        }
-        //Recuperar la sala destino
-        Room targetRoom = roomRepository.findById(targetRoomId)
-            .orElseThrow(() -> new ResourceNotFoundException("Target room not found"));
-        //Comprobar que la sala destino no es la misma que la sala actual del jugador
-        if (targetRoom.getId().equals(currentRoom.getId())) {
-            throw new InvalidMovementException("Move not allowed: the target room is the same as the current room");
-        }
-        //Validar si la sala destino es adyacente
-        List<Room> adjacent = currentRoom.getAdjacencyList();
-        boolean canMove = adjacent.stream()
-                .anyMatch(r -> r.getId().equals(targetRoom.getId()));
-        if (!canMove) {
-            throw new InvalidMovementException("Move not allowed: the target room is not adjacent");
-        }
-        //Actualizar la sala del jugador y sus puntos de acción
-        if (!targetRoom.getId().equals(currentRoom.getId())) {
-            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);
-            player.setRoomsVisited(visited + 1);
-        }
-        player.setRoom(targetRoom);
-        if (player.getActionPoints() > 0) {
-            player.setActionPoints(player.getActionPoints() - 1);
-        } 
-
-        //Guardar cambios
-        return playerRepo.save(player);
-    }
-
-    @Transactional
-    public Npc moveNpcToRoom(Integer matchId, Integer npcId, Integer targetRoomId, Integer userId) {
-        Match match = matchRepo.findById(matchId)
-            .orElseThrow(() -> new RuntimeException("Match not found"));
-
-        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
-            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
-        }
-        matchRepo.save(match);
-
-        //Buscamos al npc que queremos mover de la partida
-        Npc npc = npcRepository.findById(npcId)
-            .orElseThrow(() -> new RuntimeException("NPC not found in the match"));
-
-        //Obtenemos la habitación actual en la que se encuentra el npc
-        Room currentRoomNpc = npc.getRoom();
-        if (currentRoomNpc == null) {
-            throw new RuntimeException("NPC does not have a room assigned"); }
-
-        //Obtenemos la sala destino a la que queremos mover al npc
-        Room targetRoom = roomRepository.findById(targetRoomId)
-            .orElseThrow(() -> new RuntimeException("Target room not found"));
-
-        //Comprobamos que el jugador tiene puntos de acción para poder mover al npc
-        Player player = playerRepo.findByMatchAndUser(matchId, userId)
-                .orElseThrow(() -> new RuntimeException("Player not found in the match"));
-        if (player.getActionPoints() <= 0) {
-            throw new NoActionPointsException("Move not allowed: player has no action points left"); }
-
-        //Comprobamos que la sala destino no es la misma que la sala actual del npc
-        if (targetRoom.getId().equals(currentRoomNpc.getId())) {
-            throw new InvalidMovementException("Move not allowed: the target room is the same as the current room of the NPC");
-        }
-
-        //Actualizamos la sala del npc y los puntos de acción del jugador
-
-        npc.setRoom(targetRoom);
-        
-
-        if (player.getActionPoints() > 0) {
-            player.setActionPoints(player.getActionPoints() - 1);
-            playerRepo.save(player);
-        }
-        //Guardamos los cambios
-        return npcRepository.save(npc);
-    }
-
-
-    @Transactional
-    public Player moveLoserPlayer(Integer matchId, Integer userId, Integer targetRoomId) {
-        Match match = matchRepo.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
-        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
-            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
-        }
-        //Recuperar el jugador dentro del match
-        Player player = playerRepo.findByMatchAndUser(matchId, userId)
-                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
-        //Recuperar la sala destino
-        Room targetRoom = roomRepository.findById(targetRoomId)
-            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
-        //Actualizar la sala y fuerza del jugador
-        Room currentRoom = player.getRoom();
-        if (currentRoom == null || !targetRoom.getId().equals(currentRoom.getId())) {
-            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);
-            player.setRoomsVisited(visited + 1);
-        }
-        player.setRoom(targetRoom);
-        player.setStrength(player.getStrength() + 1);
-        
-        //Guardar cambios
-        return playerRepo.save(player);
-    }
-
     public ActionPointsUpdateDTO consumeOneActionPoint(Integer matchId, Integer userId) {
         Player player = playerRepo.findByMatchAndUser(matchId, userId)
             .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
@@ -807,164 +677,7 @@ public class MatchService {
             System.currentTimeMillis()
         );
     }
-    @Transactional
-    public Player movePlayerByFormingRoomName(Integer matchId, Integer userId, Integer targetRoomId) {
-        Match match = matchRepo.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
-        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
-            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
-        }
-        matchRepo.save(match);
-
-        Player player = playerRepo.findByMatchAndUser(matchId, userId)
-                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
-        
-        if (player.getActionPoints() <= 0) {
-            throw new NoActionPointsException("Move not allowed: player has no action points left");
-        }
-
-        Room targetRoom = roomRepository.findById(targetRoomId)
-            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
-
-        // Obtener la bolsa del jugador y sus letras
-        BagInGame playerBag = bagService.findPlayerBag(matchId, player.getId());
-        if (playerBag == null || playerBag.getCards().isEmpty()) {
-            throw new RuntimeException("El jugador no tiene cartas en su bolsa");
-        }
-
-        // Recopilar todas las letras de la bolsa
-        String availableLetters = "";
-        for (Card card : playerBag.getCards()) {
-            if (card.getLetter() != null) {
-                availableLetters += card.getLetter().toLowerCase();
-            }
-        }
-
-        // Obtener las palabras que forman la sala destino 
-        String[] roomWords = targetRoom.getName().toLowerCase().split("\\s+");
-
-        Boolean canFormAnyWord = false;
-
-        for (String roomWord : roomWords){
-
-            //Hacemos una copia de las letras de nuestra bolsa
-            String remaining = availableLetters;
-            boolean canFormThisWord = true;
-
-            //Recorremos cada letra de la palabra de la sala destino
-            for (char c : roomWord.toCharArray()) {
-                //El método indexOf devuelve -1 si no encuentra la letra en la cadena, si la encuentra devuelve la posición de la letra en la cadena
-                if (remaining.indexOf(c) >= 0) {
-                    //Si la letra está en la cadena, la eliminamos de la cadena para no usarla de nuevo
-                    remaining = remaining.replaceFirst(String.valueOf(c), "");
-                } else {
-                    //Si la letra no está en la cadena, no podemos formar la palabra
-                    canFormThisWord = false;
-                    break;
-                }
-            }
-            if (canFormThisWord) {
-                canFormAnyWord = true;
-                break;
-            }
-
-        }
-
-
-        if (!canFormAnyWord) {
-            throw new RuntimeException(
-                "No se puede formar ninguna palabra del nombre de la sala '" +
-                targetRoom.getName() + "' con las letras disponibles en la bolsa");
-        }
-                
-
-        // Si llegamos aquí, el movimiento es válido
-        Room currentRoom = player.getRoom();
-        if (currentRoom == null || !targetRoom.getId().equals(currentRoom.getId())) {
-            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);
-            player.setRoomsVisited(visited + 1);
-        }
-        player.setRoom(targetRoom);
-        if (player.getActionPoints() > 0) {
-            player.setActionPoints(player.getActionPoints() - 1);
-        }
-
-        return playerRepo.save(player);
-    }
-
-
-    @Transactional
-    public EscapeAttemptResultDTO escapeAttempt( Integer matchId, Integer userId, Integer rolldiceResult) {
-        matchRepo.findById(matchId).orElseThrow(() -> new IllegalArgumentException("Match not found"));
-        Player p = playerRepo.findByMatchAndUser(matchId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
-
-        //Comprobamos que el jugador tenga puntos de acción para poder realizar la acción
-        if (p.getActionPoints() <= 0) {
-            throw new NoActionPointsException("Escape attempt not allowed: player has no action points left");
-        }
-        
-
-        //Comprobamos que el jugador cumpla las condiciones para poder realizar un intento de escape 
-
-        //Primero comprobamos que el jugador se encuentre en una de las torres
-        Room playerRoom = p.getRoom();
-        List<Room> towers = roomService.getAllTowers();
-        boolean inTower = towers.stream().anyMatch(r -> r.equals(playerRoom));
-        if (!inTower) {
-            throw new IllegalArgumentException("Player is not in a tower room");
-        }
-
-        //Segundo comprobamos que el jugador tengo en su bolsa las cartas necesarias para formas la palabra de escape correspondiente a la torre
-        // o las palabras “EMPEROR” o “CAMPBELL”
-
-        //Primero obtenemos la bolsa del jugador 
-        BagInGame playerBag = bagService.findPlayerBag(matchId, p.getId());
-        //Obtenemos las cartas de la bolsa
-        List<Card> bagCards = playerBag.getCards();
-        //Convertimos la lista de cartas en una lista de DTO de cartas
-        List<CardDTO> bagCardDTOs = bagCards.stream()
-                .map(CardDTO::new)
-                .toList();
-        //Obtenemos la palabra que forman las letras de las cartas de la bolsa
-        String bagWord = bagService.wordFromCards(bagCardDTOs).toLowerCase().replaceAll("\\s+", "") ;
-
-        //Obtenemos la palabra de escape correspondiente a la torre en la que se encuentra el jugador
-        String towerEscapeWord = roomService.getWordOfEscapeFromTower(playerRoom.getId()).toLowerCase().replaceAll("\\s+", "");
-
-        //Comprobamos si la palabra de la bolsa del jugador es igual a la palabra de escape de la torre o a las palabras especiales
-        boolean hasRequiredWord = bagWord.equals(towerEscapeWord) || bagWord.equals("emperor") || bagWord.equals("campbell");
-        if (!hasRequiredWord) {
-            throw new IllegalArgumentException("Player does not have the required word in their bag to attempt escape");
-        }
-
-
-        //Cuando se cumplan las condiciones realizamos el intento de escape 
-        EscapeAttemptResultDTO resultado = new EscapeAttemptResultDTO();
-
-        if(rolldiceResult < p.getStrength()){
-            //El intento de escape es existoso
-            endMatch(matchId, p);
-            resultado.setSuccess(true);
-            resultado.setWinnerUserId(p.getUser().getId());
-            resultado.setDiscardRequired(false);
-            return resultado;
-
-        } else {
-            //El intento de escape falla y ocurre lo mismo que si un jugador pierde contra un npc en una pelea
-            List<Room> availableRooms = getAvailableRoomsForPlayer(matchId);
-            if (availableRooms.isEmpty()) {
-                throw new IllegalStateException("No available rooms for escape");
-            }
-            Room randomRoom = availableRooms.get(new Random().nextInt(availableRooms.size()));
-            consumeAllActionPointForUser(matchId, userId);
-            moveLoserPlayer(matchId, userId, randomRoom.getId());
-
-            resultado.setSuccess(false);
-            resultado.setDiscardRequired(true);
-            return resultado;
-        }
-        }
+    
 
 
 

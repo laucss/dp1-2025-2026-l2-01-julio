@@ -134,6 +134,7 @@ public class SecurityConfiguration {
 
                 .requestMatchers("/api/v1/invitations/**").authenticated()
                 .requestMatchers("/api/v1/notifications/**").authenticated()
+                .requestMatchers("/api/v1/actions/**").authenticated()
 
                 .requestMatchers("/api/v1/players/**").authenticated()
 

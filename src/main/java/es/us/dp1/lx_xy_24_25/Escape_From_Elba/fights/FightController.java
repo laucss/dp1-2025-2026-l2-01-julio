@@ -91,6 +91,12 @@ public class FightController {
         matchWebsocketController.notifyWeaponsUpdate(matchId, weaponsUpdate);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{matchId}/check-pending-fights")
+    public ResponseEntity<?> checkAndTriggerChainFights(@PathVariable Integer matchId) {
+        fs.checkPendingFights(matchId);
+        return ResponseEntity.ok().build();
+    }
       
     
 }

@@ -5,13 +5,13 @@ import '../../static/css/match/Match.css';
 import DiscardPhaseModal from "./modals/DiscardPhaseModal";
 import ActionsModal from "./modals/ActionsModal";
 import ChatBox from "./chatBox";
-import { FaComments } from "react-icons/fa";
 import FightModal from "./modals/FightModal";
 import StartDiceModal from "./modals/StartDiceModal";
 import StealCardModal from "./modals/StealCardModal";
 import NpcLossDiscardModal from "./modals/NpcLossDiscardModal";
 import EscapeDiceModal from "./modals/EscapeDiceModal";
 import VotingModal from "./modals/VotingModal";
+import ReturnedCardModal from "./modals/ReturnedCardModal";
 
 import { normalizeRoomId } from "./utils/roomUtils";
 import { getPlayerColor } from "./utils/playersUtil";
@@ -21,11 +21,11 @@ import MatchBoardMap from "./components/MatchBoardMap";
 import OtherPlayersPanel from './components/OthersPlayersSection';
 import MatchButtons from './components/MatchButtons'
 import PlayerCardsSection from "./components/PlayerCardsSection";
-import { getRandomFreeRoom } from "./utils/roomHelpers";
 import { handlePlayerFight, handleNpcFight} from "./utils/fightHelpers";
 
 // para alerta de errores
 import { toast } from "react-toastify"
+import EndMatchModal from "./modals/EndMatchModal";
 
 export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt }){
     const navigate = useNavigate();
@@ -55,6 +55,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [selectedNpcId, setSelectedNpcId] = useState(null)
     const [selectedNpcIndex, setSelectedNpcIndex] = useState(null)
 
+    const [isReturnedCardModalOpen, setIsReturnedCardModalOpen] = useState(false); 
     const [isDiceModalOpen, setIsDiceModalOpen] = useState(true);
     const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
     const [isEscapeModalOpen, setIsEscapeModalOpen] = useState(false);
@@ -62,6 +63,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [fightDefender, setFightDefender] = useState(null);
     const [fightAttacker, setFightAttacker] = useState(null);
     const [pendingTargetRoom, setPendingTargetRoom] = useState(null);
+    const [fightQueue, setFightQueue] = useState([]);
     const [isStealModalOpen, setIsStealModalOpen] = useState(false);
     const [stealLoserPlayerId, setStealLoserPlayerId] = useState(null);
     const [isNpcLossModalOpen, setIsNpcLossModalOpen] = useState(false);
@@ -72,7 +74,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [proposingUserId, setProposingUserId] = useState(null);
     const [proposingUsername, setProposingUsername] = useState('');
     const [votingResult, setVotingResult] = useState(null);
-        const [confirmModal, setConfirmModal] = useState({
+    const [returnedFightCard, setReturnedFightCard] = useState(null);
+
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms)); // para que haya un sec entre peleas, que se siente atropellado
+    const [confirmModal, setConfirmModal] = useState({
         open: false,
         title: "",
         message: "",
@@ -80,7 +85,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         confirmText: "",
         onConfirm: null
     });
-    
+ 
 
     // CARGAR DATOS JUGADORES 
     useEffect(() => {
@@ -109,6 +114,18 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
         return () => subscription.unsubscribe();
     }, [stompClient, matchId]);
+    
+    useEffect(() => {
+        if (!stompClient || !stompClient.active) return;
+
+        const subscription = stompClient.subscribe(`/topic/match.${matchId}.end`, (msg) => {
+            const matchDto = JSON.parse(msg.body);
+            setMatch(matchDto)
+
+        });
+
+        return () => subscription.unsubscribe();
+    }, [stompClient, matchId]);
 
 
         useEffect(() => {
@@ -133,6 +150,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.fight`, async (msg) => {
             const fightUpdate = JSON.parse(msg.body);
             
+            console.log('fightUpdate', fightUpdate)
             if (fightUpdate.action === 'START') {
                 try {
                     const response = await fetch(`/api/v1/matches/${matchId}`, {
@@ -142,23 +160,25 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     if (response.ok) {
                         const freshMatch = await response.json();
                         setMatch(freshMatch);
-                        
-                        const attacker = freshMatch.players?.find(p => p.user.id === fightUpdate.attackerId);
+                        let attacker =null
                         let defender = null;
-                        
-                        if (fightUpdate.isBot) {
+
+                        if (fightUpdate.isBot && (fightUpdate.attackerUsername === 'NPC' || fightUpdate.attackerUsername === 'Niall Campbell' )) {
+                            attacker = freshMatch.npcs?.find(n => n.id === fightUpdate.attackerId);
+                            defender = freshMatch.players?.find(p => p.user.id === fightUpdate.defenderId);
+                        } else if (fightUpdate.isBot && !(fightUpdate.attackerUsername === 'NPC' || fightUpdate.attackerUsername === 'Niall Campbell' )) {
+                            attacker =  freshMatch.players?.find(p => p.user.id === fightUpdate.attackerId);
                             defender = freshMatch.npcs?.find(n => n.id === fightUpdate.defenderId);
                         } else {
+                            attacker = freshMatch.players?.find(p => p.user.id === fightUpdate.attackerId);
                             defender = freshMatch.players?.find(p => p.user.id === fightUpdate.defenderId);
                         }
-                        
+                                                
                         if (attacker && defender) {
-                             console.log("ANTES", isFightModalOpen);
                             setFightAttacker(attacker);
                             setFightDefender(defender);
                             setPendingTargetRoom(fightUpdate.roomId || fightUpdate.roomName);
                             setIsFightModalOpen(true);
-                             console.log("DESPUÉS", isFightModalOpen);
                         }
                         console.log("Abriendo modal", attacker, defender);
                     }
@@ -166,14 +186,29 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     console.error('Error fetching fresh match data for fight:', error);
                 }
             } else if (fightUpdate.action === 'RESOLVE') {
-                const winnerId = fightUpdate.winnerId;
-                const loserId = fightUpdate.loserId;
+                const winnerUserId = fightUpdate.winnerUserId
+                const loserId = fightUpdate.loserId
+                const loserUserId = fightUpdate.loserUserId
                 const fightType = fightUpdate.fightResultType
 
-                if (currentPlayer.id === winnerId &&  fightType === 'PLAYER_BEATS_PLAYER') {
-                    setStealLoserPlayerId(loserId);
-                    setIsStealModalOpen(true);
+                const currentUserId = currentUser?.id;
+
+                if (currentUserId && currentUserId === winnerUserId) {
+                    if (fightType === 'PLAYER_BEATS_PLAYER') {
+                        setStealLoserPlayerId(loserId);
+                        setIsStealModalOpen(true);
+                    }
+
+                    if (fightType === 'PLAYER_BEATS_NPC') {
+                        setReturnedFightCard(fightUpdate.card)
+                        setIsReturnedCardModalOpen(true);
+                    }
+                } else if (currentUserId && currentUserId === loserUserId && fightType === 'NPC_BEATS_PLAYER' ){
+                    setIsNpcLossModalOpen(true);
                 }
+
+                setIsFightModalOpen(false)
+                fetchMatchAndPlayers() // REVISAR
             }
         });
 
@@ -272,7 +307,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 const hand = Array.isArray(info.hand?.cards) ? info.hand.cards : [];
                 const bag = Array.isArray(info.bag?.cards) ? info.bag.cards : [];
                 const deckInfo = info.deck;
-                console.log('manoh',hand)
                 if (currentPlayer?.id === info.playerId) {
                     setHandCards(hand.map(c => ({...c})));
                     setBagCards(bag.map(c => ({...c})));
@@ -336,6 +370,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         const subscription = stompClient.subscribe(`/topic/match.${matchId}.strength`, (msg) => {
             const strengthUpdate = JSON.parse(msg.body);
             
+            console.log('strengthUpdate', strengthUpdate)
             if (strengthUpdate.userId === currentPlayer.user?.id) {
                 setStrength(Math.min(6, strengthUpdate.strength));
             } else if (strengthUpdate.npcId) {
@@ -394,13 +429,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         calculateActionPoints()
     }, [handCards]);
 
-    /*
-    useEffect(() => {
-        if (!currentPlayer || !currentPlayer.hand || !currentPlayer.bag) return;
-        setHandCards(currentPlayer.hand.cards || []);
-        setBagCards(currentPlayer.bag.cards || []);
-    }, [currentPlayer]);
-    */
 
     useEffect(() => {
         if (!isDiceModalOpen || match?.currentTurnPhase !== null) return;
@@ -422,6 +450,24 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         const intervalId = setInterval(fetchMatchUpdate, 2000);
         return () => clearInterval(intervalId);
     }, [isDiceModalOpen, match?.currentTurnPhase, matchId]);
+
+    useEffect(() => {
+        // Si el modal de pelea ya está abierto, o si hay fases de resolución activas (robo, descarte), esperamos.
+        if (isFightModalOpen || isStealModalOpen || isNpcLossModalOpen || discardPhaseOpen) return;
+
+        if (fightQueue.length > 0) {
+            // Obtenemos la siguiente pelea de la cola
+            const nextFight = fightQueue[0];
+            
+            setFightAttacker(nextFight.attacker);
+            setFightDefender(nextFight.defender);
+            setPendingTargetRoom(nextFight.roomId);
+            setIsFightModalOpen(true);
+
+            // Sacamos la pelea procesada de la cola
+            setFightQueue(prevQueue => prevQueue.slice(1));
+        }
+    }, [fightQueue, isFightModalOpen, isStealModalOpen, isNpcLossModalOpen, discardPhaseOpen]);
 
     const cleanVotingStates = async () => {
         setVotingResult(null);
@@ -503,35 +549,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     }
 
-    /*
-    const movePlayerToRoom = async (userId, roomId) => {
-        try {
-            const response = await fetch(`/api/v1/matches/${matchId}/move`, {
-                method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ userId, roomId })
-            });
-
-            if (!response.ok) throw new Error("Move failed");
-
-            const data = await response.json();
-            updatePlayerData(data);
-                
-            const movedPlayer = data.players.find(p => p.user.id === currentUser?.id);
-            if (movedPlayer && userId === currentUser?.id) {
-                setActionPoints(movedPlayer.actionPoints);
-            }
-            return data;
-        } catch (err) {
-            console.error('Error moving player:', err);
-            return null;
-        }
-    }
-        */
 
     const fetchCards = async () => {
         try {
@@ -608,54 +625,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }    
     }
 
-    /*
-    const drawCardForWinner = async (winnerId) => {
-        try {
-            const response = await fetch(`/api/v1/matches/${matchId}/${winnerId}/drawRewardCard`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
-            })
-
-            if (!response.ok) throw new Error("Error rewarding card");
-
-            const data = await response.json()
-            if (winnerId === currentPlayer?.id) {
-                setDeck(data.deck)
-                setHandCards(prev => [...prev, data.card])
-            }
-            return true
-        } catch (error) {
-            console.log('Error al robar carta para el ganador:', error)
-            return false
-        }
-    }
-
-    */
-    const getPlayerInRoom = (roomId) => {
-        const targetRoomNormalized = normalizeRoomId(roomId);
-        return match?.players?.find(p => {
-            const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
-            return (
-                p.user?.id !== currentUser?.id &&
-                normalizeRoomId(playerRoomId) === targetRoomNormalized
-            );
-        });
-    };
-
-    const getNpcInRoom = (roomId) => {
-        const targetRoomNormalized = normalizeRoomId(roomId);
-        return match?.npcs?.find(npc => {
-            const npcRoomId = npc.room?.id;
-            return (
-                npcRoomId &&
-                normalizeRoomId(npcRoomId) === targetRoomNormalized
-            );
-        });
-    };
 
     const updatePlayerData = (data) => {
         setMatch(data);
@@ -671,16 +640,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     };
 
-    const notifyFight = async ({ attackerId, attackerUsername, defenderId, defenderUsername, roomId, isBot = false }) => {
-        await fetch(`/api/v1/fights/${matchId}/notify-fight`, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ matchId, attackerId, attackerUsername, defenderId, defenderUsername, roomId, action: "START", isBot })
-        });
-    };
 
     const notifyActionPoints = async (userId, actionPoints) => {
         try {
@@ -719,7 +678,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
 
         try {
-            const response = await fetch(`/api/v1/matches/${matchId}/moveNpc`, {
+            const response = await fetch(`/api/v1/actions/${matchId}/moveNpc`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${jwt}`,
@@ -742,26 +701,9 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             const data = await response.json();
             updatePlayerData(data);
 
-            const targetRoomNormalized = normalizeRoomId(roomId);
-            const playerInRoom = data.players.find(p => {
-                const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
-                return normalizeRoomId(playerRoomId) === targetRoomNormalized;
-            });
-
-            if (playerInRoom && roomId !== 37) {
-                const movedNpc = data.npcs.find(n => n.id === npcIdToSend);
-
-                if (movedNpc) {
-                    await notifyFight({
-                        attackerId: playerInRoom.user.id,
-                        attackerUsername: playerInRoom.user.username,
-                        defenderId: movedNpc.id,
-                        defenderUsername: movedNpc.isNiallCampbell ? "Niall Campbell" : "NPC",
-                        roomId,
-                        isBot: true
-                    });
-                }
-            }
+            setSelectedNpcIndex(null);
+            setSelectedNpcId(null);
+            setMoveNpcMode(false);
 
         } catch (err) {
             console.error(err);
@@ -775,66 +717,8 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
     const performPlayerMove = async (roomId, endpoint, resetMoveMode) => {
         try {
-            const isSafeArea = roomId === 37;
-            const otherPlayer = getPlayerInRoom(roomId);
-
-            if (otherPlayer && !isSafeArea) {
-                setPendingTargetRoom(roomId);
-                setFightDefender(otherPlayer);
-                setIsFightModalOpen(true);
-                resetMoveMode(false);
-
-                await notifyFight({
-                    attackerId: currentUser.id,
-                    attackerUsername: currentUser.username,
-                    defenderId: otherPlayer.user.id,
-                    defenderUsername: otherPlayer.user.username,
-                    roomId
-                });
-                return;
-            }
-
-            const botInRoom = getNpcInRoom(roomId);
-
-            if (botInRoom && !isSafeArea) {
-                setPendingTargetRoom(roomId);
-                setFightDefender(botInRoom);
-                setFightAttacker(currentPlayer);
-                setIsFightModalOpen(true);
-                resetMoveMode(false);
-
-                try {
-                    const consumeResponse = await fetch(
-                        `/api/v1/matches/${matchId}/consume-action-point/${currentUser.id}`,
-                        {
-                            method: "POST",
-                            headers: {
-                                Authorization: `Bearer ${jwt}`,
-                                "Content-Type": "application/json",
-                            },
-                        }
-                    );
-
-                    if (consumeResponse.ok) {
-                        setActionPoints(prev => Math.max(0, prev - 1));
-                    }
-                } catch (err) {
-                    console.error(err);
-                }
-
-                await notifyFight({
-                    attackerId: currentUser.id,
-                    attackerUsername: currentUser.username,
-                    defenderId: botInRoom.id,
-                    defenderUsername: `Bot ${botInRoom.id}`,
-                    roomId,
-                    isBot: true
-                });
-                return;
-            }
-
             const response = await fetch(
-                `/api/v1/matches/${matchId}/${endpoint}`,
+                `/api/v1/actions/${matchId}/${endpoint}`,
                 {
                     method: "PUT",
                     headers: {
@@ -848,12 +732,13 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
             if (response.ok) {
                 const data = await response.json();
-                updatePlayerData(data);
+                updatePlayerData(data); // Actualizamos el mapa y los jugadores con el nuevo estado
 
                 const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
                 if (movedPlayer) {
                     await notifyActionPoints(currentUser.id, movedPlayer.actionPoints);
                 }
+
                 resetMoveMode(false);
             } else {
                 resetMoveMode(false);
@@ -861,10 +746,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                   toast.error(error.message);
             }
         } catch (error) {
-            console.error(error);
+            console.error("Error al realizar el movimiento:", error);
+            resetMoveMode(false);
         }
     };
-
     const handleWordMove = async (roomId) => {
         return performPlayerMove(roomId, "moveByLetters", setMoveToRoomWithWord);
     };
@@ -879,36 +764,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         if (moveToAdyacentRoom === false) return;
         if (moveToAdyacentRoom === true) return handleAdjacentMove(roomId);
     }
-
-    /*
-    const moveLoserToRandomRoom = async (userId, roomId) => {
-        try {
-            const response = await fetch(`/api/v1/matches/${matchId}/moveLoser`, {
-                method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ userId, roomId })
-            });
-
-            if (!response.ok) throw new Error("Move loser failed");
-
-            const data = await response.json();
-            updatePlayerData(data);
-                
-            const movedPlayer = data.players.find(p => p.user.id === userId);
-            if (movedPlayer) {
-                await notifyActionPoints(userId, movedPlayer.actionPoints);
-            }
-            return data;
-        } catch (err) {
-            console.error('Error moving player:', err);
-            return null;
-        }
-    }
-        */
 
     const handleNpcLossDiscard = async ({ cardId, fromWhere }) => {
         if (!cardId || !fromWhere || !currentPlayer?.id) {
@@ -929,8 +784,9 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             if (!res.ok) {
                 alert('No se pudo descartar la carta tras perder contra el NPC.');
             } else {
-                await fetchCards();
-                await fetchOtherPlayersCards();
+                await fetchCards()
+                await fetchOtherPlayersCards()
+                await handleCheckChainFights()
             }
         } catch (error) {
             console.error('Error discarding card after NPC loss:', error);
@@ -1078,18 +934,9 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
     if (match?.status === "FINISHED") {
         return (
-            <div className="match-ended">
-                <div className="end-overlay">
-                    <div className="end-text-box">
-                        <h2>The match has ended</h2>
-                        {match?.winner?.user ? (
-                            <p style={{ fontWeight: 700, margin: '8px 0' }}>Winner: {match.winner.user.username}</p>
-                        ) : null}
-                        <p>Thanks for playing.</p>
-                        <button className="return-menu-button" onClick={() => navigate(`/`)}>Return to main menu</button>
-                    </div>
-                </div>
-            </div>
+            <EndMatchModal
+                match={match}
+            />
         );
     }
 
@@ -1097,16 +944,8 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         return <div>Cargando partida...</div>;
     }
 
-    const clearFightState = async () => {
-        console.log("CLEAR FIGHT STATE");
-        setIsFightModalOpen(false);
-        setFightDefender(null);
-        setFightAttacker(null);
-        setPendingTargetRoom(null);
-        await cleanVotingStates();
-    };
 
-    const handleFightResult = async (currentUserWon) => {
+    const handleFightResult = async (attackerWins) => {
         
         try {
             const npcIsAttacker = !fightAttacker?.user;
@@ -1126,7 +965,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             }
 
             const defenderRoomId = fightDefender?.currentRoom?.id || fightDefender?.roomId || fightDefender?.room?.id || pendingTargetRoom;
-            const attackerWins = currentUserWon;
             
             const isNpcFight = !fightAttacker?.user || !fightDefender?.user;
 
@@ -1141,7 +979,9 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     defenderRoomId,
                     handCards,
                     bagCards,
-                    setIsNpcLossModalOpen
+                    setIsNpcLossModalOpen,
+                    setReturnedFightCard,
+                    setIsReturnedCardModalOpen
                 });
                 return;
             }
@@ -1165,6 +1005,32 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             
         }
     }
+
+    const handleCheckChainFights = async () => {
+        try {
+            await delay(1000);
+            // Avisamos al backend de que la interfaz está despejada 
+            // y puede comprobar si hay que encadenar combates
+            await fetch(`/api/v1/fights/${matchId}/check-pending-fights`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+        } catch (error) {
+            console.error("Error al comprobar peleas en cadena:", error);
+        }
+    }
+
+    const clearFightState = async () => {
+        setIsFightModalOpen(false);
+        setFightDefender(null);
+        setFightAttacker(null);
+        setPendingTargetRoom(null);
+        await cleanVotingStates();
+    };
 
     return (
         <div className="match-container">
@@ -1198,8 +1064,8 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     <div className="current-player">
                         <CurrentPlayerInfo
                             currentPlayer={currentPlayer}
-                            actionPoints={actionPoints}
-                            strength={strength}
+                            actionPoints={actionPoints ? actionPoints : 0}
+                            strength={strength ? strength : 1 }
                             getPlayerColor={getPlayerColor}
                             players={match?.players}
                             match={match}
@@ -1309,6 +1175,20 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 bagCards={bagCards}
             />
 
+            <DiscardPhaseModal
+                isVisible={discardPhaseOpen}
+                hand={handCards}
+                bag={bagCards}
+                deck={deck}
+                player={currentPlayer}
+                onClose={() => setDiscardPhaseOpen(false)}
+                updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
+                onSave={async () => {
+                    await fetchCards();
+                    setDiscardPhaseOpen(false);
+                }}
+            />
+
             <FightModal
                 isOpen={isFightModalOpen}
                 onClose={() => {
@@ -1325,21 +1205,17 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 votingResult={votingResult}
                 proposingUserId={proposingUserId}
                 onVotingResultProcessed={() => setVotingResult(null)}
-                onResolve={async (currentUserWon) => { handleFightResult(currentUserWon); }}
+                onResolve={async (attackerWins) => { handleFightResult(attackerWins); }}
             />
 
-            <DiscardPhaseModal
-                isVisible={discardPhaseOpen}
-                hand={handCards}
-                bag={bagCards}
-                deck={deck}
-                player={currentPlayer}
-                onClose={() => setDiscardPhaseOpen(false)}
-                updateCurrentTurnId={(newTurnId) => setCurrentTurnUserId(newTurnId)}
-                onSave={async () => {
-                    await fetchCards();
-                    setDiscardPhaseOpen(false);
+            <ReturnedCardModal
+                isOpen={isReturnedCardModalOpen}
+                onClose={async () => {
+                    setIsReturnedCardModalOpen(false);
+                    setIsFightModalOpen(false);
+                    await handleCheckChainFights()
                 }}
+                card={returnedFightCard}
             />
 
             <StealCardModal
@@ -1347,14 +1223,18 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 loserId={stealLoserPlayerId}
                 matchId={matchId}
                 winnerId={currentPlayer?.id}
-                onClose={() => {
+                onClose={async () => {
                     setIsStealModalOpen(false);
                     setStealLoserPlayerId(null);
+                    setIsFightModalOpen(false);
+                    await handleCheckChainFights()
                 }}
                 onSteal={async () => {
                     await fetchCards();
                     setIsStealModalOpen(false);
                     setStealLoserPlayerId(null);
+                    setIsFightModalOpen(false);
+                    await handleCheckChainFights()
                 }}
             />
 
@@ -1362,7 +1242,13 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 isOpen={isNpcLossModalOpen}
                 handCards={handCards}
                 bagCards={bagCards}
-                onClose={() => { setIsNpcLossModalOpen(false); setNpcLossModalTitle(); setNpcLossModalSubtitle(); }}
+                onClose={async () => { 
+                    setIsNpcLossModalOpen(false);
+                    setNpcLossModalTitle(); 
+                    setNpcLossModalSubtitle(); 
+                    setIsFightModalOpen(false);
+                    await handleCheckChainFights()
+                 }}
                 title={npcLossModalTitle}
                 subtitle={npcLossModalSubtitle}
                 onDiscard={handleNpcLossDiscard}

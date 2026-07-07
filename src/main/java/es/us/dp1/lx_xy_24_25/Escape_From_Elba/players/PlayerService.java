@@ -53,7 +53,14 @@ public class PlayerService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Player> findByMatchIdAndUserId(Integer matchId, Integer userId) {
+    public Player findByMatchIdAndUserId(Integer matchId, Integer userId) {
+        return playerRepository.findByMatchAndUser(matchId, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Player with  user id " + userId + "not found in the match with id" + matchId));
+    }
+
+    // funcion usada en el caht service
+    @Transactional(readOnly = true)
+    public Optional<Player> findOptionalPlayerByMatchIdAndUserId(Integer matchId, Integer userId) {
         return playerRepository.findByMatchAndUser(matchId, userId);
     }
 
@@ -113,6 +120,7 @@ public class PlayerService {
             }
         }
     }
+
 
 
 

@@ -54,7 +54,7 @@ public class ChatServiceTests {
         User user = new User();
         user.setId(1);
         when(userService.findCurrentUser()).thenReturn(user);
-        when(playerService.findByMatchIdAndUserId(anyInt(), anyInt())).thenReturn(Optional.empty());
+        when(playerService.findOptionalPlayerByMatchIdAndUserId(anyInt(), anyInt())).thenReturn(Optional.empty());
 
         List<ChatMessage> chat = chatService.findChatOfMyGame(1);
         assertTrue(chat.isEmpty(), "Debe devolver lista vacía si el usuario no es jugador de la partida");
@@ -73,7 +73,7 @@ public class ChatServiceTests {
         Match match = new Match();
         match.setId(1);
         player.setMatch(match);
-        when(playerService.findByMatchIdAndUserId(match.getId(), user.getId()))
+        when(playerService.findOptionalPlayerByMatchIdAndUserId(match.getId(), user.getId()))
             .thenReturn(Optional.of(player));
 
 
@@ -114,7 +114,7 @@ public class ChatServiceTests {
         User user = new User();
         user.setId(1);
         when(userService.findCurrentUser()).thenReturn(user);
-        when(playerService.findByMatchIdAndUserId(anyInt(), anyInt())).thenReturn(Optional.empty());
+        when(playerService.findOptionalPlayerByMatchIdAndUserId(anyInt(), anyInt())).thenReturn(Optional.empty());
 
         ChatMessageDTO dto = new ChatMessageDTO();
         dto.setMessage("Hola");
@@ -130,7 +130,7 @@ public class ChatServiceTests {
 
         Player player = new Player();
         player.setId(10);
-        when(playerService.findByMatchIdAndUserId(anyInt(), anyInt())).thenReturn(Optional.of(player));
+        when(playerService.findOptionalPlayerByMatchIdAndUserId(anyInt(), anyInt())).thenReturn(Optional.of(player));
 
         ChatMessageDTO dto = new ChatMessageDTO();
         dto.setMessage("Hola");

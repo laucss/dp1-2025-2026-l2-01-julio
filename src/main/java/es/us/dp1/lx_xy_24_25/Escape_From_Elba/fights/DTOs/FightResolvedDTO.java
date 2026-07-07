@@ -17,52 +17,63 @@ public class FightResolvedDTO {
 
     private Integer matchId;
 
-    private Integer winnerId;
+    private Integer winnerUserId; // id del user ganador en caso de que haya sido un player, 
+    // lo ponemos para que en el frontend siempre se capte bien el ganador, porque currentPlayer es undefined muchas veces
+
+    private Integer loserUserId; // igual que con winner
+
+    private Integer winnerId; // el id del player o el de npc
 
     private Integer loserId;
 
     private Integer chainRoomId;
-    private Integer movedPlayerId;
-    private Integer movedNpcId;
+
 
     // si por ejemplo, gana contra npcs recibe directamente la carta
     private CardDTO card; 
 
     @NonNull
     @Enumerated(EnumType.STRING)
-    private FightResultType fightResultType; 
+    private FightResultType fightResultType; // en verdad sobra un poco pero bueno, extra confirmación
 
 
     public boolean hasChainFight() {
-    return chainRoomId != null;
+        return chainRoomId != null;
     }
 
-    public FightResolvedDTO(Integer matchId, Integer winnerId, Integer loserId, Card card, FightResultType fightResultType){
+    // player beats npc
+    public FightResolvedDTO(Integer matchId, Integer winnerUserId, Integer winnerId, Integer loserId, Integer chainRoomId, Card card, FightResultType fightResultType){
         this.card = new CardDTO(card);
         this.fightResultType = fightResultType; 
         this.winnerId = winnerId; 
         this.loserId = loserId; 
         this.matchId = matchId;
+        this.chainRoomId = chainRoomId; 
+        this.winnerUserId = winnerUserId;
     }
 
-    public FightResolvedDTO(Integer matchId, Integer winnerId, Integer loserId, FightResultType fightResultType){
+
+    //  npc beats player
+    public FightResolvedDTO(Integer matchId, Integer winnerId, Integer loserId, Integer loserUserId, Integer chainRoomId, FightResultType fightResultType){
         this.fightResultType = fightResultType;
         this.winnerId = winnerId; 
         this.loserId = loserId; 
         this.matchId = matchId;
+        this.chainRoomId = chainRoomId; 
+        this.loserUserId = loserUserId; 
     }
 
-        public void setPlayerChainFight(Integer roomId, Integer playerId) {
-        this.chainRoomId = roomId;
-        this.movedPlayerId = playerId;
-        this.movedNpcId = null;
+    // player beats player
+    public FightResolvedDTO(Integer matchId, Integer winnerUserId, Integer winnerId, Integer loserId, Integer loserUserId, Integer chainRoomId, FightResultType fightResultType){
+        this.fightResultType = fightResultType;
+        this.winnerId = winnerId; 
+        this.loserId = loserId; 
+        this.matchId = matchId;
+        this.chainRoomId = chainRoomId; 
+        this.winnerUserId = winnerUserId;
+        this.loserUserId = loserUserId; 
     }
 
-    public void setNpcChainFight(Integer roomId, Integer npcId) {
-        this.chainRoomId = roomId;
-        this.movedNpcId = npcId;
-        this.movedPlayerId = null;
-    }
 
     public FightResolvedDTO(){}
 
