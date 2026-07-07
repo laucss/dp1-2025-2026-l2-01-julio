@@ -159,7 +159,7 @@ export default function OtherPlayersPanel({
                         <div className="detail-grids-container">
                             {/* Bolsa */}
                             <div className="detail-section-box">
-                                <h5>Bolsa</h5>
+                                <h5>Bag</h5>
                                 <div className="cards-display-zone">
                                     {otherPlayersBags[inspectedData.id] && otherPlayersBags[inspectedData.id].length > 0 ? (
                                         <div className="bag-cards-container">
@@ -174,14 +174,14 @@ export default function OtherPlayersPanel({
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="empty-zone-text">Bolsa vacía</p>
+                                        <p className="empty-zone-text">Bag is empty</p>
                                     )}
                                 </div>
                             </div>
 
                             {/* Mano */}
                             <div className="detail-section-box">
-                                <h5>Mano</h5>
+                                <h5>Hand</h5>
                                 <div className="cards-display-zone">
                                     {otherPlayersHands[inspectedData.id] && otherPlayersHands[inspectedData.id].length > 0 ? (
                                         <div className="bag-cards-container">
@@ -196,7 +196,7 @@ export default function OtherPlayersPanel({
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="empty-zone-text">Sin cartas en mano</p>
+                                        <p className="empty-zone-text">Hand is empty</p>
                                     )}
                                 </div>
                             </div>
@@ -204,7 +204,7 @@ export default function OtherPlayersPanel({
                     ) : (
                         <div className="npc-detail-container">
                             <p className="npc-info-text">
-                                📍 <strong>Ubicación:</strong> Habitación {inspectedData.room?.name || `ID: ${inspectedData.room?.id || 'Desconocida'}`}
+                                📍 <strong>Location:</strong> Room {inspectedData.room?.name || `ID: ${inspectedData.room?.id || 'Unknown'}`}
                             </p>
                         </div>
                     )}

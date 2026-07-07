@@ -6,12 +6,14 @@ import "../../../static/css/match/components/matchButtons.css";
 
 export default function MatchButtons({
     match,
+    matchId,
     currentUser,
     actionPoints,
     setDiscardPhaseOpen,
     setIsActionsModalOpen,
     leaveMatch,
-    endMatch,
+    handleEndTurn,
+    isEndingTurn,
     chatOpen,
     setChatOpen
 }) {
@@ -19,6 +21,17 @@ export default function MatchButtons({
         <div className="match-sidebar">
 
             <div className="buttons-section">
+
+                <button
+                    className="leave-match-button"
+                    onClick={handleEndTurn}
+                    disabled={
+                        match.currentTurnUserId !== currentUser.id ||
+                        isEndingTurn
+                    }
+                >
+                    End your turn
+                </button>
 
                 <button
                     className="leave-match-button"
@@ -50,15 +63,6 @@ export default function MatchButtons({
                     Leave Match
                 </button>
 
-                {match?.creatorId === currentUser?.id && (
-                    <button
-                        className="end-match-button"
-                        onClick={endMatch}
-                    >
-                        End match
-                    </button>
-                )}
-
                 <div className="match-chat-icon">
                     <div
                         className="match-chat-icon-button"
@@ -68,7 +72,7 @@ export default function MatchButtons({
                     </div>
                 </div>
 
-                {chatOpen && <ChatBox matchId={match.id} />}
+                {chatOpen && <ChatBox matchId={matchId} />}
 
             </div>
 

@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import '../../../static/css/match/modals/startDiceModal.css';
 import tokenService from '../../../services/token.service';
 import getIdFromUrl from '../../../util/getIdFromUrl';
+import { toast } from 'react-toastify';
 
-export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
+export default function EscapeDiceModal({ isOpen, onClose, onResult, canAttemptEscape = true, escapeAttemptReason = '' }) {
   const jwt = tokenService.getLocalAccessToken();
   const currentUser = tokenService.getUser();
   const matchId = getIdFromUrl(2);
@@ -42,6 +43,11 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
   };
 
   const throwDice = () => {
+    if (!canAttemptEscape) {
+      toast.error(escapeAttemptReason || 'Conditions not met to attempt escape.');
+      return;
+    }
+
     if (diceRolled || isRolling) return;
     setIsRolling(true);
 
@@ -66,7 +72,7 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
   return (
     <div className="start-dice-modal-overlay">
       <div className="start-dice-modal-content">
-        <h2 className="start-dice-title">Intentar escapar</h2>
+        <h2 className="start-dice-title">Attempt Escape</h2>
 
         <div className="start-dice-container">
           <div className="dice-wrapper">
@@ -75,12 +81,12 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
         </div>
 
         <button onClick={throwDice} className={`throw-dice-button ${diceRolled || isRolling ? 'disabled' : ''}`} disabled={diceRolled || isRolling}>
-          {isRolling ? 'Tirando...' : diceRolled ? 'Dado lanzado' : 'Lanzar dado'}
+          {isRolling ? 'Rolling...' : diceRolled ? 'Dice rolled' : 'Roll Dice'}
         </button>
 
         {diceRolled && (
           <>
-            <p className="dice-result-text">Resultado: {parseInt(whiteDice)}</p>
+            <p className="dice-result-text">Result: {parseInt(whiteDice)}</p>
             <button
               className="confirm-dice-button"
               onClick={() => {
@@ -89,7 +95,7 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
                 }
               }}
             >
-              Confirmar
+              Confirm
             </button>
           </>
         )}

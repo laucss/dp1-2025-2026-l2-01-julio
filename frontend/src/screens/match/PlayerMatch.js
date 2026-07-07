@@ -72,6 +72,14 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [proposingUserId, setProposingUserId] = useState(null);
     const [proposingUsername, setProposingUsername] = useState('');
     const [votingResult, setVotingResult] = useState(null);
+        const [confirmModal, setConfirmModal] = useState({
+        open: false,
+        title: "",
+        message: "",
+        warning: "",
+        confirmText: "",
+        onConfirm: null
+    });
     
 
     // CARGAR DATOS JUGADORES 
@@ -101,6 +109,23 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
         return () => subscription.unsubscribe();
     }, [stompClient, matchId]);
+
+
+        useEffect(() => {
+            console.log(stompClient);
+            console.log(stompClient?.active);
+            if (!stompClient || !stompClient.active) return;
+
+            const subscription = stompClient.subscribe(
+                `/topic/match.${matchId}.playerLeft`,
+                (msg) => {
+                    console.log("PLAYER LEFT", msg.body);
+                    fetchMatchAndPlayers();
+                }
+            );
+
+            return () => subscription.unsubscribe();
+        }, [stompClient, matchId]);
 
     useEffect(() => {
         if (!stompClient || !stompClient.active) return;
@@ -676,9 +701,9 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     };
 
-    const handleNpcMove = async (roomId) => {
+   const handleNpcMove = async (roomId) => {
         if (selectedNpcIndex === null) {
-            alert('Selecciona primero un NPC en el mapa');
+            toast.error("Select an NPC first.");
             return;
         }
 
@@ -686,7 +711,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         const npcIdToSend = npc?.id ?? null;
 
         if (!npcIdToSend) {
-            alert('No se puede mover: el NPC no tiene identificador.');
+            toast.error("The selected NPC is not valid.");
             setSelectedNpcIndex(null);
             setSelectedNpcId(null);
             setMoveNpcMode(false);
@@ -701,17 +726,21 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     Accept: 'application/json',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ userId: currentUser.id, roomId, npcId: npcIdToSend })
+                body: JSON.stringify({
+                    userId: currentUser.id,
+                    roomId,
+                    npcId: npcIdToSend
+                })
             });
 
-            if (!response.ok) return;
+            if (!response.ok) {
+                const error = await response.json();
+                toast.error(error.message);
+                return;
+            }
 
             const data = await response.json();
             updatePlayerData(data);
-
-            setSelectedNpcIndex(null);
-            setSelectedNpcId(null);
-            setMoveNpcMode(false);
 
             const targetRoomNormalized = normalizeRoomId(roomId);
             const playerInRoom = data.players.find(p => {
@@ -721,6 +750,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
             if (playerInRoom && roomId !== 37) {
                 const movedNpc = data.npcs.find(n => n.id === npcIdToSend);
+
                 if (movedNpc) {
                     await notifyFight({
                         attackerId: playerInRoom.user.id,
@@ -732,8 +762,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     });
                 }
             }
+
         } catch (err) {
             console.error(err);
+            toast.error("Couldn't move the NPC.");
         } finally {
             setSelectedNpcIndex(null);
             setSelectedNpcId(null);
@@ -825,7 +857,8 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 resetMoveMode(false);
             } else {
                 resetMoveMode(false);
-                toast.error(response.statusText);
+                  const error = await response.json();
+                  toast.error(error.message);
             }
         } catch (error) {
             console.error(error);
@@ -907,21 +940,31 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     }
 
     const endMatch = () => {
-        if (!window.confirm("¿Are you sure you want to end the match?")) return; 
-        fetch(`/api/v1/matches/${matchId}/end`, {
-            method: "PUT",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(10)
-        })
-        .then(res => res.json())
-        .then(updated => {
-            setMatch(updated)
-        })
-        .catch(err => console.error(err))
-    }
+        setConfirmModal({
+            open: true,
+            title: "End Match",
+            message: "Are you sure you want to end this match?",
+            warning: "The match will finish immediately for every player.",
+            confirmText: "End Match",
+            onConfirm: async () => {
+                try {
+                    const res = await fetch(`/api/v1/matches/${matchId}/end`, {
+                        method: "PUT",
+                        headers: {
+                            Authorization: `Bearer ${jwt}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(10)
+                    });
+
+                    const updated = await res.json();
+                    setMatch(updated);
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        });
+    };
 
     const handleEndTurn = async () => {
         if (isEndingTurn) return;
@@ -949,29 +992,29 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     };
 
-    const leaveMatch = async () => {
-        if (!window.confirm("¿Seguro que quieres abandonar la partida?")) return;
 
-        try {
-            const response = await fetch(`/api/v1/matches/${matchId}/leaveMatch`, {
-                method: 'PUT',
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(currentUser?.id)
-            });
+     const leaveMatch = async () => {
+            try {
+                const response = await fetch(`/api/v1/matches/${matchId}/leaveMatch`, {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(currentUser?.id)
+                });
 
-            if (!response.ok) {
-                alert('No se pudo abandonar la partida');
-                return;
+                if (!response.ok) {
+                    toast.error("Couldn't leave the match.");
+                    return;
+                }
+
+                navigate('/');
+            } catch (err) {
+                console.error(err);
+                toast.error("Error leaving the match.");
             }
-
-            navigate('/');
-        } catch (err) {
-            console.error('Error leaving match:', err);
-        }
-    };
+        };
 
     const currentPlayerTurn = match?.players?.find(p => p.user.id === match.currentTurnUserId);
     const isRoomSelectionActive = moveNpcMode || moveToAdyacentRoom || moveToRoomWithWord;
@@ -982,6 +1025,37 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const canDraw = match?.currentTurnUserId === currentUser?.id &&
                 match?.currentTurnPhase === "DRAW" &&
                 numCardsDrawn < 7;
+
+    const escapeTowerWords = {
+        1: "escape",
+        6: "from",
+        31: "elba",
+        36: "peace",
+    };
+
+    const currentRoomId = normalizeRoomId(
+        currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id)
+    );
+    const escapeWord = escapeTowerWords[currentRoomId] || null;
+    const bagWord = Array.isArray(bagCards)
+        ? bagCards
+            .map(card => card?.letter || "")
+            .join("")
+            .toLowerCase()
+        : "";
+
+    const hasEscapeActionPoints = actionPoints > 0;
+    const isEscapeTower = [1, 6, 31, 36].includes(currentRoomId);
+    const hasRequiredEscapeWord = Boolean(escapeWord) && bagWord === escapeWord;
+    const canAttemptEscape = hasEscapeActionPoints && isEscapeTower && hasRequiredEscapeWord;
+
+    const escapeAttemptReason = !hasEscapeActionPoints
+        ? "No tienes puntos de acción para intentar escapar."
+        : !isEscapeTower
+            ? "Solo puedes intentar escapar desde una torre de escape."
+            : !hasRequiredEscapeWord
+                ? "No tienes en la bolsa la palabra correcta para esa torre."
+                : "";
 
     const calculateActionPoints = () => {
         if (!match) return;
@@ -1103,12 +1177,14 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             <EscapeDiceModal
                 isOpen={isEscapeModalOpen}
                 onClose={() => setIsEscapeModalOpen(false)}
+                canAttemptEscape={canAttemptEscape}
+                escapeAttemptReason={escapeAttemptReason}
                 onResult={async (result) => {
                     try {
                         await fetchMatchAndPlayers();
                         if (!result.success && result.discardRequired) {
-                            setNpcLossModalTitle('Tu intento de escape ha fallado');
-                            setNpcLossModalSubtitle('Elige de donde descartar una carta');
+                            setNpcLossModalTitle('Your escape attempt failed');
+                            setNpcLossModalSubtitle('Choose a card to discard');
                             setIsNpcLossModalOpen(true);
                         }
                     } catch (err) {
@@ -1131,12 +1207,26 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                         />
                     </div>
 
-                    <DeckSection
-                        numCardsDrawn={numCardsDrawn}
-                        drawCard={drawCard}
-                        canDraw={canDraw}
-                        deck={deck}
-                    />
+     
+
+                <DeckSection
+                    numCardsDrawn={numCardsDrawn}
+                    drawCard={drawCard}
+                    canDraw={canDraw}
+                    deck={deck}
+                />
+
+                
+
+                {match?.creatorId === currentUser?.id && (
+                    <button
+                        className="end-match-button deck-end-match-button"
+                        onClick={endMatch}
+                    >
+                        End Match
+                    </button>
+                )}
+
                 </div>
 
                 <MatchBoardMap
@@ -1162,12 +1252,23 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
                     <MatchButtons
                         match={match}
+                        matchId={matchId}
                         currentUser={currentUser}
                         actionPoints={actionPoints}
                         setDiscardPhaseOpen={setDiscardPhaseOpen}
                         setIsActionsModalOpen={setIsActionsModalOpen}
-                        leaveMatch={leaveMatch}
-                        endMatch={endMatch}
+                        leaveMatch={() =>
+                            setConfirmModal({
+                                open: true,
+                                title: "Leave Match",
+                                message: "Are you sure you want to leave this match?",
+                                warning: "Your progress in this match will be lost.",
+                                confirmText: "Leave Match",
+                                onConfirm: leaveMatch
+                            })
+                        }                   
+                        handleEndTurn={handleEndTurn}
+                        isEndingTurn={isEndingTurn}
                         chatOpen={chatOpen}
                         setChatOpen={setChatOpen}
                         ChatBox={ChatBox}
@@ -1179,8 +1280,16 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                         moveToAdyacent={() => setMoveToAdyacentRoom(true)}
                         moveToRoomWithWord={() => setMoveToRoomWithWord(true)}
                         onMoveNpcRequested={() => { setMoveNpcMode(true); setSelectedNpcId(null); setSelectedNpcIndex(null); }}
-                        onAttemptEscape={() => { setIsEscapeModalOpen(true); }}
-                        canAttemptEscape={[1, 6, 31, 36].includes(normalizeRoomId(currentPlayer && (currentPlayer.roomId ?? currentPlayer.room?.id ?? currentPlayer.currentRoom?.id)))}
+                        onAttemptEscape={() => {
+                            if (!canAttemptEscape) {
+                                toast.error(escapeAttemptReason);
+                                return;
+                            }
+
+                            setIsEscapeModalOpen(true);
+                        }}
+                        canAttemptEscape={canAttemptEscape}
+                        escapeAttemptReason={escapeAttemptReason}
                     />
 
 
@@ -1194,16 +1303,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 </div>
             )}
 
-            {match?.currentTurnUserId === currentUser?.id && (
-                <button
-                    className="end-turn-button"
-                    onClick={handleEndTurn}
-                    disabled={isEndingTurn}
-                >
-                    End your turn
-                </button>
-            )}
-
+ 
             <PlayerCardsSection
                 handCards={handCards}
                 bagCards={bagCards}
@@ -1280,6 +1380,40 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     setIsVotingModalOpen(false);
                 }}
             />
+            {confirmModal.open && (
+                <div className="leave-match-overlay">
+                    <div className="leave-match-modal">
+                        <h2>{confirmModal.title}</h2>
+
+                        <p>{confirmModal.message}</p>
+
+                        <p className="leave-warning">
+                            {confirmModal.warning}
+                        </p>
+
+                        <div className="leave-buttons">
+                            <button
+                                className="leave-cancel"
+                                onClick={() =>
+                                    setConfirmModal(prev => ({ ...prev, open: false }))
+                                }
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                className="leave-confirm"
+                                onClick={async () => {
+                                    setConfirmModal(prev => ({ ...prev, open: false }));
+                                    await confirmModal.onConfirm();
+                                }}
+                            >
+                                {confirmModal.confirmText}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
