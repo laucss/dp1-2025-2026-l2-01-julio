@@ -392,7 +392,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         if (currentTurnUserId && currentPlayer.user?.id === currentTurnUserId){ 
             fetchActionPoints() 
         }
-    }, [currentTurnUserId]);
+    }, [currentTurnUserId, currentPlayer]);
 
     useEffect(() => {
         if (playersList.length > 0) {
