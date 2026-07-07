@@ -31,6 +31,7 @@ export default function NotificationsModal({ isOpen, onClose }) {
           throw new Error(txt || `HTTP ${res.status}`);
         }
         const data = await res.json();
+        console.log("Fetched notifications:", data);
         if (!cancelled) setNotifications(Array.isArray(data) ? data : []);
       } catch (e) {
         if (!cancelled) setError("Error al cargar notificaciones");

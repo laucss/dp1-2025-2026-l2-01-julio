@@ -9,19 +9,19 @@
 }
 
 .actions-modal-content {
-    background: rgb(255, 255, 255);
+    background: #ffecdb;
     padding: 20px;
     border-radius: 12px;
     min-width: 300px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    border: 9px solid #700202;
+    border: 5px solid #ff7f00;
 }
 
 .actions-modal-content h2 {
     text-align: center;       /* Centrado */
-    color: #700202;      /* Cambia este color al que quieras */
+    color: #ff7f00;      /* Cambia este color al que quieras */
     font-size: 34px;          /* Más grande (opcional) */
     margin-bottom: 15px;      /* Un poco de separación */
 }
@@ -30,15 +30,33 @@
     padding: 10px;
     border-radius: 8px;
     border: none;
-    background: #cf1313;
+    background: #ffb876;
     color: white;
     cursor: pointer;
+    border: 3px solid #ff7f00;
 }
 
 .actions-modal-content button:hover {
-    background: #680000;
+    background: #f7934d;
+}
+
+.actions-escape-disabled {
+    background: #8a8a8a !important;
+    cursor: not-allowed;
+    opacity: 0.82;
+    border: 3px solid #8a8a8a !important;
+}
+
+.actions-escape-disabled:hover {
+    background: #8a8a8a !important;
+    border: 3px solid #8a8a8a !important;
 }
 
 .actions-close-btn {
-    background: #700202 !important;
+    background: #5db9eb !important;
+    border: 3px solid #2ba5e7 !important;
+}
+.actions-close-btn:hover {
+    background: #2ba5e7 !important;
+    border: 3px solid #2ba5e7 !important;
 }

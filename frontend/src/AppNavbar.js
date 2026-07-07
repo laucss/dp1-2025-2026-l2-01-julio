@@ -36,6 +36,34 @@ function AppNavbar() {
             setUser(tokenService.getUser());
         }
     }, [jwt])
+    
+    useEffect(() => {
+        if (!jwt) return;
+
+        const fetchNotifications = async () => {
+            try {
+                const res = await fetch("/api/v1/notifications", {
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                    },
+                });
+
+                if (!res.ok) return;
+
+                const data = await res.json();
+                setNotifications(Array.isArray(data) ? data : []);
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        fetchNotifications();
+
+        const interval = setInterval(fetchNotifications, 5000);
+
+        return () => clearInterval(interval);
+
+    }, [jwt]);
 
     let adminLinks = <></>;
     let playerLinks = <></>;
@@ -71,13 +99,13 @@ function AppNavbar() {
                             style={{ color: "white", cursor: "pointer", marginRight: "20px" }}
                             onClick={handleNotificationsClick}
                         >
-                            <div className="notification-container">
-                            <IoNotifications size={20} />
-                            {notifications.length > 0 && (
-                                <span className="notification-badge">
-                                {notifications.length}
-                                </span>
-                            )}
+                        <div className="notification-container">
+                                <IoNotifications size={24} />
+                                {notifications.length > 0 && (
+                                    <span className="notification-badge">
+                                        {notifications.length}
+                                    </span>
+                                )}
                             </div>
                             Notifications 
                         </NavLink>

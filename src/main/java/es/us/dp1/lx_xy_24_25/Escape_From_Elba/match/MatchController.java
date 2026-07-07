@@ -81,9 +81,10 @@ public class MatchController {
         return m;
     }
 
+
     @GetMapping("/all-Matches")
     public Page<MatchHistorialDTO> getMatches(@RequestParam(defaultValue = "all") String filter,@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "3") Integer size) {
-         Page<Match> matches;
+         Page<MatchHistorialDTO> matches;
         switch (filter) {
             case "finished":
                 matches = ms.getFinishedMatches(page, size);
@@ -94,7 +95,7 @@ public class MatchController {
             default:
                 matches = ms.getFinishedAndInProgressMatches(page, size);
         }
-        return matches.map(MatchHistorialDTO::new);
+        return matches;
     }
 
     @GetMapping("all-Matches/{userId}")
@@ -105,26 +106,26 @@ public class MatchController {
 
     @GetMapping("matches-played/{userId}")
     public Page<MatchHistorialDTO> getAllMatchesPlayedByUser(@PathVariable("userId") Integer userId, @ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
-        Page<Match> userMatches = ms.getMatchesPlayedByUser(userId, page, size);
-        return userMatches.map(MatchHistorialDTO::new);
+        Page<MatchHistorialDTO> userMatches = ms.getMatchesPlayedByUser(userId, page, size);
+        return userMatches;
     }
 
     @GetMapping("matches-created/{userId}")
     public Page<MatchHistorialDTO> getAllMatchesCreatedByUser(@PathVariable("userId") Integer userId, @ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
-        Page<Match> matchesCreated = ms.getMatchesPlayedAndCreatedByUser(userId, page, size);
-        return matchesCreated.map(MatchHistorialDTO::new);
+        Page<MatchHistorialDTO> matchesCreated = ms.getMatchesPlayedAndCreatedByUser(userId, page, size);
+        return matchesCreated;
     }
 
     @GetMapping("matches-won/{userId}")
     public Page<MatchHistorialDTO> getAllMatchesWonByUser(@PathVariable("userId") Integer userId, @ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
-        Page<Match> matchesWon = ms.getMatchesWonByUser(userId, page, size);
-        return matchesWon.map(MatchHistorialDTO::new);
+        Page<MatchHistorialDTO> matchesWon = ms.getMatchesWonByUser(userId, page, size);
+        return matchesWon;
     }
 
     @GetMapping("matches-abandoned/{userId}")
     public Page<MatchHistorialDTO> getAllMatchesAbandonedByUser(@PathVariable("userId") Integer userId, @ParameterObject @RequestParam(value="page", defaultValue = "0") Integer page, @ParameterObject @RequestParam(value="size", defaultValue = "10") Integer size){
-        Page<Match> matchesAbandoned = ms.getMatchesAbandonedByUser(userId, page, size);
-        return matchesAbandoned.map(MatchHistorialDTO::new);
+        Page<MatchHistorialDTO> matchesAbandoned = ms.getMatchesAbandonedByUser(userId, page, size);
+        return matchesAbandoned;
     }
 
     @GetMapping("/{matchId}/players")

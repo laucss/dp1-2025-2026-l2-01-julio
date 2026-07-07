@@ -13,7 +13,7 @@
 
     padding: 1rem;
     gap: 1rem;
-    background-color: #ff8000;
+    background-color: #a0deff;
 }
 
 .cards-section{
@@ -42,11 +42,11 @@
 }
 
 .player-hand{
-    background-color: #ffb375;
+    background-color: #5db9eb;
 }
 
 .player-bag{
-    background-color: #ff9a46;
+    background-color: #3daeeb;
 }
 
 .hand-cards,

@@ -153,23 +153,30 @@ public class MatchService {
 
 //------------------FUNCIONES PARA EL HISTORIAL DE PARTIDAS ------------------------------------------------------
 
+    private MatchHistorialDTO toHistorialDTO(Match match) {
+     return new MatchHistorialDTO(match, userService.findUser(match.getCreatorId()));
+    }
     //Para devolver el listado de todo el historial de partidas finalizadas y en curso
     @Transactional(readOnly = true) 
-    public Page<Match> getFinishedAndInProgressMatches(Integer page, Integer size) {
-        return matchRepo.findFinishedAndInProgress(PageRequest.of(page,size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getFinishedAndInProgressMatches(Integer page, Integer size) {
+        return matchRepo.findFinishedAndInProgress(
+            PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")))
+            .map(this::toHistorialDTO);
     }
 
     //Para devolver el listado de partidas en curso 
     @Transactional(readOnly = true)
-    public Page<Match> getInProgressMatches(Integer page, Integer size) {
-        return matchRepo.findInProgress(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getInProgressMatches(Integer page, Integer size) {
+        return matchRepo.findInProgress(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")))
+            .map(this::toHistorialDTO)  ;
     }
 
 
     //Para devolver el listado de partidas finalizadas
     @Transactional(readOnly = true)
-    public Page<Match> getFinishedMatches(Integer page, Integer size) {
-            return matchRepo.findFinished(PageRequest.of(page,size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getFinishedMatches(Integer page, Integer size) {
+            return matchRepo.findFinished(PageRequest.of(page,size, Sort.by(Sort.Direction.DESC, "startTime")))
+                .map(this::toHistorialDTO);
         }
 
 
@@ -184,13 +191,14 @@ public class MatchService {
 
             return matches.map(match -> {
 
-                MatchHistorialDTO dto = new MatchHistorialDTO(match);
+            MatchHistorialDTO dto = toHistorialDTO(match);
+         
 
-                dto.setAbandoned(
-                    abandonedMatchRepository.existsByMatchIdAndUserId(match.getId(), userId)
-                );
+            dto.setAbandoned(
+                abandonedMatchRepository.existsByMatchIdAndUserId(match.getId(), userId)
+            );
 
-                return dto;
+            return dto;
             });
         }
 
@@ -198,26 +206,30 @@ public class MatchService {
 
     //Para devolver el listado de partidas jugadas por un usuario
     @Transactional(readOnly = true)
-    public Page<Match> getMatchesPlayedByUser(Integer userId, Integer page, Integer size) {
-        return matchRepo.findMatchesPlayedByUser(userId, PageRequest.of(page, size,Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getMatchesPlayedByUser(Integer userId, Integer page, Integer size) {
+        return matchRepo.findMatchesPlayedByUser(userId, PageRequest.of(page, size,Sort.by(Sort.Direction.DESC, "startTime")))
+            .map(this::toHistorialDTO);
     }
 
     //Para devolver el listado de partidas creadas por un usuario 
     @Transactional(readOnly = true)
-    public Page<Match> getMatchesPlayedAndCreatedByUser(Integer userId, Integer page, Integer size) {
-        return matchRepo.findMatchesPlayedAndCreatedByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getMatchesPlayedAndCreatedByUser(Integer userId, Integer page, Integer size) {
+        return matchRepo.findMatchesPlayedAndCreatedByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")))
+            .map(this::toHistorialDTO);
     }
 
     //Para devolver el listado de partidas ganadas por un usuario 
     @Transactional(readOnly = true)
-    public Page<Match> getMatchesWonByUser(Integer userId, Integer page, Integer size) {
-        return matchRepo.findMatchesWonByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getMatchesWonByUser(Integer userId, Integer page, Integer size) {
+        return matchRepo.findMatchesWonByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")))
+            .map(this::toHistorialDTO);
     }
 
     //Para devolver el listado de partidas abandonadas por un usuario
     @Transactional(readOnly = true)
-    public Page<Match> getMatchesAbandonedByUser(Integer userId, Integer page, Integer size) {
-        return abandonedMatchRepository.findMatchesAbandonedByUser(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startTime")));
+    public Page<MatchHistorialDTO> getMatchesAbandonedByUser(Integer userId, Integer page, Integer size) {
+        return abandonedMatchRepository.findMatchesAbandonedByUser(userId, PageRequest.of(page, size))
+            .map(this::toHistorialDTO);
     }
 
 
@@ -424,57 +436,59 @@ public class MatchService {
     }
 
 
-    @Transactional 
-    public MatchDTO  leaveMatch(Integer matchId, Integer userId){
+
+
+  @Transactional
+    public MatchDTO leaveMatch(Integer matchId, Integer userId) {
+          System.out.println("HE ENTRADO EN LEAVE MATCH");
         Match m = matchRepo.findById(matchId)
                 .orElseThrow(() -> new IllegalArgumentException("Match not found"));
+
         Player p = playerRepo.findByMatchAndUser(matchId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found in this match"));
-        User u = userService.findUser(userId);
-        
-        //Guardamos el orden del turno del jugador que se va
-        Integer leavingPlayerOrder = p.getOrderInMatch();
-        //Guardamos si el jugador que se va tiene el turno actual
-        Boolean isLeavingPlayerCurrentTurn = m.getCurrentTurnUserId().equals(userId);
 
+        User u = userService.findUser(userId);
+
+        Integer leavingPlayerOrder = p.getOrderInMatch();
+        Boolean isLeavingPlayerCurrentTurn = m.getCurrentTurnUserId().equals(userId);
 
         abandonedMatchService.saveAbandonedMatch(u, m);
         m.getPlayers().remove(p);
 
-        if (isLeavingPlayerCurrentTurn){
+        if (isLeavingPlayerCurrentTurn) {
             Integer nextIndx = (leavingPlayerOrder + 1) % m.getPlayers().size();
+
             Player nextPlayerTurn = m.getPlayers().stream()
-                .filter(pl -> pl.getOrderInMatch().equals(nextIndx))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Player not found"));
-            //Actualizamos el id del jugador que tiene el turno actualmente en la partida
+                    .filter(pl -> pl.getOrderInMatch().equals(nextIndx))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Player not found"));
+
             m.setCurrentTurnUserId(nextPlayerTurn.getUser().getId());
             m.setCurrentTurnPhase(TurnPhase.DRAW);
         }
 
-        
-
-        //Actualizamos el orden de los jugadores que quedan en la partida 
-        for (Player player : m.getPlayers()){
-            //Todos los jugadores que iban después del que se va adelantan una posición
-            if (player.getOrderInMatch() > leavingPlayerOrder){
+        for (Player player : m.getPlayers()) {
+            if (player.getOrderInMatch() > leavingPlayerOrder) {
                 player.setOrderInMatch(player.getOrderInMatch() - 1);
                 playerRepo.save(player);
             }
         }
 
-        //Si no se llega al minimo de jugadores, se termina la partida
-        if (m.getPlayers().size() < m.getMinPlayers()){
-            endMatch(matchId, null);
+        MatchDTO dto;
+
+        if (m.getPlayers().size() < m.getMinPlayers()) {
+            dto = endMatch(matchId, null);
         } else {
             matchRepo.save(m);
+            dto = new MatchDTO(m);
         }
 
-        return new MatchDTO(m);
+        System.out.println("ANTES DE NOTIFICAR");
+        matchWebsocketController.notifyPlayerLeft(matchId, dto);
 
-
+        return dto;
     }
-
+        
 
     @Transactional
     public void deleteMatchCards(Integer matchId){
