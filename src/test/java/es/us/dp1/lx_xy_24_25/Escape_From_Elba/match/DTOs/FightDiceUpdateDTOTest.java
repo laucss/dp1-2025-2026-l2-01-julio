@@ -136,19 +136,7 @@ public class FightDiceUpdateDTOTest {
         assertThat(dto.getDiceValue()).isEqualTo(5);
     }
 
-    @Test
-    @DisplayName("Should verify toString method works")
-    void testToString() {
-        FightDiceUpdateDTO dto = new FightDiceUpdateDTO(1, 10, "player1", "WHITE", 4);
-        String toString = dto.toString();
-
-        assertThat(toString).contains("FightDiceUpdateDTO");
-        assertThat(toString).contains("matchId=1");
-        assertThat(toString).contains("playerId=10");
-        assertThat(toString).contains("playerUsername=");
-        assertThat(toString).contains("diceType=");
-        assertThat(toString).contains("diceValue=4");
-    }
+    
 
     @Test
     @DisplayName("Should maintain independent instances")

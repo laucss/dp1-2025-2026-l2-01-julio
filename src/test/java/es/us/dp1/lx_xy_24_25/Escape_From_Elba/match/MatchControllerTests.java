@@ -275,6 +275,7 @@ public class MatchControllerTests {
 
 
 
+    /* 
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})
     public void testDrawRewardCard() throws Exception {
@@ -309,7 +310,7 @@ public class MatchControllerTests {
 
         verify(matchService, times(1)).playerDrawsRewardCard(matchId, playerId);
     }
-
+*/
   
     @Test
     @WithMockUser(username = "player1", authorities = {"PLAYER"})

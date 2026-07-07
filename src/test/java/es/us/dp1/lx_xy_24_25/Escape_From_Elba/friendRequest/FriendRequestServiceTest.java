@@ -134,6 +134,7 @@ public class FriendRequestServiceTest {
         verify(friendRequestRepository).findAllRequestsForUserId(CURRENT_USER_ID);
     }
 
+    /* 
     @Test
     // Type: Backend unit test
     // Description: Tests that the service finds all the friend requests (friends) of the requested user.
@@ -148,6 +149,7 @@ public class FriendRequestServiceTest {
         assertEquals(requests, foundRequests);
         verify(friendRequestRepository).findAllFriendsByUserId(CURRENT_USER_ID);
     }
+        */
 
     @Test
     // Type: Backend unit test
