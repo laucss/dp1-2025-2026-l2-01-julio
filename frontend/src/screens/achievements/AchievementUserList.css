@@ -1,125 +1,292 @@
 .achievement-user-container {
-  min-height: 50vh;
-  padding: 1px 0px;
-  background: url('../../static/images/menuBackGround.png') center/cover no-repeat;
-  background-attachment: fixed;
+    min-height: auto;
+
+    background: url('../../static/images/menuBackGround.png') center/cover no-repeat;
+    background-attachment: fixed;
 }
 
 .achievement-header {
-  text-align: center;
-  color: white;
-  margin-bottom: 50px;
+    text-align: center;
+    color: white;
+    margin-bottom: 50px;
 }
 
 .achievement-header h1 {
-  font-size: 3.5rem;
-  font-weight: 700;
-  margin: 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-  letter-spacing: 2px;
-  text-transform: uppercase;
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 .achievement-header .subtitle {
-  font-size: 1.1rem;
-  margin-top: 10px;
-  opacity: 0.95;
-  font-weight: 300;
+    font-size: 1.1rem;
+    margin-top: 10px;
+    opacity: 0.95;
+    font-weight: 300;
 }
 
 .achievement-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
-  max-width: 1400px;
-  margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    width: 95%;
+    margin: 0 auto;
 }
 
 .achievement-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
-  padding: 30px 25px;
-  text-align: center;
-  color: white;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.12);
+
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+
+    padding: 20px;
+
+    text-align: center;
+    color: white;
+
+    transition: all 0.3s ease;
 }
 
 .achievement-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
 }
 
 .achievement-card.pending {
-  filter: grayscale(0.8);
-  opacity: 0.65;
+    opacity: 0.65;
+    filter: grayscale(0.5);
 }
 
 .achievement-card.pending:hover {
-  filter: grayscale(0.6);
-  opacity: 0.75;
+    opacity: 0.75;
 }
 
 .achievement-card.completed {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  opacity: 1;
+    background: rgba(212, 175, 55, 0.60);
+    border: 2px solid #d4af37;
 }
 
 .achievement-badge {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  padding: 10px;
-  transition: transform 0.3s ease;
+    width: 65px;
+    height: 65px;
+
+    margin: 0 auto 15px;
+
+    background: rgba(255,255,255,0.10);
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .achievement-card:hover .achievement-badge {
-  transform: scale(1.1);
+    transform: scale(1.1);
 }
 
 .achievement-badge img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .achievement-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 15px 0 10px 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 15px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .achievement-value {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 10px 0;
-  line-height: 1.2;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ffd166;
 }
 
 .achievement-threshold {
-  font-size: 0.9rem;
-  opacity: 0.85;
-  margin: 10px 0 0 0;
-  font-weight: 400;
+    font-size: 0.9rem;
+    opacity: 0.85;
 }
 
+.auth-page-container {
+    width: 100%;
+    height: auto;
+    min-height: auto;
+
+    display: flex;
+    justify-content: center; 
+
+    align-items: center; 
+
+    padding: 30px;
+}
+
+
 .waiting-room-box {
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 20px;
-  padding: 3rem 4rem;
-  text-align: center;
-  box-shadow: 0 8px 25px rgba(31, 0, 170, 0.3);
-  backdrop-filter: blur(px);
-  color: #000000;
-  max-width: 500px;
+    width: 95%;
+    max-width: 1200px;
+
+    height: auto;
+
+    padding: 40px;
+
+    background: rgba(255,255,255,0.08);
+
+    border-radius: 20px;
+}
+
+
+.waiting-room-box h2 {
+    text-align: center;
+    margin-bottom: 10px;
+
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.auth-form-container {
+    width: 100%;
+    height: auto;
+
+    margin-top: 0;
+    padding-top: 1;
+    margin-bottom: 0;
+    padding-bottom: 1;
+}
+
+.achievement-form-grid {
+    width: 85%;
+}
+
+.custom-form-input {
+    width: 100%;
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.custom-form-input-label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: white;
+    font-weight: 600;
+}
+
+.custom-input {
+    width: 100% !important;
+    height: 50px;
+
+    background: rgba(255,255,255,0.12) !important;
+
+    border: 1px solid rgba(255,255,255,0.20) !important;
+
+    color: white !important;
+
+    border-radius: 12px !important;
+
+    padding: 10px 15px !important;
+}
+
+.custom-input:focus {
+    border-color: #ffd166 !important;
+
+    box-shadow: 0 0 10px rgba(255,209,102,0.3) !important;
+}
+
+.custom-input option {
+    color: black;
+}
+
+.custom-button-row {
+    width: 95%;
+    
+    margin: 20px auto 0 auto; 
+
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.auth-button {
+    min-width: 180px;
+
+    padding: 12px 25px;
+
+    border-radius: 12px;
+
+    background: rgba(255,255,255,0.15);
+
+    border: 1px solid rgba(255,255,255,0.2);
+
+    color: white;
+
+    text-decoration: none;
+
+    transition: all 0.3s ease;
+}
+
+.auth-button:hover {
+    background: rgba(255,255,255,0.25);
+
+    color: white;
+
+    transform: translateY(-2px);
+}
+
+@media (max-width: 1200px) {
+    .achievement-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .achievement-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .achievement-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .custom-button-row {
+        flex-direction: column;
+    }
+
+    .auth-button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .achievement-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.achievement-form-box {
+    width: 100%;
+    max-width: 650px; 
+    height: auto; 
+    
+    padding: 30px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    color: white;
+    box-sizing: border-box;
 }

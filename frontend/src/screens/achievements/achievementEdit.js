@@ -88,7 +88,7 @@ export default function AchievementEdit() {
     return ( 
         <div className="achievement-user-container"> 
             <div className="auth-page-container"> 
-                <div className="waiting-room-box">
+                <div className="achievement-form-box">
                 <h2 className="text-center"> 
                     {achievement.id ? "Edit Achievement" : "Add Achievement"} 
                 </h2> 
