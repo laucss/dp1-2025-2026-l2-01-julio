@@ -30,6 +30,15 @@ class UserStatisticsDTOTest {
         assertEquals(0, dto.getTotalActionPoints());
         assertEquals(0, dto.getBattlesWon());
         assertEquals(0, dto.getRoomsVisited());
+        assertEquals(0, dto.getMaxRoomsVisitedInMatch());
+
+        assertNull(dto.getWinRate());
+        assertNull(dto.getAverageTimePerMatch());
+        assertNull(dto.getAverageActionPointsPerMatch());
+        assertNull(dto.getAverageRoomsVisitedPerMatch());
+        assertNull(dto.getBattlesWonPerMatch());
+        assertNull(dto.getTotalBattlesPlayed());
+        assertNull(dto.getPlayerType());
     }
 
     @Test
@@ -93,6 +102,54 @@ class UserStatisticsDTOTest {
     }
 
     @Test
+    @DisplayName("Debe permitir establecer y obtener los campos de tipo Double")
+    void testSetAndGetDoubleFields() {
+        // When
+        userStatistics.setWinRate(65.5);
+        userStatistics.setAverageTimePerMatch(450.0);
+        userStatistics.setAverageActionPointsPerMatch(22.3);
+        userStatistics.setAverageRoomsVisitedPerMatch(5.4);
+        userStatistics.setBattlesWonPerMatch(1.8);
+
+        // Then
+        assertEquals(65.5, userStatistics.getWinRate());
+        assertEquals(450.0, userStatistics.getAverageTimePerMatch());
+        assertEquals(22.3, userStatistics.getAverageActionPointsPerMatch());
+        assertEquals(5.4, userStatistics.getAverageRoomsVisitedPerMatch());
+        assertEquals(1.8, userStatistics.getBattlesWonPerMatch());
+    }
+
+    @Test
+    @DisplayName("Debe permitir establecer y obtener totalBattlesPlayed")
+    void testSetAndGetTotalBattlesPlayed() {
+        // When
+        userStatistics.setTotalBattlesPlayed(12);
+
+        // Then
+        assertEquals(12, userStatistics.getTotalBattlesPlayed());
+    }
+
+    @Test
+    @DisplayName("Debe permitir establecer y obtener maxRoomsVisitedInMatch")
+    void testSetAndGetMaxRoomsVisitedInMatch() {
+        // When
+        userStatistics.setMaxRoomsVisitedInMatch(9);
+
+        // Then
+        assertEquals(9, userStatistics.getMaxRoomsVisitedInMatch());
+    }
+
+    @Test
+    @DisplayName("Debe permitir establecer y obtener playerType")
+    void testSetAndGetPlayerType() {
+        // When
+        userStatistics.setPlayerType("EXPLORER");
+
+        // Then
+        assertEquals("EXPLORER", userStatistics.getPlayerType());
+    }
+
+    @Test
     @DisplayName("Debe permitir establecer id heredado de BaseEntity")
     void testSetAndGetId() {
         // When
@@ -112,6 +169,14 @@ class UserStatisticsDTOTest {
         userStatistics.setTotalActionPoints(null);
         userStatistics.setBattlesWon(null);
         userStatistics.setRoomsVisited(null);
+        userStatistics.setWinRate(null);
+        userStatistics.setAverageTimePerMatch(null);
+        userStatistics.setAverageActionPointsPerMatch(null);
+        userStatistics.setAverageRoomsVisitedPerMatch(null);
+        userStatistics.setBattlesWonPerMatch(null);
+        userStatistics.setTotalBattlesPlayed(null);
+        userStatistics.setMaxRoomsVisitedInMatch(null);
+        userStatistics.setPlayerType(null);
 
         // Then
         assertNull(userStatistics.getTotalVictories());
@@ -120,6 +185,14 @@ class UserStatisticsDTOTest {
         assertNull(userStatistics.getTotalActionPoints());
         assertNull(userStatistics.getBattlesWon());
         assertNull(userStatistics.getRoomsVisited());
+        assertNull(userStatistics.getWinRate());
+        assertNull(userStatistics.getAverageTimePerMatch());
+        assertNull(userStatistics.getAverageActionPointsPerMatch());
+        assertNull(userStatistics.getAverageRoomsVisitedPerMatch());
+        assertNull(userStatistics.getBattlesWonPerMatch());
+        assertNull(userStatistics.getTotalBattlesPlayed());
+        assertNull(userStatistics.getMaxRoomsVisitedInMatch());
+        assertNull(userStatistics.getPlayerType());
     }
 
     @Test
@@ -133,6 +206,14 @@ class UserStatisticsDTOTest {
         userStatistics.setTotalActionPoints(300);
         userStatistics.setBattlesWon(15);
         userStatistics.setRoomsVisited(50);
+        userStatistics.setWinRate(35.0);
+        userStatistics.setAverageTimePerMatch(360.0);
+        userStatistics.setAverageActionPointsPerMatch(15.0);
+        userStatistics.setAverageRoomsVisitedPerMatch(2.5);
+        userStatistics.setBattlesWonPerMatch(0.75);
+        userStatistics.setTotalBattlesPlayed(25);
+        userStatistics.setMaxRoomsVisitedInMatch(8);
+        userStatistics.setPlayerType("WARRIOR");
 
         // Then
         assertEquals(100, userStatistics.getId());
@@ -142,6 +223,14 @@ class UserStatisticsDTOTest {
         assertEquals(300, userStatistics.getTotalActionPoints());
         assertEquals(15, userStatistics.getBattlesWon());
         assertEquals(50, userStatistics.getRoomsVisited());
+        assertEquals(35.0, userStatistics.getWinRate());
+        assertEquals(360.0, userStatistics.getAverageTimePerMatch());
+        assertEquals(15.0, userStatistics.getAverageActionPointsPerMatch());
+        assertEquals(2.5, userStatistics.getAverageRoomsVisitedPerMatch());
+        assertEquals(0.75, userStatistics.getBattlesWonPerMatch());
+        assertEquals(25, userStatistics.getTotalBattlesPlayed());
+        assertEquals(8, userStatistics.getMaxRoomsVisitedInMatch());
+        assertEquals("WARRIOR", userStatistics.getPlayerType());
     }
 
     @Test
@@ -170,6 +259,13 @@ class UserStatisticsDTOTest {
         userStatistics.setTotalActionPoints(0);
         userStatistics.setBattlesWon(0);
         userStatistics.setRoomsVisited(0);
+        userStatistics.setWinRate(0.0);
+        userStatistics.setAverageTimePerMatch(0.0);
+        userStatistics.setAverageActionPointsPerMatch(0.0);
+        userStatistics.setAverageRoomsVisitedPerMatch(0.0);
+        userStatistics.setBattlesWonPerMatch(0.0);
+        userStatistics.setTotalBattlesPlayed(0);
+        userStatistics.setMaxRoomsVisitedInMatch(0);
 
         // Then
         assertEquals(0, userStatistics.getTotalVictories());
@@ -178,10 +274,17 @@ class UserStatisticsDTOTest {
         assertEquals(0, userStatistics.getTotalActionPoints());
         assertEquals(0, userStatistics.getBattlesWon());
         assertEquals(0, userStatistics.getRoomsVisited());
+        assertEquals(0.0, userStatistics.getWinRate());
+        assertEquals(0.0, userStatistics.getAverageTimePerMatch());
+        assertEquals(0.0, userStatistics.getAverageActionPointsPerMatch());
+        assertEquals(0.0, userStatistics.getAverageRoomsVisitedPerMatch());
+        assertEquals(0.0, userStatistics.getBattlesWonPerMatch());
+        assertEquals(0, userStatistics.getTotalBattlesPlayed());
+        assertEquals(0, userStatistics.getMaxRoomsVisitedInMatch());
     }
 
     @Test
-    @DisplayName("Debe manejar valores grandes en los campos")
+    @DisplayName("Debe manejar valores grande en los campos")
     void testLargeValues() {
         // When
         userStatistics.setTotalVictories(1000);
@@ -190,6 +293,13 @@ class UserStatisticsDTOTest {
         userStatistics.setTotalActionPoints(99999);
         userStatistics.setBattlesWon(10000);
         userStatistics.setRoomsVisited(500);
+        userStatistics.setWinRate(100.0);
+        userStatistics.setAverageTimePerMatch(9999.9);
+        userStatistics.setAverageActionPointsPerMatch(888.8);
+        userStatistics.setAverageRoomsVisitedPerMatch(77.7);
+        userStatistics.setBattlesWonPerMatch(66.6);
+        userStatistics.setTotalBattlesPlayed(55555);
+        userStatistics.setMaxRoomsVisitedInMatch(444);
 
         // Then
         assertEquals(1000, userStatistics.getTotalVictories());
@@ -198,6 +308,13 @@ class UserStatisticsDTOTest {
         assertEquals(99999, userStatistics.getTotalActionPoints());
         assertEquals(10000, userStatistics.getBattlesWon());
         assertEquals(500, userStatistics.getRoomsVisited());
+        assertEquals(100.0, userStatistics.getWinRate());
+        assertEquals(9999.9, userStatistics.getAverageTimePerMatch());
+        assertEquals(888.8, userStatistics.getAverageActionPointsPerMatch());
+        assertEquals(77.7, userStatistics.getAverageRoomsVisitedPerMatch());
+        assertEquals(66.6, userStatistics.getBattlesWonPerMatch());
+        assertEquals(55555, userStatistics.getTotalBattlesPlayed());
+        assertEquals(444, userStatistics.getMaxRoomsVisitedInMatch());
     }
 
     @Test
