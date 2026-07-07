@@ -372,7 +372,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                         <div className='combat-panel'> {/*zona del atacante */}
                             <div className='combat-header'>
                                 <span>
-                                    {attacker?.user?.username || (attacker?.isNiallCampbell ? 'NiallCampbell' : 'NPC')}
+                                    {attacker?.user?.username || (attacker?.isNiallCampbell ? 'NiallCampbell' : `NPC ${attacker.id}`)}
                                 </span>
 
                                 {attacker?.user?.avatar ? (
@@ -440,7 +440,7 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
 
                         <div className='combat-panel'> {/*zona del oponente */}
                             <div className='combat-header'> 
-                                <span>{defender?.user?.username || (defender?.isNiallCampbell ? 'NiallCampbell' : 'NPC')}</span>
+                                <span>{defender?.user?.username || (defender?.isNiallCampbell ? 'NiallCampbell' : `NPC ${defender.id}`)}</span>
                                 {defender?.user?.avatar ? (
                                     <img 
                                         src={defender.user.avatar}

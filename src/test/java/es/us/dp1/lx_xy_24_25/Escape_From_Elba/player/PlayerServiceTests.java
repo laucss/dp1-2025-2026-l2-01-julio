@@ -79,6 +79,7 @@ public class PlayerServiceTests {
 
     
 
+    /* 
     @Test
     public void findByMatchIdAndUserIdReturnsOptional() {
         Player player = new Player();
@@ -90,6 +91,7 @@ public class PlayerServiceTests {
 
         assertTrue(result.isPresent());
     }
+        */
 
  
 

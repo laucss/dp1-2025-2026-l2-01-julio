@@ -284,43 +284,7 @@ public class MatchController {
         return ResponseEntity.ok(result); 
     }
 
-    @PutMapping("/{matchId}/move")
-    public ResponseEntity<MatchDTO> moveToAdyacentRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
-        ms.movePlayerToAdyacentRoom(matchId, data.getUserId(), data.getRoomId()); 
-        Match match = ms.getMatchById(matchId);
-        
-        Player movedPlayer = match.getPlayers().stream()
-            .filter(p -> p.getUser().getId().equals(data.getUserId()))
-            .findFirst()
-            .orElse(null);
-        
-        if (movedPlayer != null) {
-             ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
-                movedPlayer.getId(),
-                movedPlayer.getUser().getId(),
-                movedPlayer.getUser().getUsername(),
-                movedPlayer.getActionPoints(),
-                System.currentTimeMillis()
-            );
-            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
-
-            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);
-            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
-            
-        }
-        
-        return ResponseEntity.ok(new MatchDTO(match)); 
-    }
-
     
-    @PutMapping("/{matchId}/moveNpc")
-    public ResponseEntity<MatchDTO> moveNpcToRoom (@PathVariable Integer matchId, @RequestBody MoveNpcToRoomDTO data){
-        ms.moveNpcToRoom(matchId, data.getNpcId(), data.getRoomId(), data.getUserId()); 
-        Match match = ms.getMatchById(matchId);
-        
-        return ResponseEntity.ok(new MatchDTO(match)); 
-    }
-
     /* 
     @PutMapping("/{matchId}/moveLoser")
     public ResponseEntity<MatchDTO> moveLoserToRandomRoom (@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data){
@@ -359,32 +323,7 @@ public class MatchController {
     }
         */
 
-    @PutMapping("/{matchId}/moveByLetters")
-    public ResponseEntity<MatchDTO> moveByFormingRoomName(@PathVariable Integer matchId, @RequestBody MoveToRoomDTO data) {
-        ms.movePlayerByFormingRoomName(matchId, data.getUserId(), data.getRoomId());
-        Match match = ms.getMatchById(matchId);
-        
-        Player movedPlayer = match.getPlayers().stream()
-            .filter(p -> p.getUser().getId().equals(data.getUserId()))
-            .findFirst()
-            .orElse(null);
-        
-        if (movedPlayer != null) {
-            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(movedPlayer);
-            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
-            
-            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
-                movedPlayer.getId(),
-                movedPlayer.getUser().getId(),
-                movedPlayer.getUser().getUsername(),
-                movedPlayer.getActionPoints(),
-                System.currentTimeMillis()
-            );
-            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
-        }
-        
-        return ResponseEntity.ok(new MatchDTO(match));
-    }
+
 
     @GetMapping("/{matchId}/{playerId}/actionPoints")
     public ResponseEntity<Integer> getActionPoints(@PathVariable Integer matchId, @PathVariable Integer playerId) {
@@ -486,8 +425,7 @@ public class MatchController {
         Integer userId = data.get("userId");
         Integer newStrength = data.get("strength");
         
-        Player player = playerService.findByMatchIdAndUserId(matchId, userId)
-            .orElseThrow(() -> new RuntimeException("Player no encontrado"));
+        Player player = playerService.findByMatchIdAndUserId(matchId, userId);
         player.setStrength(newStrength);
         playerService.save(player);
         
@@ -546,11 +484,6 @@ public class MatchController {
     }
 
 
-    @PostMapping("/{matchId}/escape-attempt")
-    public ResponseEntity<EscapeAttemptResultDTO> attemptEscape(@PathVariable Integer matchId, @RequestParam Integer userId, @RequestParam Integer rollDice){
-        EscapeAttemptResultDTO result = ms.escapeAttempt(matchId, userId, rollDice);
-        return ResponseEntity.ok(result);
-    }
 
     @PostMapping("/{matchId}/spectate")
     public ResponseEntity<MatchDTO> spectateGame (@PathVariable Integer matchId) {

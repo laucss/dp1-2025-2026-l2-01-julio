@@ -8,10 +8,12 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.*;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest.FriendRequestService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 
@@ -21,6 +23,7 @@ import java.util.Optional;
 @Component
 public class Checkers {
 
+    private final MatchRepository matchRepository; 
     private final LobbyRepository lobbyRepository;
     private final CardRepository cardRepository; 
     private final PlayerRepository playerRepository;
@@ -29,12 +32,13 @@ public class Checkers {
     private final UserService userService;
 
     public Checkers(LobbyRepository lobbyRepository, PlayerRepository playerRepository, CardRepository cardRepository, 
-        FriendRequestService friendRequestService,  UserService userService) {
+        FriendRequestService friendRequestService,  UserService userService, MatchRepository matchRepository) {
         this.lobbyRepository = lobbyRepository;
         this.playerRepository = playerRepository;
         this.cardRepository = cardRepository; 
         this.friendRequestService = friendRequestService; 
         this.userService = userService; 
+        this.matchRepository = matchRepository; 
     }
 
     private static final Integer TOTAL_CARDS_TO_DRAW = 7; // máximo número de cartas que puedes robar por turno 
@@ -117,6 +121,38 @@ public class Checkers {
 
     }
      
+
+    public void chechPlayerExists(Integer playerId){
+        Optional<Player> match = playerRepository.findById(playerId);
+        if (match == null){
+            throw new ResourceNotFoundException("Player with id" + playerId + "not found");
+        }
+
+    }
+
+    public void chechMatchExists(Integer matchId){
+        Optional<Match> match = matchRepository.findById(matchId);
+        if (match == null){
+            throw new ResourceNotFoundException("Match with id" + matchId + "not found");
+        }
+        
+    }
+
+    public void checkRoomIsAdyacent(Room currentRoom, Room targetRoom){
+        List<Room> adjacent = currentRoom.getAdjacencyList();
+        boolean canMove = adjacent.stream()
+                .anyMatch(r -> r.getId().equals(targetRoom.getId()));
+        if (!canMove) {
+            throw new InvalidMovementException("Movimiento no permitido: la sala destino no es adyacente");
+        }
+    }
+
+    public void checkPlayerHasActionPoints(Player player){
+        if (player.getActionPoints() <= 0) {
+            throw new NoActionPointsException("Move not allowed: player has no action points left");
+        }
+    }
+
 
     
 

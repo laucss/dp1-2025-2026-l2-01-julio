@@ -92,9 +92,9 @@ public class FightController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{matchId}/{loserId}/{loserRoomDestination}/check-chains")
-    public ResponseEntity<?> checkAndTriggerChainFights(@PathVariable Integer matchId, @PathVariable Integer loserId, @PathVariable Integer loserRoomDestination) {
-        fs.checkAndTriggerChainFights(matchId, loserId, loserRoomDestination);
+    @PostMapping("/{matchId}/check-pending-fights")
+    public ResponseEntity<?> checkAndTriggerChainFights(@PathVariable Integer matchId) {
+        fs.checkPendingFights(matchId);
         return ResponseEntity.ok().build();
     }
       

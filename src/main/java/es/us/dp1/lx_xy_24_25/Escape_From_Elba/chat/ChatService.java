@@ -34,7 +34,7 @@ public class ChatService {
         var user = userService.findCurrentUser();
         if (user == null) return Collections.emptyList();
 
-        Optional<Player> maybePlayer = playerService.findByMatchIdAndUserId(matchId, user.getId());
+        Optional<Player> maybePlayer = playerService.findOptionalPlayerByMatchIdAndUserId(matchId, user.getId());
         if (maybePlayer.isEmpty()) return Collections.emptyList(); 
 
         List<ChatMessage> chat = chatRepository.findByMatchId(matchId);
@@ -54,7 +54,7 @@ public class ChatService {
             throw new IllegalStateException("Usuario no autenticado");
 
         Optional<Player> maybeAuthor =
-                playerService.findByMatchIdAndUserId(matchId, user.getId());
+                playerService.findOptionalPlayerByMatchIdAndUserId(matchId, user.getId());
 
         Player author = maybeAuthor.orElseThrow(
                 () -> new IllegalStateException("No eres jugador de esta partida")

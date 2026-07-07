@@ -9,9 +9,9 @@ public class FightResultRequestDTO {
 
     private Integer matchId;
 
-    private Integer attackerId; 
+    private Integer attackerId; // id del player o npc (no user)
 
-    private Integer defenderId; 
+    private Integer defenderId; // id del player o npc (no user)
 
     // si está involucrado un npc 
     private boolean isNpcFight; 
@@ -31,6 +31,9 @@ public class FightResultRequestDTO {
         this.attackerWins = attackerWins;
         this.defenderRoomId = defenderRoomId;
         this.isNpcAttacker = isNpcAttacker; 
+    }
+
+    public FightResultRequestDTO() {
     }
 
     

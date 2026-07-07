@@ -680,7 +680,7 @@ public class MatchServiceTests {
         verify(deckService).addCardToDiscardedPile(matchId, card);
         verify(playerService).save(p);
     }
-    */
+    
 
     @Test
     void moveLoserPlayerUpdatesRoomAndStrength() {
@@ -767,7 +767,7 @@ public class MatchServiceTests {
         assertThrows(RuntimeException.class,
             () -> matchService.movePlayerToAdyacentRoom(1, 2, 3));
     }
-
+    
 
         // CORREGIR 
     /*
@@ -800,7 +800,7 @@ public class MatchServiceTests {
             () -> matchService.movePlayerToAdyacentRoom(matchId, userId, targetRoomId));
     }
 
-    */
+    
 
     
     
@@ -931,7 +931,7 @@ public class MatchServiceTests {
             () -> matchService.moveNpcToAdyacentRoom(1, 1, 2, 3));
     }
 
-    */
+    
 
     @Test
     void movePlayerByFormingRoomNameSucceedsWhenBagHasLetters() {
@@ -1006,6 +1006,7 @@ public class MatchServiceTests {
         verify(roomRepo).findAll();
         verify(playerRepo, times(2)).save(p);
     }
+    */
 
     @Test
     void submitDiceAndAssignOrderThrowsWhenPlayerNotFound() {

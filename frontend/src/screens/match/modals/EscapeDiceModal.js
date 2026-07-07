@@ -19,7 +19,7 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult }) {
 
   const submitEscapeAttempt = async (totalRoll) => {
     try {
-      const resp = await fetch(`/api/v1/matches/${matchId}/escape-attempt?userId=${currentUser.id}&rollDice=${totalRoll}`, {
+      const resp = await fetch(`/api/v1/actions/${matchId}/escape-attempt?userId=${currentUser.id}&rollDice=${totalRoll}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${jwt}`,

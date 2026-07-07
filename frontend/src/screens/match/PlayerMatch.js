@@ -77,8 +77,8 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
     const [proposingUsername, setProposingUsername] = useState('');
     const [votingResult, setVotingResult] = useState(null);
     const [returnedFightCard, setReturnedFightCard] = useState(null);
-    const [loserId, setLoserId] = useState(null);
-    const [loserRoomDestination, setLoserRoomDestionation] = useState(null); 
+
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms)); // para que haya un sec entre peleas, que se siente atropellado
     
 
     // CARGAR DATOS JUGADORES 
@@ -152,12 +152,10 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                         }
                                                 
                         if (attacker && defender) {
-                            console.log("ANTES", isFightModalOpen);
                             setFightAttacker(attacker);
                             setFightDefender(defender);
                             setPendingTargetRoom(fightUpdate.roomId || fightUpdate.roomName);
                             setIsFightModalOpen(true);
-                            console.log("DESPUÉS", isFightModalOpen);
                         }
                         console.log("Abriendo modal", attacker, defender);
                     }
@@ -168,24 +166,17 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 const winnerUserId = fightUpdate.winnerUserId
                 const loserId = fightUpdate.loserId
                 const loserUserId = fightUpdate.loserUserId
-                setLoserId(fightUpdate.loserId)
-                setLoserRoomDestionation(fightUpdate.chainRoomId)
                 const fightType = fightUpdate.fightResultType
-                
-                console.log('currentUser', currentUser?.id) 
-                console.log('winnerUser', winnerUserId)
 
                 const currentUserId = currentUser?.id;
 
                 if (currentUserId && currentUserId === winnerUserId) {
                     if (fightType === 'PLAYER_BEATS_PLAYER') {
-                        console.log('entrando en el websocket de pelea JvJ')
                         setStealLoserPlayerId(loserId);
                         setIsStealModalOpen(true);
                     }
 
                     if (fightType === 'PLAYER_BEATS_NPC') {
-                        console.log('entrando en el websocket de pelea JvNpc')
                         setReturnedFightCard(fightUpdate.card)
                         setIsReturnedCardModalOpen(true);
                     }
@@ -194,6 +185,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 }
 
                 setIsFightModalOpen(false)
+                fetchMatchAndPlayers() // REVISAR
             }
         });
 
@@ -292,7 +284,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 const hand = Array.isArray(info.hand?.cards) ? info.hand.cards : [];
                 const bag = Array.isArray(info.bag?.cards) ? info.bag.cards : [];
                 const deckInfo = info.deck;
-                console.log('manoh',hand)
                 if (currentPlayer?.id === info.playerId) {
                     setHandCards(hand.map(c => ({...c})));
                     setBagCards(bag.map(c => ({...c})));
@@ -673,7 +664,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     }
 
-    */
+    
     const getPlayerInRoom = (roomId) => {
         const targetRoomNormalized = normalizeRoomId(roomId);
         return match?.players?.find(p => {
@@ -695,6 +686,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             );
         });
     };
+    */
 
     const updatePlayerData = (data) => {
         setMatch(data);
@@ -710,16 +702,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     };
 
-    const notifyFight = async ({ attackerId, attackerUsername, defenderId, defenderUsername, roomId, isBot = false }) => {
-        await fetch(`/api/v1/fights/${matchId}/notify-fight`, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ matchId, attackerId, attackerUsername, defenderId, defenderUsername, roomId, action: "START", isBot })
-        });
-    };
 
     const notifyActionPoints = async (userId, actionPoints) => {
         try {
@@ -758,7 +740,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
 
         try {
-            const response = await fetch(`/api/v1/matches/${matchId}/moveNpc`, {
+            const response = await fetch(`/api/v1/actions/${matchId}/moveNpc`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${jwt}`,
@@ -777,25 +759,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             setSelectedNpcId(null);
             setMoveNpcMode(false);
 
-            const targetRoomNormalized = normalizeRoomId(roomId);
-            const playerInRoom = data.players.find(p => {
-                const playerRoomId = p.currentRoom?.id || p.roomId || p.room?.id;
-                return normalizeRoomId(playerRoomId) === targetRoomNormalized;
-            });
-
-            if (playerInRoom && roomId !== 37) {
-                const movedNpc = data.npcs.find(n => n.id === npcIdToSend);
-                if (movedNpc) {
-                    await notifyFight({
-                        attackerId:movedNpc.id,
-                        attackerUsername: movedNpc.isNiallCampbell ? "Niall Campbell" : "NPC",
-                        defenderId: playerInRoom.user.id,
-                        defenderUsername: playerInRoom.user.username,
-                        roomId,
-                        isBot: true
-                    });
-                }
-            }
         } catch (err) {
             console.error(err);
         } finally {
@@ -807,57 +770,8 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
     const performPlayerMove = async (roomId, endpoint, resetMoveMode) => {
         try {
-            const isSafeArea = roomId === 37;
-            const otherPlayer = getPlayerInRoom(roomId);
-
-            if (otherPlayer && !isSafeArea) {
-                resetMoveMode(false);
-                await notifyFight({
-                    attackerId: currentUser.id,
-                    attackerUsername: currentUser.username,
-                    defenderId: otherPlayer.user.id,
-                    defenderUsername: otherPlayer.user.username,
-                    roomId
-                });
-                return;
-            }
-
-            const botInRoom = getNpcInRoom(roomId);
-
-            if (botInRoom && !isSafeArea) {
-                resetMoveMode(false);
-                try {
-                    const consumeResponse = await fetch(
-                        `/api/v1/matches/${matchId}/consume-action-point/${currentUser.id}`,
-                        {
-                            method: "POST",
-                            headers: {
-                                Authorization: `Bearer ${jwt}`,
-                                "Content-Type": "application/json",
-                            },
-                        }
-                    );
-
-                    if (consumeResponse.ok) {
-                        setActionPoints(prev => Math.max(0, prev - 1));
-                    }
-                } catch (err) {
-                    console.error(err);
-                }
-
-                await notifyFight({
-                    attackerId: currentUser.id,
-                    attackerUsername: currentUser.username,
-                    defenderId: botInRoom.id,
-                    defenderUsername: `Bot ${botInRoom.id}`,
-                    roomId,
-                    isBot: true
-                });
-                return;
-            }
-
             const response = await fetch(
-                `/api/v1/matches/${matchId}/${endpoint}`,
+                `/api/v1/actions/${matchId}/${endpoint}`,
                 {
                     method: "PUT",
                     headers: {
@@ -871,22 +785,23 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
             if (response.ok) {
                 const data = await response.json();
-                updatePlayerData(data);
+                updatePlayerData(data); // Actualizamos el mapa y los jugadores con el nuevo estado
 
                 const movedPlayer = data.players.find(p => p.user.id === currentUser.id);
                 if (movedPlayer) {
                     await notifyActionPoints(currentUser.id, movedPlayer.actionPoints);
                 }
+
                 resetMoveMode(false);
             } else {
                 resetMoveMode(false);
                 toast.error(response.statusText);
             }
         } catch (error) {
-            console.error(error);
+            console.error("Error al realizar el movimiento:", error);
+            resetMoveMode(false);
         }
     };
-
     const handleWordMove = async (roomId) => {
         return performPlayerMove(roomId, "moveByLetters", setMoveToRoomWithWord);
     };
@@ -951,8 +866,9 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
             if (!res.ok) {
                 alert('No se pudo descartar la carta tras perder contra el NPC.');
             } else {
-                await fetchCards();
-                await fetchOtherPlayersCards();
+                await fetchCards()
+                await fetchOtherPlayersCards()
+                await handleCheckChainFights()
             }
         } catch (error) {
             console.error('Error discarding card after NPC loss:', error);
@@ -1104,7 +1020,9 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     defenderRoomId,
                     handCards,
                     bagCards,
-                    setIsNpcLossModalOpen
+                    setIsNpcLossModalOpen,
+                    setReturnedFightCard,
+                    setIsReturnedCardModalOpen
                 });
                 return;
             }
@@ -1118,9 +1036,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 defenderRoomId,
                 currentUser,
                 setStealLoserPlayerId,
-                setIsStealModalOpen,
-                setReturnedFightCard,
-                setIsReturnedCardModalOpen
+                setIsStealModalOpen
             });
 
         } catch (err) {
@@ -1133,15 +1049,17 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
     const handleCheckChainFights = async () => {
         try {
+            await delay(1000);
             // Avisamos al backend de que la interfaz está despejada 
             // y puede comprobar si hay que encadenar combates
-            await fetch(`/api/v1/fights/${matchId}/${loserId}/${loserRoomDestination}/check-chains`, {
+            await fetch(`/api/v1/fights/${matchId}/check-pending-fights`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                     "Content-Type": "application/json"
                 }
             });
+
         } catch (error) {
             console.error("Error al comprobar peleas en cadena:", error);
         }

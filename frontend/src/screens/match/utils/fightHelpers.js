@@ -1,4 +1,3 @@
-import { toast } from "react-toastify"
 
 /**
  * RESUELVE UN COMBATE JUGADOR VS JUGADOR
@@ -72,6 +71,17 @@ export async function handleNpcFight({
 }) {
     console.log('attacker',fightAttacker)
     try {
+        const body = {
+            matchId,
+            attackerId: fightAttacker.id,
+            defenderId: fightDefender.id,
+            npcFight: true,
+            npcAttacker: npcIsAttacker,
+            attackerWins,
+            defenderRoomId
+        };
+
+        console.log("BODY ENVIADO:", body);
         // Mapeamos los IDs tal cual llegan desde la interfaz (manteniendo el rol de atacante/defensor original)
         const response = await fetch(`/api/v1/fights/${matchId}/fight/resolve`, {
             method: "PUT",
@@ -79,16 +89,11 @@ export async function handleNpcFight({
                 Authorization: `Bearer ${jwt}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                matchId: matchId,
-                attackerId: fightAttacker.id,
-                defenderId: fightDefender.id,
-                isNpcFight: true,
-                isNpcAttacker: npcIsAttacker,
-                attackerWins: attackerWins,
-                defenderRoomId: defenderRoomId
-            }),
+            body: JSON.stringify(body),
+            
         });
+
+        
 
         if (!response.ok) throw new Error("Error resolviendo la pelea NPC en el servidor");
 
