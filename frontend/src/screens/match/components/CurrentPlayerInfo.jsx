@@ -60,11 +60,11 @@ export default function CurrentPlayerInfo({
                 <div className="panel-turn-container">
                     {isMyTurn ? (
                         <div className="panel-turn-message turn-mine">
-                            ¡Es tu turno!
+                            It's your turn!
                         </div>
                     ) : (
                         <div className="panel-turn-message turn-others">
-                            Turno de: {currentTurnUsername}
+                            Turn of: {currentTurnUsername}
                         </div>
                     )}
                 </div>

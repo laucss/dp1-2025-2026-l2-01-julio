@@ -136,5 +136,12 @@ public class MatchWebsocketController {
             "/topic/match." + matchId + ".end", matchDTO
         );
     }
+    public void notifyPlayerLeft(Integer matchId, MatchDTO match) {
+        System.out.println("ENVIANDO PLAYER LEFT POR WEBSOCKET");
+        messagingTemplate.convertAndSend(
+            "/topic/match." + matchId + ".playerLeft",
+            match
+        );
+    }   
 
 }

@@ -125,3 +125,18 @@
   background: #d32f2f;
   transform: translateY(-1px);
 }
+
+.notifications-modal-card {
+    animation: slideInLeft 0.35s ease-out;
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

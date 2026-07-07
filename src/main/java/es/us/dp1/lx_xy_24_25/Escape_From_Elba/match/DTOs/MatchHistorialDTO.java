@@ -6,6 +6,7 @@ import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,7 +33,7 @@ public class MatchHistorialDTO {
 
 
 
-    public MatchHistorialDTO(Match match) {
+    public MatchHistorialDTO(Match match, User creator) {
         this.name = match.getName();
         this.players = match.getPlayers().stream().map(p-> new PlayerInGameDTO(p)).toList();
         this.duration = match.getDuration();
@@ -40,14 +41,9 @@ public class MatchHistorialDTO {
 
         
 
-        // Buscar creator en la lista de players usando creatorId
-        if (match.getCreatorId() != null) {
-            this.creator = match.getPlayers().stream()
-                .filter(p -> p.getUser().getId().equals(match.getCreatorId()))
-                .findFirst()
-                .map(PlayerInGameDTO::new)
-                .orElse(null);
-        }
+        if (creator != null) {
+        this.creator = new PlayerInGameDTO(creator);
+         }
 
         // Buscar winner en la lista de players usando el winner
         if (match.getWinner() != null) {
