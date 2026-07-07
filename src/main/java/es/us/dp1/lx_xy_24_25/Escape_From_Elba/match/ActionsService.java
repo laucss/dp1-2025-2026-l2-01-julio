@@ -84,16 +84,14 @@ public class ActionsService {
         //Validar si la sala destino es adyacente
         checkers.checkRoomIsAdyacent(currentRoom, targetRoom); 
         //Actualizar sus puntos de acción
-        if (player.getActionPoints() > 0) {
-            player.setActionPoints(player.getActionPoints() - 1);
-        } 
+        player.setActionPoints(player.getActionPoints() - 1);
         //Guardar cambios
         playerRepo.save(player);
 
         // notificamos los puntos de accion por websocket 
         ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
             player.getId(),
-            player.getUser().getId(),
+            userId,
             player.getUser().getUsername(),
             player.getActionPoints(),
             System.currentTimeMillis()
@@ -144,6 +142,16 @@ public class ActionsService {
         // Actualizamos la sala del npc y los puntos de acción del jugador
         player.setActionPoints(player.getActionPoints() - 1);
         playerRepo.save(player);
+        
+        ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
+            player.getId(),
+            userId,
+            player.getUser().getUsername(),
+            player.getActionPoints(),
+            System.currentTimeMillis()
+        );
+        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+
         npc.setRoom(targetRoom);
         npcRepository.save(npc);
         NpcLocationUpdateDTO locationNpcUpdate = new NpcLocationUpdateDTO(npc);
@@ -217,6 +225,16 @@ public class ActionsService {
 
         player.setActionPoints(player.getActionPoints() - 1);
         playerRepo.save(player);
+        
+        ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
+            player.getId(),
+            userId,
+            player.getUser().getUsername(),
+            player.getActionPoints(),
+            System.currentTimeMillis()
+        );
+        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+
         Room currentRoom = player.getRoom();
         if (currentRoom == null || !targetRoom.getId().equals(currentRoom.getId())) {
             int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);

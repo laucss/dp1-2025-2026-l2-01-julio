@@ -230,12 +230,6 @@ public class MatchController {
         return ResponseEntity.ok(actionPoints);
     }
 
-    @PostMapping("/{matchId}/notify-action-points")
-    @Operation(summary = "Notify action points", description = "Notifies all players when action points are updated.")
-    public ResponseEntity<Void> notifyActionPoints(@PathVariable Integer matchId, @RequestBody ActionPointsUpdateDTO actionPointsUpdate) {
-        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
-        return ResponseEntity.ok().build();
-    }
 
     @PostMapping("/{matchId}/consume-all-action-points/{userId}")
     @Operation(summary = "Consume all action points", description = "Consumes all action points for a user and notifies all players.")
