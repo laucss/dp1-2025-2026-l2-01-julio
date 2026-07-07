@@ -37,6 +37,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchHistorialDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
@@ -188,7 +189,7 @@ public class MatchServiceTests {
         Page<Match> page = new PageImpl<>(list);
         when(matchRepo.findFinishedAndInProgress(PageRequest.of(0, 5))).thenReturn(page);
 
-        Page<Match> result = matchService.getFinishedAndInProgressMatches(0, 5);
+        Page<MatchHistorialDTO> result = matchService.getFinishedAndInProgressMatches(0, 5);
 
         assertEquals(3, result.getContent().size());
     }
@@ -200,7 +201,7 @@ public class MatchServiceTests {
         Page<Match> page = new PageImpl<>(list);
         when(matchRepo.findMatchesPlayedByUser(eq(userId), any(PageRequest.class))).thenReturn(page);
 
-        Page<Match> result = matchService.getMatchesPlayedByUser(userId, 0, 3);
+        Page<MatchHistorialDTO> result = matchService.getMatchesPlayedByUser(userId, 0, 3);
 
         assertEquals(1, result.getContent().size());
         verify(matchRepo).findMatchesPlayedByUser(eq(userId), any(PageRequest.class));
@@ -213,7 +214,7 @@ public class MatchServiceTests {
         Page<Match> page = new PageImpl<>(list);
         when(matchRepo.findMatchesWonByUser(eq(userId), any(PageRequest.class))).thenReturn(page);
 
-        Page<Match> result = matchService.getMatchesWonByUser(userId, 0, 3);
+        Page<MatchHistorialDTO> result = matchService.getMatchesWonByUser(userId, 0, 3);
 
         assertEquals(1, result.getContent().size());
         verify(matchRepo).findMatchesWonByUser(eq(userId), any(PageRequest.class));
@@ -477,7 +478,7 @@ public class MatchServiceTests {
         Page<Match> page = new PageImpl<>(list);
         when(matchRepo.findMatchesPlayedAndCreatedByUser(eq(userId), any(PageRequest.class))).thenReturn(page);
 
-        Page<Match> result = matchService.getMatchesPlayedAndCreatedByUser(userId, 0, 3);
+        Page<MatchHistorialDTO> result = matchService.getMatchesPlayedAndCreatedByUser(userId, 0, 3);
 
         assertEquals(1, result.getContent().size());
         verify(matchRepo).findMatchesPlayedAndCreatedByUser(eq(userId), any(PageRequest.class));
