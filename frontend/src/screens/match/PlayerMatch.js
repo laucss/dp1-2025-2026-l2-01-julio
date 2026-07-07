@@ -165,17 +165,19 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     console.error('Error fetching fresh match data for fight:', error);
                 }
             } else if (fightUpdate.action === 'RESOLVE') {
-                const winnerId = fightUpdate.winnerId;
-                const loserId = fightUpdate.loserId;
+                const winnerUserId = fightUpdate.winnerUserId
+                const loserId = fightUpdate.loserId
+                const loserUserId = fightUpdate.loserUserId
                 setLoserId(fightUpdate.loserId)
                 setLoserRoomDestionation(fightUpdate.chainRoomId)
                 const fightType = fightUpdate.fightResultType
-                console.log('currentUser', currentPlayer.id) 
-                console.log('winnerUser', winnerId)
+                
+                console.log('currentUser', currentUser?.id) 
+                console.log('winnerUser', winnerUserId)
 
-                const currentUserId = currentPlayer?.user?.id;
+                const currentUserId = currentUser?.id;
 
-                if (currentUserId && currentUserId === winnerId) {
+                if (currentUserId && currentUserId === winnerUserId) {
                     if (fightType === 'PLAYER_BEATS_PLAYER') {
                         console.log('entrando en el websocket de pelea JvJ')
                         setStealLoserPlayerId(loserId);
@@ -187,8 +189,9 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                         setReturnedFightCard(fightUpdate.card)
                         setIsReturnedCardModalOpen(true);
                     }
+                } else if (currentUserId && currentUserId === loserUserId && fightType === 'NPC_BEATS_PLAYER' ){
+                    setIsNpcLossModalOpen(true);
                 }
-                // comprobar si pongo un npc encima de uno, le sale que tenga que descartar?
 
                 setIsFightModalOpen(false)
             }
@@ -1182,8 +1185,8 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                     <div className="current-player">
                         <CurrentPlayerInfo
                             currentPlayer={currentPlayer}
-                            actionPoints={actionPoints}
-                            strength={strength}
+                            actionPoints={actionPoints ? actionPoints : 0}
+                            strength={strength ? strength : 1 }
                             getPlayerColor={getPlayerColor}
                             players={match?.players}
                             match={match}

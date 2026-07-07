@@ -187,8 +187,10 @@ public class FightService {
 
         FightResolvedDTO dto = new FightResolvedDTO(
             result.getMatchId(),
+            winner.getUser().getId(),
             winner.getId(),
             loser.getId(),
+            loser.getUser().getId(),
             room.getId(),
             FightResultType.PLAYER_BEATS_PLAYER
         );
@@ -311,6 +313,7 @@ public class FightService {
             result.getMatchId(),
             npcId,
             player.getId(),
+            player.getUser().getId(),
             room.getId(),
             FightResultType.NPC_BEATS_PLAYER
         );
@@ -382,7 +385,7 @@ public class FightService {
         CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards);
         matchWebsocketController.notifyCardsUpdate(matchId, update);
 
-        return new FightResolvedDTO(matchId, player.getId(), npcId, roomId, discardedCard, FightResultType.PLAYER_BEATS_NIALL); 
+        return new FightResolvedDTO(matchId, player.getUser().getId(), player.getId(), npcId, roomId, discardedCard, FightResultType.PLAYER_BEATS_NPC); 
 
     }
 
@@ -398,7 +401,7 @@ public class FightService {
         CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);
         matchWebsocketController.notifyCardsUpdate(matchId, update);
         
-        return new FightResolvedDTO(matchId, player.getId(), npcId, roomId, stolenCard,FightResultType.PLAYER_BEATS_NPC);   
+        return new FightResolvedDTO(matchId, player.getUser().getId(), player.getId(), npcId, roomId, stolenCard, FightResultType.PLAYER_BEATS_NPC);   
     }
 
     @Transactional

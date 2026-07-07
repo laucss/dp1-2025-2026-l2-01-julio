@@ -98,7 +98,7 @@ export async function handleNpcFight({
         // Fase interactiva visual en React: si el humano pierde y tiene cartas, abrir descarte
         const humanWins = npcIsAttacker ? !attackerWins : attackerWins;
 
-        if (data.fightResultType === 'PLAYER_BEATS_NIALL' && humanWins) {
+        if (data.fightResultType === 'PLAYER_BEATS_NPC' && humanWins) {
             setReturnedFightCard(data.card)
             setIsReturnedCardModalOpen(true);
         }
