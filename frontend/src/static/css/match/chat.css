@@ -5,7 +5,7 @@
   right: 20px;
   width: 55px;
   height: 55px;
-  background-color: #c0392b;
+  background-color: #cc731f;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -24,11 +24,11 @@
 /* CONTENEDOR DEL CHAT */
 .chat-container {
   position: fixed;
-  bottom: 90px;
+  bottom: -300px;
   right: 20px;
   width: 300px;
   max-height: 400px;
-  background-color: #222;
+  background-color: #ce6400;
   color: white;
   border-radius: 10px;
   display: flex;
@@ -78,7 +78,7 @@
 
 /* BOTÓN ENVIAR */
 .chat-send-button {
-  background-color: #c0392b;
+  background-color: #5db9eb;
   border: none;
   padding: 8px;
   color: white;
@@ -88,7 +88,7 @@
 }
 
 .chat-send-button:hover {
-  background-color: #e74c3c;
+  background-color: #2ba5e7;
 }
 
 .chat-avatar {

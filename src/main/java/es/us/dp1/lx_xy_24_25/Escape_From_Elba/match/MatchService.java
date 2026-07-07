@@ -671,17 +671,17 @@ public class MatchService {
     @Transactional
     public Player movePlayerToAdyacentRoom(Integer matchId, Integer userId, Integer targetRoomId) {
         Match match = matchRepo.findById(matchId)
-                .orElseThrow(() -> new ResourceNotFoundException("Partida no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
         if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
             match.setCurrentTurnPhase(TurnPhase.ACTIONS);
         }
         matchRepo.save(match);
         //Recuperar el jugador dentro del match
         Player player = playerRepo.findByMatchAndUser(matchId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Jugador no encontrado en la partida"));
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found in the match"));
         Room currentRoom = player.getRoom();
         if (currentRoom == null) {
-            throw new RuntimeException("Jugador no tiene sala asignada");
+            throw new RuntimeException("Player does not have a room assigned");
         }
         // checkear que el jugador tiene puntos de acción para poder moverse 
         // TODO: revisar si tengo que usar la función de playerService de getPlayerActionPoints en vez de acceder directamente al atributo
@@ -690,13 +690,17 @@ public class MatchService {
         }
         //Recuperar la sala destino
         Room targetRoom = roomRepository.findById(targetRoomId)
-            .orElseThrow(() -> new ResourceNotFoundException("Sala destino no encontrada"));
+            .orElseThrow(() -> new ResourceNotFoundException("Target room not found"));
+        //Comprobar que la sala destino no es la misma que la sala actual del jugador
+        if (targetRoom.getId().equals(currentRoom.getId())) {
+            throw new InvalidMovementException("Move not allowed: the target room is the same as the current room");
+        }
         //Validar si la sala destino es adyacente
         List<Room> adjacent = currentRoom.getAdjacencyList();
         boolean canMove = adjacent.stream()
                 .anyMatch(r -> r.getId().equals(targetRoom.getId()));
         if (!canMove) {
-            throw new InvalidMovementException("Movimiento no permitido: la sala destino no es adyacente");
+            throw new InvalidMovementException("Move not allowed: the target room is not adjacent");
         }
         //Actualizar la sala del jugador y sus puntos de acción
         if (!targetRoom.getId().equals(currentRoom.getId())) {
@@ -715,7 +719,7 @@ public class MatchService {
     @Transactional
     public Npc moveNpcToRoom(Integer matchId, Integer npcId, Integer targetRoomId, Integer userId) {
         Match match = matchRepo.findById(matchId)
-            .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
+            .orElseThrow(() -> new RuntimeException("Match not found"));
 
         if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
             match.setCurrentTurnPhase(TurnPhase.ACTIONS);
@@ -724,24 +728,27 @@ public class MatchService {
 
         //Buscamos al npc que queremos mover de la partida
         Npc npc = npcRepository.findById(npcId)
-            .orElseThrow(() -> new RuntimeException("NPC no encontrado en la partida"));
+            .orElseThrow(() -> new RuntimeException("NPC not found in the match"));
 
         //Obtenemos la habitación actual en la que se encuentra el npc
         Room currentRoomNpc = npc.getRoom();
         if (currentRoomNpc == null) {
-            throw new RuntimeException("NPC no tiene sala asignada"); }
+            throw new RuntimeException("NPC does not have a room assigned"); }
 
         //Obtenemos la sala destino a la que queremos mover al npc
         Room targetRoom = roomRepository.findById(targetRoomId)
-            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
+            .orElseThrow(() -> new RuntimeException("Target room not found"));
 
         //Comprobamos que el jugador tiene puntos de acción para poder mover al npc
         Player player = playerRepo.findByMatchAndUser(matchId, userId)
-                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+                .orElseThrow(() -> new RuntimeException("Player not found in the match"));
         if (player.getActionPoints() <= 0) {
             throw new NoActionPointsException("Move not allowed: player has no action points left"); }
 
-        
+        //Comprobamos que la sala destino no es la misma que la sala actual del npc
+        if (targetRoom.getId().equals(currentRoomNpc.getId())) {
+            throw new InvalidMovementException("Move not allowed: the target room is the same as the current room of the NPC");
+        }
 
         //Actualizamos la sala del npc y los puntos de acción del jugador
 

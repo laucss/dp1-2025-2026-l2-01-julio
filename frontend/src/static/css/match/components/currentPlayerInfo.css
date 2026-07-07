@@ -3,8 +3,8 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.95);
-    border: 2px solid #1e293b;
+    background-color: #ffffff;
+    border: 3px solid #6daef9;
     border-radius: 12px;
     padding: 1.5vh 1.2vw; 
     gap: 1.5vw; /* Espacio horizontal relativo entre avatar y la columna */
@@ -12,6 +12,7 @@
     max-width: 40vw; /* Asegura que no se deforme en pantallas gigantes */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     box-sizing: border-box;
+    margin-top: 10px; /* Espacio superior relativo al viewport */
 }
 
 /* Contenedor del Avatar (Círculo Responsivo) */
@@ -66,7 +67,7 @@
 /* Tarjetas individuales de Fuerza y Acción */
 .action-points-card {
     background-color: #ffffff;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #4a90e2;
     border-radius: 8px;
     width: 6.5vw;       /* Ancho relativo */
     min-width: 85px;    /* Evita que colapse en un portátil pequeño */
@@ -111,6 +112,6 @@
 }
 
 .panel-turn-message.turn-others {
-    background-color: #e74c3c;
+    background-color: #ffb876;
     color: #ffffff;
 }

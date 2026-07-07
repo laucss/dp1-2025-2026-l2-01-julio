@@ -48,7 +48,7 @@
 
 .hand-section {
     flex: 1;
-    background-color: #FFB3BA;
+    background-color: #7ac8f3;
     border-radius: 15px;
     padding: 0;
     display: flex;
@@ -80,7 +80,7 @@
 
 .bag-section {
     flex: 1;
-    background-color: #f59191 !important; /*lo de important lo he puesto porque no se estaba cambiando bien el color por algo de la jerarquía y tal */
+    background-color: #5db9eb !important; /*lo de important lo he puesto porque no se estaba cambiando bien el color por algo de la jerarquía y tal */
     border-radius: 15px;
     padding: 0;
     display: flex;
