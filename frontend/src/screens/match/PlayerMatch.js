@@ -1137,7 +1137,7 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
 
             {isRoomSelectionActive && match?.currentTurnUserId === currentUser?.id && (
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: '60px', zIndex: 30 }}>
-                    <div style={{ padding: '14px 42px', background: '#d200005e', color: '#fff', borderRadius: '10px', fontWeight: '700', fontSize: '20px', minWidth: '280px', textAlign: 'center', transform: 'translateX(20px)' }}>
+                    <div style={{ padding: '14px 42px', background: '#ffa825a5', color: '#fff', borderRadius: '10px', fontWeight: '700', fontSize: '20px', minWidth: '280px', textAlign: 'center', transform: 'translateX(20px)' }}>
                         {roomSelectionMessage}
                     </div>
                 </div>
