@@ -11,13 +11,11 @@
 
 **Integrantes:** 
 
-Alberto Pardina Miñón (QSS7721 / albparmin@alum.us.es)<br>
-Marco Visentin Lopez (CYB6650 / marvislop@alum.us.es)<br>
-Emilio Diaz Arcenegui (FSS8078 / emidiaarc@alum.us.es)<br>
 Nerea Camacho Perez (QFL3393 / nercamper@alum.us.es)<br>
 Laura Cubero Sánchez (XNT3290 / laucubsan@alum.us.es)<br>
 Lucía Baltasar Muñoz (SBJ4592 / lucbalmun@alum.us.es)<br>
 
+<div align="justify">
 
 ## Introducción
 
@@ -57,6 +55,9 @@ Puedes gastar tus puntos en diferentes acciones:<br>
 - Hacer un intento de escape, siempre que estes en una de las torres de escape (a no ser que sea "EMPEROR" o "CAMPBELL", cuyas palabras pueden usarse en cualquier ubicación), puedas formar su nombre con la palabra en tu "bolsa". Para que el intento sea exitoso, debes lanzar un dado y sacar un número inferior a tu fuerza. Si el intento es fallido, se lanzna los dados para moverte a una habitación aleatoria.<br>
 - Por ultimo, puedes descartarte de tantas cartas como quieras y debes vaciar tu mochila, quedandote con 2 letras o 3 si eres capaz de formar una palabra con estas.
 
+### Ganador
+Como el objetivo es conseguir escapar de elba, el ganador será el primer jugador que realice la acción de intento de escape de forma exitosa. No hay límite de tiempo, por lo que si se desea terminar la pelea y nadie ha conseguido escapar, no se considerará a ningún jugador como ganador.
+
 ### Vídeo explicativo de las normas de Escape From Elba
 [https://youtu.be/JjQOi04i2-0?si=LMb-skomsHNsHqmz]
 
@@ -74,9 +75,16 @@ A continuación se definen  todas las historias de usuario a implementar:
 
 ## Juego
 
+
+   >[!NOTA]
+   >
+   >En la historias de usuario relacionadas con la ejecución de la partida, se podrá apreciar que son fieles al resultado final entregado. Esto se debe a que esta sección se dejó incompleta en la entrega de enero y se ha decidido no hacer mockups manuales, sino capturas de pantalla, ante el ahorro de tiempo que supone. 
+   
+
+
 ### HU-001
 |Como jugador quiero crear una partida pudiendo configurarla como yo desee para poder jugar.| 
-|-----|
+|:-----:|
 |![alt text](images/1000085523.jpg)|
 |![alt text](images/1000085521.jpg)|
 |![alt text](images/1000085527.jpg)|
@@ -84,99 +92,108 @@ A continuación se definen  todas las historias de usuario a implementar:
 
 ### HU-002
 |Como jugador quiero unirme a una partida para poder jugar.| 
-|-----|
+|:-----:|
 |![alt text](images/1000085522.jpg)|
 |![alt text](images/1000085528.jpg)|
 |El jugador podra elegir unirse a una partida pública en la que aún haya espacio o unirse a una partida privada usando el código correspondiente de esa partida, después de unirse a alguna partida el sistema le llevará a una sala de espera con los jugadores que se vayan uniendo. El jugador podrá abandonar la partida usando el botón de abandonar. |
 
 ### HU-003
 |Como jugador quiero robar el número de cartas de mi elección para poder gestionar mi Mano como quiera.| 
-|-----|
-|![alt text](images/390E2634-EF5D-4BDB-AE46-51CA1F415BA5.jpeg)|
+|:-----:|
+|![alt text](images/robar.jpeg)|
 |El jugador tiene la opción de robar las cartas que quiera o no robar ninguna usando el botón de robar cartas del mazo, sin embargo el total de cartas que tenga en su Mano después de robar no puede ser superior a 7. Esto se realiza al principio de cada turno del jugador. |
 
 ### HU-004
 |Como jugador quiero elegir qué acción realizar si tengo puntos de acción para poder gastar esos puntos en acciones estratégicas.| 
-|-----|
-|![alt text](images/E23DD348-5F32-43E1-93A7-B3051E82A44F.jpeg)|
+|:-----:|
+|![alt text](images/acciones.png)|
 |El jugador al terminar de robar cartas calculará su número de puntos de acción ( 7 - número de cartas de tu mano)  y si cuenta con puntos de acción el sistema le va a permitir ver las diversas opciones de acciones que puede realizar usando el botón de acciones. Puede desplazarse a una habitación adyacente, trasladar a un invitado a otra habitación, saltar a otra habitación si posee la palabra de esa habitación y puede hacer un intento de escape. |
 
 ### HU-005
 |Como jugador quiero desplazarme a una habitación adyacente a la que me encuentro para iniciar un combate o para moverme a esa habitación. | 
-|-----|
-|![alt text](images/EDDE0B85-B6D6-46FF-BA5A-308C072DC2E8.jpeg)|
+|:-----:|
+|![alt text](images/moverme1.png)|
+|![alt text](images/moverme2.png)|
 |El jugador tras hacer el recuento de sus puntos de acción podrá elegir trasladarse a una habitación adyacente de su elección gastando un punto de acción, las habitaciones adyacentes al jugador aparecerán destacadas en el tablero y al pulsar alguna el sistema le hará confirmar su elección. Como consecuencia de esto podríamos terminar en un combate. |
 
 ### HU-006
-|Como jugador quiero desplazar a otro invitado a otra habitación para iniciar un combate o alejarlo de escaparse. | 
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|Como jugador quiero desplazar a otro invitado (npc) a otra habitación para iniciar un combate o alejarlo de escaparse. | 
+|:-----:|
+|![alt text](images/moverNpc.png)|
+|![alt text](images/moverNpc2.png)|
+|![alt text](images/moverNpc3.png)|
+|![alt text](images/moverNpc4.png)|
 |El jugador tras hacer el recuento de sus puntos de acción podrá elegir desplazar a Niall Campbell o a un no jugador, es decir, a aquellos jugadores considerados como NPCs, gastando un punto de acción. Esto también podría ocasionar combates. |
 
 ### HU-007
 |Como jugador quiero desplazarme a una habitación en específico al formar la palabra de esa habitación para avanzar en la partida. | 
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|:-----:|
+|![alt text](images/moverPalabra.png)|
+|![alt text](images/moverPlabra2.png)|
+|![alt text](images/moverPalabra3.png)|
 |El jugador tras hacer el recuento de sus puntos de acción si posee en su Bolsa una palabra de alguna habitación podrá usar esa palabra para desplazarse a la misma gastando un punto de acción, pudiendo ocurrir así un combate. |
 
 ### HU-008
 |Como jugador quiero intentar escapar, ya sea estando en una torre o teniendo alguna de las dos palabras de escape fuerte para ganar la partida. | 
-|-----|
+|:-----:|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
 |El jugador tras hacer el recuento de sus puntos de acción podrá realizar un intento de escape si en su Bolsa posee una palabra de escape fuerte (EMPEROR o CAMPBELL), o si posee la palabra de alguna torre y se encuentra en esa misma torre. Si el jugador cumple alguna de esas condiciones deberá de lanzar un dado. Si el resultado es inferior a la fuerza del jugador su intento de escape sera existoso y habrá ganado, si por el contrario no es inferior el jugador será catapultado a una habitación aleatoria, perderá todos sus puntos de acción y a su fuerza se le sumará 1. |
 
 ### HU-009
 |Como jugador voy a formar parte de un combate para poder subir mi fuerza. | 
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|:-----:|
+|![alt text](images/peleaNpc.png)|
 |Cuando un jugador se desplaza a otra habitación y esa habitación ya está siendo ocupada por otro invitado se produce automáticamente un combate. Los jugadores deben de tirar un dado y sumar el resultado a su fuerza, también habría que sumar 1 punto si tienen alguna arma en su Bolsa, el jugador con el mayor resultado gana. Si son dos jugadores activos el ganador puede robar una carta a su elección de la Bolsa del perdedor o una al azar de su Mano, el perdedor será catapultado  a una habitación aleatoria, perderá todos sus puntos de acción y a su fuerza se le sumará 1.  Si un jugador activo vence a un no jugador la carta que robe será del mazo, si este no jugador es Niall la carta robada será la última del montón de descartes. Si un no jugador vence a un jugador activo el jugador activo debe descartar una carta de su Bolsa o Mano. |
 
 ### HU-010
 |Como jugador quiero descartar las cartas que quiera de mi mano para poder llevarlas a mi Bolsa o al montón de descartes. | 
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|:-----:|
+|![alt text](images/formarPalabra.jpeg)|
 |El jugador tras haber realizado todas las acciones que haya querido si tiene 7 cartas o menos en su Mano podrá elegir  descartar el número de cartas de su Mano que él quiera mandandolas a su Bolsa, si el jugador tiene en su Mano más de 7 cartas es obligatorio que descarte cartas hasta quedarse con máximo 7 en su Mano. |
 
 ### HU-011
 |Como jugador quiero formar una palabra para poder moverme a otra habitación o intentar escapar. | 
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|:-----:|
+|![alt text](images/formarPalabra.jpeg)|
+|![alt text](images/moverPalabra.png)|
 |El jugador después de realizar el descarte de cartas podrá intentar formar palabras con esas cartas y guardarlas en su bolsa para poder usarlas más adelante, si el jugador no es capaz de formar ninguna palabra con sus letras tendrá que mantener solo en su bolsa 2 cartas y las sobrantes irán al montón de descarte. Con esto termina el turno del jugador. |
 
 ### HU-012
 |Como jugador quiero formar una palabra que represente un arma para aumentar mi fuerza en un combate. | 
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|:-----:|
+|![alt text](images/usarArma.png)|
+|![alt text](images/usarArma2.png)|
+|![alt text](images/ussarArma3.png)|
 |Si el jugador forma parte de un combate podrá usar una palabra que represente un arma para sumar un punto a su resultado. La palabra que represente el arma solo se podrá formar con las letras que tenga el jugador en la Bolsa en el momento del combate. No podrá usar cartas de su Mano. |
 
 ### HU-013
 |Como jugador quiero poder formar una palabra que represente un arma y no se encuentre en la lista de armas. | 
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|:-----:|
+|![alt text](images/usarArma2.png)|
 |El jugador a la hora de formar un arma en un combate podrá formar una palabra que no se encuentre en la lista de armas dada con las cartas de la Bolsa en su turno (pero no podrá con las cartas de su Mano). |
 
 ### HU-014
 |Como jugador quiero aceptar/rechazar la propuesta de arma de otro jugador. | 
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+|:-----:|
+|![alt text](images/votacion.jpg)|
 |Cuando un jugador forme un arma que no pertenezca a la lista de armas proporcionada por el juego durante un combate , se abrirá una votación de forma que a cada uno de los jugadores restantes les aparecerá una ventana con la palabra formada por el jugador interesado junto con un botón de aceptar y otro de rechazar. Si hay mayoría en la votación se aceptará la palabra.En caso de que no sea aceptada el jugador tendra otros dos intentos para formar un arma. |
 
 ### HU-015
 |Como jugador quiero ver el listado de partidas jugadas y creadas por mí para ver mi historial de juego. | 
-|-----|
+|:-----:|
 |![alt text](images/1000085524.jpg)|
 |El sistema va a permitir al jugador ver un listado con todas sus partidas, incluyendo datos de la partida como el nombre, los jugadores, si ganó esa partida y la fecha en la que se inició y finalizó la partida. El jugador también tiene la opción de ver solo el listado de partidas que fueron creadas por él usando el botón de filtrado.|
 
 ### HU-016
 |Como administrador quiero ver el listado de partidas en curso para tener información mas precisa. | 
-|-----|
+|:-----:|
 |![alt text](images/1000085529.jpg)|
 |![alt text](images/1000085525.jpg)|
 |El administrador va a tener acceso a un listado de partidas que siguen en curso que el sistema le proporcionará al pulsar el botón. Este listado va a proporcionar el nombre de la partida, los jugadores y la fecha de inicio.|
 
 ### HU-017
 |Como administrador quiero ver el listado de partidas jugadas y sus participantes para tener un registro de las partidas. | 
-|-----|
+|:-----:|
 |![alt text](images/1000085526.jpg)|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
 |El administrador va a tener acceso a un listado de partidas completadas que el sistema le proporcionará al pulsar el botón. Este listado va a proporcionar el nombre de la partida, los jugadores y la fecha de inicio y final de la partida.|
@@ -185,49 +202,49 @@ A continuación se definen  todas las historias de usuario a implementar:
 
 ### HU-018
 |Como jugador quiero poder registrarme para poder acceder a las funcionalidades del juego.| 
-|-----|
+|:-----:|
 |![alt text](images/image.png)|
 |Cuando intentemos registrarnos introduciendo los datos obligatorios (nombre de usuario, contraseña y correo electrónico) el sistema creará un nuevo perfil para el jugador.|
 
 ### HU-019
 |Como jugador quiero poder iniciar sesión para poder jugar a partidas.|
-|-----|
+|:-----:|
 |![alt text](images/image-1.png)|
 |Cuando se inicie sesión con los campos obligatorios necesarios (nombre de usuario y contraseña), el sistema verificará las credenciales.|
 
 ### HU-020
 |Como jugador quiero poder cerrar sesión para desconectar mi cuenta de forma segura.|
-|-----|
+|:-----:|
 |![alt text](images/image-2.png)|
 |Cuando un jugador identificado pulse el menú desplegable podrá ver dentro un botón de cerrar sesión. Si hace click en él, aparecerá una ventana para que confirme que quiere desconectar su cuenta.|
 
 ### HU-021
 |Como jugador quiero poder acceder al menú desplegable para poder visitar las diferentes partes del sistema.|
-|-----|
+|:-----:|
 |Ver mockup de la HU-020|
 |El menú desplegable estará ubicado en la esquina superior derecha de la pantalla. Cuando el usuario haga click en él, podrá navegar a la pantalla que quiera.|
 
 ### HU-022
 |Como jugador quiero poder consultar las reglas del juego para conocer sus normas y mecánicas.|
-|-----|
+|:-----:|
 |![alt text](images/image-3.png)|
 |Cuando el usuario acceda al menú desplegable, podrá hacer click en “Reglas” donde podrá consultar todo lo necesario para conocer el funcionamiento y las normas del juego.|
 
 ### HU-023
 |Como jugador quiero editar mi perfil personal para que mis datos estén actualizados.| 
-|-----|
+|:-----:|
 |![alt text](images/image-4.png)|
 |Cuando el usuario acceda al menú desplegable, podrá hacer click en un botón que le permitirá editar sus datos personales (foto de perfil, nombre de usuario, una breve descripción sobre él y su país).|
 
 ### HU-024
 |Como administrador quiero ver un listado de usuarios registrados con paginación para saber quiénes son los jugadores.| 
-|-----|
+|:-----:|
 |![alt text](images/image-5.png)|
 |En la barra de navegación habrá un botón llamado "Listado de perfiles" que nos permitirá ver los jugadores registrados.|
 
 ### HU-025
 |Como administrador quiero realizar operaciones CRUD sobre los usuarios para mantener actualizado el sistema, poder comprobar la seguridad, poder borrar en cascada partidas, estadísticas, etc.| 
-|-----|
+|:-----:|
 |Ver mockup de la HU-024|
 |Al pulsar en los botones “Editar” o “Eliminar” el sistema completará la acción correspondiente.|
 
@@ -235,42 +252,44 @@ A continuación se definen  todas las historias de usuario a implementar:
 
 ### HU-026
 |Como jugador quiero poder ver el número de partidas jugadas para observar estadísticas                                                                    | 
-|-----|
+|:-----:|
 |![alt text](images/image-12.png)|
 |![alt text](images/image-13.png)|
 |En la pantalla de “Estadísticas”, si el usuario está registrado, aparecerán dos botones: uno para ver las métricas del usuario y otro para las métricas globales de todo el juego. Si desea ver más detalles aparte del número exacto de partidas jugadas, puede desplazarse a la pantalla de “Historial”, en la que aparecen listadas todas las partidas. El usuario puede filtrar este historial por si desea solo ver los detalles de las partidas en las que él haya sido partícipe.|
 
 ### HU-027
 |Como jugador quiero poder ver la duración de las partidas jugadas para saber si dispongo del tiempo necesario| 
-|-----|
+|:-----:|
 |Ver mockup de la HU-026|
+|El usuario en la pantalla de “Historial” puede ver cada partida jugada junto detalles como su duración exacta y si terminaron con ganador o deliberadamente. |
 
 ### HU-028
 |Como jugador quiero poder ver el número de jugadores por partida jugada para observar estadísticas                                                     | 
-|-----|
+|:-----:|
 |Ver mockup de la HU-026|
 |El usuario en la pantalla de “Historial” puede ver cada partida jugada junto detalles como los jugadores implicados. Además puede filtrar ese listado y mostrar solo sus partidas. |
 
 ### HU-029
 |Como jugador quiero poder ver estadísticas y métricas del juego para hacer un seguimiento de mi rendimiento |
-|-----|
+|:-----:|
 |Ver mockup de la HU-026|
+|El usuario en la pantalla de “Estadísticas” puede ver un conjunto de estadísticas tanto personales del usuario como estadísticas generales y tanto estadísticas básicas a cualquier juego como propias de Escape from Elba. |
 
 ### HU-030
 |Como jugador quiero poder ver un ranking de jugadores para fomentar mi competitividad| 
-|-----|
+|:-----:|
 |![alt text](images/image-11.png)|
 |En la barra de navegación hay un atajo llamado “Ranking”. Cuando se clica se muestra una pantalla en la que salen los 3 jugadores con más victorias. Justo debajo se encuentra el listado de jugadores en orden de victorias descendente. La posición del usuario en el ranking sale resaltada. |
 
 ### HU-031
 |Como jugador quiero poder ver mis logros en mi perfil para ver cómo avanzo en el juego | 
-|-----|
+|:-----:|
 |![alt text](images/image-14.png)|
 |En la pantalla de “Mis logros” se mostrarán todos los logros desbloqueados por el jugador. Aquellos no conseguidos se mostrarán menos resaltados. |
 
 ### HU-032
 |Como administrador quiero poder editar los logros para adaptarlos a nuevos criterios | 
-|-----|
+|:-----:|
 |![alt text](images/image-15.png)|
 |![alt text](images/image-16.png)|
 |Cuando el usuario como administrador al acceder a la pantalla de “Logros”, le aparecen cada logro junto con dos botones: uno para editarlo y otro para eliminarlo. Si se desea crear un nuevo logro, se deberá pulsar en el botón de “Crear logro” que llevará a otra pantalla en la que se rellenarán los datos necesarios para su creación. Para guardarlo se pulsará en el botón de “Guardar” y para cancelar en el de “Cancelar”. |
@@ -281,39 +300,40 @@ A continuación se definen  todas las historias de usuario a implementar:
 
 ### HU-033
 |Como jugador quiero enviar, gestionar y recibir invitaciones de amistad para poder jugar juntos.| 
-|-----|
+|:-----:|
 |![alt text](images/image-6.png)|
 |![alt text](images/image-7.png)|
 |Cuando el jugador pulse el botón “Amigos” dentro del menú desplegable, irá a una pantalla donde podrá buscar a un amigo por su nombre de usuario y podrá eliminarlo o invitarlo a jugar. También en el botón “enviar una invitación” podrá añadir nuevos amigos buscando su nombre de usuario. Por último, podrá ver las invitaciones de amistad en el botón “Invitaciones” que tendrá un contador de estas.|
 
 ### HU-034
 |Como jugador quiero enviar y recibir invitaciones a partidas (bien en modo jugador o en modo espectador) para poder ver el juego o jugar.| 
-|-----|
+|:-----:|
 |![alt text](images/image-8.png)|
 |Cuando el jugador acceda al menú desplegable, podrá hacer click en “Notificaciones” donde podrá ver las invitaciones que ha recibido. Para enviar invitaciones a partidas consultar el mockup de la HU-032.|
 
 ### HU-035
 |Como jugador quiero acceder con modo espectador a partidas de mis amigos para ver como juegan sin necesidad de participar.| 
-|-----|
+|:-----:|
 |Ver mockup de la HU-033.|
 |En la pantalla de "Amigos", a la que podemos acceder a través del menú de navegación, aparecerá un botón "Ver" cuando un amigo esté en partida. Si hacemos click podremos ver la partida en modo espectador. Este botón desaparecerá si el amigo no está en partida.|
 
 ### HU-036
 |Como jugador quiero escribir y leer comentarios en un chat durante las partidas para poder comunicarme con los demás jugadores.| 
-|-----|
+|:-----:|
 |![alt text](images/image-9.png)|
 |Cuando el jugador esté en partida podrá hacer click en el botón de chat (un bocadillo de conversación con tres puntos) para escribir y leer los comentarios de los demás jugadores.| 
 
 
 
-
 ## Diagrama conceptual del sistema
-![alt text](<images/WhatsApp Image 2025-10-29 at 09.32.01.png>)
-![alt text](<images/imagee.png>)
+
+![alt text](images/diagrama1.png)  
+![alt text](images/diagrama2.png)
+
 
 ## Reglas de Negocio
 ### R1 - Número de jugadores
-En cada partida debe asegurarse un mínimo de 3 jugadores y un máximo de 6 jugadores, y a cada jugador se le reparten 3 cartas.
+En cada partida debe asegurarse un mínimo de 3 jugadores y un máximo de 6 jugadores.
 
 ### R1.1 - Más de 6 jugadores
 Si se desea jugar con más de 6 jugadores, se juega con dos barajas de cartas.
@@ -403,32 +423,25 @@ Un intento de escape fallido implicará: ser lanzado a una sala aleatoria, perde
 ### R8 - Posicion inicial de Campbell
 Niall Campbell siempre comienza la partida en la Zona Segura.
 
-### R9 - Partida unica
-Cada jugador solo puede estar en una partida a la vez.
-
-### R10 - Dados
-Cada jugador juega con un dado de 6 caras, mientras que Niall Campbell juega con un dado especial llamado "Master die" tambien de 6 caras pero diferenciable por su color.
-
-### R11 - Habitaciones de inicio
+### R9 - Habitaciones de inicio
 Cada jugador comienza la partida en una habitación determinada por la tirada de dos dados (uno negro y otro blanco). Si un jugador queda ubicado en una habitacion ocupada, este tirara de nuevo.
 
-### R12 - Distribucion predefinida
-Se juega con un total de 64 cartas.
-
-### R13 - Barajar y remezclar
+### R10 - Barajar y remezclar
 Cuando el mazo de robo se agota, se baraja inmediatamente el descarte para formar un nuevo mazo y se continúa robando sin pausa en el mismo paso de juego.
 
-### R14 - Jugador inicial
+### R11 - Jugador inicial
 Se escoge mediante azar el jugaor con tirada de dados mas alta y se siguen los turnos de manera descendente, en caso de empate repiten la tirada solo los empatados.
 
-### R15 - Flujo de cartas estricto
+### R12 - Flujo de cartas estricto
 Las cartas pasan de la mano a la Bolsa y de esta al mazo de descartes, nunca en sentido inverso salvo por efectos de botín de combate o robos del mazo de robo/descarte definidos; está prohibido pasar del descarte a la bolsa o mano sin un evento de juego que lo permita.
 
-### R16 - Orden del turno
+### R13 - Orden del turno
 Durante el turno se sigue el orden de 1º robar, 2º tomar accion y por ultimo descartar, y es imposible volver a la fase anterior en caso de avanzar.
 
-### R17 - Bolsa de otros jugadores
-Durante la partida podremos ver las cartas que los otros jugadores tengan en sus bolsas en todo momento.
+### R14 - Bolsa de otros jugadores
+Las cartas en la Bolsa de cualquier jugador son siempre públicas.
 
-### R18 - Mano de otros jugadores
-El jugador no podrá ver las cartas de la mano de otros jugadores.
+### R15 - Mano de otros jugadores
+Las cartas en la Mano de un jugador son privadas.
+
+</div>

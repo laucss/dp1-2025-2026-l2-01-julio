@@ -7,13 +7,11 @@
 
 **Nombre del proyecto:** Escape From Elba 
 
-**Repositorio:** https://github.com/gii-is-DP1/dp1-2025-2026-l2-01
+**Repositorio:** https://github.com/laucss/dp1-2025-2026-l2-01-julio.git
 
 **Integrantes :**
 
-Alberto Pardina Miñón (QSS7721 / albparmin@alum.us.es)<br>
-Marco Visentin Lopez (CYB6650 / marvislop@alum.us.es)<br>
-Emilio Diaz Arcenegui (FSS8078 / emidiaarc@alum.us.es)<br>
+
 Nerea Camacho Perez (QFL3393 / nercamper@alum.us.es)<br>
 Laura Cubero Sánchez (XNT3290 / laucubsan@alum.us.es)<br>
 Lucía Baltasar Muñoz (SBJ4592 / lucbalmun@alum.us.es)<br>
@@ -65,11 +63,31 @@ Puedes gastar tus puntos en diferentes acciones:<br>
 
 ### Diagrama de Dominio/Diseño
 
-![alt text](<images/diagramaBase.png>)
+Debido al gran tamaño del trabajo realizado se han realizado varios diagramas de diseño por bloques.
 
-![alt text](<images/dragramadeclasesss.drawio.png>)
+#### Diagrama base
 
-![alt text](<images/diagramadeclasessss2.drawio.png>)
+![alt text](<images/DiagramaBase.png>)
+
+#### Diagrama del módulo de juego
+
+![alt text](<images/DiagramaJuego.jpg>)
+
+#### Diagrama de las cartas
+
+![alt text](<images/DiagramaCartas.png>)
+
+#### Diagrama del módulo social
+![alt text](<images/DiagramaSocial.jpg>)
+
+#### Diagramas de DTOS
+![alt text](<images/DiagramaDTO1.png>)
+![alt text](<images/DiagramaDTO2.png>)
+![alt text](<images/DiagramaDTO3.png>)
+![alt text](<images/DiagramaDTO4.png>)
+![alt text](<images/DiagramaDTO5.png>)
+
+
 
 ### Diagrama de Capas (incluyendo Controladores, Servicios y Repositorios)
 
