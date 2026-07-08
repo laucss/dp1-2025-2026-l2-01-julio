@@ -123,15 +123,15 @@
 
 /* GRID DEL DETALLE (BOLSA Y MANO) */
 .detail-grids-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    display: block; /* Modificado de grid a block para que ocupe todo el ancho disponible */
+    width: 100%;
 }
 
 .detail-section-box {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: 100%;
 }
 
 .detail-section-box h5 {
@@ -139,7 +139,7 @@
     font-size: 13px;
     font-weight: 700;
     color: #444;
-    text-align: center;
+    text-align: left; /* Modificado a la izquierda para un look más limpio, o mantén center si prefieres */
 }
 
 .cards-display-zone {
@@ -149,7 +149,7 @@
     padding: 10px;
     min-height: 110px; /* Le da holgura a las cartas para que no se corten */
     display: flex;
-    justify-content: center;
+    justify-content: flex-start; /* Alinea las cartas al inicio en lugar de centrarlas si hay mucho espacio */
     align-items: center;
 }
 
@@ -157,7 +157,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .inspected-player-card {
@@ -172,6 +172,8 @@
     font-size: 12px;
     color: #777;
     font-style: italic;
+    width: 100%;
+    text-align: center;
 }
 
 /* DETALLE DE NPCs */
