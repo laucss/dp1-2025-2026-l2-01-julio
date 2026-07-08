@@ -12,4 +12,13 @@ public class LoseAgainstNpcRequestDTO {
 
     @NotNull
     private String fromWhere;
+
+    public LoseAgainstNpcRequestDTO(Integer cardId, String fromWhere){
+        this.cardId =cardId; 
+        this.fromWhere = fromWhere; 
+    }
+
+    public LoseAgainstNpcRequestDTO(){}
+
+
 }
