@@ -50,10 +50,10 @@ public class FightService {
     private final PlayerService playerService; 
     private final MatchWebsocketController matchWebsocketController;
 
-    MatchRepository matchRepo;
-    PlayerRepository playerRepo;
-    NpcRepository npcRepository;
-    RoomService roomService;
+    private final MatchRepository matchRepo;
+    private final PlayerRepository playerRepo;
+    private final NpcRepository npcRepository;
+    private final RoomService roomService;
 
     @Autowired
     public FightService(MatchRepository mrepo, PlayerRepository playerRepo,
