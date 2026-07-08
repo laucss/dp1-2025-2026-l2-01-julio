@@ -243,21 +243,6 @@ Aunque el tamaño de nuestro proyecto ha dado lugar a un modelo relativamente co
 ## Decisiones de diseño
 
 
-### Decisión X
-#### Descripción del problema:*
-
-Describir el problema de diseño que se detectó, o el porqué era necesario plantearse las posibilidades de diseño disponibles para implementar la funcionalidad asociada a esta decisión de diseño.
-
-#### Alternativas de solución evaluadas:
-Especificar las distintas alternativas que se evaluaron antes de seleccionar el diseño concreto implementado finalmente en el sistema. Si se considera oportuno se pude incluir las ventajas e inconvenientes de cada alternativa
-
-#### Justificación de la solución adoptada
-
-Describir porqué se escogió la solución adoptada. Si se considera oportuno puede hacerse en función de qué  ventajas/inconvenientes de cada una de las soluciones consideramos más importantes.
-Os recordamos que la decisión sobre cómo implementar las distintas reglas de negocio, cómo informar de los errores en el frontend, y qué datos devolver u obtener a través de las APIs y cómo personalizar su representación en caso de que sea necesario son decisiones de diseño relevantes.
-
-_Ejemplos de uso de la plantilla con otras decisiones de diseño:_
-
 ### Decisión 1: Importación de datos reales para demostración
 #### Descripción del problema:
 
@@ -302,24 +287,24 @@ Hemos decidido implementar en nuestra aplicación cuando te unes a una partida u
 
 #### Alternativas de solución evaluadas:
 
-*Alternativa 2.a* : Añadir la lógica de negocio del lobby en el propio MatchService
-*Ventajas:*
-•	Una clase que gestiona todo, lobbies y partidas, hace que sea más simple.
-•	Hay menos servicios que implementar.
-•	No se necesita coordinación entre distintos servicios.
-*Inconvenientes:*
-• La lógica de lobby y de partida se mezcla, lo que hace que la clase sea más grande y difícil de mantener.
-• Añadir nuevas funcionalidades de lobby afecta directamente a la lógica de la partida.
-• Difícil de testear de forma aislada.
+*Alternativa 2.a* : Añadir la lógica de negocio del lobby en el propio MatchService<br>
+*Ventajas:* <br>
+•	Una clase que gestiona todo, lobbies y partidas, hace que sea más simple. <br>
+•	Hay menos servicios que implementar.<br>
+•	No se necesita coordinación entre distintos servicios.<br>
+*Inconvenientes:* <br>
+• La lógica de lobby y de partida se mezcla, lo que hace que la clase sea más grande y difícil de mantener.<br>
+• Añadir nuevas funcionalidades de lobby afecta directamente a la lógica de la partida.<br>
+• Difícil de testear de forma aislada.<br>
 
-*Alternativa 2.b* : Crear un servicio LobbyService para gestionar la lógica.
-*Ventajas:*
-•	Hace el código más fácil de entender, mantener y testear.
-•	Se separan las responsabilidades.
-•	Permite añadir funcionalidades específicas del lobby sin tocar la lógica de partidas.
-*Inconvenientes:*
-• Más código y más estructura que mantener.
-• Hay que pasar datos de LobbyService a MatchService cuando se inicia la partida.
+*Alternativa 2.b* : Crear un servicio LobbyService para gestionar la lógica.<br>
+*Ventajas:*<br>
+•	Hace el código más fácil de entender, mantener y testear.<br>
+•	Se separan las responsabilidades.<br>
+•	Permite añadir funcionalidades específicas del lobby sin tocar la lógica de partidas.<br>
+*Inconvenientes:*<br>
+• Más código y más estructura que mantener.<br>
+• Hay que pasar datos de LobbyService a MatchService cuando se inicia la partida.<br>
 
 
 
@@ -335,27 +320,103 @@ A la hora de construir los services nos hemos visto con una gran cantidad de val
 
 #### Alternativas de solución evaluadas:
 
-*Alternativa 3.a* : Añadir directamente cada validación en la función que la necesite.
-*Ventajas:*
-• No hay que crear nuevas clases ni abstraer la lógica, todo está “donde se usa”, por lo que es más simple.
-*Inconvenientes:*
-• La misma restricción puede necesitarse en varias funciones, y si se modifica, hay que actualizar todas.
-• Cambiar una regla implica revisar múltiples funciones, aumentando riesgo de errores.
-• La lógica de juego queda mezclada con servicios o controladores, dificultando extensiones o reutilización.
+*Alternativa 3.a* : Añadir directamente cada validación en la función que la necesite.<br>
+*Ventajas:*<br>
+• No hay que crear nuevas clases ni abstraer la lógica, todo está “donde se usa”, por lo que es más simple.<br>
+*Inconvenientes:*<br>
+• La misma restricción puede necesitarse en varias funciones, y si se modifica, hay que actualizar todas.<br>
+• Cambiar una regla implica revisar múltiples funciones, aumentando riesgo de errores.<br>
+• La lógica de juego queda mezclada con servicios o controladores, dificultando extensiones o reutilización.<br>
 
-*Alternativa 3.b* : Crear una clase checkers con todas las restricciones.
-*Ventajas:*
-• Todas las reglas del juego están en un solo lugar, fácil de localizar y modificar.
-•	Otras partes del sistema (MatchService, frontend, tests) pueden reutilizar la misma lógica sin duplicarla.
-•	Si cambia una regla del juego, solo se modifica en la clase Checkers.
+*Alternativa 3.b* : Crear una clase checkers con todas las restricciones.<br>
+*Ventajas:*<br>
+• Todas las reglas del juego están en un solo lugar, fácil de localizar y modificar.<br>
+•	Otras partes del sistema (MatchService, frontend, tests) pueden reutilizar la misma lógica sin duplicarla.<br>
+•	Si cambia una regla del juego, solo se modifica en la clase Checkers.<br>
 *Inconvenientes:*
-• Los servicios (como MatchService) deben interactuar con la clase Checkers correctamente, lo que añade un nivel de abstracción.
+• Los servicios (como MatchService) deben interactuar con la clase Checkers correctamente, lo que añade un nivel de abstracción.<br>
 
 
 
 #### Justificación de la solución adoptada
 
 Consideramos que al tener muchas restricciones que son reutilizables nos va a facilitar mucho el tener una clase Checkers, también nos va a facilitar la lectura del código.
+
+
+### Decisión 4
+#### Descripción del problema:*
+
+A la hora de implementar la función para que un usuario pueda ser espectador de una partida, fue necesario estudiar distintas alternativas de diseño. El objetivo era permitir que un usuario pudiera visualizar el desarrollo de una partida sin formar parte de ella como jugador, procurando que la solución fuera sencilla de mantener y no afectara a la lógica ya existente.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 4.a* : Añadir un enumerado de `PlayerType` <br>
+
+*Ventajas:*<br>
+• Permite distinguir de forma explícita entre jugadores y espectadores mediante un único modelo de entidad.<br>
+• Facilita futuras ampliaciones en caso de querer añadir nuevos tipos de participantes.<br>
+
+*Inconvenientes:*<br>
+• Obliga a modificar gran parte de la lógica de negocio para comprobar continuamente el tipo de participante antes de ejecutar determinadas acciones.<br>
+• Los espectadores no necesitan la mayoría de atributos de Player (mano, bolsa, habitación, fuerza, etc.), por lo que existirían objetos con numerosos campos sin utilidad.<br>
+• Incrementa el riesgo de errores al tener que impedir que un espectador pueda realizar acciones reservadas exclusivamente a los jugadores.<br>
+
+*Alternativa 4.b* : Añadir una lista de usuarios como atributo `spectators` en `Match.java`<br>
+
+*Ventajas:*<br>
+• Separa claramente los conceptos de jugador y espectador, evitando mezclar responsabilidades dentro de la entidad `Player`.<br>
+• Requiere menos modificaciones sobre la lógica existente, ya que los espectadores no participan en las mecánicas del juego.<br>
+• Simplifica las comprobaciones de permisos, al mantenerse independientes las listas de jugadores y espectadores.<br>
+• Reduce el impacto sobre el resto del sistema, ya que la incorporación de espectadores afecta principalmente a la entidad Match y a los servicios relacionados con ella.<br>
+
+*Inconvenientes:*<br>
+• Es necesario mantener una nueva relación entre `Match` y `User`, incrementando ligeramente la complejidad del modelo de datos.<br>
+• Si en el futuro los espectadores adquirieran funcionalidades más avanzadas, podría ser necesario crear una entidad específica para representar su participación en la partida.<br>
+
+
+
+#### Justificación de la solución adoptada
+
+Finalmente se decantó por la segunda opción, tener un atributo `spectators` debido que a que solo implicaba la generación de nuevo código y no tanto la modificación de métodos que ya funcionaban correctamente. Dado el estado del sistema en ese momento de decisión lo más viable y práctica era esta opción. 
+
+### Decisión 4
+#### Descripción del problema:*
+
+El módulo de peleas desarrollado hasta ese momento funcionaba correctamente para enfrentamientos individuales, pero no conseguía satisfacer la regla de negocio que establece que una pelea puede desencadenar una cadena de peleas consecutivas. Esto ocurría, por ejemplo, cuando el resultado de un combate provocaba el desplazamiento de un jugador a una sala en la que debía iniciarse un nuevo enfrentamiento.
+
+Ante esta situación, fue necesario analizar el diseño existente y decidir entre adaptar la implementación actual para soportar este comportamiento o replantear por completo el funcionamiento del módulo de peleas, trasladando la responsabilidad de detectar y gestionar los enfrentamientos al backend.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 4.a* : Refactorizar todo el módulo de peleas y trasladar la responsabilidad de detectar e iniciar los combates del frontend al backend mediante WebSocket. <br>
+
+*Ventajas:*<br>
+• Centraliza toda la lógica de negocio relacionada con las peleas en el backend, evitando duplicar reglas en el cliente.
+• Garantiza que las cadenas de peleas se ejecuten de forma automática y consistente para todos los jugadores.
+• Reduce la dependencia del frontend, que pasa a limitarse a representar el estado enviado por el servidor.
+• Facilita el mantenimiento y la evolución del sistema, ya que las reglas de las peleas se encuentran en un único punto.
+
+*Inconvenientes:*<br>
+• Requiere una refactorización importante del módulo de peleas y de la comunicación entre cliente y servidor.
+• Supone un mayor esfuerzo de desarrollo y de pruebas para asegurar que no se introducen regresiones en una funcionalidad crítica.
+
+*Alternativa 4.b* : Mantener la responsabilidad de detectar las peleas en el frontend e implementar allí la lógica necesaria para gestionar las cadenas de combates.<br>
+
+*Ventajas:*<br>
+• Requiere menos cambios sobre la arquitectura existente.
+• Permite reutilizar gran parte del código ya implementado en el cliente.
+• Reduce el tiempo necesario para obtener una primera versión funcional.
+
+*Inconvenientes:*<br>
+• La lógica de negocio permanece distribuida entre frontend y backend, dificultando su mantenimiento.
+• Aumenta el riesgo de inconsistencias entre clientes si alguno no procesa correctamente la cadena de peleas.
+• Hace más complejo el desarrollo de nuevas funcionalidades relacionadas con los combates.
+• El backend deja de ser la única fuente de verdad sobre el estado de la partida, lo que puede provocar comportamientos inesperados y dificultar las pruebas del sistema.
+
+#### Justificación de la solución adoptada
+
+En un principio se intentó hacer una pequeña modificación en el backend, pero seguir manteniendo la estructura tal y como estaba y que fuera el frontend el encargado de lanzar las peleas. El estado de la partida era tan complejo que no resultó dicha solución. Así que se decidió asumir el riesgo y tiempo de replantear todo el sistema y delegar la responsabilidad al backend, como se debió hacer en su momento. Se optó por esta solución porque al final era la más fiables y que a nuestro criterio, debió ser el enfoque dado inicialmente por nuestro compañero. 
+
 
 _Ejemplos de uso de la plantilla con otras decisiones de diseño:_
 
