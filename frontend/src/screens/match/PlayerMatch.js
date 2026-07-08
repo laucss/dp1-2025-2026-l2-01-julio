@@ -1065,7 +1065,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
                 <div className="panel-players-and-buttons"> 
                     <OtherPlayersPanel
                         playersList={playersList}
-                        otherPlayersHands={otherPlayersHands}
                         otherPlayersBags={otherPlayersBags}
                         getPlayerColor={getPlayerColor}
                         players={match?.players}

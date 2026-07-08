@@ -4,7 +4,6 @@ import "../../../static/css/match/components/otherPlayersSection.css";
 export default function OtherPlayersPanel({
     playersList,
     otherPlayersBags,
-    otherPlayersHands,
     getPlayerColor,
     players,
     npcs
@@ -179,27 +178,7 @@ export default function OtherPlayersPanel({
                                 </div>
                             </div>
 
-                            {/* Mano */}
-                            <div className="detail-section-box">
-                                <h5>Hand</h5>
-                                <div className="cards-display-zone">
-                                    {otherPlayersHands[inspectedData.id] && otherPlayersHands[inspectedData.id].length > 0 ? (
-                                        <div className="bag-cards-container">
-                                            {otherPlayersHands[inspectedData.id].map((carta, index) => (
-                                                <img
-                                                    key={index}
-                                                    src={`/resources${carta.frontImage}`}
-                                                    alt={`Carta ${carta.letter}`}
-                                                    className="inspected-player-card"
-                                                    title={carta.letter}
-                                                />
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="empty-zone-text">Hand is empty</p>
-                                    )}
-                                </div>
-                            </div>
+                            
                         </div>
                     ) : (
                         <div className="npc-detail-container">
