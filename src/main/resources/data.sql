@@ -26,6 +26,9 @@ INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (19
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (20,'player13','player13@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar1.jpg');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (21,'player14','player14@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar2.jpg');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (22,'player15','player15@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (23,'player16','player16@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar1.jpg');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (24,'player17','player17@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar2.jpg');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (25,'player18','player18@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
 
 -- Match
 

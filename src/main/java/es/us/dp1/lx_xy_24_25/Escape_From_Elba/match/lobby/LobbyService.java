@@ -2,6 +2,7 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.LobbyNotFound;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.PlayerNotInTheGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations.InvitationRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 
 import java.util.ArrayList;
@@ -34,17 +35,20 @@ public class LobbyService {
     public Checkers checkers;
     public PlayerService playerService;
     public LobbyWebsocketController lobbyWebsocketController;
+    public InvitationRepository invitationRepository; 
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    public LobbyService(LobbyRepository lrepo, Checkers checkers, UserService userService, PlayerService playerService, LobbyWebsocketController lobbyWebsocketController) {
+    public LobbyService(LobbyRepository lrepo, Checkers checkers, UserService userService, PlayerService playerService, 
+        LobbyWebsocketController lobbyWebsocketController, InvitationRepository invitationRepository) {
         this.lrepo = lrepo;
         this.checkers = checkers;
         this.userService = userService;
         this.playerService = playerService;
         this.lobbyWebsocketController = lobbyWebsocketController;
+        this.invitationRepository = invitationRepository; 
     }
 
     
@@ -163,17 +167,15 @@ public class LobbyService {
         User currentUser = userService.findCurrentUser();
         Player player = playerService.findByMatchIdAndUserId(m.getId(), currentUser.getId());
         
-       
         if (m.getCreatorId().equals(currentUser.getId())) {
-            
             LobbyUpdateDTO update = createLobbyUpdate(m, "DELETED", currentUser.getUsername());
             lobbyWebsocketController.notifyPlayerLeft(matchId, update);
-            
+
+            invitationRepository.deleteByMatchId(matchId);
             
             lrepo.delete(m);
             return null;
         }
-        
         
         m.getPlayers().remove(player);
         Match savedMatch = lrepo.save(m);

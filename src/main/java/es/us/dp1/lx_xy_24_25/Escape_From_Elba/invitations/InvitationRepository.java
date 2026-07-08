@@ -15,4 +15,6 @@ public interface InvitationRepository extends JpaRepository<InvitationMatch, Int
     // esta función es muy similar o igual a la que hay encima pero como no la hice yo y estamos en la recuperación de julio no la voy a cambiar por si rompo algo
     @Query("SELECT i FROM InvitationMatch i WHERE i.match.id = :matchId AND i.receiver.id = :userId AND i.status = 'PENDING' ")
     Optional<InvitationMatch> findPendingInvitationByUserIdAndMatchId(Integer userId, Integer matchId);  
+
+    void deleteByMatchId(Integer matchId);
 }
