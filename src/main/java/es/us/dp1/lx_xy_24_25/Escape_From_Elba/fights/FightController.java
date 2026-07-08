@@ -39,12 +39,14 @@ public class FightController {
     }
 
     @PutMapping("/{matchId}/fight/resolve")
+    @Operation(summary = "Resolve a fight", description = "Give the result of a fight after receiving the total of the dices and the participates")
     public ResponseEntity<FightResolvedDTO> resolveFight(@PathVariable Integer matchId, @RequestBody FightResultRequestDTO request) {
         FightResolvedDTO result = fs.processFightResolution(request); 
         return ResponseEntity.ok(result);
     }
     
     @PostMapping("/{matchId}/steal-card-from-player")
+     @Operation(summary = "Player draw a card from a player", description = "Player chooses a card to draw from the player loser after as a result o a fight")
     public ResponseEntity<CardDTO> stealCardFromPlayer(@PathVariable Integer matchId, @RequestBody StealCardRequestDTO request) {
         CardDTO result = fs.playerStealFromPlayer(request, matchId);
         return ResponseEntity.ok(result);
@@ -93,6 +95,7 @@ public class FightController {
     }
 
     @PostMapping("/{matchId}/check-pending-fights")
+    @Operation(summary = "Check pending fights", description = "Checks if there are players with npcs together as a result of a fight (so there are pending fights) and starts them")
     public ResponseEntity<?> checkAndTriggerChainFights(@PathVariable Integer matchId) {
         fs.checkPendingFights(matchId);
         return ResponseEntity.ok().build();

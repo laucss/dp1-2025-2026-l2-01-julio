@@ -43,12 +43,12 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 @Service
 public class FightService {
 
-    MatchService matchService;
-    DeckService deckService; 
-    HandService handService; 
-    BagService bagService;
-    PlayerService playerService; 
-    MatchWebsocketController matchWebsocketController;
+    private final MatchService matchService;
+    private final DeckService deckService; 
+    private final HandService handService; 
+    private final BagService bagService;
+    private final PlayerService playerService; 
+    private final MatchWebsocketController matchWebsocketController;
 
     MatchRepository matchRepo;
     PlayerRepository playerRepo;
@@ -376,7 +376,7 @@ public class FightService {
                 loser.getActionPoints(),
                 System.currentTimeMillis()
             );
-            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
+        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
     }
 
     
