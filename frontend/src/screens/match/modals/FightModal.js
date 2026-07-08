@@ -369,42 +369,36 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                     
                     <div className='combat-top'> 
 
-                        <div className='combat-panel'> {/*zona del atacante */}
+                        {/* PANEL ATACANTE (Ahora estilizado como tarjeta) */}
+                        <div className='combat-panel attacker-panel'>
                             <div className='combat-header'>
-                                <span>
-                                    {attacker?.user?.username || (attacker?.isNiallCampbell ? 'NiallCampbell' : `NPC ${attacker.id}`)}
-                                </span>
-
                                 {attacker?.user?.avatar ? (
                                     <img
                                         src={attacker.user.avatar}
                                         alt={`${attacker.user.username}'s avatar`}
-                                        style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                                        className="player-avatar"
                                     />
                                 ) : (
-                                    <div
-                                        style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            borderRadius: '50%',
-                                            backgroundColor: attacker?.isNiallCampbell ? '#ff0000' : '#666',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: 'white',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
+                                    <div className="player-avatar placeholder-avatar">
                                         {attacker?.isNiallCampbell ? 'N' : 'X'}
                                     </div>
                                 )}
+                                <span className="player-username">
+                                    {attacker?.user?.username || (attacker?.isNiallCampbell ? 'NiallCampbell' : `NPC ${attacker.id}`)}
+                                </span>
                             </div>
 
-                            <div className="total-box">{whiteRolled ? totalAttacker : '?'}</div>
+                            <div className="total-box">
+                                <span className="total-label">Total Strength</span>
+                                {whiteRolled ? totalAttacker : '?'}
+                            </div>
 
                             {/* FUERZA */}
                             <div className="calc-row">
-                                <div className="calc-box">Strength: {attackerStrength}</div>
+                                <div className="calc-box">
+                                    <span className="calc-label">Base</span>
+                                    <span className="calc-value">{attackerStrength}</span>
+                                </div>
 
                                 <span className="calc-operator">+</span>
 
@@ -422,55 +416,56 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                                     <img
                                         src={`/Dice/B${whiteDice}.png`}
                                         alt="Dado Blanco"
-                                        className={`dice ${whiteRolling ? 'rolling' : ''}`}
+                                        className={`dice white-dice ${whiteRolling ? 'rolling' : ''}`}
                                     />
                                 </button>
 
                                 <span className="calc-operator">+</span>
 
                                 <div className="calc-box">
-                                    Weapons: {getTotalWeaponsBonus(weaponsAttacker)}
+                                    <span className="calc-label">Weapons</span>
+                                    <span className="calc-value">
+                                        {getTotalWeaponsBonus(weaponsAttacker)}
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
+                        {/* CONTENEDOR VS Y LOGO */}
                         <div className='vs-container'>
                             <img src={Fight} alt="Fight" className="fight-logo-central" />
                         </div>
 
-                        <div className='combat-panel'> {/*zona del oponente */}
-                            <div className='combat-header'> 
-                                <span>{defender?.user?.username || (defender?.isNiallCampbell ? 'NiallCampbell' : `NPC ${defender.id}`)}</span>
+                        {/* PANEL DEFENSOR (Ahora estilizado como tarjeta) */}
+                        <div className='combat-panel defender-panel'>
+                            <div className='combat-header'>
                                 {defender?.user?.avatar ? (
                                     <img 
                                         src={defender.user.avatar}
                                         alt={`${defender.user.username}'s avatar`}
-                                        style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+                                        className="player-avatar"
                                     />
                                 ) : (
-                                    <div 
-                                        style={{ 
-                                            width: '40px', 
-                                            height: '40px', 
-                                            borderRadius: '50%',
-                                            backgroundColor: defender?.isNiallCampbell ? '#ff0000' : '#666',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: 'white',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
+                                    <div className="player-avatar placeholder-avatar">
                                         {defender?.isNiallCampbell ? 'N' : 'X'}
                                     </div>
                                 )}
+                                <span className="player-username">
+                                    {defender?.user?.username || (defender?.isNiallCampbell ? 'NiallCampbell' : `NPC ${defender.id}`)}
+                                </span>
                             </div>
 
-                            <div className="total-box">{blackRolled ? totalDefender : '?'}</div>
+                            <div className="total-box">
+                                <span className="total-label">Total Strength</span>
+                                {blackRolled ? totalDefender : '?'}
+                            </div>
 
-                            {/*FUERZA */}
+                            {/* FUERZA */}
                             <div className="calc-row">
-                                <div className="calc-box">Strength: {defenderStrength}</div>
+                                <div className="calc-box">
+                                    <span className="calc-label">Base</span>
+                                    <span className="calc-value">{defenderStrength}</span>
+                                </div>
 
                                 <span className="calc-operator">+</span>
                                         
@@ -479,18 +474,22 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                                     disabled={!isDefender || blackRolled}
                                     className='dice-button'
                                     title="Dado Negro"
-
                                 >
                                     <img
                                         src={`/Dice/N${blackDice}.png`}
                                         alt="Dado Negro"
-                                        className={`dice ${blackRolling ? 'rolling' : ''}`}
+                                        className={`dice black-dice ${blackRolling ? 'rolling' : ''}`}
                                     />
                                 </button>
 
                                 <span className="calc-operator">+</span>
 
-                                <div className="calc-box">Weapons: {getTotalWeaponsBonus(weaponsDefender)}</div>
+                                <div className="calc-box">
+                                    <span className="calc-label">Weapons</span>
+                                    <span className="calc-value">
+                                        {getTotalWeaponsBonus(weaponsDefender)}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -498,48 +497,48 @@ export default function FightModal({ isOpen, onClose, defender, attacker, onReso
                     </div>
 
 
-                    {/* ZONA INFERIOR */}
+                    {/* ZONA INFERIOR ACCIONES */}
                     <div className="combat-bottom"> 
 
                         <div className='action-column'>
                             <div className='actions'>
                                 <button
-                                    className="action-button"
+                                    className="action-button weapon-button"
                                     onClick={() => openWeaponModal('ATTACKER')}
                                     disabled={!isAttacker || isAttackerBot}
-                                    title={isAttacker ? "Weapon" : "Solo el atacante puede formar arma"}
+                                    title={isAttacker ? "Formar Arma" : "Solo el atacante puede formar arma"}
                                 >
-                                    Weapon
+                                    Equip Weapon
                                 </button>
                             </div>
 
                             <button
-                                className={`ready-button ${buttonStateAttacker ? 'green' : ''}`}
+                                className={`ready-button ${buttonStateAttacker ? 'ready-green' : 'not-ready-red'}`}
                                 onClick={() => toggleReadyState('ATTACKER', buttonStateAttacker)}
                                 disabled={!isAttacker || isAttackerBot}
-                                title={isAttacker ? "Ready" : "Solo el atacante puede pulsar listo"}
+                                title={isAttacker ? "Confirmar y Esperar" : "Solo el atacante puede pulsar listo"}
                             >
-                                Ready
+                                {buttonStateAttacker ? '✓ Ready' : 'Ready?'}
                             </button>
                         </div>
                         <div className='action-column'>
                             <div className='actions'>
                                 <button 
-                                    className="action-button"
+                                    className="action-button weapon-button"
                                     onClick={() => openWeaponModal('DEFENDER')}
                                     disabled={!isDefender}
-                                    title={isDefender ? "Weapon" : "Solo el defensor puede formar arma"}
+                                    title={isDefender ? "Formar Arma" : "Solo el defensor puede formar arma"}
                                 >
-                                    Weapon
+                                    Equip Weapon
                                 </button>
                             </div>
                             <button 
-                                className={`ready-button ${buttonStateDefender ? 'green' : 'red'}`}
+                                className={`ready-button ${buttonStateDefender ? 'ready-green' : 'not-ready-red'}`}
                                 onClick={() => toggleReadyState('DEFENDER', buttonStateDefender)}
                                 disabled={!isDefender}
-                                title={isDefender ? "Ready" : "Solo el defensor puede pulsar listo"}
+                                title={isDefender ? "Confirmar y Esperar" : "Solo el defensor puede pulsar listo"}
                             > 
-                                Ready
+                                {buttonStateDefender ? '✓ Ready' : 'Ready?'}
                             </button>
                         </div>
 
