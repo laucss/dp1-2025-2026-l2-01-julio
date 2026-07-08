@@ -2,6 +2,7 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.user;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -34,6 +35,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.SecurityConfiguration;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.AccessDeniedException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UpdateUserDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserStatus;
 
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
@@ -182,57 +185,47 @@ class UserControllerTests {
 		mockMvc.perform(get(BASE_URL + "/{id}", TEST_USER_ID)).andExpect(status().isNotFound());
 	}
 
-	/*
-	@Test
-	@WithMockUser("admin")
-	void shouldCreateUser() throws Exception {
-		User aux = new User();
-		aux.setUsername("Prueba");
-		aux.setPassword("Prueba");
-		aux.setAuthority(auth);
 
-		mockMvc.perform(post(BASE_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(aux))).andExpect(status().isCreated());
-	}
-				*/
-
-	/* 
 	@Test
 	@WithMockUser("admin")
 	void shouldUpdateUser() throws Exception {
-		user.setUsername("UPDATED");
-		user.setPassword("CHANGED");
+		UpdateUserDTO updateDTO = new UpdateUserDTO();
+		updateDTO.setUsername("UPDATED");
+		updateDTO.setPassword("CHANGED");
 
-		when(this.userService.findUser(TEST_USER_ID)).thenReturn(user);
-		when(this.userService.updateUser(any(User.class), any(Integer.class))).thenReturn(user);
+		User updatedUser = new User();
+		updatedUser.setId(TEST_USER_ID);
+		updatedUser.setUsername("UPDATED");
+		updatedUser.setPassword("CHANGED");
+		updatedUser.setAvatar("avatar.jpg");
+		updatedUser.setEmail("updated@test.com");
+		updatedUser.setAge(30);
+		updatedUser.setAuthority(auth);
 
-		mockMvc.perform(put(BASE_URL + "/{id}", TEST_USER_ID)
+		when(this.userService.updateUser(eq(TEST_USER_ID), any(UpdateUserDTO.class))).thenReturn(updatedUser);
+		when(this.jwtUtils.generateTokenFromUsername(eq("UPDATED"), any(Authorities.class))).thenReturn("newToken");
+
+		mockMvc.perform(put(BASE_URL + "/{userId}", TEST_USER_ID)
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(user)))
+				.content(objectMapper.writeValueAsString(updateDTO)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.username").value("UPDATED"))
 			.andExpect(jsonPath("$.id").value(TEST_USER_ID));
-
-
 	}
-			*/
 
-	/* *
 	@Test
 	@WithMockUser("admin")
 	void shouldReturnNotFoundUpdateUser() throws Exception {
-		user.setUsername("UPDATED");
-		user.setPassword("UPDATED");
+		UpdateUserDTO updateDTO = new UpdateUserDTO();
+		updateDTO.setUsername("UPDATED");
+		updateDTO.setPassword("UPDATED");
 
-		when(this.userService.findUser(TEST_USER_ID)).thenThrow(ResourceNotFoundException.class);
-		when(this.userService.updateUser(any(User.class), any(Integer.class))).thenReturn(user);
+		when(this.userService.updateUser(eq(TEST_USER_ID), any(UpdateUserDTO.class))).thenThrow(ResourceNotFoundException.class);
 
-		mockMvc.perform(put(BASE_URL + "/{id}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(user))).andExpect(status().isNotFound());
+		mockMvc.perform(put(BASE_URL + "/{userId}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(updateDTO))).andExpect(status().isNotFound());
 	}
-
-	*/
 
 	@Test
 	@WithMockUser("admin")
@@ -256,6 +249,32 @@ class UserControllerTests {
 
 		mockMvc.perform(delete(BASE_URL + "/{id}", TEST_USER_ID).with(csrf())).andExpect(status().isForbidden())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof AccessDeniedException));
+	}
+
+	@Test
+	@WithMockUser("admin")
+	void shouldSetUserOnline() throws Exception {
+		user.setStatus(UserStatus.OFFLINE);
+		logged.setStatus(UserStatus.OFFLINE);
+
+		when(this.userService.findCurrentUser()).thenReturn(logged);
+		when(this.userService.saveUser(any(User.class))).thenReturn(logged);
+
+		mockMvc.perform(put(BASE_URL + "/status/online").with(csrf()))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	@WithMockUser("admin")
+	void shouldSetUserOffline() throws Exception {
+		user.setStatus(UserStatus.ONLINE);
+		logged.setStatus(UserStatus.ONLINE);
+
+		when(this.userService.findCurrentUser()).thenReturn(logged);
+		when(this.userService.saveUser(any(User.class))).thenReturn(logged);
+
+		mockMvc.perform(put(BASE_URL + "/status/offline").with(csrf()))
+				.andExpect(status().isOk());
 	}
 
 }
