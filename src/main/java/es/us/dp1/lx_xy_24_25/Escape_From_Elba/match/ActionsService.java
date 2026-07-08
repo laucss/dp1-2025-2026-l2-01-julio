@@ -37,15 +37,17 @@ public class ActionsService {
 
     private final MatchService matchService; 
     private final FightService fightService; 
-    BagService bagService;
-    PlayerService playerService; 
-    MatchRepository matchRepo;
-    PlayerRepository playerRepo;
-    RoomRepository roomRepository;
-    NpcRepository npcRepository;
-    Checkers checkers;
-    MatchWebsocketController matchWebsocketController;
-    RoomService roomService;
+    private final BagService bagService;
+    private final PlayerService playerService; 
+
+    private final MatchRepository matchRepo;
+    private final PlayerRepository playerRepo;
+    private final RoomRepository roomRepository;
+    private final NpcRepository npcRepository;
+    
+    private final Checkers checkers;
+    private final MatchWebsocketController matchWebsocketController;
+    private final RoomService roomService;
 
     @Autowired
     public ActionsService(MatchService matchService, FightService fightService, 
