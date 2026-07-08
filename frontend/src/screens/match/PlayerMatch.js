@@ -487,24 +487,6 @@ export default function PlayerMatch({ initialMatch, matchId, currentUser, jwt })
         }
     };
 
-    const fetchActionPoints = async () => {
-        try {
-            const response = await fetch(`/api/v1/matches/${matchId}/${currentPlayer.id}/actionPoints`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                }
-            })
-            if (response.ok){
-                const data = await response.json()
-                setActionPoints(data)
-            }
-        } catch (error) {
-            console.error('error trayendo los puntos de acción del jugador', error)
-        }
-    }
 
     const fetchMatchAndPlayers = async () => {
         try {

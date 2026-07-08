@@ -66,7 +66,7 @@ export default function NotificationsModal({ isOpen, onClose }) {
       console.log(invitation);
       console.log(invitation.match);
 
-      const matchId = invitation.match;
+      const matchId = invitation.match?.id;
 
       setNotifications(n => n.filter(notif => notif.id !== id));
       setError(null);
