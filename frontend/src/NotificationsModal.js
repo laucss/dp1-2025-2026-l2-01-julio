@@ -20,7 +20,7 @@ export default function NotificationsModal({ isOpen, onClose, notifications, ref
 
       if (res.ok) {
         const invitation = await res.json();
-        const matchId = invitation.match;
+        const matchId = invitation.match.id ? invitation.match.id : invitation.match;
         setError(null);
 
         console.log('invitation', invitation)
