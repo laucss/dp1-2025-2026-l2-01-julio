@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs.VoteDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs.VotingDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.DTOs.VotingResultDTO;
+
 
 @RestController
 @RequestMapping(&quot;/api/v1/voting&quot;)
@@ -20,36 +24,36 @@ public class VotingController {
     VotingService votingService;
 
     @Autowired
-<span class="fc" id="L23">    public VotingController(VotingService votingService){</span>
-<span class="fc" id="L24">        this.votingService=votingService;</span>
-<span class="fc" id="L25">    }</span>
+<span class="fc" id="L27">    public VotingController(VotingService votingService){</span>
+<span class="fc" id="L28">        this.votingService=votingService;</span>
+<span class="fc" id="L29">    }</span>
 
     @GetMapping(&quot;/{matchId}&quot;)
     public List&lt;VotingDTO&gt; getAllVoting(@PathVariable Integer matchId){
-<span class="fc" id="L29">        return votingService.getVotingsByMatchId(matchId);</span>
+<span class="fc" id="L33">        return votingService.getVotingsByMatchId(matchId);</span>
     }
 
     
     @PostMapping(&quot;/vote/{matchId}&quot;)
     public ResponseEntity&lt;?&gt; submitVote (@PathVariable Integer matchId, @RequestBody VoteDTO vote){
-<span class="fc" id="L35">        VotingDTO voting = votingService.submitVote(matchId, vote);</span>
+<span class="fc" id="L39">        VotingDTO voting = votingService.submitVote(matchId, vote);</span>
         // Si la votación ha terminado, incluir más información
-<span class="nc bnc" id="L37" title="All 2 branches missed.">        if (voting.getStatus().equals(&quot;FINISHED&quot;)) {</span>
-<span class="nc" id="L38">            VotingResultDTO result = new VotingResultDTO(</span>
+<span class="pc bpc" id="L41" title="2 of 4 branches missed.">        if (voting != null &amp;&amp; &quot;FINISHED&quot;.equals(voting.getStatus())) {</span>
+<span class="nc" id="L42">            VotingResultDTO result = new VotingResultDTO(</span>
                 &quot;FINISHED&quot;,
-<span class="nc" id="L40">                voting.getResult().toString(),</span>
-<span class="nc" id="L41">                voting.getWeaponProposed(),</span>
-<span class="nc" id="L42">                voting.getFinalBonus()</span>
+<span class="nc" id="L44">                voting.getResult().toString(),</span>
+<span class="nc" id="L45">                voting.getWeaponProposed(),</span>
+<span class="nc" id="L46">                voting.getFinalBonus()</span>
             );
-<span class="nc" id="L44">            return ResponseEntity.ok(result);</span>
+<span class="nc" id="L48">            return ResponseEntity.ok(result);</span>
         }
-<span class="nc" id="L46">        return ResponseEntity.ok(voting);</span>
+<span class="fc" id="L50">        return ResponseEntity.ok(voting);</span>
     }
 
     @DeleteMapping(&quot;/{matchId}&quot;)
     public ResponseEntity&lt;Void&gt; deleteVotingsByMatchId(@PathVariable Integer matchId){
-<span class="nc" id="L51">        votingService.deleteVotingsByMatchId(matchId);</span>
-<span class="nc" id="L52">        return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L55">        votingService.deleteVotingsByMatchId(matchId);</span>
+<span class="nc" id="L56">        return ResponseEntity.noContent().build();</span>
     }
 
     

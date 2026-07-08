@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InvitationController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations</a> &gt; <span class="el_source">InvitationController.java</span></div><h1>InvitationController.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations;
+
+import jakarta.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/v1/invitations&quot;)
+public class InvitationController {
+    
+    private final InvitationService invitationService;
+
+    @Autowired
+<span class="fc" id="L18">    public InvitationController(InvitationService invitationService ){</span>
+<span class="fc" id="L19">        this.invitationService = invitationService; </span>
+<span class="fc" id="L20">    }</span>
+
+    @PostMapping(&quot;/invite&quot;)
+    public ResponseEntity&lt;?&gt; sendInvite(@RequestBody @Valid InviteRequest inviteRequest) {
+<span class="nc" id="L24">        InvitationMatch Invitation = invitationService.sendInvite(inviteRequest);</span>
+<span class="nc" id="L25">        return ResponseEntity.ok(Invitation);</span>
+    }
+
+    @GetMapping
+    public ResponseEntity&lt;?&gt; getInvitations(@RequestParam Integer receiverId, 
+                                              @RequestParam(required = false) Integer senderId,
+                                              @RequestParam(required = false) Integer matchId) {
+        // Si se proporcionan senderId y matchId, buscar notificación específica entre esos usuarios
+<span class="nc bnc" id="L33" title="All 4 branches missed.">        if (senderId != null &amp;&amp; matchId != null) {</span>
+<span class="nc" id="L34">            Optional&lt;InvitationMatch&gt; Invitation = invitationService.getInvitationBetweenUsers(senderId, receiverId, matchId);</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">            if (Invitation.isPresent()) {</span>
+<span class="nc" id="L36">                return ResponseEntity.ok(new InvitationMatch[]{Invitation.get()});</span>
+            } else {
+<span class="nc" id="L38">                return ResponseEntity.ok(new InvitationMatch[]{});</span>
+            }
+        }
+        // Si solo se proporciona receiverId, obtener todas las notificaciones pendientes para ese receiver
+<span class="nc" id="L42">        List&lt;InvitationMatch&gt; Invitations = invitationService.getPendingInvitations(receiverId);</span>
+<span class="nc" id="L43">        return ResponseEntity.ok(Invitations);</span>
+    }
+
+    @PostMapping(&quot;/{id}/accept&quot;)
+    public ResponseEntity&lt;InvitationMatch&gt; acceptInvite(@PathVariable Integer id) {
+<span class="nc" id="L48">        return ResponseEntity.ok(invitationService.acceptInvite(id));</span>
+    }
+
+    @PostMapping(&quot;/{id}/reject&quot;)
+    public ResponseEntity&lt;?&gt; rejectInvite(@PathVariable Integer id) {
+<span class="nc" id="L53">        InvitationMatch invitationOpt = invitationService.getInvitation(id);</span>
+<span class="nc" id="L54">        invitationService.rejectInvite(invitationOpt);</span>
+<span class="nc" id="L55">        return ResponseEntity.ok(&quot;Invitación rechazada&quot;);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -19,15 +19,15 @@ public class ChatMessageDTO {
 <span class="fc" id="L19">    public ChatMessageDTO() { }</span>
 
 <span class="fc" id="L21">    public ChatMessageDTO(ChatMessage chatMessage) {</span>
-<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if (chatMessage == null) return;</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (chatMessage == null) return;</span>
 
-<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        if (chatMessage.getPlayer() != null) {</span>
-<span class="nc" id="L25">            this.playerId = chatMessage.getPlayer().getId();</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (chatMessage.getPlayer() != null) {</span>
+<span class="fc" id="L25">            this.playerId = chatMessage.getPlayer().getId();</span>
             
-<span class="nc" id="L27">            this.playerUsername = chatMessage.getPlayer().getUser().getUsername();</span>
+<span class="fc" id="L27">            this.playerUsername = chatMessage.getPlayer().getUser().getUsername();</span>
         }
-<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if (chatMessage.getMatch() != null) {</span>
-<span class="nc" id="L30">            this.matchId = chatMessage.getMatch().getId();</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (chatMessage.getMatch() != null) {</span>
+<span class="fc" id="L30">            this.matchId = chatMessage.getMatch().getId();</span>
         }
 <span class="fc" id="L32">        this.message = chatMessage.getMessage();</span>
 <span class="fc" id="L33">        this.time = chatMessage.getTime();</span>

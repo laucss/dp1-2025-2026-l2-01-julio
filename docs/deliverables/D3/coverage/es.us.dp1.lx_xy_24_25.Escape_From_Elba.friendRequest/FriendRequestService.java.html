@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FriendRequestService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest</a> &gt; <span class="el_source">FriendRequestService.java</span></div><h1>FriendRequestService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.friendRequest;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,148 +9,197 @@ import org.springframework.stereotype.Service;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.AlreadyCreatedException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations.InvitationRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications.NotificationType;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications.NotificationWebController;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.transaction.annotation.Transactional;
 
-<span class="fc" id="L16">@Slf4j</span>
+<span class="fc" id="L25">@Slf4j</span>
 @Service
 public class FriendRequestService {
 
     FriendRequestRepository friendRequestRepository;
     UserRepository userRepository;
     FriendWebsocketController friendWebsocketController;
+    MatchRepository matchRepository;
+    InvitationRepository invitationRepository; 
+    private NotificationWebController notificationWebController;  
 
     @Autowired
-<span class="fc" id="L25">    public FriendRequestService(FriendRequestRepository friendRequestRepository, UserRepository userRepository, FriendWebsocketController friendWebsocketController) {</span>
-<span class="fc" id="L26">        this.friendRequestRepository = friendRequestRepository;</span>
-<span class="fc" id="L27">        this.userRepository = userRepository;</span>
-<span class="fc" id="L28">        this.friendWebsocketController = friendWebsocketController;</span>
-<span class="fc" id="L29">    }</span>
+    public FriendRequestService(FriendRequestRepository friendRequestRepository, UserRepository userRepository,  NotificationWebController notificationWebController,
+<span class="fc" id="L38">        FriendWebsocketController friendWebsocketController,  MatchRepository matchRepository, InvitationRepository invitationRepository) {</span>
+<span class="fc" id="L39">        this.friendRequestRepository = friendRequestRepository;</span>
+<span class="fc" id="L40">        this.userRepository = userRepository;</span>
+<span class="fc" id="L41">        this.friendWebsocketController = friendWebsocketController;</span>
+<span class="fc" id="L42">        this.matchRepository = matchRepository; </span>
+<span class="fc" id="L43">        this.invitationRepository = invitationRepository;</span>
+<span class="fc" id="L44">        this.notificationWebController = notificationWebController;  </span>
+<span class="fc" id="L45">    }</span>
 
     @Transactional(readOnly = true)
     public FriendRequest findById(Integer FriendRequestId) throws ResourceNotFoundException {
-<span class="fc" id="L33">        return friendRequestRepository.findById(FriendRequestId)</span>
-<span class="fc" id="L34">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;FriendRequest&quot;, &quot;id&quot;, FriendRequestId));</span>
+<span class="fc" id="L49">        return friendRequestRepository.findById(FriendRequestId)</span>
+<span class="fc" id="L50">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;FriendRequest&quot;, &quot;id&quot;, FriendRequestId));</span>
     }
 
     @Transactional(readOnly = true)
     public FriendRequest findFriendRequestPendingById(Integer FriendRequestId) throws ResourceNotFoundException {
-<span class="fc" id="L39">        return friendRequestRepository.findRequestPendingById(FriendRequestId)</span>
-<span class="fc" id="L40">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;FriendRequest&quot;, &quot;id&quot;, FriendRequestId));</span>
+<span class="fc" id="L55">        return friendRequestRepository.findRequestPendingById(FriendRequestId)</span>
+<span class="fc" id="L56">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;FriendRequest&quot;, &quot;id&quot;, FriendRequestId));</span>
     }
 
     @Transactional(readOnly = true)
     public List&lt;FriendRequest&gt; findFriendRequestsByUserId(Integer userId) {
-<span class="fc" id="L45">        return friendRequestRepository.findAllRequestsByUserId(userId);</span>
+<span class="fc" id="L61">        return friendRequestRepository.findAllRequestsByUserId(userId);</span>
     }
 
     @Transactional(readOnly = true)
     public List&lt;FriendRequest&gt; findFriendRequestsForUserId(Integer userId) {
-<span class="fc" id="L50">        return friendRequestRepository.findAllRequestsForUserId(userId);</span>
-    }
-
-    @Transactional(readOnly = true)
-    public List&lt;FriendRequest&gt; findFriendsByUserId(Integer userId) {
-<span class="fc" id="L55">        return friendRequestRepository.findAllFriendsByUserId(userId);</span>
+<span class="fc" id="L66">        return friendRequestRepository.findAllRequestsForUserId(userId);</span>
     }
 
     @Transactional(readOnly = true)
     public Boolean isPendingOrFriendsUsers(Integer user1Id, Integer user2Id) {
-<span class="fc" id="L60">        return friendRequestRepository.findPendingOrFriendsUsers(user1Id, user2Id).isPresent();</span>
+<span class="fc" id="L71">        return friendRequestRepository.findPendingOrFriendsUsers(user1Id, user2Id).isPresent();</span>
     }
 
     @Transactional(readOnly = true)
-    public List&lt;User&gt; findFriendsByPlayerId(Integer userId) {
-<span class="fc" id="L65">        return friendRequestRepository.findAllFriendsByUserId(userId).stream()</span>
-<span class="fc" id="L66">                .map(f -&gt; {</span>
-<span class="fc" id="L67">                    User receiver = f.getReceiver();</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">                    if (receiver.getId() == userId) {</span>
-<span class="fc" id="L69">                        return f.getSender();</span>
+    public List&lt;User&gt; findFriendsByUserId(Integer userId) {
+<span class="fc" id="L76">        return friendRequestRepository.findAllFriendsByUserId(userId).stream()</span>
+<span class="fc" id="L77">                .map(f -&gt; {</span>
+<span class="fc" id="L78">                    User receiver = f.getReceiver();</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">                    if (receiver.getId() == userId) {</span>
+<span class="fc" id="L80">                        return f.getSender();</span>
                     }
-<span class="fc" id="L71">                    return receiver;</span>
-<span class="fc" id="L72">                }).toList();</span>
+<span class="fc" id="L82">                    return receiver;</span>
+<span class="fc" id="L83">                }).toList();</span>
     }
 
+    // TODO: mirar si quitamos esta funcion pq es ridicula se repite vaya
     @Transactional(readOnly = true)
     public List&lt;FriendRequest&gt; findAcceptedFriendRequestsByUserId(Integer userId) {
-<span class="fc" id="L77">        return friendRequestRepository.findAllFriendsByUserId(userId);</span>
-}
+<span class="fc" id="L89">        return friendRequestRepository.findAllFriendsByUserId(userId);</span>
+    }
 
     @Transactional(readOnly = true)
     public User findPlayerById(Integer playerId) throws ResourceNotFoundException {
-<span class="fc" id="L82">        return userRepository.findById(playerId)</span>
-<span class="fc" id="L83">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Player&quot;, &quot;id&quot;, playerId));</span>
+<span class="fc" id="L94">        return userRepository.findById(playerId)</span>
+<span class="fc" id="L95">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Player&quot;, &quot;id&quot;, playerId));</span>
     }
 
     @Transactional(rollbackFor = AlreadyCreatedException.class)
     public FriendRequest sendRequest(Integer senderId, Integer receiverId) throws AlreadyCreatedException {
-<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (isPendingOrFriendsUsers(senderId, receiverId)) {</span>
-<span class="fc" id="L89">            log.error(&quot;Friend request already exists: senderId={}, receiverId={}&quot;, senderId, receiverId);</span>
-<span class="fc" id="L90">            throw new AlreadyCreatedException(&quot;Friend request&quot;);</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if (isPendingOrFriendsUsers(senderId, receiverId)) {</span>
+<span class="fc" id="L101">            log.error(&quot;Friend request already exists: senderId={}, receiverId={}&quot;, senderId, receiverId);</span>
+<span class="fc" id="L102">            throw new AlreadyCreatedException(&quot;Friend request&quot;);</span>
         }
 
-<span class="fc" id="L93">        log.info(&quot;Creating a new friend request: senderId={}, receiverId={}&quot;, senderId, receiverId);</span>
+<span class="fc" id="L105">        log.info(&quot;Creating a new friend request: senderId={}, receiverId={}&quot;, senderId, receiverId);</span>
 
-<span class="fc" id="L95">        FriendRequest newFriendRequest = new FriendRequest();</span>
-<span class="fc" id="L96">        User sender = findPlayerById(senderId);</span>
-<span class="fc" id="L97">        newFriendRequest.setSender(sender);</span>
-<span class="fc" id="L98">        User receiver = findPlayerById(receiverId);</span>
-<span class="fc" id="L99">        newFriendRequest.setReceiver(receiver);</span>
-<span class="fc" id="L100">        newFriendRequest.setStatus(StatusType.PENDING);</span>
-<span class="fc" id="L101">        FriendRequest savedFriendRequest = friendRequestRepository.save(newFriendRequest);</span>
+<span class="fc" id="L107">        FriendRequest newFriendRequest = new FriendRequest();</span>
+<span class="fc" id="L108">        User sender = findPlayerById(senderId);</span>
+<span class="fc" id="L109">        newFriendRequest.setSender(sender);</span>
+<span class="fc" id="L110">        User receiver = findPlayerById(receiverId);</span>
+<span class="fc" id="L111">        newFriendRequest.setReceiver(receiver);</span>
+<span class="fc" id="L112">        newFriendRequest.setStatus(StatusType.PENDING);</span>
+<span class="fc" id="L113">        FriendRequest savedFriendRequest = friendRequestRepository.save(newFriendRequest);</span>
 
-<span class="fc" id="L103">        log.info(&quot;Friend request created successfully: requestId={}, senderId={}, receiverId={}&quot;, savedFriendRequest.getId(), senderId, receiverId);</span>
+<span class="fc" id="L115">        log.info(&quot;Friend request created successfully: requestId={}, senderId={}, receiverId={}&quot;, savedFriendRequest.getId(), senderId, receiverId);</span>
         
         // Notificar al receptor sobre la nueva solicitud de amistad
-<span class="fc" id="L106">        friendWebsocketController.notifyNewFriendRequest(receiverId, savedFriendRequest);</span>
+<span class="fc" id="L118">        friendWebsocketController.notifyNewFriendRequest(receiverId, savedFriendRequest);</span>
+<span class="fc" id="L119">        notificationWebController.notifyNewNotification(receiver.getId(), NotificationType.FRIEND_REQUEST);</span>
         
-<span class="fc" id="L108">        return newFriendRequest;</span>
+<span class="fc" id="L121">        return newFriendRequest;</span>
     }
 
     @Transactional
     public FriendRequest acceptRequest(FriendRequest toUpdate) {
-<span class="fc" id="L113">        log.info(&quot;Accepting friend request: requestId={}&quot;, toUpdate.getId());</span>
-<span class="fc" id="L114">        toUpdate.setStatus(StatusType.ACCEPTED);</span>
-<span class="fc" id="L115">        friendRequestRepository.save(toUpdate);</span>
-<span class="fc" id="L116">        log.info(&quot;Friend request accepted: requestId={}&quot;, toUpdate.getId());</span>
+<span class="fc" id="L126">        log.info(&quot;Accepting friend request: requestId={}&quot;, toUpdate.getId());</span>
+<span class="fc" id="L127">        toUpdate.setStatus(StatusType.ACCEPTED);</span>
+<span class="fc" id="L128">        friendRequestRepository.save(toUpdate);</span>
+<span class="fc" id="L129">        log.info(&quot;Friend request accepted: requestId={}&quot;, toUpdate.getId());</span>
         
         // Notificar al remitente que su solicitud fue aceptada
-<span class="fc" id="L119">        friendWebsocketController.notifyRequestAccepted(toUpdate.getSender().getId(), toUpdate);</span>
+<span class="fc" id="L132">        friendWebsocketController.notifyRequestAccepted(toUpdate.getSender().getId(), toUpdate);</span>
         // Notificar al receptor de la actualización
-<span class="fc" id="L121">        friendWebsocketController.notifyFriendRequestUpdate(toUpdate.getReceiver().getId(), toUpdate);</span>
+<span class="fc" id="L134">        friendWebsocketController.notifyFriendRequestUpdate(toUpdate.getReceiver().getId(), toUpdate);</span>
+<span class="fc" id="L135">        notificationWebController.notifyNewNotification(toUpdate.getSender().getId(), NotificationType.ACCEPT_FRIEND_REQUEST);</span>
         
-<span class="fc" id="L123">        return toUpdate;</span>
+<span class="fc" id="L137">        return toUpdate;</span>
     }
 
     @Transactional
     public FriendRequest rejectRequest(FriendRequest toUpdate) {
-<span class="fc" id="L128">        log.info(&quot;Rejecting friend request: requestId={}&quot;, toUpdate.getId());</span>
-<span class="fc" id="L129">        toUpdate.setStatus(StatusType.REJECTED);</span>
-<span class="fc" id="L130">        friendRequestRepository.save(toUpdate);</span>
-<span class="fc" id="L131">        log.info(&quot;Friend request rejected: requestId={}&quot;, toUpdate.getId());</span>
+<span class="fc" id="L142">        log.info(&quot;Rejecting friend request: requestId={}&quot;, toUpdate.getId());</span>
+<span class="fc" id="L143">        toUpdate.setStatus(StatusType.REJECTED);</span>
+<span class="fc" id="L144">        friendRequestRepository.save(toUpdate);</span>
+<span class="fc" id="L145">        log.info(&quot;Friend request rejected: requestId={}&quot;, toUpdate.getId());</span>
         
         // Notificar al remitente que su solicitud fue rechazada
-<span class="fc" id="L134">        friendWebsocketController.notifyRequestRejected(toUpdate.getSender().getId(), toUpdate);</span>
+<span class="fc" id="L148">        friendWebsocketController.notifyRequestRejected(toUpdate.getSender().getId(), toUpdate);</span>
         // Notificar al receptor de la actualización
-<span class="fc" id="L136">        friendWebsocketController.notifyFriendRequestUpdate(toUpdate.getReceiver().getId(), toUpdate);</span>
+<span class="fc" id="L150">        friendWebsocketController.notifyFriendRequestUpdate(toUpdate.getReceiver().getId(), toUpdate);</span>
+<span class="fc" id="L151">        notificationWebController.notifyNewNotification(toUpdate.getSender().getId(), NotificationType.REJECT_FRIEND_REQUEST);</span>
         
-<span class="fc" id="L138">        return toUpdate;</span>
+<span class="fc" id="L153">        return toUpdate;</span>
     }
 
     @Transactional
     public void deleteFriend(FriendRequest toDelete) {
-<span class="fc" id="L143">        Integer user1Id = toDelete.getSender().getId();</span>
-<span class="fc" id="L144">        Integer user2Id = toDelete.getReceiver().getId();</span>
-<span class="fc" id="L145">        Integer friendRequestId = toDelete.getId();</span>
+<span class="fc" id="L158">        Integer user1Id = toDelete.getSender().getId();</span>
+<span class="fc" id="L159">        Integer user2Id = toDelete.getReceiver().getId();</span>
+<span class="fc" id="L160">        Integer friendRequestId = toDelete.getId();</span>
         
-<span class="fc" id="L147">        friendRequestRepository.deleteById(friendRequestId);</span>
+<span class="fc" id="L162">        friendRequestRepository.deleteById(friendRequestId);</span>
         
         // Notificar a ambos usuarios que la amistad fue eliminada
-<span class="fc" id="L150">        friendWebsocketController.notifyFriendRequestDeleted(user1Id, user2Id, friendRequestId);</span>
-<span class="fc" id="L151">    }</span>
+<span class="fc" id="L165">        friendWebsocketController.notifyFriendRequestDeleted(user1Id, user2Id, friendRequestId);</span>
+<span class="fc" id="L166">    }</span>
+
+   @Transactional
+    public List&lt;FriendsInvitationDTO&gt; getFriendsByUserIdToInvite(Integer userId, Integer matchId) {
+<span class="nc" id="L170">        Match match = matchRepository.findById(matchId)</span>
+<span class="nc" id="L171">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Match not found&quot;));</span>
+
+<span class="nc" id="L173">        List&lt;User&gt; userFriends = findFriendsByUserId(userId);</span>
+<span class="nc" id="L174">        List&lt;User&gt; players = match.getPlayers().stream().map(Player::getUser).toList();</span>
+<span class="nc" id="L175">        List&lt;Integer&gt; playerIds = players.stream().map(User::getId).toList();</span>
+
+<span class="nc" id="L177">        EnumSet&lt;MatchStatus&gt; activeStatuses = EnumSet.of(</span>
+            MatchStatus.WAITING,
+            MatchStatus.PLAYING,
+            MatchStatus.VOTING
+        );
+
+<span class="nc" id="L183">        List&lt;FriendsInvitationDTO&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        for (User friend : userFriends) {</span>
+<span class="nc" id="L186">            boolean pendingInvitation = invitationRepository.findPendingInvitationByUserIdAndMatchId(friend.getId(), matchId).isPresent();            </span>
+<span class="nc" id="L187">            boolean isPlaying = friend.getPlayers().stream().map(Player::getMatch).map(Match::getStatus).anyMatch(activeStatuses::contains);</span>
+<span class="nc" id="L188">            boolean isSpectating = friend.getSpectatingMatches().stream().map(Match::getStatus).anyMatch(activeStatuses::contains);</span>
+
+<span class="nc bnc" id="L190" title="All 4 branches missed.">            boolean isInLobby = isPlaying || isSpectating;</span>
+
+<span class="nc bnc" id="L192" title="All 2 branches missed.">            if (match.getIsPrivate()) {</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">                boolean isFriendOfAllPlayers =friendRequestRepository.countFriendsAmongPlayers(friend.getId(), playerIds)== playerIds.size();</span>
+
+<span class="nc" id="L195">                result.add(new FriendsInvitationDTO(friend,isFriendOfAllPlayers,isInLobby,pendingInvitation));</span>
+<span class="nc" id="L196">            } else {</span>
+<span class="nc" id="L197">                result.add(new FriendsInvitationDTO(friend,isInLobby,pendingInvitation));</span>
+            }
+<span class="nc" id="L199">        }</span>
+
+<span class="nc" id="L201">        return result;</span>
+    }
     
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

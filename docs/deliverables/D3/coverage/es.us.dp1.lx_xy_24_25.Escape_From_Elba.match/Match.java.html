@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Match.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match</a> &gt; <span class="el_source">Match.java</span></div><h1>Match.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
-//cambio para merge en FSS8078
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-//import scala.concurrent.duration.Duration;
-
 
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -13,22 +10,23 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.PendingFight;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.NamedEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -45,172 +43,173 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = &quot;Match&quot;)
 @EqualsAndHashCode(of = &quot;id&quot;)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = &quot;id&quot;)
-<span class="fc" id="L48">public class Match extends NamedEntity {</span>
+<span class="fc" id="L46">public class Match extends NamedEntity {</span>
+
+    // -------------------------------------------------------- ATRIBUTOS --------------------------------------------------------
     
+    // Código
     private String code;
 
-    //@NotNull
-    private Integer creatorId;
-    
+    // Indica si la partida es privada
+    @NotNull
+    private Boolean isPrivate;
+
+    // Estado: WAITING, PLAYING, VOTING, FINISHED
     @Enumerated(EnumType.STRING)
     private MatchStatus status;
-
-    
-    
-    //Tiempos
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-
-
-    public Duration getDuration() {
-<span class="pc bpc" id="L66" title="3 of 4 branches missed.">        if(startTime == null || endTime == null) return null;</span>
-<span class="nc" id="L67">        return Duration.between(startTime, endTime);</span>
-    }
-    
-
-    //Máximo y mínimo de jugadores
-<span class="fc" id="L72">    @Min(3)</span>
-    @Max(6)
-    @NotNull
-<span class="fc" id="L75">    private Integer maxPlayers = 6;</span>
-
-<span class="fc" id="L77">    @NotNull</span>
-    @Min(3)
-    @Max(6)
-<span class="fc" id="L80">    private Integer minPlayers = 3;</span>
-
-    //Validación para asegurar que minplayers es menor o igual que maxplayers???
-    @AssertTrue(message = &quot;minPlayers debe ser menor o igual que maxPlayers&quot;)
-    private boolean isPlayerLimitsValid() {
-<span class="pc bpc" id="L85" title="2 of 4 branches missed.">        if (minPlayers == null || maxPlayers == null) </span>
-<span class="nc" id="L86">            return true;</span>
-<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        return minPlayers &lt;= maxPlayers;</span>
-    }
-
-    //Jugadores 
-<span class="fc" id="L91">    @NotNull</span>
-    @OneToMany(mappedBy = &quot;match&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List&lt;Player&gt; players = new ArrayList&lt;&gt;(); 
-
-
-    //Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)
-
-<span class="fc" id="L98">    private Integer numNpcs = 3;</span>
-
-
-    //Npcs 
-<span class="fc" id="L102">    @OneToMany(mappedBy = &quot;match&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
-    private List&lt;Npc&gt; npcs = new ArrayList&lt;&gt;();
-
-    private Integer currentTurnUserId;
-
-    private Integer turnNumber;
 
     //Indica la fase actual del turno
     @Enumerated(EnumType.STRING)
     private TurnPhase currentTurnPhase;
 
-    @Transient // transient porque no se guardan en la base de datos 
-    private DeckInGame deck; 
+    private Integer currentTurnUserId;
 
-<span class="fc" id="L116">    @Transient</span>
-    private List&lt;RoomDTO&gt; roomsState = new ArrayList&lt;&gt;();
+    private Integer turnNumber;
 
+    //Tiempos
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
+    // Creador
+    // @NotNull
+    private Integer creatorId;
+
+    // Ganador
     @OneToOne(optional = true)
     @JoinColumn(name = &quot;winner_id&quot;)
     private Player winner;
-    /*
+
+    // Máximo y mínimo de jugadores
+<span class="fc" id="L83">    @Min(3)</span>
+    @Max(6)
     @NotNull
-    @OneToOne(cascade = CascadeType.ALL)
-    private Chat chat;
+<span class="fc" id="L86">    private Integer maxPlayers = 6;</span>
 
-    @NotNull
-    @OneToOne(cascade = CascadeType.ALL)
-    private Board board;
+<span class="fc" id="L88">    @NotNull</span>
+    @Min(3)
+    @Max(6)
+<span class="fc" id="L91">    private Integer minPlayers = 3;</span>
 
-    */
+    // Jugadores 
+<span class="fc" id="L94">    @NotNull</span>
+    @OneToMany(mappedBy = &quot;match&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List&lt;Player&gt; players = new ArrayList&lt;&gt;(); 
 
-    //Indica si la partida es privada
-    @NotNull
-    private Boolean isPrivate;
+    // Indica el número de npcs que el creador quiere en la partida ( por defecto 3, 2 normales y Niall Campbell)
+<span class="fc" id="L99">    private Integer numNpcs = 3;</span>
 
+    // Lista de Npcs 
+<span class="fc" id="L102">    @OneToMany(mappedBy = &quot;match&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private List&lt;Npc&gt; npcs = new ArrayList&lt;&gt;();
+
+    // Espectadores 
+<span class="fc" id="L106">    @ManyToMany</span>
+    @JoinTable(
+        name = &quot;match_spectators&quot;,
+        joinColumns = @JoinColumn(name = &quot;match_id&quot;),
+        inverseJoinColumns = @JoinColumn(name = &quot;user_id&quot;)
+    )
+    private List&lt;User&gt; spectators = new ArrayList&lt;&gt;(); 
+
+    @Transient // transient porque no se guardan en la base de datos 
+    private DeckInGame deck; 
+
+    // Habitaciones
+<span class="fc" id="L118">    @Transient</span>
+    private List&lt;RoomDTO&gt; roomsState = new ArrayList&lt;&gt;();
+
+<span class="fc" id="L121">    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private List&lt;PendingFight&gt; pendingFights = new ArrayList&lt;&gt;();
+
+
+
+    // -------------------------------------------------------- PROPIEDADES DERIVADAS --------------------------------------------------------
+
+    public Duration getDuration() {
+<span class="pc bpc" id="L129" title="3 of 4 branches missed.">        if(startTime == null || endTime == null) return null;</span>
+<span class="nc" id="L130">        return Duration.between(startTime, endTime);</span>
+    }
+    
     public Boolean isInProgress() {
-<span class="pc bpc" id="L138" title="3 of 4 branches missed.">		return this.getStartTime() != null &amp;&amp; this.getEndTime() == null;</span>
+<span class="pc bpc" id="L134" title="3 of 4 branches missed.">		return this.getStartTime() != null &amp;&amp; this.getEndTime() == null;</span>
 	}
     
     public Boolean isFinished() {
-<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        return this.getEndTime() != null;</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">        return this.getEndTime() != null;</span>
     }
-
-    //añade jugador 
-    /** Version cortita de la que está abajo, hablarlo.
-    public void addPlayer(PlayerInGame player) {
-        this.players.add(player);
-        player.setMatch(this); 
-    }
-    */
 
     public void addPlayer(Player player) {
-<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if (player == null) throw new IllegalArgumentException(&quot;El jugador no puede ser nulo&quot;);</span>
-<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        if (isFull()) {</span>
-<span class="nc" id="L156">            throw new IllegalStateException(&quot;No se puede añadir otro jugador: la partida está llena (Máximo=&quot; + this.maxPlayers + &quot;)&quot;);</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        if (player == null) throw new IllegalArgumentException(&quot;El jugador no puede ser nulo&quot;);</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if (isFull()) {</span>
+<span class="nc" id="L144">            throw new IllegalStateException(&quot;No se puede añadir otro jugador: la partida está llena (Máximo=&quot; + this.maxPlayers + &quot;)&quot;);</span>
         }
-<span class="pc bpc" id="L158" title="1 of 2 branches missed.">        if (this.players == null) {</span>
-<span class="nc" id="L159">            this.players = new java.util.ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if (this.players == null) {</span>
+<span class="nc" id="L147">            this.players = new java.util.ArrayList&lt;&gt;();</span>
         }
-<span class="fc" id="L161">        this.players.add(player);</span>
-<span class="fc" id="L162">        player.setMatch(this); </span>
-<span class="fc" id="L163">    }</span>
+<span class="fc" id="L149">        this.players.add(player);</span>
+<span class="fc" id="L150">        player.setMatch(this); </span>
+<span class="fc" id="L151">    }</span>
 
     // Devuelve true si se ha alcanzado el numero máximo de jugadores
     public boolean isFull() {
-<span class="pc bpc" id="L167" title="1 of 2 branches missed.">        if (this.players == null) return false;</span>
-<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        if (this.maxPlayers == null) return false;</span>
-<span class="fc bfc" id="L169" title="All 2 branches covered.">        return this.players.size() &gt;= this.maxPlayers;</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        if (this.players == null) return false;</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">        if (this.maxPlayers == null) return false;</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        return this.players.size() &gt;= this.maxPlayers;</span>
     }
 
     // Devuelve true si se ha alcanzado el número mínimo de jugadores para empezar
     public boolean isMinReached() {
-<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        if (this.players == null) return false;</span>
-<span class="pc bpc" id="L175" title="1 of 2 branches missed.">        if (this.minPlayers == null) return false;</span>
-<span class="fc bfc" id="L176" title="All 2 branches covered.">        return this.players.size() &gt;= this.minPlayers;</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">        if (this.players == null) return false;</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">        if (this.minPlayers == null) return false;</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        return this.players.size() &gt;= this.minPlayers;</span>
     }
     // Devuelve true si NO se ha alcanzado el número mínimo de jugadores
     public boolean isMinNotReached() {
-<span class="fc bfc" id="L180" title="All 2 branches covered.">        return !isMinReached();</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        return !isMinReached();</span>
     }
 
     // Lanza IllegalStateException si no se ha alcanzado el mínimo de jugadores
     public void ensureMinReached() {
-<span class="nc bnc" id="L185" title="All 2 branches missed.">        if (isMinNotReached()) {</span>
-<span class="nc bnc" id="L186" title="All 2 branches missed.">            int current = (this.players == null) ? 0 : this.players.size();</span>
-<span class="nc" id="L187">            throw new IllegalStateException(&quot;No hay suficientes jugadores para comenzar (Mínimo=&quot; </span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        if (isMinNotReached()) {</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">            int current = (this.players == null) ? 0 : this.players.size();</span>
+<span class="nc" id="L175">            throw new IllegalStateException(&quot;No hay suficientes jugadores para comenzar (Mínimo=&quot; </span>
                 + this.minPlayers + &quot;, actuales=&quot; + current + &quot;)&quot;);
         }
-<span class="nc" id="L190">    }</span>
+<span class="nc" id="L178">    }</span>
 
-    //Código que se genera al indicar que la partida es privada
+    // Código que se genera al indicar que la partida es privada
     public String generateCodeLobby() {
-<span class="fc" id="L194">        String characters = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;;</span>
-<span class="fc" id="L195">        SecureRandom random = new SecureRandom();</span>
+<span class="fc" id="L182">        String characters = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;;</span>
+<span class="fc" id="L183">        SecureRandom random = new SecureRandom();</span>
         StringBuilder code;
 
-<span class="fc" id="L198">        code = new StringBuilder(8);</span>
-<span class="fc bfc" id="L199" title="All 2 branches covered.">        for (int i = 0; i &lt; 8; i++) {</span>
-<span class="fc" id="L200">            int index = random.nextInt(characters.length());</span>
-<span class="fc" id="L201">            code.append(characters.charAt(index));</span>
+<span class="fc" id="L186">        code = new StringBuilder(8);</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        for (int i = 0; i &lt; 8; i++) {</span>
+<span class="fc" id="L188">            int index = random.nextInt(characters.length());</span>
+<span class="fc" id="L189">            code.append(characters.charAt(index));</span>
         }
-<span class="fc" id="L203">        return code.toString();</span>
+<span class="fc" id="L191">        return code.toString();</span>
     }
 
 
     public List&lt;RoomDTO&gt; getRoomsState() {
-<span class="fc" id="L208">    return roomsState;</span>
+<span class="fc" id="L196">        return roomsState;</span>
     }
 
     public void setRoomsState(List&lt;RoomDTO&gt; roomsState) {
-<span class="nc" id="L212">    this.roomsState = roomsState;</span>
-<span class="nc" id="L213">    }</span>
+<span class="fc" id="L200">        this.roomsState = roomsState;</span>
+<span class="fc" id="L201">    }</span>
+
+
+    // -------------------------------------------------------- VALIDACIONES --------------------------------------------------------
+
+    // Validación para asegurar que minplayers es menor o igual que maxplayers
+    @AssertTrue(message = &quot;minPlayers debe ser menor o igual que maxPlayers&quot;)
+    private boolean isPlayerLimitsValid() {
+<span class="pc bpc" id="L209" title="2 of 4 branches missed.">        if (minPlayers == null || maxPlayers == null) </span>
+<span class="nc" id="L210">            return true;</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">        return minPlayers &lt;= maxPlayers;</span>
+    }
 
 
 

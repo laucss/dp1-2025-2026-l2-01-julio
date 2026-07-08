@@ -21,21 +21,21 @@ public class BagInGameDTO  {
 <span class="fc" id="L21">    public BagInGameDTO(BagInGame bag){</span>
 <span class="fc" id="L22">        List&lt;Card&gt; cards = bag.getCards(); </span>
 <span class="fc" id="L23">        List&lt;CardDTO&gt; newBag = new ArrayList&lt;&gt;(); </span>
-<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        for (Card card : cards){</span>
-<span class="nc" id="L25">            newBag.add(new CardDTO(card)); </span>
-<span class="nc" id="L26">        }</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        for (Card card : cards){</span>
+<span class="fc" id="L25">            newBag.add(new CardDTO(card)); </span>
+<span class="fc" id="L26">        }</span>
 <span class="fc" id="L27">        this.cards=newBag; </span>
 <span class="fc" id="L28">    }</span>
 
-<span class="nc" id="L30">    public BagInGameDTO(BagInGame bag, Integer playerId){</span>
-<span class="nc" id="L31">        List&lt;Card&gt; cards = bag.getCards(); </span>
-<span class="nc" id="L32">        List&lt;CardDTO&gt; newBag = new ArrayList&lt;&gt;(); </span>
-<span class="nc bnc" id="L33" title="All 2 branches missed.">        for (Card card : cards){</span>
-<span class="nc" id="L34">            newBag.add(new CardDTO(card)); </span>
-<span class="nc" id="L35">        }</span>
-<span class="nc" id="L36">        this.cards=newBag; </span>
-<span class="nc" id="L37">        this.playerId=playerId;</span>
-<span class="nc" id="L38">    }</span>
+<span class="fc" id="L30">    public BagInGameDTO(BagInGame bag, Integer playerId){</span>
+<span class="fc" id="L31">        List&lt;Card&gt; cards = bag.getCards(); </span>
+<span class="fc" id="L32">        List&lt;CardDTO&gt; newBag = new ArrayList&lt;&gt;(); </span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        for (Card card : cards){</span>
+<span class="fc" id="L34">            newBag.add(new CardDTO(card)); </span>
+<span class="fc" id="L35">        }</span>
+<span class="fc" id="L36">        this.cards=newBag; </span>
+<span class="fc" id="L37">        this.playerId=playerId;</span>
+<span class="fc" id="L38">    }</span>
 
 <span class="fc" id="L40">    public BagInGameDTO(){}</span>
     

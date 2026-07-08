@@ -42,7 +42,6 @@ public class DeckService {
 
     @Transactional(readOnly = true)
     public DeckInGame initializeDeck(Integer macthId) {
-        // TODO: revisar si debería checkear que el match exista, creo que no pq no da tiempo pero bueno
         List<Card> originalsCards = cardRepository.findAll();
 
         /*
@@ -70,7 +69,6 @@ public class DeckService {
 
     @Transactional
     public void deleteDeckInGame(Integer matchId){ 
-        // TODO: revisar si tengo que checkear que match exista
         activesDecks.remove(matchId); 
     }
 
@@ -187,7 +185,6 @@ public class DeckService {
     public List<Card> drawInitialCardsFromDeck (Integer matchId){
         List<Card> cards = new ArrayList<>(); 
         DeckInGame deck = findDeckById(matchId); 
-        // TODO: REVISAR SI ES MEJOR HACER UNA COPIA DE DECK 
 
         for (int i = 0; i<numberOfInitialCards; i++) {
             cards.add(deck.getNotDiscardedCards().getLast()); 

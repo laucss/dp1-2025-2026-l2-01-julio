@@ -17,7 +17,6 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DictionaryService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.EmptyWeaponException;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.VotingService;
@@ -27,8 +26,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.voting.VotingService;
 @Service
 public class BagService {
 
-<span class="fc" id="L30">    private static final Integer MAX_LETTERS_ALLOWED = 2; // es el número máximo de letras que puedes guardar en tu bolsa sin tener que checkear que la palabra exista</span>
-<span class="fc" id="L31">    private static final Integer BONUS_WEAPONS = 1; // la bonificación que te llevas al formar un arma válida </span>
+<span class="fc" id="L29">    private static final Integer MAX_LETTERS_ALLOWED = 2; // es el número máximo de letras que puedes guardar en tu bolsa sin tener que checkear que la palabra exista</span>
+<span class="fc" id="L30">    private static final Integer BONUS_WEAPONS = 1; // la bonificación que te llevas al formar un arma válida </span>
 
     RestTemplate restTemplate;
     Checkers checkers;
@@ -37,25 +36,25 @@ public class BagService {
     VotingService votingService;
 
     @Autowired
-<span class="fc" id="L40">    public BagService(Checkers checkers, PlayerService playerService, DictionaryService dictionaryService, RestTemplate restTemplate, VotingService votingService){</span>
-<span class="fc" id="L41">        this.checkers = checkers; </span>
-<span class="fc" id="L42">        this.playerService = playerService; </span>
-<span class="fc" id="L43">        this.dictionaryService = dictionaryService;</span>
-<span class="fc" id="L44">        this.restTemplate=restTemplate; </span>
-<span class="fc" id="L45">        this.votingService = votingService; </span>
-<span class="fc" id="L46">    }</span>
+<span class="fc" id="L39">    public BagService(Checkers checkers, PlayerService playerService, DictionaryService dictionaryService, RestTemplate restTemplate, VotingService votingService){</span>
+<span class="fc" id="L40">        this.checkers = checkers; </span>
+<span class="fc" id="L41">        this.playerService = playerService; </span>
+<span class="fc" id="L42">        this.dictionaryService = dictionaryService;</span>
+<span class="fc" id="L43">        this.restTemplate=restTemplate; </span>
+<span class="fc" id="L44">        this.votingService = votingService; </span>
+<span class="fc" id="L45">    }</span>
 
     /*
      * Variable que vamos a usar a modo de &quot;almacenamiento&quot; en memoria del estado de la bolsa
      * Map de la forma: 
      * Map&lt;MatchId, Map&lt;PlayerId, BagInGame&gt;&gt; 
      */
-<span class="fc" id="L53">    private final Map&lt;Integer, Map&lt;Integer, BagInGame&gt;&gt; activesBags = new HashMap&lt;&gt;(); </span>
+<span class="fc" id="L52">    private final Map&lt;Integer, Map&lt;Integer, BagInGame&gt;&gt; activesBags = new HashMap&lt;&gt;(); </span>
 
 
 
     public Map&lt;Integer, Map&lt;Integer, BagInGame&gt;&gt; getActivesBags() {
-<span class="fc" id="L58">        return activesBags;</span>
+<span class="fc" id="L57">        return activesBags;</span>
     }
     /*
      * Método que crea un BagInGame para un jugador
@@ -64,13 +63,13 @@ public class BagService {
     public void createPlayerbag(Integer matchId, Integer playerId){
         // TODO: revisar si tengo que checkear que match exista
 
-<span class="fc" id="L67">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.computeIfAbsent(matchId, m -&gt; new HashMap&lt;&gt;());</span>
+<span class="fc" id="L66">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.computeIfAbsent(matchId, m -&gt; new HashMap&lt;&gt;());</span>
 
         // Solo añadimos la mano si no existe
-<span class="fc" id="L70">        playerMap.putIfAbsent(playerId, new BagInGame());</span>
+<span class="fc" id="L69">        playerMap.putIfAbsent(playerId, new BagInGame());</span>
         
 
-<span class="fc" id="L73">    }</span>
+<span class="fc" id="L72">    }</span>
 
     /*
      * Método que tras acabar una partida, borra la bolsa en memoria del jugador 
@@ -80,8 +79,8 @@ public class BagService {
         //playerService.findById(playerId); 
         // TODO: revisar si tengo que checkear que match exista
 
-<span class="fc" id="L83">        activesBags.remove(matchId); </span>
-<span class="fc" id="L84">    }</span>
+<span class="fc" id="L82">        activesBags.remove(matchId); </span>
+<span class="fc" id="L83">    }</span>
 
     
 
@@ -91,14 +90,14 @@ public class BagService {
 
     @Transactional (readOnly = true)
     public BagInGame findPlayerBag(Integer matchId, Integer playerId){
-<span class="fc" id="L94">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.get(matchId); </span>
+<span class="fc" id="L93">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.get(matchId); </span>
 
-<span class="fc bfc" id="L96" title="All 2 branches covered.">        if ( playerMap == null ){</span>
-<span class="fc" id="L97">            return new BagInGame(); // devuelvo una lista vacía por si acaso da error porque no se carga hasta que se le da a empezar partida </span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if ( playerMap == null ){</span>
+<span class="fc" id="L96">            return new BagInGame(); // devuelvo una lista vacía por si acaso da error porque no se carga hasta que se le da a empezar partida </span>
         }
 
-<span class="fc" id="L100">        BagInGame playersBag = playerMap.get(playerId); </span>
-<span class="fc" id="L101">        return playersBag; </span>
+<span class="fc" id="L99">        BagInGame playersBag = playerMap.get(playerId); </span>
+<span class="fc" id="L100">        return playersBag; </span>
     }
 
     /*
@@ -107,47 +106,47 @@ public class BagService {
 
     @Transactional 
     public Card removeCardFromPlayerBag(Card card, Integer matchId, Integer playerId){
-<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (card == null) {</span>
-<span class="fc" id="L111">            return null;</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        if (card == null) {</span>
+<span class="fc" id="L110">            return null;</span>
         }
         
-<span class="fc" id="L114">        BagInGame playerBag = findPlayerBag(matchId, playerId); </span>
-<span class="fc" id="L115">        List&lt;Card&gt; playerCards = playerBag.getCards(); </span>
-<span class="fc" id="L116">        Card removedCard = null; </span>
+<span class="fc" id="L113">        BagInGame playerBag = findPlayerBag(matchId, playerId); </span>
+<span class="fc" id="L114">        List&lt;Card&gt; playerCards = playerBag.getCards(); </span>
+<span class="fc" id="L115">        Card removedCard = null; </span>
         
         // Buscar por referencia exacta primero (más confiable para objetos en memoria)
-<span class="fc bfc" id="L119" title="All 2 branches covered.">        for (int i = 0; i &lt; playerCards.size(); i++){</span>
-<span class="fc bfc" id="L120" title="All 2 branches covered.">            if (playerCards.get(i) == card) {</span>
-<span class="fc" id="L121">                removedCard = playerCards.get(i); </span>
-<span class="fc" id="L122">                playerCards.remove(i);</span>
-<span class="fc" id="L123">                break; </span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        for (int i = 0; i &lt; playerCards.size(); i++){</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">            if (playerCards.get(i) == card) {</span>
+<span class="fc" id="L120">                removedCard = playerCards.get(i); </span>
+<span class="fc" id="L121">                playerCards.remove(i);</span>
+<span class="fc" id="L122">                break; </span>
             }
         }
         
         // Si no se encontró por referencia, buscar por ID o letra
-<span class="fc bfc" id="L128" title="All 2 branches covered.">        if (removedCard == null) {</span>
-<span class="pc bpc" id="L129" title="1 of 2 branches missed.">            for (int i = 0; i &lt; playerCards.size(); i++){</span>
-<span class="fc" id="L130">                Card c = playerCards.get(i);</span>
-<span class="fc" id="L131">                boolean match = false;</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (removedCard == null) {</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">            for (int i = 0; i &lt; playerCards.size(); i++){</span>
+<span class="fc" id="L129">                Card c = playerCards.get(i);</span>
+<span class="fc" id="L130">                boolean match = false;</span>
                 
                 // Comparar por ID si ambos tienen ID
-<span class="pc bpc" id="L134" title="5 of 6 branches missed.">                if (card.getId() != null &amp;&amp; c.getId() != null &amp;&amp; card.getId().equals(c.getId())) {</span>
-<span class="nc" id="L135">                    match = true;</span>
+<span class="pc bpc" id="L133" title="5 of 6 branches missed.">                if (card.getId() != null &amp;&amp; c.getId() != null &amp;&amp; card.getId().equals(c.getId())) {</span>
+<span class="nc" id="L134">                    match = true;</span>
                 }
                 // Si no hay ID, comparar por letra
-<span class="pc bpc" id="L138" title="2 of 4 branches missed.">                else if (card.getLetter() != null &amp;&amp; card.getLetter().equals(c.getLetter())) {</span>
-<span class="fc" id="L139">                    match = true;</span>
+<span class="pc bpc" id="L137" title="2 of 4 branches missed.">                else if (card.getLetter() != null &amp;&amp; card.getLetter().equals(c.getLetter())) {</span>
+<span class="fc" id="L138">                    match = true;</span>
                 }
                 
-<span class="pc bpc" id="L142" title="1 of 2 branches missed.">                if (match) {</span>
-<span class="fc" id="L143">                    removedCard = playerCards.get(i); </span>
-<span class="fc" id="L144">                    playerCards.remove(i);</span>
-<span class="fc" id="L145">                    break; </span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">                if (match) {</span>
+<span class="fc" id="L142">                    removedCard = playerCards.get(i); </span>
+<span class="fc" id="L143">                    playerCards.remove(i);</span>
+<span class="fc" id="L144">                    break; </span>
                 }
             }
         }
         
-<span class="fc" id="L150">        return removedCard; </span>
+<span class="fc" id="L149">        return removedCard; </span>
 
     }
     
@@ -158,11 +157,11 @@ public class BagService {
 
     @Transactional 
     public String wordFromCards (List&lt;CardDTO&gt; cards) {
-<span class="fc" id="L161">        StringBuilder word = new StringBuilder();</span>
-<span class="fc bfc" id="L162" title="All 2 branches covered.">        for (CardDTO card : cards){</span>
-<span class="fc" id="L163">            word.append(card.getLetter()); </span>
-<span class="fc" id="L164">        }</span>
-<span class="fc" id="L165">        return word.toString();</span>
+<span class="fc" id="L160">        StringBuilder word = new StringBuilder();</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        for (CardDTO card : cards){</span>
+<span class="fc" id="L162">            word.append(card.getLetter()); </span>
+<span class="fc" id="L163">        }</span>
+<span class="fc" id="L164">        return word.toString();</span>
     }
 
 
@@ -185,23 +184,23 @@ public class BagService {
         // https://api.dictionaryapi.dev/api/v2/entries/en/&lt;word&gt;
         // hay otra opción de api que es https://www.wordsapi.com/  aunque creo que es un poco menos completa pero ns 
         
-<span class="fc bfc" id="L188" title="All 2 branches covered.">        if (dictionaryService.containsWord(word)){</span>
-<span class="fc" id="L189">            return true; </span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if (dictionaryService.containsWord(word)){</span>
+<span class="fc" id="L188">            return true; </span>
 
         } else {
-<span class="fc" id="L192">            String url = &quot;https://api.dictionaryapi.dev/api/v2/entries/en/&quot;+ word; </span>
+<span class="fc" id="L191">            String url = &quot;https://api.dictionaryapi.dev/api/v2/entries/en/&quot;+ word; </span>
 
             try {
-<span class="fc" id="L195">                ResponseEntity&lt;String&gt; response = restTemplate.exchange(url, HttpMethod.GET, null, String.class); </span>
+<span class="fc" id="L194">                ResponseEntity&lt;String&gt; response = restTemplate.exchange(url, HttpMethod.GET, null, String.class); </span>
 
-<span class="fc" id="L197">                return response.getStatusCode().is2xxSuccessful(); // devuelve true</span>
+<span class="fc" id="L196">                return response.getStatusCode().is2xxSuccessful(); // devuelve true</span>
         
-<span class="nc" id="L199">            } catch (HttpClientErrorException e){</span>
-<span class="nc" id="L200">                return false; </span>
+<span class="nc" id="L198">            } catch (HttpClientErrorException e){</span>
+<span class="nc" id="L199">                return false; </span>
                 
-<span class="fc" id="L202">            } catch (Exception e) {</span>
+<span class="fc" id="L201">            } catch (Exception e) {</span>
                 // TODO: handle exception en el validar bag
-<span class="fc" id="L204">                return false; </span>
+<span class="fc" id="L203">                return false; </span>
             }
         }
         
@@ -218,16 +217,16 @@ public class BagService {
     public boolean checkBagIsValid (List&lt;CardDTO&gt; cards){
 
         // si la bolsa no está vacía hacemos la comprobación
-<span class="fc bfc" id="L221" title="All 2 branches covered.">        if (!cards.isEmpty()){</span>
-<span class="pc bpc" id="L222" title="1 of 2 branches missed.">            if (cards.size()&gt; MAX_LETTERS_ALLOWED){ // si tiene más de 2 letras, checkear en el diccionario</span>
-<span class="fc" id="L223">                String word = wordFromCards(cards); </span>
-<span class="fc" id="L224">                return doesWordExists(word); </span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">        if (!cards.isEmpty()){</span>
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">            if (cards.size()&gt; MAX_LETTERS_ALLOWED){ // si tiene más de 2 letras, checkear en el diccionario</span>
+<span class="fc" id="L222">                String word = wordFromCards(cards); </span>
+<span class="fc" id="L223">                return doesWordExists(word); </span>
             } else {
-<span class="nc" id="L226">                return true; // si tiene 2 o menos letras, es válida automáticamente</span>
+<span class="nc" id="L225">                return true; // si tiene 2 o menos letras, es válida automáticamente</span>
             }
         }
         // si está vacía devolvemos true para que pueda seguir 
-<span class="fc" id="L230">        return true;  </span>
+<span class="fc" id="L229">        return true;  </span>
 
     }
 
@@ -240,20 +239,20 @@ public class BagService {
      */
 
     public WeaponValidationDTO validateWeapon(BagInGameDTO bag, Integer matchId){
-<span class="fc bfc" id="L243" title="All 2 branches covered.">        if (bag.getCards().isEmpty()){</span>
-<span class="fc" id="L244">            throw new EmptyWeaponException(&quot;Try putting a weapon or cancel the operation &quot;); </span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">        if (bag.getCards().isEmpty()){</span>
+<span class="fc" id="L243">            throw new EmptyWeaponException(&quot;Try putting a weapon or cancel the operation &quot;); </span>
         } else {
-<span class="fc" id="L246">            String word = wordFromCards(bag.getCards()); </span>
-<span class="fc" id="L247">            boolean isOnTheList = isWeaponOnTheList(word); </span>
-<span class="fc bfc" id="L248" title="All 2 branches covered.">            if (isOnTheList){</span>
-<span class="fc" id="L249">                return new WeaponValidationDTO(word,BONUS_WEAPONS, ValidationWeaponStatus.VALID);</span>
+<span class="fc" id="L245">            String word = wordFromCards(bag.getCards()); </span>
+<span class="fc" id="L246">            boolean isOnTheList = isWeaponOnTheList(word); </span>
+<span class="fc bfc" id="L247" title="All 2 branches covered.">            if (isOnTheList){</span>
+<span class="fc" id="L248">                return new WeaponValidationDTO(word,BONUS_WEAPONS, ValidationWeaponStatus.VALID);</span>
             } else {
-<span class="fc" id="L251">                boolean existsInDictionary = doesWordExists(word);</span>
-<span class="fc bfc" id="L252" title="All 2 branches covered.">                if (existsInDictionary){</span>
-<span class="fc" id="L253">                    votingService.startVoting(matchId, word, bag.getPlayerId()); </span>
-<span class="fc" id="L254">                    return new WeaponValidationDTO(word,0, ValidationWeaponStatus.REQUIRES_VOTING);</span>
+<span class="fc" id="L250">                boolean existsInDictionary = doesWordExists(word);</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">                if (existsInDictionary){</span>
+<span class="fc" id="L252">                    votingService.startVoting(matchId, word, bag.getPlayerId()); </span>
+<span class="fc" id="L253">                    return new WeaponValidationDTO(word,0, ValidationWeaponStatus.REQUIRES_VOTING);</span>
                 } else {
-<span class="fc" id="L256">                    return new WeaponValidationDTO(word,0, ValidationWeaponStatus.INVALID);</span>
+<span class="fc" id="L255">                    return new WeaponValidationDTO(word,0, ValidationWeaponStatus.INVALID);</span>
                 }
             }
 
@@ -268,11 +267,11 @@ public class BagService {
     @Transactional 
     public boolean isWeaponOnTheList(String word){ 
       
-<span class="fc bfc" id="L271" title="All 2 branches covered.">        if (dictionaryService.isWeapon(word)){</span>
-<span class="fc" id="L272">            return true; </span>
+<span class="fc bfc" id="L270" title="All 2 branches covered.">        if (dictionaryService.isWeapon(word)){</span>
+<span class="fc" id="L271">            return true; </span>
 
         } else {
-<span class="fc" id="L275">            return false;</span>
+<span class="fc" id="L274">            return false;</span>
         } 
     }
 
@@ -282,8 +281,8 @@ public class BagService {
      */
     @Transactional 
     public boolean checkProposedWeaponExists(List&lt;CardDTO&gt; cards){
-<span class="fc" id="L285">        String word = wordFromCards(cards);</span>
-<span class="fc" id="L286">        return doesWordExists(word);</span>
+<span class="fc" id="L284">        String word = wordFromCards(cards);</span>
+<span class="fc" id="L285">        return doesWordExists(word);</span>
     }
 
     
@@ -297,19 +296,19 @@ public class BagService {
 
         //checkear que exista el player y tal 
 
-<span class="fc" id="L300">        BagInGame newBag = new BagInGame(); </span>
+<span class="fc" id="L299">        BagInGame newBag = new BagInGame(); </span>
 
-<span class="fc" id="L302">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.get(matchId);</span>
+<span class="fc" id="L301">        Map&lt;Integer, BagInGame&gt; playerMap = activesBags.get(matchId);</span>
 
             // tengo que hacer lo de newArrayList&lt;&gt;(deck...) dentro del set porque si no se hace así ç
         // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
-<span class="fc" id="L306">        newBag.setCards(new ArrayList&lt;&gt;(bag.getCards().stream()</span>
-<span class="fc" id="L307">            .map(dto -&gt; new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));</span>
+<span class="fc" id="L305">        newBag.setCards(new ArrayList&lt;&gt;(bag.getCards().stream()</span>
+<span class="fc" id="L306">            .map(dto -&gt; new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));</span>
 
-<span class="fc" id="L309">        playerMap.put(playerId, newBag); </span>
-<span class="fc" id="L310">        activesBags.put(matchId, playerMap); </span>
+<span class="fc" id="L308">        playerMap.put(playerId, newBag); </span>
+<span class="fc" id="L309">        activesBags.put(matchId, playerMap); </span>
 
-<span class="fc" id="L312">    }</span>
+<span class="fc" id="L311">    }</span>
 
     
 

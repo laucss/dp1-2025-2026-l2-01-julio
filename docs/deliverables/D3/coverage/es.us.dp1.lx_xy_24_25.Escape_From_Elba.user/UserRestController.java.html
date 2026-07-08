@@ -85,62 +85,66 @@ class UserRestController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity&lt;User&gt; create(@RequestBody @Valid User user) {
-<span class="fc" id="L88">		User savedUser = userService.saveUser(user);</span>
-<span class="fc" id="L89">		return new ResponseEntity&lt;&gt;(savedUser, HttpStatus.CREATED);</span>
+<span class="nc" id="L88">		User savedUser = userService.saveUser(user);</span>
+<span class="nc" id="L89">		return new ResponseEntity&lt;&gt;(savedUser, HttpStatus.CREATED);</span>
 	}
+
 
 	@PutMapping(value = &quot;{userId}&quot;)
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity&lt;UpdateResponse&gt; update(@PathVariable(&quot;userId&quot;) Integer id, @RequestBody @Valid User user) {
-<span class="fc" id="L95">		RestPreconditions.checkNotNull(userService.findUser(id), &quot;User&quot;, &quot;ID&quot;, id);</span>
-<span class="pc bpc" id="L96" title="2 of 4 branches missed.">		if (user.getPassword() != null &amp;&amp; !user.getPassword().isEmpty()) {</span>
-<span class="fc" id="L97">            user.setPassword(passwordEncoder.encode(user.getPassword()));</span>
-        }else{
-<span class="nc" id="L99">			user.setPassword(userService.findUser(id).getPassword());</span>
-		}
-<span class="fc" id="L101">		User updatedUser = this.userService.updateUser(user, id);</span>
-<span class="fc" id="L102">		String newToken = jwtUtils.generateTokenFromUsername(updatedUser.getUsername(), updatedUser.getAuthority());</span>
-<span class="fc" id="L103">		List&lt;String&gt; roles = List.of(updatedUser.getAuthority().getAuthority());</span>
-<span class="fc" id="L104">		UpdateResponse responseBody = new UpdateResponse(</span>
-            newToken,
-<span class="fc" id="L106">            updatedUser.getId(),</span>
-<span class="fc" id="L107">            updatedUser.getUsername(),</span>
-<span class="fc" id="L108">			updatedUser.getAvatar(),</span>
-            roles,
-<span class="fc" id="L110">			updatedUser.getEmail(),</span>
-<span class="fc" id="L111">			updatedUser.getAge()</span>
-        );
-<span class="fc" id="L113">		return new ResponseEntity&lt;&gt;(responseBody, HttpStatus.OK);</span>
-	}
+	public ResponseEntity&lt;UpdateResponse&gt; update(@PathVariable(&quot;userId&quot;) Integer id,@RequestBody @Valid UpdateUserDTO dto) {
+	
+<span class="fc" id="L97">		User updatedUser = userService.updateUser(id, dto);</span>
+
+<span class="fc" id="L99">		String newToken = jwtUtils.generateTokenFromUsername(</span>
+<span class="fc" id="L100">			updatedUser.getUsername(),</span>
+<span class="fc" id="L101">			updatedUser.getAuthority()</span>
+		);
+
+<span class="fc" id="L104">		List&lt;String&gt; roles = List.of(updatedUser.getAuthority().getAuthority());</span>
+
+<span class="fc" id="L106">		UpdateResponse responseBody = new UpdateResponse(</span>
+			newToken,
+<span class="fc" id="L108">			updatedUser.getId(),</span>
+<span class="fc" id="L109">			updatedUser.getUsername(),</span>
+<span class="fc" id="L110">			updatedUser.getAvatar(),</span>
+			roles,
+<span class="fc" id="L112">			updatedUser.getEmail(),</span>
+<span class="fc" id="L113">			updatedUser.getAge()</span>
+		);
+
+<span class="fc" id="L116">		return new ResponseEntity&lt;&gt;(responseBody, HttpStatus.OK);</span>
+
+			}
 
 	@DeleteMapping(value = &quot;{userId}&quot;)
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity&lt;MessageResponse&gt; delete(@PathVariable(&quot;userId&quot;) int id) {
-<span class="fc" id="L119">		RestPreconditions.checkNotNull(userService.findUser(id), &quot;User&quot;, &quot;ID&quot;, id);</span>
-<span class="fc bfc" id="L120" title="All 2 branches covered.">		if (userService.findCurrentUser().getId() != id) {</span>
-<span class="fc" id="L121">			userService.deleteUser(id);</span>
-<span class="fc" id="L122">			return new ResponseEntity&lt;&gt;(new MessageResponse(&quot;User deleted!&quot;), HttpStatus.OK);</span>
+<span class="fc" id="L123">		RestPreconditions.checkNotNull(userService.findUser(id), &quot;User&quot;, &quot;ID&quot;, id);</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">		if (userService.findCurrentUser().getId() != id) {</span>
+<span class="fc" id="L125">			userService.deleteUser(id);</span>
+<span class="fc" id="L126">			return new ResponseEntity&lt;&gt;(new MessageResponse(&quot;User deleted!&quot;), HttpStatus.OK);</span>
 		} else
-<span class="fc" id="L124">			throw new AccessDeniedException(&quot;You can't delete yourself!&quot;);</span>
+<span class="fc" id="L128">			throw new AccessDeniedException(&quot;You can't delete yourself!&quot;);</span>
 	}
 
 
 	// Endpoint para poner usuario ONLINE
 	@PutMapping(&quot;/status/online&quot;)
 	public ResponseEntity&lt;?&gt; setOnline() {
-<span class="nc" id="L131">		User currentUser = userService.findCurrentUser();</span>
-<span class="nc" id="L132">		currentUser.setStatus(UserStatus.ONLINE);</span>
-<span class="nc" id="L133">		userService.saveUser(currentUser);</span>
-<span class="nc" id="L134">		return ResponseEntity.ok().build();</span>
+<span class="fc" id="L135">		User currentUser = userService.findCurrentUser();</span>
+<span class="fc" id="L136">		currentUser.setStatus(UserStatus.ONLINE);</span>
+<span class="fc" id="L137">		userService.saveUser(currentUser);</span>
+<span class="fc" id="L138">		return ResponseEntity.ok().build();</span>
 	}
 
 	// Endpoint para poner usuario OFFLINE
 	@PutMapping(&quot;/status/offline&quot;)
 	public ResponseEntity&lt;?&gt; setOffline() {
-<span class="nc" id="L140">		User currentUser = userService.findCurrentUser();</span>
-<span class="nc" id="L141">		currentUser.setStatus(UserStatus.OFFLINE);</span>
-<span class="nc" id="L142">		userService.saveUser(currentUser);</span>
-<span class="nc" id="L143">		return ResponseEntity.ok().build();</span>
+<span class="fc" id="L144">		User currentUser = userService.findCurrentUser();</span>
+<span class="fc" id="L145">		currentUser.setStatus(UserStatus.OFFLINE);</span>
+<span class="fc" id="L146">		userService.saveUser(currentUser);</span>
+<span class="fc" id="L147">		return ResponseEntity.ok().build();</span>
 	}
 
 }

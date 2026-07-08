@@ -2,40 +2,36 @@
 
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class LobbyUpdateDTO {
     private Integer lobbyId;
     private List&lt;PlayerLobbyDTO&gt; players;
+    private List&lt;UserLobbyDTO&gt; spectators;
     private String action; 
     private String username;
 
-<span class="nc" id="L11">    public LobbyUpdateDTO() {}</span>
+<span class="nc" id="L17">    public LobbyUpdateDTO() {}</span>
 
-<span class="nc" id="L13">    public LobbyUpdateDTO(Integer lobbyId, List&lt;PlayerLobbyDTO&gt; players, String action, String username) {</span>
-<span class="nc" id="L14">        this.lobbyId = lobbyId;</span>
-<span class="nc" id="L15">        this.players = players;</span>
-<span class="nc" id="L16">        this.action = action;</span>
-<span class="nc" id="L17">        this.username = username;</span>
-<span class="nc" id="L18">    }</span>
-
-<span class="nc" id="L20">    public Integer getLobbyId() { return lobbyId; }</span>
-<span class="nc" id="L21">    public void setLobbyId(Integer lobbyId) { this.lobbyId = lobbyId; }</span>
-
-<span class="nc" id="L23">    public List&lt;PlayerLobbyDTO&gt; getPlayers() { return players; }</span>
-<span class="nc" id="L24">    public void setPlayers(List&lt;PlayerLobbyDTO&gt; players) { this.players = players; }</span>
-
-<span class="nc" id="L26">    public String getAction() { return action; }</span>
-<span class="nc" id="L27">    public void setAction(String action) { this.action = action; }</span>
-
-<span class="nc" id="L29">    public String getUsername() { return username; }</span>
-<span class="nc" id="L30">    public void setUsername(String username) { this.username = username; }</span>
+<span class="fc" id="L19">    public LobbyUpdateDTO(Integer lobbyId, List&lt;PlayerLobbyDTO&gt; players, List&lt;UserLobbyDTO&gt; spectators, String action, String username) {</span>
+<span class="fc" id="L20">        this.lobbyId = lobbyId;</span>
+<span class="fc" id="L21">        this.players = players;</span>
+<span class="fc" id="L22">        this.spectators = spectators;</span>
+<span class="fc" id="L23">        this.action = action;</span>
+<span class="fc" id="L24">        this.username = username;</span>
+<span class="fc" id="L25">    }</span>
 
     @Override
     public String toString() {
-<span class="nc" id="L34">        return &quot;LobbyUpdateDTO{&quot; +</span>
+<span class="nc" id="L29">        return &quot;LobbyUpdateDTO{&quot; +</span>
                 &quot;lobbyId=&quot; + lobbyId +
                 &quot;, action='&quot; + action + '\'' +
                 &quot;, username='&quot; + username + '\'' +
-<span class="nc" id="L38">                &quot;, players=&quot; + players.size() +</span>
+<span class="nc" id="L33">                &quot;, players=&quot; + players.size() +</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">                &quot;, spectators=&quot; + (spectators != null ? spectators.size() : 0) + </span>
                 '}';
     }
 
@@ -45,22 +41,41 @@ public class LobbyUpdateDTO {
         private String username;
         private String avatar;
 
-<span class="nc" id="L48">        public PlayerLobbyDTO() {}</span>
+<span class="nc" id="L44">        public PlayerLobbyDTO() {}</span>
 
-<span class="nc" id="L50">        public PlayerLobbyDTO(Integer userId, String username, String avatar) {</span>
-<span class="nc" id="L51">            this.userId = userId;</span>
-<span class="nc" id="L52">            this.username = username;</span>
-<span class="nc" id="L53">            this.avatar = avatar;</span>
-<span class="nc" id="L54">        }</span>
+<span class="fc" id="L46">        public PlayerLobbyDTO(Integer userId, String username, String avatar) {</span>
+<span class="fc" id="L47">            this.userId = userId;</span>
+<span class="fc" id="L48">            this.username = username;</span>
+<span class="fc" id="L49">            this.avatar = avatar;</span>
+<span class="fc" id="L50">        }</span>
 
-<span class="nc" id="L56">        public Integer getUserId() { return userId; }</span>
-<span class="nc" id="L57">        public void setUserId(Integer userId) { this.userId = userId; }</span>
+<span class="nc" id="L52">        public Integer getUserId() { return userId; }</span>
+<span class="nc" id="L53">        public void setUserId(Integer userId) { this.userId = userId; }</span>
 
-<span class="nc" id="L59">        public String getUsername() { return username; }</span>
-<span class="nc" id="L60">        public void setUsername(String username) { this.username = username; }</span>
+<span class="nc" id="L55">        public String getUsername() { return username; }</span>
+<span class="nc" id="L56">        public void setUsername(String username) { this.username = username; }</span>
 
-<span class="nc" id="L62">        public String getAvatar() { return avatar; }</span>
-<span class="nc" id="L63">        public void setAvatar(String avatar) { this.avatar = avatar; }</span>
+<span class="nc" id="L58">        public String getAvatar() { return avatar; }</span>
+<span class="nc" id="L59">        public void setAvatar(String avatar) { this.avatar = avatar; }</span>
+    }
+
+    public static class UserLobbyDTO {
+        private Integer id; 
+        private String username;
+        private String avatar;
+
+<span class="nc" id="L67">        public UserLobbyDTO() {}</span>
+<span class="nc" id="L68">        public UserLobbyDTO(Integer id, String username, String avatar) {</span>
+<span class="nc" id="L69">            this.id = id;</span>
+<span class="nc" id="L70">            this.username = username;</span>
+<span class="nc" id="L71">            this.avatar = avatar;</span>
+<span class="nc" id="L72">        }</span>
+<span class="nc" id="L73">        public Integer getId() { return id; }</span>
+<span class="nc" id="L74">        public void setId(Integer id) { this.id = id; }</span>
+<span class="nc" id="L75">        public String getUsername() { return username; }</span>
+<span class="nc" id="L76">        public void setUsername(String username) { this.username = username; }</span>
+<span class="nc" id="L77">        public String getAvatar() { return avatar; }</span>
+<span class="nc" id="L78">        public void setAvatar(String avatar) { this.avatar = avatar; }</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match</a> &gt; <span class="el_source">ActionsService.java</span></div><h1>ActionsService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.FightService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.PendingFight;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightResultRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+
+@Service
+public class ActionsService {
+
+    private final MatchService matchService; 
+    private final FightService fightService; 
+    private final BagService bagService;
+    private final PlayerService playerService; 
+
+    private final MatchRepository matchRepo;
+    private final PlayerRepository playerRepo;
+    private final RoomRepository roomRepository;
+    private final NpcRepository npcRepository;
+    
+    private final Checkers checkers;
+    private final MatchWebsocketController matchWebsocketController;
+    private final RoomService roomService;
+
+    @Autowired
+    public ActionsService(MatchService matchService, FightService fightService, 
+        BagService bagService, PlayerService playerService, MatchRepository matchRepo, PlayerRepository playerRepo,
+<span class="fc" id="L55">        RoomRepository roomRepository, NpcRepository npcRepository, Checkers checkers, MatchWebsocketController matchWebsocketController, RoomService roomService) {</span>
+<span class="fc" id="L56">        this.fightService = fightService;</span>
+<span class="fc" id="L57">        this.matchService = matchService; </span>
+<span class="fc" id="L58">        this.bagService = bagService;</span>
+<span class="fc" id="L59">        this.playerService = playerService;</span>
+<span class="fc" id="L60">        this.matchRepo = matchRepo;</span>
+<span class="fc" id="L61">        this.playerRepo = playerRepo;</span>
+<span class="fc" id="L62">        this.roomRepository = roomRepository;</span>
+<span class="fc" id="L63">        this.npcRepository = npcRepository;</span>
+<span class="fc" id="L64">        this.checkers = checkers; </span>
+<span class="fc" id="L65">        this.matchWebsocketController = matchWebsocketController;</span>
+<span class="fc" id="L66">        this.roomService = roomService;</span>
+<span class="fc" id="L67">    }</span>
+
+    //Función para mover un jugador de una sala a otra adyacente
+    @Transactional
+    public MatchDTO movePlayerToAdyacentRoom(Integer matchId, Integer userId, Integer targetRoomId) {
+<span class="fc" id="L72">        Match match = matchService.getMatchById(matchId);</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (match.getCurrentTurnPhase() != TurnPhase.ACTIONS){</span>
+<span class="fc" id="L74">            match.setCurrentTurnPhase(TurnPhase.ACTIONS);</span>
+<span class="fc" id="L75">            matchRepo.save(match);</span>
+        }
+        //Recuperar el jugador dentro del match
+<span class="fc" id="L78">        Player player = playerService.findByMatchIdAndUserId(matchId, userId);</span>
+<span class="fc" id="L79">        Room currentRoom = player.getRoom();</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (currentRoom == null) {</span>
+<span class="fc" id="L81">            throw new RuntimeException(&quot;Player not assigned to a room&quot;);</span>
+        }
+        //Comprobar que la sala destino no sea la misma que la sala actual del jugador
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (targetRoomId.equals(currentRoom.getId())) {</span>
+<span class="fc" id="L85">            throw new RuntimeException(&quot;The destination room is the same as the current room of the player&quot;);</span>
+        }
+<span class="fc" id="L87">        checkers.checkPlayerHasActionPoints(player);</span>
+        //Recuperar la sala destino
+<span class="fc" id="L89">        Room targetRoom = roomRepository.findById(targetRoomId)</span>
+<span class="pc" id="L90">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Destination room not found&quot;));</span>
+        //Validar si la sala destino es adyacente
+<span class="fc" id="L92">        checkers.checkRoomIsAdyacent(currentRoom, targetRoom); </span>
+        //Actualizar sus puntos de acción
+<span class="fc" id="L94">        player.setActionPoints(player.getActionPoints() - 1);</span>
+        //Guardar cambios
+<span class="fc" id="L96">        playerRepo.save(player);</span>
+
+        // notificamos los puntos de accion por websocket 
+<span class="fc" id="L99">        ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(</span>
+<span class="fc" id="L100">            player.getId(),</span>
+            userId,
+<span class="fc" id="L102">            player.getUser().getUsername(),</span>
+<span class="fc" id="L103">            player.getActionPoints(),</span>
+<span class="fc" id="L104">            System.currentTimeMillis()</span>
+        );
+<span class="fc" id="L106">        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        if (!targetRoom.getId().equals(currentRoom.getId())) {</span>
+<span class="fc" id="L109">            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);</span>
+<span class="fc" id="L110">            player.setRoomsVisited(visited + 1);</span>
+        }
+        //Guardar cambios
+<span class="fc" id="L113">        player.setRoom(targetRoom);</span>
+<span class="fc" id="L114">        playerRepo.save(player);</span>
+<span class="fc" id="L115">        PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(player);</span>
+<span class="fc" id="L116">        matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);</span>
+
+        // checkeamos si hay alguien en la sala y por ende se produce una pelea
+<span class="fc" id="L119">        List&lt;PendingFight&gt; fights = fightService.getPossibleFight(matchId, userId, targetRoomId, false);</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if (!fights.isEmpty()){</span>
+<span class="nc" id="L121">            fightService.checkPendingFights(matchId);</span>
+        } 
+<span class="fc" id="L123">        return new MatchDTO(match);</span>
+        
+    }
+
+    @Transactional
+    public MatchDTO moveNpcToRoom(Integer matchId, Integer npcId, Integer targetRoomId, Integer userId) {
+<span class="fc" id="L129">        Match match = matchService.getMatchById(matchId);</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        if (match.getCurrentTurnPhase() != TurnPhase.ACTIONS){</span>
+<span class="fc" id="L131">            match.setCurrentTurnPhase(TurnPhase.ACTIONS);</span>
+<span class="fc" id="L132">            matchRepo.save(match);</span>
+        }
+        //Buscamos al npc que queremos mover de la partida
+<span class="fc" id="L135">        Npc npc = npcRepository.findById(npcId)</span>
+<span class="pc" id="L136">            .orElseThrow(() -&gt; new RuntimeException(&quot;NPC not found&quot;));</span>
+
+        //Obtenemos la habitación actual en la que se encuentra el npc
+<span class="fc" id="L139">        Room currentRoomNpc = npc.getRoom();</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (currentRoomNpc == null) {</span>
+<span class="fc" id="L141">            throw new RuntimeException(&quot;NPC not assigned to a room&quot;); }</span>
+
+        //Obtenemos la sala destino a la que queremos mover al npc
+<span class="fc" id="L144">        Room targetRoom = roomService.findById(targetRoomId);</span>
+
+        //Comprobamos que la sala destino no sea la misma que la sala actual del npc
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        if (targetRoom.getId().equals(currentRoomNpc.getId())) {</span>
+<span class="fc" id="L148">            throw new RuntimeException(&quot;The destination room is the same as the current room of the NPC&quot;);</span>
+        }
+
+        //Comprobamos que el jugador tiene puntos de acción para poder mover al npc
+<span class="fc" id="L152">        Player player = playerService.findByMatchIdAndUserId(matchId, userId);</span>
+<span class="fc" id="L153">        checkers.checkPlayerHasActionPoints(player);</span>
+        // Actualizamos la sala del npc y los puntos de acción del jugador
+<span class="fc" id="L155">        player.setActionPoints(player.getActionPoints() - 1);</span>
+<span class="fc" id="L156">        playerRepo.save(player);</span>
+        
+<span class="fc" id="L158">        ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(</span>
+<span class="fc" id="L159">            player.getId(),</span>
+            userId,
+<span class="fc" id="L161">            player.getUser().getUsername(),</span>
+<span class="fc" id="L162">            player.getActionPoints(),</span>
+<span class="fc" id="L163">            System.currentTimeMillis()</span>
+        );
+<span class="fc" id="L165">        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+
+<span class="fc" id="L167">        npc.setRoom(targetRoom);</span>
+<span class="fc" id="L168">        npcRepository.save(npc);</span>
+<span class="fc" id="L169">        NpcLocationUpdateDTO locationNpcUpdate = new NpcLocationUpdateDTO(npc);</span>
+<span class="fc" id="L170">        matchWebsocketController.notifyNpcLocationUpdate(matchId, locationNpcUpdate);</span>
+        
+        // checkeamos si hay alguien en la sala y por ende se produce una pelea
+<span class="fc" id="L173">        List&lt;PendingFight&gt; fights = fightService.getPossibleFight(matchId, npcId, targetRoomId, true);</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        if (!fights.isEmpty()){ </span>
+<span class="nc" id="L175">            fightService.checkPendingFights(matchId);</span>
+        } 
+
+<span class="fc" id="L178">        return new MatchDTO(match);</span>
+    }
+
+    @Transactional
+    public MatchDTO movePlayerByFormingRoomName(Integer matchId, Integer userId, Integer targetRoomId) {
+<span class="fc" id="L183">        Match match = matchService.getMatchById(matchId);</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){</span>
+<span class="fc" id="L185">            match.setCurrentTurnPhase(TurnPhase.ACTIONS);</span>
+<span class="fc" id="L186">            matchRepo.save(match);</span>
+        }
+        
+<span class="fc" id="L189">        Player player = playerService.findByMatchIdAndUserId(matchId, userId);</span>
+<span class="fc" id="L190">        checkers.checkPlayerHasActionPoints(player);</span>
+<span class="fc" id="L191">        Room targetRoom = roomService.findById(targetRoomId);</span>
+
+        // Obtener la bolsa del jugador y sus letras
+<span class="fc" id="L194">        BagInGame playerBag = bagService.findPlayerBag(matchId, player.getId());</span>
+<span class="pc bpc" id="L195" title="1 of 4 branches missed.">        if (playerBag == null || playerBag.getCards().isEmpty()) {</span>
+<span class="fc" id="L196">            throw new RuntimeException(&quot;The player does not have any cards in their bag&quot;);</span>
+        }
+
+        // Recopilar todas las letras de la bolsa
+<span class="fc" id="L200">        String availableLetters = &quot;&quot;;</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        for (Card card : playerBag.getCards()) {</span>
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">            if (card.getLetter() != null) {</span>
+<span class="fc" id="L203">                availableLetters += card.getLetter().toLowerCase();</span>
+            }
+<span class="fc" id="L205">        }</span>
+
+        // Obtener las palabras que forman la sala destino 
+<span class="fc" id="L208">        String[] roomWords = targetRoom.getName().toLowerCase().split(&quot;\\s+&quot;);</span>
+<span class="fc" id="L209">        Boolean canFormAnyWord = false;</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        for (String roomWord : roomWords){</span>
+            //Hacemos una copia de las letras de nuestra bolsa
+<span class="fc" id="L212">            String remaining = availableLetters;</span>
+<span class="fc" id="L213">            boolean canFormThisWord = true;</span>
+
+            //Recorremos cada letra de la palabra de la sala destino
+<span class="fc bfc" id="L216" title="All 2 branches covered.">            for (char c : roomWord.toCharArray()) {</span>
+                //El método indexOf devuelve -1 si no encuentra la letra en la cadena, si la encuentra devuelve la posición de la letra en la cadena
+<span class="fc bfc" id="L218" title="All 2 branches covered.">                if (remaining.indexOf(c) &gt;= 0) {</span>
+                    //Si la letra está en la cadena, la eliminamos de la cadena para no usarla de nuevo
+<span class="fc" id="L220">                    remaining = remaining.replaceFirst(String.valueOf(c), &quot;&quot;);</span>
+                } else {
+                    //Si la letra no está en la cadena, no podemos formar la palabra
+<span class="fc" id="L223">                    canFormThisWord = false;</span>
+<span class="fc" id="L224">                    break;</span>
+                }
+            }
+<span class="fc bfc" id="L227" title="All 2 branches covered.">            if (canFormThisWord) {</span>
+<span class="fc" id="L228">                canFormAnyWord = true;</span>
+<span class="fc" id="L229">                break;</span>
+            }
+        }
+<span class="fc bfc" id="L232" title="All 2 branches covered.">        if (!canFormAnyWord) {</span>
+<span class="fc" id="L233">            throw new RuntimeException(</span>
+                &quot;You cannot form any word from the destination room name '&quot; +
+<span class="fc" id="L235">                targetRoom.getName() + &quot;' with the available letters in the bag&quot;);</span>
+        }
+
+<span class="fc" id="L238">        player.setActionPoints(player.getActionPoints() - 1);</span>
+<span class="fc" id="L239">        playerRepo.save(player);</span>
+        
+<span class="fc" id="L241">        ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(</span>
+<span class="fc" id="L242">            player.getId(),</span>
+            userId,
+<span class="fc" id="L244">            player.getUser().getUsername(),</span>
+<span class="fc" id="L245">            player.getActionPoints(),</span>
+<span class="fc" id="L246">            System.currentTimeMillis()</span>
+        );
+<span class="fc" id="L248">        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+
+<span class="fc" id="L250">        Room currentRoom = player.getRoom();</span>
+<span class="pc bpc" id="L251" title="2 of 4 branches missed.">        if (currentRoom == null || !targetRoom.getId().equals(currentRoom.getId())) {</span>
+<span class="fc" id="L252">            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);</span>
+<span class="fc" id="L253">            player.setRoomsVisited(visited + 1);</span>
+        }
+<span class="fc" id="L255">        player.setRoom(targetRoom);</span>
+<span class="fc" id="L256">        playerRepo.save(player);</span>
+<span class="fc" id="L257">        PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(player);</span>
+<span class="fc" id="L258">        matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);</span>
+        // checkeamos si hay alguien en la sala y por ende se produce una pelea
+<span class="fc" id="L260">        List&lt;PendingFight&gt; fights = fightService.getPossibleFight(matchId, userId, targetRoomId, false);</span>
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">        if (!fights.isEmpty()){ </span>
+<span class="nc" id="L262">             fightService.checkPendingFights(matchId);</span>
+        } 
+
+<span class="fc" id="L265">        return new MatchDTO(match);</span>
+    }
+
+    @Transactional
+    public EscapeAttemptResultDTO escapeAttempt( Integer matchId, Integer userId, Integer rolldiceResult) {
+<span class="pc" id="L270">        matchRepo.findById(matchId).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Match not found&quot;));</span>
+<span class="fc" id="L271">        Player p = playerService.findByMatchIdAndUserId(matchId, userId);</span>
+
+        //Comprobamos que el jugador tenga puntos de acción para poder realizar la acción
+<span class="fc bfc" id="L274" title="All 2 branches covered.">        if (p.getActionPoints() &lt;= 0) {</span>
+<span class="fc" id="L275">            throw new NoActionPointsException(&quot;Escape attempt not allowed: player has no action points left&quot;);</span>
+        }
+        
+
+        //Comprobamos que el jugador cumpla las condiciones para poder realizar un intento de escape 
+
+        //Primero comprobamos que el jugador se encuentre en una de las torres
+<span class="fc" id="L282">        Room playerRoom = p.getRoom();</span>
+<span class="fc" id="L283">        List&lt;Room&gt; towers = roomService.getAllTowers();</span>
+<span class="fc" id="L284">        boolean inTower = towers.stream().anyMatch(r -&gt; r.equals(playerRoom));</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">        if (!inTower) {</span>
+<span class="fc" id="L286">            throw new IllegalArgumentException(&quot;Player is not in a tower room&quot;);</span>
+        }
+
+        //Segundo comprobamos que el jugador tengo en su bolsa las cartas necesarias para formas la palabra de escape correspondiente a la torre
+        // o las palabras “EMPEROR” o “CAMPBELL”
+
+        //Primero obtenemos la bolsa del jugador 
+<span class="fc" id="L293">        BagInGame playerBag = bagService.findPlayerBag(matchId, p.getId());</span>
+        //Obtenemos las cartas de la bolsa
+<span class="fc" id="L295">        List&lt;Card&gt; bagCards = playerBag.getCards();</span>
+        //Convertimos la lista de cartas en una lista de DTO de cartas
+<span class="fc" id="L297">        List&lt;CardDTO&gt; bagCardDTOs = bagCards.stream()</span>
+<span class="fc" id="L298">                .map(CardDTO::new)</span>
+<span class="fc" id="L299">                .toList();</span>
+        //Obtenemos la palabra que forman las letras de las cartas de la bolsa
+<span class="fc" id="L301">        String bagWord = bagService.wordFromCards(bagCardDTOs).toLowerCase().replaceAll(&quot;\\s+&quot;, &quot;&quot;) ;</span>
+
+        //Obtenemos la palabra de escape correspondiente a la torre en la que se encuentra el jugador
+<span class="fc" id="L304">        String towerEscapeWord = roomService.getWordOfEscapeFromTower(playerRoom.getId()).toLowerCase().replaceAll(&quot;\\s+&quot;, &quot;&quot;);</span>
+
+        //Comprobamos si la palabra de la bolsa del jugador es igual a la palabra de escape de la torre o a las palabras especiales
+<span class="pc bpc" id="L307" title="2 of 6 branches missed.">        boolean hasRequiredWord = bagWord.equals(towerEscapeWord) || bagWord.equals(&quot;emperor&quot;) || bagWord.equals(&quot;campbell&quot;);</span>
+<span class="fc bfc" id="L308" title="All 2 branches covered.">        if (!hasRequiredWord) {</span>
+<span class="fc" id="L309">            throw new IllegalArgumentException(&quot;Player does not have the required word in their bag to attempt escape&quot;);</span>
+        }
+
+
+        //Cuando se cumplan las condiciones realizamos el intento de escape 
+<span class="fc" id="L314">        EscapeAttemptResultDTO resultado = new EscapeAttemptResultDTO();</span>
+
+<span class="fc bfc" id="L316" title="All 2 branches covered.">        if(rolldiceResult &lt; p.getStrength()){</span>
+            //El intento de escape es existoso
+<span class="fc" id="L318">            matchService.endMatch(matchId, p);</span>
+<span class="fc" id="L319">            resultado.setSuccess(true);</span>
+<span class="fc" id="L320">            resultado.setWinnerUserId(p.getUser().getId());</span>
+<span class="fc" id="L321">            resultado.setDiscardRequired(false);</span>
+<span class="fc" id="L322">            return resultado;</span>
+
+        } else {
+            //El intento de escape falla y ocurre lo mismo que si un jugador pierde contra un npc en una pelea
+<span class="fc" id="L326">            matchService.consumeAllActionPointForUser(matchId, userId);</span>
+<span class="fc" id="L327">            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(</span>
+<span class="fc" id="L328">                p.getId(),</span>
+                userId,
+<span class="fc" id="L330">                p.getUser().getUsername(),</span>
+<span class="fc" id="L331">                p.getActionPoints(),</span>
+<span class="fc" id="L332">                System.currentTimeMillis()</span>
+            );
+<span class="fc" id="L334">            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+<span class="fc" id="L335">            Room randomRoom = matchService.getAvailableRoomsForPlayer(matchId).get(new Random().nextInt(matchService.getAvailableRoomsForPlayer(matchId).size()));</span>
+<span class="fc" id="L336">            matchService.moveLoserPlayer(matchId, userId, randomRoom.getId());</span>
+<span class="fc" id="L337">            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(p);</span>
+<span class="fc" id="L338">            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);</span>
+
+
+<span class="fc" id="L341">            resultado.setSuccess(false);</span>
+<span class="fc" id="L342">            resultado.setDiscardRequired(true);</span>
+<span class="fc" id="L343">            return resultado;</span>
+        }
+    }
+    
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

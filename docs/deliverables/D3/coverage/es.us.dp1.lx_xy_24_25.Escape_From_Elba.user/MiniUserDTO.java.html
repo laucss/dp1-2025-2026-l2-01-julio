@@ -27,24 +27,24 @@ public class MiniUserDTO extends BaseEntity {
 <span class="fc" id="L27">        this.setId(user.getId());</span>
 <span class="fc" id="L28">        this.setAvatar(user.getAvatar());</span>
 <span class="fc" id="L29">        this.setUsername(user.getUsername());</span>
-<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        this.setStatus(user.getStatus() != null ? user.getStatus().name() : &quot;OFFLINE&quot;);</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        this.setStatus(user.getStatus() != null ? user.getStatus().name() : &quot;OFFLINE&quot;);</span>
 <span class="fc" id="L31">        this.match = match;</span>
 <span class="fc" id="L32">    }</span>
 
     // Constructor de compatibilidad para usos antiguos
     public MiniUserDTO(User user) {
-<span class="nc" id="L36">        this(user, null);</span>
-<span class="nc" id="L37">    }</span>
+<span class="fc" id="L36">        this(user, null);</span>
+<span class="fc" id="L37">    }</span>
 
-<span class="nc" id="L39">    public MiniUserDTO() {</span>
-<span class="nc" id="L40">    }</span>
+<span class="fc" id="L39">    public MiniUserDTO() {</span>
+<span class="fc" id="L40">    }</span>
 
     public MiniMatchDTO getMatch() {
 <span class="fc" id="L43">        return match;</span>
     }
 
     public void setMatch(MiniMatchDTO match) {
-<span class="nc" id="L47">        this.match = match;</span>
-<span class="nc" id="L48">    }</span>
+<span class="fc" id="L47">        this.match = match;</span>
+<span class="fc" id="L48">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

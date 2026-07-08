@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PendingFight.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights</a> &gt; <span class="el_source">PendingFight.java</span></div><h1>PendingFight.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Entity
+public class PendingFight extends BaseEntity{
+    
+    @NotNull
+    private Integer matchId;
+
+    @NotNull
+    private Integer attackerUserId; 
+
+    @NotNull
+    private Integer defenserUserId; 
+
+    @NotNull
+    private Integer roomId; 
+    
+    @NotNull
+    private boolean isNpcFight; 
+
+    @NotNull
+    private boolean isNpcAttacker;
+
+<span class="fc" id="L32">    public PendingFight(){}</span>
+
+<span class="fc" id="L34">    public PendingFight( Integer matchId, Integer attackerUserId,Integer defenserUserId, Integer roomId , boolean isNpcFight, boolean isNpcAttacker ){</span>
+<span class="fc" id="L35">        this.attackerUserId = attackerUserId; </span>
+<span class="fc" id="L36">        this.defenserUserId = defenserUserId; </span>
+<span class="fc" id="L37">        this.matchId = matchId; </span>
+<span class="fc" id="L38">        this.roomId = roomId; </span>
+<span class="fc" id="L39">        this.isNpcFight = isNpcFight; </span>
+<span class="fc" id="L40">        this.isNpcAttacker = isNpcAttacker; </span>
+<span class="fc" id="L41">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

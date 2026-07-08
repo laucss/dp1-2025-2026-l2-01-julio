@@ -28,15 +28,15 @@ public class DeckInGameDTO {
 <span class="fc" id="L28">            newNotDiscardedCards.add(new CardDTO(card)); </span>
 <span class="fc" id="L29">        }</span>
 
-<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        for (Card card : deck.getDiscardedCards()){</span>
-<span class="nc" id="L32">            newDiscardedCards.add(new CardDTO(card)); </span>
-<span class="nc" id="L33">        }</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        for (Card card : deck.getDiscardedCards()){</span>
+<span class="fc" id="L32">            newDiscardedCards.add(new CardDTO(card)); </span>
+<span class="fc" id="L33">        }</span>
 
 <span class="fc" id="L35">        this.discardedCards=newDiscardedCards; </span>
 <span class="fc" id="L36">        this.notDiscardedCards=newNotDiscardedCards; </span>
 <span class="fc" id="L37">    }</span>
 
-<span class="nc" id="L39">    public DeckInGameDTO(){}</span>
+<span class="fc" id="L39">    public DeckInGameDTO(){}</span>
 
     
     

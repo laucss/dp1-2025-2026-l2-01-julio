@@ -89,94 +89,100 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.configuration.services.UserDetails
 <span class="fc" id="L89">                .requestMatchers(&quot;/api/v1/auth/**&quot;).permitAll()</span>
 <span class="fc" id="L90">                .requestMatchers(&quot;/api/v1/developers&quot;).permitAll()</span>
 <span class="fc" id="L91">                .requestMatchers(&quot;/api/v1/plan&quot;).permitAll()</span>
+<span class="fc" id="L92">                .requestMatchers(&quot;/api/v1/statistics/ranking&quot;).permitAll()</span>
 
                 // API restringida para usuarios autenticados
-<span class="fc" id="L94">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/achievements&quot;).authenticated()</span>
-<span class="fc" id="L95">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/achievements/**&quot;).authenticated()</span>
-<span class="fc" id="L96">                .requestMatchers(HttpMethod.PUT,&quot;/api/v1/users/**&quot;).authenticated()</span>
-<span class="fc" id="L97">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/users/**&quot;).authenticated()</span>
-<span class="fc" id="L98">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/rooms/**&quot;).authenticated()</span>
+<span class="fc" id="L95">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/achievements&quot;).authenticated()</span>
+<span class="fc" id="L96">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/achievements/**&quot;).authenticated()</span>
+<span class="fc" id="L97">                .requestMatchers(HttpMethod.PUT,&quot;/api/v1/users/**&quot;).authenticated()</span>
+<span class="fc" id="L98">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/users/**&quot;).authenticated()</span>
+<span class="fc" id="L99">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/rooms/**&quot;).authenticated()</span>
                 
                 // API restringida para jugadores
-<span class="fc" id="L101">                .requestMatchers(HttpMethod.POST, &quot;/api/v1/matches/lobbies&quot;).hasAnyAuthority(PLAYER)</span>
-<span class="fc" id="L102">                .requestMatchers(HttpMethod.PUT, &quot;/api/v1/matches/{id}/discardConfirmed&quot;).hasAnyAuthority(PLAYER)</span>
-<span class="fc" id="L103">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
-<span class="fc" id="L104">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
-<span class="fc" id="L105">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/matches/{matchId}/{playerId}/drawRewardCard&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
-<span class="fc" id="L106">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/matches/{matchId}/{winnerId}/steal-card-from/{loserId}&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
-<span class="fc" id="L107">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/matches/{matchId}/notify-fight-resolved&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
-<span class="fc" id="L108">                .requestMatchers(HttpMethod.PUT,&quot;/api/v1/matches/{matchId}/move&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
-<span class="fc" id="L109">                .requestMatchers(HttpMethod.POST, &quot;/api/v1/bag/validate-weapon/{matchId}&quot;).permitAll()</span>
-<span class="fc" id="L110">                .requestMatchers(HttpMethod.GET, &quot;/api/v1/deck/**&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+<span class="fc" id="L102">                .requestMatchers(HttpMethod.POST, &quot;/api/v1/lobbies&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+<span class="fc" id="L103">                .requestMatchers(HttpMethod.PUT, &quot;/api/v1/matches/{id}/discardConfirmed&quot;).hasAnyAuthority(PLAYER)</span>
+<span class="fc" id="L104">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+<span class="fc" id="L105">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/matches/{matchId}/{playerId}/drawCardFromDeck&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+<span class="fc" id="L106">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/matches/{matchId}/{playerId}/drawRewardCard&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+<span class="fc" id="L107">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/matches/{matchId}/{winnerId}/steal-card-from/{loserId}&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+                // .requestMatchers(HttpMethod.POST,&quot;/api/v1/matches/{matchId}/notify-fight-resolved&quot;).hasAnyAuthority(PLAYER, ADMIN)
+<span class="fc" id="L109">                .requestMatchers(HttpMethod.PUT,&quot;/api/v1/matches/{matchId}/move&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+<span class="fc" id="L110">                .requestMatchers(HttpMethod.POST, &quot;/api/v1/bag/validate-weapon/{matchId}&quot;).permitAll()</span>
+<span class="fc" id="L111">                .requestMatchers(HttpMethod.GET, &quot;/api/v1/deck/**&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+<span class="fc" id="L112">                .requestMatchers(&quot;/api/v1/voting/**&quot;).hasAnyAuthority(PLAYER)</span>
 
-<span class="fc" id="L112">                .requestMatchers(HttpMethod.GET, &quot;/api/v1/voting/**&quot;).hasAnyAuthority(PLAYER, ADMIN) //TODO</span>
-<span class="fc" id="L113">                .requestMatchers(HttpMethod.POST, &quot;/api/v1/voting/vote/**&quot;).hasAnyAuthority(PLAYER, ADMIN) //TODO</span>
+<span class="fc" id="L114">                .requestMatchers(HttpMethod.GET, &quot;/api/v1/voting/**&quot;).hasAnyAuthority(PLAYER, ADMIN) //TODO</span>
+<span class="fc" id="L115">                .requestMatchers(HttpMethod.POST, &quot;/api/v1/voting/vote/**&quot;).hasAnyAuthority(PLAYER, ADMIN) //TODO</span>
 
 
                 // API restringida para administradores
-<span class="fc" id="L117">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/achievements/**&quot;).hasAuthority(ADMIN)</span>
-<span class="fc" id="L118">                .requestMatchers(HttpMethod.PUT,&quot;/api/v1/achievements/**&quot;).hasAuthority(ADMIN)</span>
-<span class="fc" id="L119">                .requestMatchers(HttpMethod.DELETE,&quot;/api/v1/achievements/**&quot;).hasAuthority(ADMIN)</span>
-<span class="fc" id="L120">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/users/**&quot;).hasAuthority(ADMIN)</span>
-<span class="fc" id="L121">                .requestMatchers(HttpMethod.DELETE,&quot;/api/v1/users/**&quot;).hasAuthority(ADMIN)</span>
-<span class="fc" id="L122">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/matches/finishedAndInProgress&quot;).hasAuthority(ADMIN)</span>
-<span class="fc" id="L123">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/matches/finishedMatches&quot;).hasAuthority(ADMIN)</span>
+<span class="fc" id="L119">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/achievements/**&quot;).hasAuthority(ADMIN)</span>
+<span class="fc" id="L120">                .requestMatchers(HttpMethod.PUT,&quot;/api/v1/achievements/**&quot;).hasAuthority(ADMIN)</span>
+<span class="fc" id="L121">                .requestMatchers(HttpMethod.DELETE,&quot;/api/v1/achievements/**&quot;).hasAuthority(ADMIN)</span>
+<span class="fc" id="L122">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/users/**&quot;).hasAuthority(ADMIN)</span>
+<span class="fc" id="L123">                .requestMatchers(HttpMethod.DELETE,&quot;/api/v1/users/**&quot;).hasAuthority(ADMIN)</span>
+<span class="fc" id="L124">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/matches/finishedAndInProgress&quot;).hasAuthority(ADMIN)</span>
+<span class="fc" id="L125">                .requestMatchers(HttpMethod.GET,&quot;/api/v1/matches/finishedMatches&quot;).hasAuthority(ADMIN)</span>
 
 
                 // API restringida para jugadores o administradores
-<span class="fc" id="L127">                .requestMatchers(&quot;/api/v1/matches/**&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
-<span class="fc" id="L128">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/bag/validate&quot;).permitAll()</span>
+<span class="fc" id="L129">                .requestMatchers(&quot;/api/v1/lobbies/**&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+<span class="fc" id="L130">                .requestMatchers(&quot;/api/v1/matches/**&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+<span class="fc" id="L131">                .requestMatchers(HttpMethod.POST,&quot;/api/v1/bag/validate&quot;).permitAll()</span>
                 
-<span class="fc" id="L130">                .requestMatchers(&quot;/api/v1/friendRequests/**&quot;).authenticated()</span>
+<span class="fc" id="L133">                .requestMatchers(&quot;/api/v1/friendRequests/**&quot;).authenticated()</span>
 
-<span class="fc" id="L132">                .requestMatchers(&quot;/api/v1/notifications/**&quot;).authenticated()</span>
+<span class="fc" id="L135">                .requestMatchers(&quot;/api/v1/invitations/**&quot;).authenticated()</span>
+<span class="fc" id="L136">                .requestMatchers(&quot;/api/v1/notifications/**&quot;).authenticated()</span>
+<span class="fc" id="L137">                .requestMatchers(&quot;/api/v1/actions/**&quot;).authenticated()</span>
 
-<span class="fc" id="L134">                .requestMatchers(&quot;/api/v1/players/**&quot;).authenticated()</span>
+<span class="fc" id="L139">                .requestMatchers(&quot;/api/v1/players/**&quot;).authenticated()</span>
 
-<span class="fc" id="L136">                .requestMatchers(&quot;/api/v1/statistics/**&quot;).authenticated()</span>
+<span class="fc" id="L141">                .requestMatchers(&quot;/api/v1/statistics/**&quot;).authenticated()</span>
 
-<span class="fc" id="L138">                .requestMatchers(&quot;/api/v1/players/**&quot;).authenticated()</span>
+<span class="fc" id="L143">                .requestMatchers(&quot;/api/v1/players/**&quot;).authenticated()</span>
 
-<span class="fc" id="L140">                .requestMatchers(&quot;/api/v1/statistics/**&quot;).authenticated()</span>
+<span class="fc" id="L145">                .requestMatchers(&quot;/api/v1/statistics/**&quot;).authenticated()</span>
 
-<span class="fc" id="L142">                .requestMatchers(&quot;/api/v1/match/{matchId}/chat/**&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+<span class="fc" id="L147">                .requestMatchers(&quot;/api/v1/match/{matchId}/chat/**&quot;).hasAnyAuthority(PLAYER, ADMIN)</span>
+<span class="fc" id="L148">                .requestMatchers(&quot;/api/v1/fights/**&quot;).authenticated()</span>
                 
                 // El resto denegado
-<span class="fc" id="L145">                .anyRequest().denyAll()</span>
+<span class="fc" id="L151">                .anyRequest().denyAll()</span>
             )
 
 
-<span class="fc" id="L149">			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);</span>
-<span class="fc" id="L150">		return http.build();</span>
+<span class="fc" id="L155">			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);</span>
+<span class="fc" id="L156">		return http.build();</span>
 	}
 
 	@Bean
 	public AuthTokenFilter authenticationJwtTokenFilter() {
-<span class="fc" id="L155">		return new AuthTokenFilter();</span>
+<span class="fc" id="L161">		return new AuthTokenFilter();</span>
 	}
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
-<span class="fc" id="L160">		return config.getAuthenticationManager();</span>
+<span class="fc" id="L166">		return config.getAuthenticationManager();</span>
 	}
 
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-<span class="fc" id="L166">		return new BCryptPasswordEncoder();</span>
+<span class="fc" id="L172">		return new BCryptPasswordEncoder();</span>
 	}
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-<span class="fc" id="L171">        CorsConfiguration configuration = new CorsConfiguration();</span>
-<span class="fc" id="L172">        configuration.setAllowedOrigins(List.of(&quot;http://localhost:3000&quot;));</span>
-<span class="fc" id="L173">        configuration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;));</span>
-<span class="fc" id="L174">        configuration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
-<span class="fc" id="L175">        configuration.setAllowCredentials(true); // Permite enviar JWT en headers/cookies</span>
+<span class="fc" id="L177">        CorsConfiguration configuration = new CorsConfiguration();</span>
+<span class="fc" id="L178">        configuration.setAllowedOrigins(List.of(&quot;http://localhost:3000&quot;));</span>
+<span class="fc" id="L179">        configuration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;));</span>
+<span class="fc" id="L180">        configuration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
+<span class="fc" id="L181">        configuration.setAllowCredentials(true); // Permite enviar JWT en headers/cookies</span>
 
-<span class="fc" id="L177">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
-<span class="fc" id="L178">        source.registerCorsConfiguration(&quot;/**&quot;, configuration);</span>
-<span class="fc" id="L179">        return source;</span>
+<span class="fc" id="L183">        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="fc" id="L184">        source.registerCorsConfiguration(&quot;/**&quot;, configuration);</span>
+<span class="fc" id="L185">        return source;</span>
     }
 
 }

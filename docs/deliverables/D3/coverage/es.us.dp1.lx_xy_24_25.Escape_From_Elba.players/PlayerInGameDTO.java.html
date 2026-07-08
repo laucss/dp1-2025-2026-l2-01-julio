@@ -38,24 +38,35 @@ public class PlayerInGameDTO {
 <span class="fc" id="L38">        this.strength = player.getStrength();</span>
 <span class="fc" id="L39">        this.actionPoints = player.getActionPoints();</span>
 <span class="fc" id="L40">        this.user= player.getUser();</span>
-<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        this.currentRoom = player.getRoom() != null ? new RoomDTO(player.getRoom()) : null;</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        this.currentRoom = player.getRoom() != null ? new RoomDTO(player.getRoom()) : null;</span>
 <span class="fc" id="L42">    }</span>
 
 
-<span class="nc" id="L45">    public PlayerInGameDTO(Player player, HandInGame hand, BagInGame bag) {</span>
-<span class="nc" id="L46">        this.id = player.getId();</span>
-<span class="nc" id="L47">        this.strength = player.getStrength();</span>
-<span class="nc" id="L48">        this.actionPoints = player.getActionPoints();</span>
-<span class="nc" id="L49">        this.user= player.getUser();</span>
-<span class="nc bnc" id="L50" title="All 2 branches missed.">        this.currentRoom = player.getRoom() != null ? new RoomDTO(player.getRoom()) : null;</span>
-<span class="nc" id="L51">        this.hand = new HandInGameDTO(hand);</span>
-<span class="nc" id="L52">        this.bag = new BagInGameDTO(bag);</span>
+<span class="fc" id="L45">    public PlayerInGameDTO(Player player, HandInGame hand, BagInGame bag) {</span>
+<span class="fc" id="L46">        this.id = player.getId();</span>
+<span class="fc" id="L47">        this.strength = player.getStrength();</span>
+<span class="fc" id="L48">        this.actionPoints = player.getActionPoints();</span>
+<span class="fc" id="L49">        this.user= player.getUser();</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        this.currentRoom = player.getRoom() != null ? new RoomDTO(player.getRoom()) : null;</span>
+<span class="fc" id="L51">        this.hand = new HandInGameDTO(hand);</span>
+<span class="fc" id="L52">        this.bag = new BagInGameDTO(bag);</span>
 
-<span class="nc" id="L54">    }</span>
+<span class="fc" id="L54">    }</span>
+
+    //Se usa para el historial
+<span class="fc" id="L57">    public PlayerInGameDTO(User user) {</span>
+<span class="fc" id="L58">        this.user = user;</span>
+<span class="fc" id="L59">        this.id = null;           </span>
+<span class="fc" id="L60">        this.strength = null;</span>
+<span class="fc" id="L61">        this.actionPoints = null;</span>
+<span class="fc" id="L62">        this.currentRoom = null;</span>
+<span class="fc" id="L63">        this.hand = null;</span>
+<span class="fc" id="L64">        this.bag = null;</span>
+<span class="fc" id="L65">    }</span>
 
 
-<span class="nc" id="L57">    public PlayerInGameDTO() {</span>
-<span class="nc" id="L58">    }</span>
+<span class="fc" id="L68">    public PlayerInGameDTO() {</span>
+<span class="fc" id="L69">    }</span>
     
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -61,7 +61,6 @@ public class BagService {
      */
     @Transactional
     public void createPlayerbag(Integer matchId, Integer playerId){
-        // TODO: revisar si tengo que checkear que match exista
 
         Map<Integer, BagInGame> playerMap = activesBags.computeIfAbsent(matchId, m -> new HashMap<>());
 
@@ -77,7 +76,6 @@ public class BagService {
     @Transactional
     public void deleteMatchBags(Integer matchId){
         //playerService.findById(playerId); 
-        // TODO: revisar si tengo que checkear que match exista
 
         activesBags.remove(matchId); 
     }

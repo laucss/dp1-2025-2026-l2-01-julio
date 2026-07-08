@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MiniMatchDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.user</a> &gt; <span class="el_source">MiniMatchDTO.java</span></div><h1>MiniMatchDTO.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.user;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,39 +9,39 @@ public class MiniMatchDTO {
     private String status;
     private List&lt;MatchPlayerDTO&gt; players;
   
-<span class="nc" id="L13">    public MiniMatchDTO(Match match) {</span>
-<span class="nc" id="L14">        this.id = match.getId();</span>
-<span class="nc bnc" id="L15" title="All 2 branches missed.">        this.status = match.getStatus() != null ? match.getStatus().name() : null;</span>
-<span class="nc bnc" id="L16" title="All 2 branches missed.">        this.players = match.getPlayers() != null </span>
-<span class="nc" id="L17">            ? match.getPlayers().stream()</span>
-<span class="nc" id="L18">                .map(MatchPlayerDTO::new)</span>
-<span class="nc" id="L19">                .collect(Collectors.toList())</span>
-<span class="nc" id="L20">            : null;</span>
-<span class="nc" id="L21">    }</span>
+<span class="fc" id="L12">    public MiniMatchDTO(Match match) {</span>
+<span class="fc" id="L13">        this.id = match.getId();</span>
+<span class="fc bfc" id="L14" title="All 2 branches covered.">        this.status = match.getStatus() != null ? match.getStatus().name() : null;</span>
+<span class="fc bfc" id="L15" title="All 2 branches covered.">        this.players = match.getPlayers() != null </span>
+<span class="fc" id="L16">            ? match.getPlayers().stream()</span>
+<span class="fc" id="L17">                .map(MatchPlayerDTO::new)</span>
+<span class="fc" id="L18">                .collect(Collectors.toList())</span>
+<span class="fc" id="L19">            : null;</span>
+<span class="fc" id="L20">    }</span>
 
     public Integer getId() {
-<span class="nc" id="L24">        return id;</span>
+<span class="fc" id="L23">        return id;</span>
     }
 
     public void setId(Integer id) {
-<span class="nc" id="L28">        this.id = id;</span>
-<span class="nc" id="L29">    }</span>
+<span class="fc" id="L27">        this.id = id;</span>
+<span class="fc" id="L28">    }</span>
 
     public String getStatus() {
-<span class="nc" id="L32">        return status;</span>
+<span class="fc" id="L31">        return status;</span>
     }
 
     public void setStatus(String status) {
-<span class="nc" id="L36">        this.status = status;</span>
-<span class="nc" id="L37">    }</span>
+<span class="fc" id="L35">        this.status = status;</span>
+<span class="fc" id="L36">    }</span>
 
     public List&lt;MatchPlayerDTO&gt; getPlayers() {
-<span class="nc" id="L40">        return players;</span>
+<span class="fc" id="L39">        return players;</span>
     }
 
     public void setPlayers(List&lt;MatchPlayerDTO&gt; players) {
-<span class="nc" id="L44">        this.players = players;</span>
-<span class="nc" id="L45">    }</span>
+<span class="fc" id="L43">        this.players = players;</span>
+<span class="fc" id="L44">    }</span>
 
     // DTO interno para representar un jugador en una partida
     public static class MatchPlayerDTO {
@@ -50,37 +49,37 @@ public class MiniMatchDTO {
         private Integer userId;
         private String username;
 
-<span class="nc" id="L53">        public MatchPlayerDTO(es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player player) {</span>
-<span class="nc" id="L54">            this.id = player.getId();</span>
-<span class="nc bnc" id="L55" title="All 2 branches missed.">            if (player.getUser() != null) {</span>
-<span class="nc" id="L56">                this.userId = player.getUser().getId();</span>
-<span class="nc" id="L57">                this.username = player.getUser().getUsername();</span>
+<span class="fc" id="L52">        public MatchPlayerDTO(es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player player) {</span>
+<span class="fc" id="L53">            this.id = player.getId();</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            if (player.getUser() != null) {</span>
+<span class="fc" id="L55">                this.userId = player.getUser().getId();</span>
+<span class="fc" id="L56">                this.username = player.getUser().getUsername();</span>
             }
-<span class="nc" id="L59">        }</span>
+<span class="fc" id="L58">        }</span>
 
         public Integer getId() {
-<span class="nc" id="L62">            return id;</span>
+<span class="fc" id="L61">            return id;</span>
         }
 
         public void setId(Integer id) {
-<span class="nc" id="L66">            this.id = id;</span>
-<span class="nc" id="L67">        }</span>
+<span class="fc" id="L65">            this.id = id;</span>
+<span class="fc" id="L66">        }</span>
 
         public Integer getUserId() {
-<span class="nc" id="L70">            return userId;</span>
+<span class="fc" id="L69">            return userId;</span>
         }
 
         public void setUserId(Integer userId) {
-<span class="nc" id="L74">            this.userId = userId;</span>
-<span class="nc" id="L75">        }</span>
+<span class="fc" id="L73">            this.userId = userId;</span>
+<span class="fc" id="L74">        }</span>
 
         public String getUsername() {
-<span class="nc" id="L78">            return username;</span>
+<span class="fc" id="L77">            return username;</span>
         }
 
         public void setUsername(String username) {
-<span class="nc" id="L82">            this.username = username;</span>
-<span class="nc" id="L83">        }</span>
+<span class="fc" id="L81">            this.username = username;</span>
+<span class="fc" id="L82">        }</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

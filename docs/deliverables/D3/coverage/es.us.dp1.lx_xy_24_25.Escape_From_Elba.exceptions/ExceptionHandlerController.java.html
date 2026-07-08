@@ -20,10 +20,10 @@ import org.springframework.web.context.request.WebRequest;
 	@ExceptionHandler(Exception.class)
 	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
 	public ResponseEntity&lt;ErrorMessage&gt; globalExceptionHandler(Exception ex, WebRequest request) {
-<span class="fc" id="L23">		ErrorMessage message = new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), new Date(), ex.getMessage(),</span>
-<span class="fc" id="L24">				request.getDescription(false));</span>
+<span class="nc" id="L23">		ErrorMessage message = new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), new Date(), ex.getMessage(),</span>
+<span class="nc" id="L24">				request.getDescription(false));</span>
 
-<span class="fc" id="L26">		return new ResponseEntity&lt;&gt;(message, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="nc" id="L26">		return new ResponseEntity&lt;&gt;(message, HttpStatus.INTERNAL_SERVER_ERROR);</span>
 	}
 
 	@ExceptionHandler(ResourceNotFoundException.class)
@@ -65,14 +65,17 @@ import org.springframework.web.context.request.WebRequest;
 		PlayerNotInTheGame.class, 
 		MoreThan7CardsDrawnException.class,
 		EmptyWeaponException.class,
-		MoreVotesThanPlayersException.class
+		MoreVotesThanPlayersException.class,
+		InvalidMovementException.class,
+		GameIsNotPublicException.class,
+		AlreadyPlayingException.class
 	})
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	public ResponseEntity&lt;ErrorMessage&gt; handleBadRequestExceptions(RuntimeException ex, WebRequest request) {
-<span class="fc" id="L72">		ErrorMessage message = new ErrorMessage(HttpStatus.BAD_REQUEST.value(), new Date(), ex.getMessage(),</span>
-<span class="fc" id="L73">				request.getDescription(false));</span>
+<span class="fc" id="L75">		ErrorMessage message = new ErrorMessage(HttpStatus.BAD_REQUEST.value(), new Date(), ex.getMessage(),</span>
+<span class="fc" id="L76">				request.getDescription(false));</span>
 
-<span class="fc" id="L75">		return new ResponseEntity&lt;&gt;(message, HttpStatus.BAD_REQUEST);</span>
+<span class="fc" id="L78">		return new ResponseEntity&lt;&gt;(message, HttpStatus.BAD_REQUEST);</span>
 	}
 
 
@@ -89,13 +92,13 @@ import org.springframework.web.context.request.WebRequest;
 	@ExceptionHandler(value = MethodArgumentNotValidException.class)
 	public final ResponseEntity&lt;ErrorMessage&gt; handleMethodArgumentException(MethodArgumentNotValidException ex,
 			WebRequest request) {
-<span class="fc" id="L92">		Map&lt;String, Object&gt; fieldError = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L93">		List&lt;FieldError&gt; fieldErrors = ex.getBindingResult().getFieldErrors();</span>
-<span class="fc" id="L94">		fieldErrors.stream().forEach(error -&gt; fieldError.put(error.getField(), error.getDefaultMessage()));</span>
-<span class="fc" id="L95">		ErrorMessage message = new ErrorMessage(HttpStatus.BAD_REQUEST.value(), new Date(), fieldError.toString(),</span>
-<span class="fc" id="L96">				request.getDescription(false));</span>
+<span class="fc" id="L95">		Map&lt;String, Object&gt; fieldError = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L96">		List&lt;FieldError&gt; fieldErrors = ex.getBindingResult().getFieldErrors();</span>
+<span class="fc" id="L97">		fieldErrors.stream().forEach(error -&gt; fieldError.put(error.getField(), error.getDefaultMessage()));</span>
+<span class="fc" id="L98">		ErrorMessage message = new ErrorMessage(HttpStatus.BAD_REQUEST.value(), new Date(), fieldError.toString(),</span>
+<span class="fc" id="L99">				request.getDescription(false));</span>
 
-<span class="fc" id="L98">		return new ResponseEntity&lt;&gt;(message, HttpStatus.BAD_REQUEST);</span>
+<span class="fc" id="L101">		return new ResponseEntity&lt;&gt;(message, HttpStatus.BAD_REQUEST);</span>
 	}
 
 	
@@ -104,10 +107,10 @@ import org.springframework.web.context.request.WebRequest;
 	@ExceptionHandler(value = AccessDeniedException.class)
 	@ResponseStatus(HttpStatus.FORBIDDEN)
 	public ResponseEntity&lt;ErrorMessage&gt; handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
-<span class="fc" id="L107">		ErrorMessage message = new ErrorMessage(HttpStatus.FORBIDDEN.value(), new Date(), ex.getMessage(),</span>
-<span class="fc" id="L108">				request.getDescription(false));</span>
+<span class="fc" id="L110">		ErrorMessage message = new ErrorMessage(HttpStatus.FORBIDDEN.value(), new Date(), ex.getMessage(),</span>
+<span class="fc" id="L111">				request.getDescription(false));</span>
 
-<span class="fc" id="L110">		return new ResponseEntity&lt;&gt;(message, HttpStatus.FORBIDDEN);</span>
+<span class="fc" id="L113">		return new ResponseEntity&lt;&gt;(message, HttpStatus.FORBIDDEN);</span>
 	}
 
 }

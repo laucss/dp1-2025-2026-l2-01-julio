@@ -1,125 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificationController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications</a> &gt; <span class="el_source">NotificationController.java</span></div><h1>NotificationController.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications;
 
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequestMapping(&quot;/api/v1/notifications&quot;)
-<span class="fc" id="L18">public class NotificationController {</span>
+public class NotificationController {
+
+    private final NotificationService notificationService; 
+
     @Autowired
-    private NotificationService notificationService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private MatchRepository matchRepository;
-    @Autowired
-    private PlayerRepository playerRepository;
+<span class="fc" id="L21">    public NotificationController(NotificationService notificationService) {</span>
+<span class="fc" id="L22">        this.notificationService = notificationService; </span>
 
-    @PostMapping(&quot;/invite&quot;)
-    public ResponseEntity&lt;?&gt; sendInvite(@RequestBody InviteRequest request) {
-<span class="nc" id="L30">        Optional&lt;User&gt; senderOpt = userRepository.findById(request.getSenderId());</span>
-<span class="nc" id="L31">        Optional&lt;User&gt; receiverOpt = userRepository.findById(request.getReceiverId());</span>
-<span class="nc" id="L32">        Optional&lt;Match&gt; matchOpt = matchRepository.findById(request.getMatchId());</span>
-<span class="nc bnc" id="L33" title="All 6 branches missed.">        if (senderOpt.isEmpty() || receiverOpt.isEmpty() || matchOpt.isEmpty()) {</span>
-<span class="nc" id="L34">            return ResponseEntity.badRequest().body(&quot;Datos inválidos&quot;);</span>
-        }
-        try {
-<span class="nc" id="L37">            Notification notification = notificationService.sendInvite(senderOpt.get(), receiverOpt.get(), matchOpt.get());</span>
-<span class="nc" id="L38">            return ResponseEntity.ok(notification);</span>
-<span class="nc" id="L39">        } catch (IllegalArgumentException e) {</span>
-<span class="nc" id="L40">            return ResponseEntity.badRequest().body(e.getMessage());</span>
-        }
+<span class="fc" id="L24">    }</span>
+
+    @GetMapping()
+    @Operation(summary = &quot;Get user notifications&quot;, description = &quot;Get all friend request and match invitation of current user&quot;)
+    public ResponseEntity&lt;List&lt;Notification&gt;&gt; getNotfications() {
+<span class="nc" id="L29">        return new ResponseEntity&lt;&gt;(notificationService.getAllNotifications(), HttpStatus.OK);</span>
     }
 
-    @GetMapping
-    public ResponseEntity&lt;?&gt; getNotifications(@RequestParam Integer receiverId, 
-                                              @RequestParam(required = false) Integer senderId,
-                                              @RequestParam(required = false) Integer matchId) {
-        // Si se proporcionan senderId y matchId, buscar notificación específica entre esos usuarios
-<span class="nc bnc" id="L49" title="All 4 branches missed.">        if (senderId != null &amp;&amp; matchId != null) {</span>
-<span class="nc" id="L50">            Optional&lt;Notification&gt; notification = notificationService.getNotificationBetweenUsers(senderId, receiverId, matchId);</span>
-<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (notification.isPresent()) {</span>
-<span class="nc" id="L52">                return ResponseEntity.ok(new Notification[]{notification.get()});</span>
-            } else {
-<span class="nc" id="L54">                return ResponseEntity.ok(new Notification[]{});</span>
-            }
-        }
-        // Si solo se proporciona receiverId, obtener todas las notificaciones pendientes para ese receiver
-<span class="nc" id="L58">        List&lt;Notification&gt; notifications = notificationService.getPendingNotifications(receiverId);</span>
-<span class="nc" id="L59">        return ResponseEntity.ok(notifications);</span>
-    }
 
-    @PostMapping(&quot;/{id}/accept&quot;)
-    public ResponseEntity&lt;?&gt; acceptInvite(@PathVariable Integer id) {
-<span class="nc" id="L64">        Optional&lt;Notification&gt; notificationOpt = notificationService.getNotification(id);</span>
-<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (notificationOpt.isEmpty()) return ResponseEntity.notFound().build();</span>
-<span class="nc" id="L66">        Notification notification = notificationOpt.get();</span>
-<span class="nc" id="L67">        Match match = notification.getMatch();</span>
-<span class="nc" id="L68">        User receiver = notification.getReceiver();</span>
-        
-<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (match.getStatus() == MatchStatus.PLAYING) {</span>
-<span class="nc" id="L71">            return ResponseEntity.badRequest().body(&quot;La partida ya ha comenzado&quot;);</span>
-        }
-
-        // Verificar si el usuario ya está en la partida
-<span class="nc" id="L75">        boolean alreadyInMatch = match.getPlayers().stream()</span>
-<span class="nc" id="L76">            .anyMatch(p -&gt; p.getUser().getId().equals(receiver.getId()));</span>
-
-<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (alreadyInMatch) {</span>
-            // Ya estaba unido: marcar esta invitación como aceptada y limpiar el resto pero responder 200 con la notificación
-<span class="nc" id="L80">            Notification accepted = notificationService.acceptInvite(notification);</span>
-<span class="nc" id="L81">            notificationService.rejectOtherInvitesForMatch(receiver.getId(), match.getId(), id);</span>
-<span class="nc" id="L82">            return ResponseEntity.ok(accepted);</span>
-        }
-
-<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (match.isFull()) {</span>
-<span class="nc" id="L86">            return ResponseEntity.badRequest().body(&quot;La partida está llena&quot;);</span>
-        }
-        
-        // Agregar al jugador a la partida
-<span class="nc" id="L90">        Player player = new Player();</span>
-<span class="nc" id="L91">        player.setUser(receiver);</span>
-<span class="nc" id="L92">        match.addPlayer(player);</span>
-<span class="nc" id="L93">        playerRepository.save(player);</span>
-<span class="nc" id="L94">        matchRepository.save(match);</span>
-        
-        // Aceptar esta invitación
-<span class="nc" id="L97">        Notification accepted = notificationService.acceptInvite(notification);</span>
-
-        // Rechazar automáticamente todas las otras invitaciones pendientes para este receiver en esta partida
-<span class="nc" id="L100">        notificationService.rejectOtherInvitesForMatch(receiver.getId(), match.getId(), id);</span>
-
-<span class="nc" id="L102">        return ResponseEntity.ok(accepted);</span>
-    }
-
-    @PostMapping(&quot;/{id}/reject&quot;)
-    public ResponseEntity&lt;?&gt; rejectInvite(@PathVariable Integer id) {
-<span class="nc" id="L107">        Optional&lt;Notification&gt; notificationOpt = notificationService.getNotification(id);</span>
-<span class="nc bnc" id="L108" title="All 2 branches missed.">        if (notificationOpt.isEmpty()) return ResponseEntity.notFound().build();</span>
-<span class="nc" id="L109">        notificationService.rejectInvite(notificationOpt.get());</span>
-<span class="nc" id="L110">        return ResponseEntity.ok(&quot;Invitación rechazada&quot;);</span>
-    }
-
-<span class="nc" id="L113">    public static class InviteRequest {</span>
-        private Integer senderId;
-        private Integer receiverId;
-        private Integer matchId;
-<span class="nc" id="L117">        public Integer getSenderId() { return senderId; }</span>
-<span class="nc" id="L118">        public void setSenderId(Integer senderId) { this.senderId = senderId; }</span>
-<span class="nc" id="L119">        public Integer getReceiverId() { return receiverId; }</span>
-<span class="nc" id="L120">        public void setReceiverId(Integer receiverId) { this.receiverId = receiverId; }</span>
-<span class="nc" id="L121">        public Integer getMatchId() { return matchId; }</span>
-<span class="nc" id="L122">        public void setMatchId(Integer matchId) { this.matchId = matchId; }</span>
-    }
+    
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 // import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 
@@ -19,10 +18,10 @@ public class HandService {
     Checkers checkers; 
     //PlayerService playerService; 
 
-<span class="fc" id="L22">    public HandService(Checkers checkers){</span>
-<span class="fc" id="L23">        this.checkers = checkers; </span>
+<span class="fc" id="L21">    public HandService(Checkers checkers){</span>
+<span class="fc" id="L22">        this.checkers = checkers; </span>
         //this.playerService = playerService; 
-<span class="fc" id="L25">    }</span>
+<span class="fc" id="L24">    }</span>
 
     /*
      * Variable que vamos a usar a modo de &quot;almacenamiento&quot; en memoria de las manos. 
@@ -30,19 +29,19 @@ public class HandService {
      * Vamos a tener un map de la siguiente forma: 
      * Map&lt;MatchId, Map&lt;PlayerId, HandInGame&gt;&gt; 
      */
-<span class="fc" id="L33">    private final Map&lt;Integer, Map&lt;Integer, HandInGame&gt;&gt; activesHands = new HashMap&lt;&gt;(); </span>
+<span class="fc" id="L32">    private final Map&lt;Integer, Map&lt;Integer, HandInGame&gt;&gt; activesHands = new HashMap&lt;&gt;(); </span>
 
     /*
      * Método que crea un HandInGame para un jugador
      */
     public void createPlayerHand(Integer matchId, Integer playerId){
 
-<span class="fc" id="L40">        Map&lt;Integer, HandInGame&gt; playerMap = activesHands.computeIfAbsent(matchId, m -&gt; new HashMap&lt;&gt;());</span>
+<span class="fc" id="L39">        Map&lt;Integer, HandInGame&gt; playerMap = activesHands.computeIfAbsent(matchId, m -&gt; new HashMap&lt;&gt;());</span>
 
         // Solo añadimos la mano si no existe
-<span class="fc" id="L43">        playerMap.putIfAbsent(playerId, new HandInGame());</span>
+<span class="fc" id="L42">        playerMap.putIfAbsent(playerId, new HandInGame());</span>
         
-<span class="fc" id="L45">    }</span>
+<span class="fc" id="L44">    }</span>
     /*
      * Método que tras acabar una partida, borra la mano en memoria del jugador 
      */
@@ -51,8 +50,8 @@ public class HandService {
         //playerService.findById(playerId); 
         // TODO: revisar si tengo que checkear que match exista
 
-<span class="fc" id="L54">        activesHands.remove(matchId);  </span>
-<span class="fc" id="L55">    }</span>
+<span class="fc" id="L53">        activesHands.remove(matchId);  </span>
+<span class="fc" id="L54">    }</span>
 
     /*
      * Método que busca la HandInGame del jugador en la partida dada
@@ -60,22 +59,22 @@ public class HandService {
 
     @Transactional(readOnly = true)
     public HandInGame findPlayerHand(Integer matchId, Integer playerId){
-<span class="fc" id="L63">        Map&lt;Integer, HandInGame&gt; playerMap = activesHands.get(matchId);</span>
-<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (playerMap == null) {</span>
-<span class="fc" id="L65">            return new HandInGame(); // devuelvo una lista vacía por si acaso da error porque no se carga hasta que se le da a empezar partida </span>
+<span class="fc" id="L62">        Map&lt;Integer, HandInGame&gt; playerMap = activesHands.get(matchId);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (playerMap == null) {</span>
+<span class="fc" id="L64">            return new HandInGame(); // devuelvo una lista vacía por si acaso da error porque no se carga hasta que se le da a empezar partida </span>
         }
         
-<span class="fc" id="L68">        HandInGame playerHand = playerMap.get(playerId); </span>
+<span class="fc" id="L67">        HandInGame playerHand = playerMap.get(playerId); </span>
 
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">        if (playerHand == null) { // devuelvo una lista vacía por si acaso da error porque no se carga hasta que se le da a empezar partida </span>
-<span class="nc" id="L71">            return new HandInGame(); </span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (playerHand == null) { // devuelvo una lista vacía por si acaso da error porque no se carga hasta que se le da a empezar partida </span>
+<span class="nc" id="L70">            return new HandInGame(); </span>
         }
 
-<span class="fc" id="L74">        return playerHand; </span>
+<span class="fc" id="L73">        return playerHand; </span>
     }
 
     public Map&lt;Integer, HandInGame&gt; findPlayerMap (Integer matchId, Integer playerId){
-<span class="nc" id="L78">        return activesHands.get(matchId); </span>
+<span class="nc" id="L77">        return activesHands.get(matchId); </span>
     }
     /*
      * Método que pasa la carta de la mano del jugador a su bolsa 
@@ -93,15 +92,15 @@ public class HandService {
     
     @Transactional
     public HandInGame addCardToPlayerHand(Card card, Integer matchId, Integer playerId){
-<span class="fc" id="L96">        HandInGame playerHand = findPlayerHand(matchId, playerId); </span>
+<span class="fc" id="L95">        HandInGame playerHand = findPlayerHand(matchId, playerId); </span>
 
-<span class="fc" id="L98">        playerHand.getCards().add(card); </span>
+<span class="fc" id="L97">        playerHand.getCards().add(card); </span>
 
-<span class="fc" id="L100">        activesHands</span>
-<span class="pc" id="L101">            .computeIfAbsent(matchId, m -&gt; new HashMap&lt;&gt;())</span>
-<span class="fc" id="L102">            .put(playerId, playerHand);</span>
+<span class="fc" id="L99">        activesHands</span>
+<span class="pc" id="L100">            .computeIfAbsent(matchId, m -&gt; new HashMap&lt;&gt;())</span>
+<span class="fc" id="L101">            .put(playerId, playerHand);</span>
 
-<span class="fc" id="L104">        return playerHand; </span>
+<span class="fc" id="L103">        return playerHand; </span>
 
     }
 
@@ -109,55 +108,54 @@ public class HandService {
      * Método que quita una carta de la mano del jugador 
      */
 
-
     @Transactional
     public Card removeCardFromPlayerHand(Card card, Integer matchId, Integer playerId){
-<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (card == null) {</span>
-<span class="fc" id="L116">            return null;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (card == null) {</span>
+<span class="fc" id="L114">            return null;</span>
         }
         
-<span class="fc" id="L119">        HandInGame playerHand = findPlayerHand(matchId, playerId); </span>
-<span class="fc" id="L120">        List&lt;Card&gt; playerCards = playerHand.getCards(); </span>
-<span class="fc" id="L121">        Card removedCard = null; </span>
+<span class="fc" id="L117">        HandInGame playerHand = findPlayerHand(matchId, playerId); </span>
+<span class="fc" id="L118">        List&lt;Card&gt; playerCards = playerHand.getCards(); </span>
+<span class="fc" id="L119">        Card removedCard = null; </span>
         
         // Buscar por referencia exacta primero (más confiable para objetos en memoria)
-<span class="fc bfc" id="L124" title="All 2 branches covered.">        for (int i = 0; i &lt; playerCards.size(); i++){</span>
-<span class="fc bfc" id="L125" title="All 2 branches covered.">            if (playerCards.get(i) == card) {</span>
-<span class="fc" id="L126">                removedCard = playerCards.get(i); </span>
-<span class="fc" id="L127">                playerCards.remove(i);</span>
-<span class="fc" id="L128">                break; </span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        for (int i = 0; i &lt; playerCards.size(); i++){</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">            if (playerCards.get(i) == card) {</span>
+<span class="fc" id="L124">                removedCard = playerCards.get(i); </span>
+<span class="fc" id="L125">                playerCards.remove(i);</span>
+<span class="fc" id="L126">                break; </span>
             }
         }
         
         // Si no se encontró por referencia, buscar por ID o letra
-<span class="fc bfc" id="L133" title="All 2 branches covered.">        if (removedCard == null) {</span>
-<span class="pc bpc" id="L134" title="1 of 2 branches missed.">            for (int i = 0; i &lt; playerCards.size(); i++){</span>
-<span class="fc" id="L135">                Card c = playerCards.get(i);</span>
-<span class="fc" id="L136">                boolean match = false;</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        if (removedCard == null) {</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">            for (int i = 0; i &lt; playerCards.size(); i++){</span>
+<span class="fc" id="L133">                Card c = playerCards.get(i);</span>
+<span class="fc" id="L134">                boolean match = false;</span>
                 
                 // Comparar por ID si ambos tienen ID
-<span class="pc bpc" id="L139" title="5 of 6 branches missed.">                if (card.getId() != null &amp;&amp; c.getId() != null &amp;&amp; card.getId().equals(c.getId())) {</span>
-<span class="nc" id="L140">                    match = true;</span>
+<span class="pc bpc" id="L137" title="5 of 6 branches missed.">                if (card.getId() != null &amp;&amp; c.getId() != null &amp;&amp; card.getId().equals(c.getId())) {</span>
+<span class="nc" id="L138">                    match = true;</span>
                 }
                 // Si no hay ID, comparar por letra
-<span class="pc bpc" id="L143" title="2 of 4 branches missed.">                else if (card.getLetter() != null &amp;&amp; card.getLetter().equals(c.getLetter())) {</span>
-<span class="fc" id="L144">                    match = true;</span>
+<span class="pc bpc" id="L141" title="2 of 4 branches missed.">                else if (card.getLetter() != null &amp;&amp; card.getLetter().equals(c.getLetter())) {</span>
+<span class="fc" id="L142">                    match = true;</span>
                 }
                 
-<span class="pc bpc" id="L147" title="1 of 2 branches missed.">                if (match) {</span>
-<span class="fc" id="L148">                    removedCard = playerCards.get(i); </span>
-<span class="fc" id="L149">                    playerCards.remove(i);</span>
-<span class="fc" id="L150">                    break; </span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">                if (match) {</span>
+<span class="fc" id="L146">                    removedCard = playerCards.get(i); </span>
+<span class="fc" id="L147">                    playerCards.remove(i);</span>
+<span class="fc" id="L148">                    break; </span>
                 }
             }
         }
         
         // Persist the updated hand back to the map
-<span class="fc" id="L156">        activesHands</span>
-<span class="pc" id="L157">            .computeIfAbsent(matchId, m -&gt; new HashMap&lt;&gt;())</span>
-<span class="fc" id="L158">            .put(playerId, playerHand);</span>
+<span class="fc" id="L154">        activesHands</span>
+<span class="pc" id="L155">            .computeIfAbsent(matchId, m -&gt; new HashMap&lt;&gt;())</span>
+<span class="fc" id="L156">            .put(playerId, playerHand);</span>
         
-<span class="fc" id="L160">        return removedCard; </span>
+<span class="fc" id="L158">        return removedCard; </span>
 
     }
     
@@ -167,40 +165,40 @@ public class HandService {
 
     public void addFewCardsToPlayerHand (Integer matchId, Integer playerId, List&lt;Card&gt; cards ){
        //TODO: REVISAR ESTA DOS LINEAS, NS SI SON REPETITIVAS
-<span class="fc" id="L170">       Map&lt;Integer, HandInGame&gt; playerMap = activesHands.get(matchId); </span>
-<span class="fc" id="L171">       HandInGame playerHand= findPlayerHand(matchId, playerId); </span>
+<span class="fc" id="L168">       Map&lt;Integer, HandInGame&gt; playerMap = activesHands.get(matchId); </span>
+<span class="fc" id="L169">       HandInGame playerHand= findPlayerHand(matchId, playerId); </span>
 
-<span class="fc bfc" id="L173" title="All 2 branches covered.">       for (Card card : cards){</span>
-<span class="fc" id="L174">        playerHand.getCards().add(card); </span>
-<span class="fc" id="L175">       }</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">       for (Card card : cards){</span>
+<span class="fc" id="L172">        playerHand.getCards().add(card); </span>
+<span class="fc" id="L173">       }</span>
 
-<span class="fc" id="L177">       playerMap.replace(playerId, playerHand); </span>
-<span class="fc" id="L178">       activesHands.replace(matchId, playerMap); </span>
-<span class="fc" id="L179">    }</span>
+<span class="fc" id="L175">       playerMap.replace(playerId, playerHand); </span>
+<span class="fc" id="L176">       activesHands.replace(matchId, playerMap); </span>
+<span class="fc" id="L177">    }</span>
 
     public void update(HandInGameDTO hand, Integer matchId, Integer playerId){
 
         //checkear que exista el player y tal 
 
-<span class="fc" id="L185">        Map&lt;Integer, Map&lt;Integer, HandInGame&gt;&gt; allHands1 = activesHands;</span>
-<span class="fc" id="L186">        Map&lt;Integer, HandInGame&gt; playerMap = activesHands.get(matchId);</span>
+<span class="fc" id="L183">        Map&lt;Integer, Map&lt;Integer, HandInGame&gt;&gt; allHands1 = activesHands;</span>
+<span class="fc" id="L184">        Map&lt;Integer, HandInGame&gt; playerMap = activesHands.get(matchId);</span>
         
-<span class="fc" id="L188">        HandInGame newHand = new HandInGame(); </span>
+<span class="fc" id="L186">        HandInGame newHand = new HandInGame(); </span>
 
         // tengo que hacer lo de newArrayList&lt;&gt;(hand...) dentro del set porque si no se hace así ç
         // y le paso el stream con el tolist directamente, lo entiende como una lista inmutable y daría error 
-<span class="fc" id="L192">        newHand.setCards(new ArrayList&lt;&gt;(hand.getCards().stream()</span>
-<span class="fc" id="L193">            .map(dto -&gt; new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));</span>
+<span class="fc" id="L190">        newHand.setCards(new ArrayList&lt;&gt;(hand.getCards().stream()</span>
+<span class="fc" id="L191">            .map(dto -&gt; new Card(dto.getId(),dto.getFrontImage(), dto.getBackImage(), dto.getLetter())).toList()));</span>
 
-<span class="fc" id="L195">        Map&lt;Integer, Map&lt;Integer, HandInGame&gt;&gt; allHands2 = activesHands;</span>
-<span class="fc" id="L196">        playerMap.put(playerId,newHand); </span>
+<span class="fc" id="L193">        Map&lt;Integer, Map&lt;Integer, HandInGame&gt;&gt; allHands2 = activesHands;</span>
+<span class="fc" id="L194">        playerMap.put(playerId,newHand); </span>
 
-<span class="fc" id="L198">        activesHands.put(matchId, playerMap); </span>
+<span class="fc" id="L196">        activesHands.put(matchId, playerMap); </span>
 
-<span class="fc" id="L200">    }</span>
+<span class="fc" id="L198">    }</span>
 
     public Map&lt;Integer, Map&lt;Integer, HandInGame&gt;&gt; getActivesHands() {
-<span class="fc" id="L203">        return activesHands;</span>
+<span class="fc" id="L201">        return activesHands;</span>
     }
     
 }

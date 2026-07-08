@@ -34,7 +34,7 @@ public class ChatService {
 <span class="fc" id="L34">        var user = userService.findCurrentUser();</span>
 <span class="fc bfc" id="L35" title="All 2 branches covered.">        if (user == null) return Collections.emptyList();</span>
 
-<span class="fc" id="L37">        Optional&lt;Player&gt; maybePlayer = playerService.findByMatchIdAndUserId(matchId, user.getId());</span>
+<span class="fc" id="L37">        Optional&lt;Player&gt; maybePlayer = playerService.findOptionalPlayerByMatchIdAndUserId(matchId, user.getId());</span>
 <span class="fc bfc" id="L38" title="All 2 branches covered.">        if (maybePlayer.isEmpty()) return Collections.emptyList(); </span>
 
 <span class="fc" id="L40">        List&lt;ChatMessage&gt; chat = chatRepository.findByMatchId(matchId);</span>
@@ -54,7 +54,7 @@ public class ChatService {
 <span class="fc" id="L54">            throw new IllegalStateException(&quot;Usuario no autenticado&quot;);</span>
 
 <span class="fc" id="L56">        Optional&lt;Player&gt; maybeAuthor =</span>
-<span class="fc" id="L57">                playerService.findByMatchIdAndUserId(matchId, user.getId());</span>
+<span class="fc" id="L57">                playerService.findOptionalPlayerByMatchIdAndUserId(matchId, user.getId());</span>
 
 <span class="fc" id="L59">        Player author = maybeAuthor.orElseThrow(</span>
 <span class="fc" id="L60">                () -&gt; new IllegalStateException(&quot;No eres jugador de esta partida&quot;)</span>
