@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -12,14 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.server.ResponseStatusException;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.LobbyNotFound;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations.InvitationRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
@@ -47,6 +43,9 @@ public class LobbyServiceTests {
     private Checkers checkers;
 
     @Mock
+    private InvitationRepository invitationRepository;
+
+    @Mock
     private LobbyWebsocketController lobbyWebsocketController;
 
     @BeforeEach
@@ -56,7 +55,8 @@ public class LobbyServiceTests {
             checkers,
             userService,
             playerService,
-            lobbyWebsocketController
+            lobbyWebsocketController,
+            invitationRepository
         );
     }
 

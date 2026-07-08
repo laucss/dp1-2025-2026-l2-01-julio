@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar, NavbarBrand, NavLink, NavItem, Nav, NavbarText, NavbarToggler, Collapse, Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
+import { Navbar, NavbarBrand, NavLink, NavItem, Nav, NavbarText, NavbarToggler, Collapse } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import tokenService from './services/token.service';
 import jwt_decode from "jwt-decode";
 import Sidebar from './Sidebar';
-import { FaBars } from 'react-icons/fa'
+import { FaBars } from 'react-icons/fa';
 import { IoNotifications } from "react-icons/io5";
-import '../src/static/css/appnavbar/navbar.css'
+import { Client } from '@stomp/stompjs';
+import '../src/static/css/appnavbar/navbar.css';
 import NotificationsModal from './NotificationsModal';
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AppNavbar() {
     const [roles, setRoles] = useState([]);
@@ -17,53 +21,114 @@ function AppNavbar() {
     const [collapsed, setCollapsed] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
-
     const [showNotifications, setShowNotifications] = useState(false);
       
-      const handleNotificationsClick = () => {
+    const handleNotificationsClick = () => {
         setShowNotifications(true);
-      };
-      const handleCloseNotifications = () => setShowNotifications(false);
+    };
+    const handleCloseNotifications = () => setShowNotifications(false);
     
     const toggleNavbar = () => setCollapsed(!collapsed);
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+    // Función para transformar el NotificationType del backend en un texto amigable
+    const getToastMessage = (type) => {
+        switch (type) {
+            case "FRIEND_REQUEST":
+                return "You received a new friend request!";
+            case "MATCH_INVITATION_AS_PLAYER":
+                return "You have been invited to join a match as a player!";
+            case "MATCH_INVITATION_AS_SPECTATOR":
+                return "You have been invited to spectate a match!";
+            case "ACCEPT_FRIEND_REQUEST":
+                return "Your friend request was accepted!";
+            case "REJECT_FRIEND_REQUEST":
+                return "Your friend request was rejected.";
+            case "ACCEPT_INVITATION":
+                return "A player accepted your match invitation!";
+            case "REJECT_INVITATION":
+                return "A player rejected your match invitation.";
+            default:
+                return "🔔 New notification received!";
+        }
+    };
 
     useEffect(() => {
         if (jwt) {
             setRoles(jwt_decode(jwt).authorities);
             setUsername(jwt_decode(jwt).sub);
-            setUser(tokenService.getUser());
+            const currentUser = tokenService.getUser();
+            setUser(currentUser);
         }
-    }, [jwt])
+    }, [jwt]);
     
-    useEffect(() => {
+    const fetchNotifications = async () => {
         if (!jwt) return;
+        try {
+            const res = await fetch("/api/v1/notifications", {
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                },
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+            setNotifications(Array.isArray(data) ? data : []);
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
-        const fetchNotifications = async () => {
-            try {
-                const res = await fetch("/api/v1/notifications", {
-                    headers: {
-                        Authorization: `Bearer ${jwt}`,
-                    },
+    useEffect(() => {
+        if (jwt) {
+            fetchNotifications();
+        }
+    }, [jwt]);
+
+    useEffect(() => {
+        if (!jwt || !user?.id) return;
+
+        const client = new Client({
+            brokerURL: 'ws://localhost:8080/ws', 
+            connectHeaders: { 
+                'Authorization': `Bearer ${jwt}` 
+            },
+            onConnect: () => {
+                console.log('Connected to notifications websocket');
+                
+                client.subscribe(`/topic/user.${user.id}.notifications`, (message) => {
+                    if (message.body) {
+                        const notificationType = message.body.replace(/(^"|"$)/g, '').trim(); 
+                        
+                        console.log('notificationType limpia:', notificationType);
+
+                        toast.info(getToastMessage(notificationType), {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "colored",
+                        });
+
+                        fetchNotifications();
+                    }
                 });
+            },
+            onStompError: (frame) => {
+                console.error('Broker error: ' + frame.headers['message']);
+            }
+        });
 
-                if (!res.ok) return;
+        client.activate();
 
-                const data = await res.json();
-                setNotifications(Array.isArray(data) ? data : []);
-            } catch (e) {
-                console.error(e);
+        return () => {
+            if (client.active) {
+                client.deactivate();
             }
         };
-
-        fetchNotifications();
-
-        const interval = setInterval(fetchNotifications, 5000);
-
-        return () => clearInterval(interval);
-
-    }, [jwt]);
+    }, [jwt, user?.id]);
 
     let adminLinks = <></>;
     let playerLinks = <></>;
@@ -74,8 +139,7 @@ function AppNavbar() {
     let profileLinks = <></>;
 
     roles.forEach((role) => {
-        if (role === "ADMIN") {
-        
+        if (role === "ADMIN" || role === "PLAYER") {
             profileLinks = (
                 <>
                     <NavItem>
@@ -83,7 +147,7 @@ function AppNavbar() {
                             style={{ color: "white", cursor: "pointer", marginRight: "20px" }}
                             onClick={handleNotificationsClick}
                         >
-                        <div className="notification-container">
+                            <div className="notification-container">
                                 <IoNotifications size={24} />
                                 {notifications.length > 0 && (
                                     <span className="notification-badge">
@@ -95,42 +159,13 @@ function AppNavbar() {
                         </NavLink>
                     </NavItem>
                     <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
-                    {/* TODO: provisional hasta poner logout en AppNavbar cuando  eres admin */}
                     <NavItem>
                         <NavLink style={{ color: "white", cursor: "pointer" }} onClick={toggleSidebar}><FaBars/></NavLink>
                     </NavItem> 
                 </>
-            )
+            );
         }   
-    })
-        roles.forEach((role) => {
-        if (role === "PLAYER") {
-            profileLinks = (
-                <>
-                    <NavItem>
-                        <NavLink
-                            style={{ color: "white", cursor: "pointer", marginRight: "20px" }}
-                            onClick={handleNotificationsClick}
-                        >
-                        <div className="notification-container">
-                                <IoNotifications size={24} />
-                                {notifications.length > 0 && (
-                                    <span className="notification-badge">
-                                        {notifications.length}
-                                    </span>
-                                )}
-                            </div>
-                            Notifications 
-                        </NavLink>
-                    </NavItem>
-                    <NavbarText style={{ color: "white" }} className="justify-content-end">{username}</NavbarText>
-                    <NavItem>
-                        <NavLink style={{ color: "white", cursor: "pointer" }} onClick={toggleSidebar}><FaBars/></NavLink>
-                    </NavItem> 
-                </>
-            )
-        }        
-    })
+    });
 
     if (!jwt) {
         publicLinks = (
@@ -142,22 +177,15 @@ function AppNavbar() {
                     <NavLink style={{ color: "white" }} id="ranking" tag={Link} to="/ranking">Ranking</NavLink>
                 </NavItem>
             </>
-        )
-    } else {
-        userLinks = (
-            <>
-            </>
-        )
-
+        );
     }
 
     return (
         <div>
-            <Navbar
-                expand="md"
-                dark
-                style={{ backgroundColor: '#d58a5b', borderBottom: '4px solid #a7661b' }}
-            >
+            {/* Contenedor global de Toastify indispensable para renderizar las alertas flotantes */}
+            <ToastContainer />
+
+            <Navbar expand="md" dark style={{ backgroundColor: '#d58a5b', borderBottom: '4px solid #a7661b' }}>
                 <NavbarBrand href="/" style={{ color: '#ffffff', fontWeight: 700 }}>
                     Escape From Elba
                 </NavbarBrand>
@@ -179,8 +207,12 @@ function AppNavbar() {
             <Sidebar isOpen={sidebarOpen} toggle={toggleSidebar} user={user} />
             {sidebarOpen && <div className="sidebar-overlay" onClick={toggleSidebar}></div>}
             
-            <NotificationsModal isOpen={showNotifications} onClose={handleCloseNotifications} />
-
+            <NotificationsModal 
+                isOpen={showNotifications} 
+                onClose={handleCloseNotifications} 
+                notifications={notifications}
+                refreshNotifications={fetchNotifications}
+            />
         </div>
     );
 }
