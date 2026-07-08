@@ -400,6 +400,8 @@ public class MatchService {
     }
 
 
+
+
     @Transactional
     public MatchDTO endMatch(Integer matchId, Player winner) {
         Match m = matchRepo.findById(matchId)
@@ -676,6 +678,33 @@ public class MatchService {
             updated,
             System.currentTimeMillis()
         );
+    }
+
+    //Función que se va a usar cuando un jugador falla el intento de escapar
+     @Transactional
+    public Player moveLoserPlayer(Integer matchId, Integer userId, Integer targetRoomId) {
+        Match match = matchRepo.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
+        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
+            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+        }
+        //Recuperar el jugador dentro del match
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        //Recuperar la sala destino
+        Room targetRoom = roomRepository.findById(targetRoomId)
+            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
+        //Actualizar la sala y fuerza del jugador
+        Room currentRoom = player.getRoom();
+        if (currentRoom == null || !targetRoom.getId().equals(currentRoom.getId())) {
+            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);
+            player.setRoomsVisited(visited + 1);
+        }
+        player.setRoom(targetRoom);
+        player.setStrength(player.getStrength() + 1);
+        
+        //Guardar cambios
+        return playerRepo.save(player);
     }
     
 
