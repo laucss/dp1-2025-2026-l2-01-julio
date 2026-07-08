@@ -27,7 +27,7 @@ public class PlayerLocationUpdateDTO {
 <span class="fc" id="L27">        this.playerId = player.getId();</span>
 <span class="fc" id="L28">        this.userId = player.getUser().getId();</span>
 <span class="fc" id="L29">        this.username = player.getUser().getUsername();</span>
-<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        this.newRoom = player.getRoom() != null ? new RoomDTO(player.getRoom()) : null;</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        this.newRoom = player.getRoom() != null ? new RoomDTO(player.getRoom()) : null;</span>
 <span class="fc" id="L31">        this.timestamp = System.currentTimeMillis();</span>
 <span class="fc" id="L32">    }</span>
 }

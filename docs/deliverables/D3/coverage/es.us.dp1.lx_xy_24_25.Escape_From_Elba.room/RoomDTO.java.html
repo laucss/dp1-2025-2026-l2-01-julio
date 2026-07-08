@@ -4,9 +4,7 @@ import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.model.BaseEntity;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,15 +33,17 @@ public class RoomDTO extends BaseEntity {
 
     private Player playerInside;
 
-<span class="fc" id="L38">    public RoomDTO(Room room) {</span>
-<span class="fc" id="L39">        this.setId(room.getId());</span>
-<span class="fc" id="L40">        this.setName(room.getName());</span>
-<span class="fc" id="L41">        this.setBlackDice(room.getBlackDice());</span>
-<span class="fc" id="L42">        this.setWhiteDice(room.getWhiteDice());</span>
-<span class="fc" id="L43">        this.setAdjacencyList(room.getAdjacencyList());</span>
-<span class="fc" id="L44">        this.setTimesVisited(0);</span>
-<span class="fc" id="L45">        this.setNpcsInside(new java.util.ArrayList&lt;&gt;());</span>
-<span class="fc" id="L46">        this.setPlayerInside(null);</span>
-<span class="fc" id="L47">    }</span>
+<span class="fc" id="L36">    public RoomDTO(Room room) {</span>
+<span class="fc" id="L37">        this.setId(room.getId());</span>
+<span class="fc" id="L38">        this.setName(room.getName());</span>
+<span class="fc" id="L39">        this.setBlackDice(room.getBlackDice());</span>
+<span class="fc" id="L40">        this.setWhiteDice(room.getWhiteDice());</span>
+<span class="fc" id="L41">        this.setAdjacencyList(room.getAdjacencyList());</span>
+<span class="fc" id="L42">        this.setTimesVisited(0);</span>
+<span class="fc" id="L43">        this.setNpcsInside(new java.util.ArrayList&lt;&gt;());</span>
+<span class="fc" id="L44">        this.setPlayerInside(null);</span>
+<span class="fc" id="L45">    }</span>
+
+<span class="fc" id="L47">    public RoomDTO(){}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

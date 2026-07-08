@@ -53,80 +53,87 @@ public class FriendRequestRestController {
 <span class="fc" id="L53">        return new ResponseEntity&lt;&gt;(friends, HttpStatus.OK);</span>
     }
 
+    @GetMapping(&quot;{userId}/{matchId}&quot;)
+    @Operation(summary = &quot;Get friends by user id to invite to match&quot;, 
+        description = &quot;Get all friends of a user by user id and if is private it return if each friend is also friend of the rest of the players in the match.&quot;)
+    public ResponseEntity&lt;List&lt;FriendsInvitationDTO&gt;&gt; getFriendsByUserIdToInvite(@PathVariable(&quot;userId&quot;) Integer userId, @PathVariable(&quot;matchId&quot;) Integer matchId) {
+<span class="nc" id="L60">        return new ResponseEntity&lt;&gt;(friendRequestService.getFriendsByUserIdToInvite(userId, matchId), HttpStatus.OK);</span>
+    }
+
     @GetMapping(&quot;{userId}/pending&quot;)
     @Operation(summary = &quot;Get pending requests by user id&quot;, description = &quot;Get all pending friend requests of a user by user id.&quot;)
     public ResponseEntity&lt;List&lt;MiniRequestDTO&gt;&gt; getPendingRequestsByUserId(@PathVariable(&quot;userId&quot;) Integer userId) {
-<span class="fc" id="L59">        List&lt;MiniRequestDTO&gt; pendingRequests = friendRequestService.findFriendRequestsByUserId(userId).stream()</span>
-<span class="fc" id="L60">                .map(r -&gt; new MiniRequestDTO(r, playerService)).toList();</span>
-<span class="fc" id="L61">        return new ResponseEntity&lt;&gt;(pendingRequests, HttpStatus.OK);</span>
+<span class="fc" id="L66">        List&lt;MiniRequestDTO&gt; pendingRequests = friendRequestService.findFriendRequestsByUserId(userId).stream()</span>
+<span class="fc" id="L67">                .map(r -&gt; new MiniRequestDTO(r, playerService)).toList();</span>
+<span class="fc" id="L68">        return new ResponseEntity&lt;&gt;(pendingRequests, HttpStatus.OK);</span>
     }
 
     @GetMapping(&quot;{userId}/received&quot;)
     @Operation(summary = &quot;Get received requests by user id&quot;, description = &quot;Get all received friend requests of a user by user id.&quot;)
     public ResponseEntity&lt;List&lt;MiniRequestDTO&gt;&gt; getPendingRequestsForUserId(@PathVariable(&quot;userId&quot;) Integer userId) {
-<span class="fc" id="L67">        List&lt;MiniRequestDTO&gt; pendingRequests = friendRequestService.findFriendRequestsForUserId(userId).stream()</span>
-<span class="fc" id="L68">                .map(r -&gt; new MiniRequestDTO(r, playerService)).toList();</span>
-<span class="fc" id="L69">        return new ResponseEntity&lt;&gt;(pendingRequests, HttpStatus.OK);</span>
+<span class="fc" id="L74">        List&lt;MiniRequestDTO&gt; pendingRequests = friendRequestService.findFriendRequestsForUserId(userId).stream()</span>
+<span class="fc" id="L75">                .map(r -&gt; new MiniRequestDTO(r, playerService)).toList();</span>
+<span class="fc" id="L76">        return new ResponseEntity&lt;&gt;(pendingRequests, HttpStatus.OK);</span>
     }
 
     @PostMapping(&quot;{receiverName}&quot;)
     @Operation(summary = &quot;Create friend request&quot;, description = &quot;Create a friend request from the current user to another user.&quot;)
     public ResponseEntity&lt;MiniRequestDTO&gt; createFriendRequest(@RequestBody Integer senderId, @PathVariable String receiverName) {
-<span class="fc" id="L75">        Integer receiverId = userService.findUser(receiverName).getId();</span>
-<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (senderId == receiverId) {</span>
-<span class="fc" id="L77">            log.error(&quot;User cannot send friend request to himself: senderId={}, receiverId={}&quot;, senderId, receiverId);</span>
-<span class="fc" id="L78">            return new ResponseEntity&lt;&gt;(HttpStatus.BAD_REQUEST);</span>
+<span class="fc" id="L82">        Integer receiverId = userService.findUser(receiverName).getId();</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (senderId == receiverId) {</span>
+<span class="fc" id="L84">            log.error(&quot;User cannot send friend request to himself: senderId={}, receiverId={}&quot;, senderId, receiverId);</span>
+<span class="fc" id="L85">            return new ResponseEntity&lt;&gt;(HttpStatus.BAD_REQUEST);</span>
         }
-<span class="fc" id="L80">        MiniRequestDTO newRequest = new MiniRequestDTO(friendRequestService.sendRequest(senderId, receiverId), playerService);</span>
-<span class="fc" id="L81">        return new ResponseEntity&lt;&gt;(newRequest, HttpStatus.OK);</span>
+<span class="fc" id="L87">        MiniRequestDTO newRequest = new MiniRequestDTO(friendRequestService.sendRequest(senderId, receiverId), playerService);</span>
+<span class="fc" id="L88">        return new ResponseEntity&lt;&gt;(newRequest, HttpStatus.OK);</span>
     }
 
     @PutMapping(&quot;accept&quot;)
     @Operation(summary = &quot;Accept friend request&quot;, description = &quot;Accept a friend request from another user.&quot;)
     public ResponseEntity&lt;MiniRequestDTO&gt; acceptFriendRequest(@RequestBody Integer friendRequestId) {
-<span class="fc" id="L87">        FriendRequest friendRequestToAccept = friendRequestService.findFriendRequestPendingById(friendRequestId);</span>
-<span class="fc" id="L88">        User currentUser = userService.findCurrentUser();</span>
-<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (friendRequestToAccept.getReceiver().getId() != currentUser.getId()) {</span>
-<span class="fc" id="L90">            log.error(&quot;User cannot accept friend request that is not for him: receiverId={}, currentUserId={}&quot;,</span>
-<span class="fc" id="L91">                    friendRequestToAccept.getReceiver().getId(), currentUser.getId());</span>
+<span class="fc" id="L94">        FriendRequest friendRequestToAccept = friendRequestService.findFriendRequestPendingById(friendRequestId);</span>
+<span class="fc" id="L95">        User currentUser = userService.findCurrentUser();</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if (friendRequestToAccept.getReceiver().getId() != currentUser.getId()) {</span>
+<span class="fc" id="L97">            log.error(&quot;User cannot accept friend request that is not for him: receiverId={}, currentUserId={}&quot;,</span>
+<span class="fc" id="L98">                    friendRequestToAccept.getReceiver().getId(), currentUser.getId());</span>
             
-<span class="fc" id="L93">            return new ResponseEntity&lt;&gt;(HttpStatus.FORBIDDEN);</span>
+<span class="fc" id="L100">            return new ResponseEntity&lt;&gt;(HttpStatus.FORBIDDEN);</span>
         }
-<span class="fc" id="L95">        MiniRequestDTO acceptedRequest = new MiniRequestDTO(friendRequestService.acceptRequest(friendRequestToAccept), playerService);</span>
-<span class="fc" id="L96">        return new ResponseEntity&lt;&gt;(acceptedRequest, HttpStatus.OK);</span>
+<span class="fc" id="L102">        MiniRequestDTO acceptedRequest = new MiniRequestDTO(friendRequestService.acceptRequest(friendRequestToAccept), playerService);</span>
+<span class="fc" id="L103">        return new ResponseEntity&lt;&gt;(acceptedRequest, HttpStatus.OK);</span>
     }
 
     @PutMapping(&quot;reject&quot;)
     @Operation(summary = &quot;Reject friend request&quot;, description = &quot;Reject a friend request from another user.&quot;)
     public ResponseEntity&lt;MiniRequestDTO&gt; rejectFriendRequest(@RequestBody Integer friendRequestId) {
-<span class="fc" id="L102">        FriendRequest friendRequestToReject = friendRequestService.findFriendRequestPendingById(friendRequestId);</span>
-<span class="fc" id="L103">        User currentUser = userService.findCurrentUser();</span>
-<span class="fc bfc" id="L104" title="All 2 branches covered.">        if (friendRequestToReject.getReceiver().getId() != currentUser.getId()) {</span>
-<span class="fc" id="L105">            log.error(&quot;User cannot reject friend request that is not for him: receiverId={}, currentUserId={}&quot;,</span>
-<span class="fc" id="L106">                    friendRequestToReject.getReceiver().getId(), currentUser.getId());</span>
+<span class="fc" id="L109">        FriendRequest friendRequestToReject = friendRequestService.findFriendRequestPendingById(friendRequestId);</span>
+<span class="fc" id="L110">        User currentUser = userService.findCurrentUser();</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if (friendRequestToReject.getReceiver().getId() != currentUser.getId()) {</span>
+<span class="fc" id="L112">            log.error(&quot;User cannot reject friend request that is not for him: receiverId={}, currentUserId={}&quot;,</span>
+<span class="fc" id="L113">                    friendRequestToReject.getReceiver().getId(), currentUser.getId());</span>
             
-<span class="fc" id="L108">            return new ResponseEntity&lt;&gt;(HttpStatus.FORBIDDEN);</span>
+<span class="fc" id="L115">            return new ResponseEntity&lt;&gt;(HttpStatus.FORBIDDEN);</span>
         }
-<span class="fc" id="L110">        MiniRequestDTO rejectedRequest = new MiniRequestDTO(friendRequestService.rejectRequest(friendRequestToReject), playerService);</span>
-<span class="fc" id="L111">        return new ResponseEntity&lt;&gt;(rejectedRequest, HttpStatus.OK);</span>
+<span class="fc" id="L117">        MiniRequestDTO rejectedRequest = new MiniRequestDTO(friendRequestService.rejectRequest(friendRequestToReject), playerService);</span>
+<span class="fc" id="L118">        return new ResponseEntity&lt;&gt;(rejectedRequest, HttpStatus.OK);</span>
     }
 
     @DeleteMapping
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = &quot;Delete friend&quot;, description = &quot;Delete a friend from the current user.&quot;)
     public ResponseEntity&lt;MessageResponse&gt; delete(@RequestBody Integer friendRequestId) {
-<span class="fc" id="L118">        FriendRequest friendRequestToDelete = friendRequestService.findById(friendRequestId);</span>
-<span class="fc" id="L119">        Integer currentUserId = userService.findCurrentUser().getId();</span>
+<span class="fc" id="L125">        FriendRequest friendRequestToDelete = friendRequestService.findById(friendRequestId);</span>
+<span class="fc" id="L126">        Integer currentUserId = userService.findCurrentUser().getId();</span>
         
-<span class="fc bfc" id="L121" title="All 2 branches covered.">        if (friendRequestToDelete.getReceiver().getId() != currentUserId</span>
-<span class="fc bfc" id="L122" title="All 2 branches covered.">            &amp;&amp; friendRequestToDelete.getSender().getId() != currentUserId) {</span>
-<span class="fc" id="L123">            log.error(&quot;User cannot delete friend request that is not for him: receiverId={}, senderId={}, currentUserId={}&quot;,</span>
-<span class="fc" id="L124">                    friendRequestToDelete.getReceiver().getId(), friendRequestToDelete.getSender().getId(), currentUserId);</span>
-<span class="fc" id="L125">            return new ResponseEntity&lt;&gt;(HttpStatus.FORBIDDEN);</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        if (friendRequestToDelete.getReceiver().getId() != currentUserId</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">            &amp;&amp; friendRequestToDelete.getSender().getId() != currentUserId) {</span>
+<span class="fc" id="L130">            log.error(&quot;User cannot delete friend request that is not for him: receiverId={}, senderId={}, currentUserId={}&quot;,</span>
+<span class="fc" id="L131">                    friendRequestToDelete.getReceiver().getId(), friendRequestToDelete.getSender().getId(), currentUserId);</span>
+<span class="fc" id="L132">            return new ResponseEntity&lt;&gt;(HttpStatus.FORBIDDEN);</span>
         }
         
-<span class="fc" id="L128">        friendRequestService.deleteFriend(friendRequestToDelete);</span>
-<span class="fc" id="L129">        return new ResponseEntity&lt;&gt;(new MessageResponse(&quot;Friend deleted.&quot;), HttpStatus.OK);</span>
+<span class="fc" id="L135">        friendRequestService.deleteFriend(friendRequestToDelete);</span>
+<span class="fc" id="L136">        return new ResponseEntity&lt;&gt;(new MessageResponse(&quot;Friend deleted.&quot;), HttpStatus.OK);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

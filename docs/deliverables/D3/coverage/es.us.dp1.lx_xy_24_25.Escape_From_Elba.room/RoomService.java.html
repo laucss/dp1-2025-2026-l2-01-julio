@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcDTO;
 
 @Service
 public class RoomService {
@@ -21,139 +19,195 @@ public class RoomService {
     private final RoomRepository roomRepository;
 
     @Autowired
-<span class="fc" id="L24">    public RoomService(RoomRepository roomRepository) {</span>
-<span class="fc" id="L25">        this.roomRepository = roomRepository;</span>
-<span class="fc" id="L26">    }</span>
+<span class="fc" id="L22">    public RoomService(RoomRepository roomRepository) {</span>
+<span class="fc" id="L23">        this.roomRepository = roomRepository;</span>
+<span class="fc" id="L24">    }</span>
 
     public List&lt;Room&gt; findAllRooms() {
-<span class="fc" id="L29">        return roomRepository.findAll();</span>
+<span class="fc" id="L27">        return roomRepository.findAll();</span>
     }
 
     public Room findById(Integer id) {
-<span class="fc" id="L33">        return roomRepository.findById(id).orElse(null);</span>
+<span class="fc" id="L31">        return roomRepository.findById(id).orElse(null);</span>
     }
 
     public Room findByDice(Integer blackDice, Integer whiteDice) {
-<span class="fc" id="L37">        return roomRepository.findByDices(blackDice, whiteDice).orElse(null);</span>
+<span class="fc" id="L35">        return roomRepository.findByDices(blackDice, whiteDice).orElse(null);</span>
     }
 
     public Room save(RoomDTO room) {
-<span class="nc" id="L41">        return roomRepository.save(room);</span>
+<span class="nc" id="L39">        return roomRepository.save(room);</span>
     }
 
     public void deleteById(Integer id) {
-<span class="nc" id="L45">        roomRepository.deleteById(id);</span>
-<span class="nc" id="L46">    }</span>
+<span class="nc" id="L43">        roomRepository.deleteById(id);</span>
+<span class="nc" id="L44">    }</span>
 
     // Lógica adicional
 
     public boolean areAdjacent(Room room1, Room room2) {
-<span class="nc" id="L51">        return room1.getAdjacencyList().contains(room2);</span>
+<span class="fc" id="L49">        return room1.getAdjacencyList().contains(room2);</span>
     }
 
     public void incrementTimesVisited(RoomDTO room) {
-<span class="nc" id="L55">        room.setTimesVisited(room.getTimesVisited() + 1);</span>
-<span class="nc" id="L56">        roomRepository.save(room);</span>
-<span class="nc" id="L57">    }</span>
+<span class="nc" id="L53">        room.setTimesVisited(room.getTimesVisited() + 1);</span>
+<span class="nc" id="L54">        roomRepository.save(room);</span>
+<span class="nc" id="L55">    }</span>
 
     public List&lt;Room&gt; getAllTowers(){
-<span class="nc" id="L60">        Room torre1 = roomRepository.findById(1).orElseThrow(() -&gt; </span>
-<span class="nc" id="L61">        new IllegalStateException(&quot;Torre 1 (ID 1) not found&quot;));</span>
-<span class="nc" id="L62">        Room torre2 = roomRepository.findById(31).orElseThrow(() -&gt; </span>
-<span class="nc" id="L63">        new IllegalStateException(&quot;Torre 2 (ID 31) not found&quot;));</span>
-<span class="nc" id="L64">        Room torre3 = roomRepository.findById(6).orElseThrow(() -&gt; </span>
-<span class="nc" id="L65">        new IllegalStateException(&quot;Torre 3 (ID 6) not found&quot;));</span>
-<span class="nc" id="L66">        Room torre4 = roomRepository.findById(36).orElseThrow(() -&gt; </span>
-<span class="nc" id="L67">        new IllegalStateException(&quot;Torre 4 (ID 36) not found&quot;));</span>
-<span class="nc" id="L68">        List&lt;Room&gt; towers = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L69">        towers.add(torre1);</span>
-<span class="nc" id="L70">        towers.add(torre2);</span>
-<span class="nc" id="L71">        towers.add(torre3);</span>
-<span class="nc" id="L72">        towers.add(torre4);</span>
-<span class="nc" id="L73">        return towers;</span>
+<span class="fc" id="L58">        Room torre1 = roomRepository.findById(1).orElseThrow(() -&gt; </span>
+<span class="nc" id="L59">        new IllegalStateException(&quot;Torre 1 (ID 1) not found&quot;));</span>
+<span class="fc" id="L60">        Room torre2 = roomRepository.findById(31).orElseThrow(() -&gt; </span>
+<span class="nc" id="L61">        new IllegalStateException(&quot;Torre 2 (ID 31) not found&quot;));</span>
+<span class="fc" id="L62">        Room torre3 = roomRepository.findById(6).orElseThrow(() -&gt; </span>
+<span class="nc" id="L63">        new IllegalStateException(&quot;Torre 3 (ID 6) not found&quot;));</span>
+<span class="fc" id="L64">        Room torre4 = roomRepository.findById(36).orElseThrow(() -&gt; </span>
+<span class="nc" id="L65">        new IllegalStateException(&quot;Torre 4 (ID 36) not found&quot;));</span>
+<span class="fc" id="L66">        List&lt;Room&gt; towers = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L67">        towers.add(torre1);</span>
+<span class="fc" id="L68">        towers.add(torre2);</span>
+<span class="fc" id="L69">        towers.add(torre3);</span>
+<span class="fc" id="L70">        towers.add(torre4);</span>
+<span class="fc" id="L71">        return towers;</span>
 
     }
 
     public String getWordOfEscapeFromTower (Integer towerId){
-<span class="nc bnc" id="L78" title="All 5 branches missed.">        return switch (towerId) {</span>
-<span class="nc" id="L79">            case 1 -&gt; &quot;ESCAPE&quot;;</span>
-<span class="nc" id="L80">            case 31 -&gt; &quot;ELBA&quot;;</span>
-<span class="nc" id="L81">            case 6 -&gt; &quot;FROM&quot;;</span>
-<span class="nc" id="L82">            case 36 -&gt; &quot;PEACE&quot;;</span>
-<span class="nc" id="L83">            default -&gt; null;</span>
+<span class="fc bfc" id="L76" title="All 5 branches covered.">        return switch (towerId) {</span>
+<span class="fc" id="L77">            case 1 -&gt; &quot;ESCAPE&quot;;</span>
+<span class="fc" id="L78">            case 31 -&gt; &quot;ELBA&quot;;</span>
+<span class="fc" id="L79">            case 6 -&gt; &quot;FROM&quot;;</span>
+<span class="fc" id="L80">            case 36 -&gt; &quot;PEACE&quot;;</span>
+<span class="fc" id="L81">            default -&gt; null;</span>
         };
     }
 
     public Room getRandomRoom(){
-<span class="nc" id="L88">        List&lt;Room&gt; rooms = roomRepository.findAll();</span>
+<span class="fc" id="L86">        List&lt;Room&gt; rooms = roomRepository.findAll();</span>
         //Quitamos las torres de las habitaciones disponibles
-<span class="nc" id="L90">        List&lt;Room&gt; towers = getAllTowers();</span>
-<span class="nc" id="L91">        rooms.removeAll(towers);</span>
-<span class="nc" id="L92">        Random rand = new Random();</span>
-<span class="nc" id="L93">        return rooms.get(rand.nextInt(rooms.size()));</span>
+<span class="fc" id="L88">        List&lt;Room&gt; towers = getAllTowers();</span>
+<span class="fc" id="L89">        rooms.removeAll(towers);</span>
+<span class="fc" id="L90">        Random rand = new Random();</span>
+<span class="fc" id="L91">        return rooms.get(rand.nextInt(rooms.size()));</span>
+    }
+
+    public Room getRandomFightRoom(Room originRoom) {
+
+<span class="fc" id="L96">        List&lt;Room&gt; rooms = new ArrayList&lt;&gt;(roomRepository.findAll());</span>
+
+        // Quitar la Safe Zone
+<span class="fc" id="L99">        rooms.removeIf(room -&gt; room.getId().equals(37));</span>
+        // Quitar las torres
+<span class="fc" id="L101">        rooms.removeAll(getAllTowers());</span>
+        // Quitar la habitación de origen
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (originRoom != null) {</span>
+<span class="nc" id="L104">            rooms.removeIf(room -&gt; room.getId().equals(originRoom.getId()));</span>
+        }
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (rooms.isEmpty()) {</span>
+<span class="nc" id="L107">            throw new IllegalStateException(&quot;No available room for fight relocation&quot;);</span>
+        }
+
+<span class="fc" id="L110">        Random rand = new Random();</span>
+<span class="fc" id="L111">        return rooms.get(rand.nextInt(rooms.size()));</span>
+    }
+
+    public Room getRandomUnoccupiedRoom(Match match) {
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (match == null) {</span>
+<span class="fc" id="L116">            return getRandomRoom();</span>
+        }
+
+<span class="fc" id="L119">        List&lt;Room&gt; rooms = new ArrayList&lt;&gt;(roomRepository.findAll());</span>
+<span class="fc" id="L120">        rooms.removeAll(getAllTowers());</span>
+
+<span class="fc" id="L122">        List&lt;Integer&gt; occupiedRoomIds = new ArrayList&lt;&gt;();</span>
+
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">        if (match.getPlayers() != null) {</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">            for (Player player : match.getPlayers()) {</span>
+<span class="pc bpc" id="L126" title="3 of 6 branches missed.">                if (player != null &amp;&amp; player.getRoom() != null &amp;&amp; player.getRoom().getId() != null) {</span>
+<span class="fc" id="L127">                    occupiedRoomIds.add(player.getRoom().getId());</span>
+                }
+<span class="fc" id="L129">            }</span>
+        }
+
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">        if (match.getNpcs() != null) {</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">            for (Npc npc : match.getNpcs()) {</span>
+<span class="nc bnc" id="L134" title="All 6 branches missed.">                if (npc != null &amp;&amp; npc.getRoom() != null &amp;&amp; npc.getRoom().getId() != null) {</span>
+<span class="nc" id="L135">                    occupiedRoomIds.add(npc.getRoom().getId());</span>
+                }
+<span class="nc" id="L137">            }</span>
+        }
+
+<span class="pc bpc" id="L140" title="1 of 4 branches missed.">        rooms.removeIf(room -&gt; room.getId() != null &amp;&amp; occupiedRoomIds.contains(room.getId()));</span>
+
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        if (rooms.isEmpty()) {</span>
+<span class="nc" id="L143">            throw new IllegalStateException(&quot;No free room available to move the player or NPC&quot;);</span>
+        }
+
+<span class="fc" id="L146">        Random rand = new Random();</span>
+<span class="fc" id="L147">        return rooms.get(rand.nextInt(rooms.size()));</span>
     }
 
     public List&lt;RoomDTO&gt; initializeRoomsForMatch(Match match) {
-<span class="nc" id="L97">        List&lt;Room&gt; rooms = roomRepository.findAll();</span>
-<span class="nc" id="L98">        Room safeZone = roomRepository.findById(37).orElseThrow(() -&gt; </span>
-<span class="nc" id="L99">        new IllegalStateException(&quot;Safe zone (ID 37) not found&quot;)); //La safe zone es la habitacion con id 37</span>
-<span class="nc" id="L100">        List&lt;Room&gt; availableRooms = new ArrayList&lt;&gt;(rooms);</span>
-<span class="nc" id="L101">        availableRooms.remove(safeZone); //Quitamos la safe zone de las habitaciones disponibles</span>
-<span class="nc" id="L102">        Random rand = new Random();</span>
+<span class="fc" id="L151">        List&lt;Room&gt; rooms = roomRepository.findAll();</span>
+<span class="fc" id="L152">        Room safeZone = roomRepository.findById(37).orElseThrow(() -&gt; </span>
+<span class="nc" id="L153">        new IllegalStateException(&quot;Safe zone (ID 37) not found&quot;)); //La safe zone es la habitacion con id 37</span>
+<span class="fc" id="L154">        List&lt;Room&gt; availableRooms = new ArrayList&lt;&gt;(rooms);</span>
+<span class="fc" id="L155">        availableRooms.remove(safeZone); //Quitamos la safe zone de las habitaciones disponibles</span>
+<span class="fc" id="L156">        Random rand = new Random();</span>
 
         //Quitamos las torres de las habitaciones disponibles
-<span class="nc" id="L105">        List&lt;Room&gt; towers = getAllTowers();</span>
-<span class="nc" id="L106">        availableRooms.removeAll(towers);</span>
+<span class="fc" id="L159">        List&lt;Room&gt; towers = getAllTowers();</span>
+<span class="fc" id="L160">        availableRooms.removeAll(towers);</span>
 
         //Asignamos habitaciones aleatoriamente a los NPCs
         //Niall Campbell debe de ir en la safe zone
-<span class="nc bnc" id="L110" title="All 2 branches missed.">        for ( Npc npc: match.getNpcs()) {</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        for ( Npc npc: match.getNpcs()) {</span>
         Room room;
-<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (npc.getIsNiallCampbell()) {</span>
-<span class="nc" id="L113">        room = safeZone; // Niall Campbell va en la safe zone</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (npc.getIsNiallCampbell()) {</span>
+<span class="fc" id="L167">        room = safeZone; // Niall Campbell va en la safe zone</span>
         } else {
-<span class="nc" id="L115">            room = availableRooms.remove(rand.nextInt(availableRooms.size())); //Los demas NPCs en habitaciones aleatorias</span>
+<span class="fc" id="L169">            room = availableRooms.remove(rand.nextInt(availableRooms.size())); //Los demas NPCs en habitaciones aleatorias</span>
         }
-<span class="nc" id="L117">        npc.setRoom(room);</span>
-<span class="nc" id="L118">        }</span>
+<span class="fc" id="L171">        npc.setRoom(room);</span>
+<span class="fc" id="L172">        }</span>
         //Asignamos habitaciones aleatoriamente a los jugadores 
-<span class="nc bnc" id="L120" title="All 2 branches missed.">        for (Player p: match.getPlayers()) {</span>
-<span class="nc" id="L121">        Room room = availableRooms.remove(rand.nextInt(availableRooms.size()));</span>
-<span class="nc" id="L122">        p.setRoom(room);</span>
-<span class="nc" id="L123">        }</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        for (Player p: match.getPlayers()) {</span>
+<span class="fc" id="L175">        Room room = availableRooms.remove(rand.nextInt(availableRooms.size()));</span>
+<span class="fc" id="L176">        p.setRoom(room);</span>
+<span class="fc" id="L177">        }</span>
 
 
-<span class="nc" id="L126">        Map&lt;Integer, RoomDTO&gt; map = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L180">        Map&lt;Integer, RoomDTO&gt; map = new HashMap&lt;&gt;();</span>
 
-<span class="nc bnc" id="L128" title="All 2 branches missed.">        for (Room r : rooms) {</span>
-<span class="nc" id="L129">            RoomDTO dto = new RoomDTO(r);</span>
-<span class="nc" id="L130">            map.put(r.getId(), dto);</span>
-<span class="nc" id="L131">        }</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">        for (Room r : rooms) {</span>
+<span class="fc" id="L183">            RoomDTO dto = new RoomDTO(r);</span>
+<span class="fc" id="L184">            map.put(r.getId(), dto);</span>
+<span class="fc" id="L185">        }</span>
 
-<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (match.getPlayers() != null) {</span>
-<span class="nc bnc" id="L134" title="All 2 branches missed.">            for (Player p : match.getPlayers()) {</span>
-<span class="nc bnc" id="L135" title="All 2 branches missed.">                if (p.getRoom() != null) {</span>
-<span class="nc" id="L136">                    RoomDTO dto = map.get(p.getRoom().getId());</span>
-<span class="nc bnc" id="L137" title="All 2 branches missed.">                    if (dto != null) {</span>
-<span class="nc" id="L138">                        dto.setPlayerInside(p);</span>
-<span class="nc" id="L139">                        dto.setTimesVisited(1);</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">        if (match.getPlayers() != null) {</span>
+<span class="fc bfc" id="L188" title="All 2 branches covered.">            for (Player p : match.getPlayers()) {</span>
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">                if (p.getRoom() != null) {</span>
+<span class="fc" id="L190">                    RoomDTO dto = map.get(p.getRoom().getId());</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">                    if (dto != null) {</span>
+<span class="fc" id="L192">                        dto.setPlayerInside(p);</span>
+<span class="fc" id="L193">                        dto.setTimesVisited(1);</span>
                     }
                 }
-<span class="nc" id="L142">            }</span>
+<span class="fc" id="L196">            }</span>
         }
 
-<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (match.getNpcs() != null) {</span>
-<span class="nc bnc" id="L146" title="All 2 branches missed.">            for (Npc n : match.getNpcs()) {</span>
-<span class="nc bnc" id="L147" title="All 2 branches missed.">                if (n.getRoom() != null) {</span>
-<span class="nc" id="L148">                    RoomDTO dto = map.get(n.getRoom().getId());</span>
-<span class="nc bnc" id="L149" title="All 2 branches missed.">                    if (dto != null) {</span>
-<span class="nc" id="L150">                        dto.getNpcsInside().add(n);</span>
+<span class="pc bpc" id="L199" title="1 of 2 branches missed.">        if (match.getNpcs() != null) {</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">            for (Npc n : match.getNpcs()) {</span>
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">                if (n.getRoom() != null) {</span>
+<span class="fc" id="L202">                    RoomDTO dto = map.get(n.getRoom().getId());</span>
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">                    if (dto != null) {</span>
+<span class="fc" id="L204">                        dto.getNpcsInside().add(n);</span>
                     }
                 }
-<span class="nc" id="L153">            }</span>
+<span class="fc" id="L207">            }</span>
         }
 
-<span class="nc" id="L156">        return new ArrayList&lt;&gt;(map.values());</span>
+<span class="fc" id="L210">        return new ArrayList&lt;&gt;(map.values());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

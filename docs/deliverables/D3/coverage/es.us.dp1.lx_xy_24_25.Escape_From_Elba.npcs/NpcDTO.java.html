@@ -17,15 +17,15 @@ public class NpcDTO {
 
     private RoomDTO room;
 
-<span class="nc" id="L20">    public NpcDTO(Npc npc) {</span>
-<span class="nc" id="L21">        this.id = npc.getId();</span>
-<span class="nc" id="L22">        this.strength = npc.getStrength();</span>
-<span class="nc" id="L23">        this.isNiallCampbell = npc.getIsNiallCampbell();</span>
-<span class="nc bnc" id="L24" title="All 2 branches missed.">        this.room = npc.getRoom() != null ? new RoomDTO(npc.getRoom()) : null;</span>
-<span class="nc" id="L25">    }</span>
+<span class="fc" id="L20">    public NpcDTO(Npc npc) {</span>
+<span class="fc" id="L21">        this.id = npc.getId();</span>
+<span class="fc" id="L22">        this.strength = npc.getStrength();</span>
+<span class="fc" id="L23">        this.isNiallCampbell = npc.getIsNiallCampbell();</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        this.room = npc.getRoom() != null ? new RoomDTO(npc.getRoom()) : null;</span>
+<span class="fc" id="L25">    }</span>
 
-<span class="nc" id="L27">    public NpcDTO() {</span>
-<span class="nc" id="L28">    }</span>
+<span class="fc" id="L27">    public NpcDTO() {</span>
+<span class="fc" id="L28">    }</span>
     
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

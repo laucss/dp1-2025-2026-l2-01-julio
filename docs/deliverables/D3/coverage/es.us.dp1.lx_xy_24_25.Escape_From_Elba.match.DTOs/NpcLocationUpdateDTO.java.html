@@ -21,11 +21,11 @@ public class NpcLocationUpdateDTO {
     
     private Long timestamp;
     
-<span class="nc" id="L24">    public NpcLocationUpdateDTO(Npc npc) {</span>
-<span class="nc" id="L25">        this.npcId = npc.getId();</span>
-<span class="nc" id="L26">        this.isNiallCampbell = npc.getIsNiallCampbell();</span>
-<span class="nc bnc" id="L27" title="All 2 branches missed.">        this.newRoom = npc.getRoom() != null ? new RoomDTO(npc.getRoom()) : null;</span>
-<span class="nc" id="L28">        this.timestamp = System.currentTimeMillis();</span>
-<span class="nc" id="L29">    }</span>
+<span class="fc" id="L24">    public NpcLocationUpdateDTO(Npc npc) {</span>
+<span class="fc" id="L25">        this.npcId = npc.getId();</span>
+<span class="fc" id="L26">        this.isNiallCampbell = npc.getIsNiallCampbell();</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        this.newRoom = npc.getRoom() != null ? new RoomDTO(npc.getRoom()) : null;</span>
+<span class="fc" id="L28">        this.timestamp = System.currentTimeMillis();</span>
+<span class="fc" id="L29">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FightService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights</a> &gt; <span class="el_source">FightService.java</span></div><h1>FightService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.AllCardsStatusDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightResolvedDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightResultRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.LoseAgainstNpcRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.StealCardRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchWebsocketController;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.NpcLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.PlayerLocationUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.StrengthUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
+
+
+@Service
+public class FightService {
+
+    private final MatchService matchService;
+    private final DeckService deckService; 
+    private final HandService handService; 
+    private final BagService bagService;
+    private final PlayerService playerService; 
+    private final MatchWebsocketController matchWebsocketController;
+
+    private final MatchRepository matchRepo;
+    private final PlayerRepository playerRepo;
+    private final NpcRepository npcRepository;
+    private final RoomService roomService;
+
+    @Autowired
+    public FightService(MatchRepository mrepo, PlayerRepository playerRepo,
+            RoomService roomService, DeckService deckService, HandService handService, BagService bagService, 
+            PlayerService playerService, MatchWebsocketController matchWebsocketController, NpcRepository npcRepository, 
+<span class="fc" id="L62">             MatchService matchService) {</span>
+<span class="fc" id="L63">        this.matchRepo = mrepo;</span>
+<span class="fc" id="L64">        this.playerRepo = playerRepo;</span>
+<span class="fc" id="L65">        this.npcRepository = npcRepository;</span>
+<span class="fc" id="L66">        this.roomService = roomService;</span>
+<span class="fc" id="L67">        this.deckService = deckService;</span>
+<span class="fc" id="L68">        this.handService = handService;</span>
+<span class="fc" id="L69">        this.bagService = bagService; </span>
+<span class="fc" id="L70">        this.playerService = playerService;</span>
+<span class="fc" id="L71">        this.matchWebsocketController = matchWebsocketController;</span>
+<span class="fc" id="L72">        this.matchService = matchService;</span>
+<span class="fc" id="L73">    }</span>
+
+
+
+    @Transactional
+    public FightResolvedDTO processFightResolution(FightResultRequestDTO result) {
+<span class="fc" id="L79">        matchRepo.findById(result.getMatchId()).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Match not found&quot;));</span>
+<span class="fc" id="L80">        FightResolvedDTO fightResult = new FightResolvedDTO();</span>
+
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (result.isNpcFight()) {</span>
+            // el npc gana al player en dos casos: 
+            //      1. el npc ataca y gana como atacante 
+            //      2. el player ataca pero pierde 
+<span class="pc bpc" id="L86" title="4 of 8 branches missed.">            if ((result.isAttackerWins() &amp;&amp; result.isNpcAttacker()) || (!result.isAttackerWins() &amp;&amp; !result.isNpcAttacker())) { </span>
+<span class="fc" id="L87">                fightResult = npcBeatsPlayer(result);</span>
+            } else  { // el jugador gana al npc en el resto de situaciones
+<span class="fc" id="L89">                fightResult = playerBeatsNpc(result);</span>
+            }
+        } else {
+<span class="fc" id="L92">            fightResult = playerBeatsPlayer(result);    </span>
+        }
+
+<span class="fc" id="L95">        matchWebsocketController.notifyFightResolved(result.getMatchId(), fightResult);</span>
+<span class="fc" id="L96">        return fightResult;</span>
+
+    }
+
+    
+    @Transactional
+    public FightResolvedDTO npcBeatsPlayer(FightResultRequestDTO result){
+<span class="pc bpc" id="L103" title="3 of 4 branches missed.">        Player player = !result.isAttackerWins() &amp;&amp; !result.isNpcAttacker() ? playerService.findById(result.getAttackerId()) : playerService.findById(result.getDefenderId());</span>
+        
+<span class="pc bpc" id="L105" title="2 of 4 branches missed.">        Integer npcId = result.isAttackerWins() &amp;&amp; result.isNpcAttacker() ? result.getAttackerId() : result.getDefenderId(); </span>
+<span class="pc" id="L106">        npcRepository.findById(npcId).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Npc not found&quot;)); </span>
+
+<span class="fc" id="L108">        Room room = playerLoses(player, result.getMatchId(), result);</span>
+
+<span class="fc" id="L110">        FightResolvedDTO dto = new FightResolvedDTO(</span>
+<span class="fc" id="L111">            result.getMatchId(),</span>
+            npcId,
+<span class="fc" id="L113">            player.getId(),</span>
+<span class="fc" id="L114">            player.getUser().getId(),</span>
+<span class="fc" id="L115">            room.getId(),</span>
+            FightResultType.NPC_BEATS_PLAYER
+        );
+
+<span class="fc" id="L119">        return dto;</span>
+    }
+
+    @Transactional
+    public FightResolvedDTO playerBeatsNpc(FightResultRequestDTO result){
+<span class="pc bpc" id="L124" title="2 of 4 branches missed.">        Player player = result.isAttackerWins() &amp;&amp; !result.isNpcAttacker() ? playerService.findById(result.getAttackerId()) : playerService.findById(result.getDefenderId());</span>
+        
+<span class="pc bpc" id="L126" title="3 of 4 branches missed.">        Integer npcId = !result.isAttackerWins() &amp;&amp; result.isNpcAttacker() ? result.getAttackerId() : result.getDefenderId(); </span>
+<span class="pc" id="L127">        Npc loser = npcRepository.findById(npcId).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Npc not found&quot;));</span>
+        
+<span class="fc" id="L129">        Integer matchId = result.getMatchId();</span>
+<span class="fc" id="L130">        Room room = npcLoses(loser, player, result.getMatchId(), result.getDefenderRoomId());</span>
+
+        // Actualizar estadísticas de batallas del jugador
+<span class="fc" id="L133">        updatePlayerStatistics(player);</span>
+        FightResolvedDTO dto;
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        if (loser.getIsNiallCampbell()) {</span>
+<span class="fc" id="L136">            dto = playerBeatsNiallCampbell(player, npcId, matchId, room.getId());</span>
+        } else {
+<span class="fc" id="L138">            dto = playerBeatsNormalNPC(player, npcId, matchId, room.getId());</span>
+        }
+<span class="fc" id="L140">        dto.setChainRoomId(room.getId());</span>
+        
+        // comprobamos que si hay más npcs en la sala donde se queda el player ganador, para encadenarla
+<span class="fc" id="L143">        getPossibleFight(matchId, player.getUser().getId(), result.getDefenderRoomId(), false);</span>
+
+<span class="fc" id="L145">        return dto;</span>
+    }
+
+    @Transactional
+    public FightResolvedDTO playerBeatsNiallCampbell(Player player, Integer npcId, Integer matchId, Integer roomId){
+<span class="fc" id="L150">        Card discardedCard = deckService.getAndRemoveLastDiscardedCard(matchId);  </span>
+
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        if (discardedCard != null){</span>
+            // no hay carta descartada que dar al jugador
+<span class="fc" id="L154">            handService.addCardToPlayerHand(discardedCard, matchId, player.getId());</span>
+        } else {
+<span class="nc" id="L156">            discardedCard = new Card(); </span>
+        }
+
+        // Notificar por WebSocket el estado actualizado de cartas (incluye deck/discard)
+<span class="fc" id="L160">        AllCardsStatusDTO playerCards = matchService.getAllCards(matchId, player.getId());</span>
+<span class="fc" id="L161">        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards);</span>
+<span class="fc" id="L162">        matchWebsocketController.notifyCardsUpdate(matchId, update);</span>
+
+<span class="fc" id="L164">        return new FightResolvedDTO(matchId, player.getUser().getId(), player.getId(), npcId, roomId, discardedCard, FightResultType.PLAYER_BEATS_NPC); </span>
+
+    }
+
+    @Transactional
+    public FightResolvedDTO playerBeatsNormalNPC(Player player, Integer npcId, Integer matchId, Integer roomId){
+<span class="fc" id="L170">        Card stolenCard = deckService.drawCard(matchId);</span>
+<span class="fc" id="L171">        deckService.findDeckById(matchId);</span>
+
+<span class="fc" id="L173">        handService.addCardToPlayerHand(stolenCard, matchId,  player.getId());</span>
+
+        // Notificar cambios de cartas por WebSocket
+<span class="fc" id="L176">        AllCardsStatusDTO playerCards = matchService.getAllCards(matchId, player.getId());</span>
+<span class="fc" id="L177">        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);</span>
+<span class="fc" id="L178">        matchWebsocketController.notifyCardsUpdate(matchId, update);</span>
+        
+<span class="fc" id="L180">        return new FightResolvedDTO(matchId, player.getUser().getId(), player.getId(), npcId, roomId, stolenCard, FightResultType.PLAYER_BEATS_NPC);   </span>
+    }
+
+    
+    @Transactional
+    public FightResolvedDTO playerBeatsPlayer(FightResultRequestDTO result){
+<span class="pc bpc" id="L186" title="1 of 2 branches missed.">        Player winner = result.isAttackerWins() ? playerService.findById(result.getAttackerId()) : playerService.findById(result.getDefenderId()); </span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">        Player loser = result.isAttackerWins() ? playerService.findById(result.getDefenderId()) : playerService.findById(result.getAttackerId()); </span>
+      
+<span class="fc" id="L189">        Room defenderRoom = roomService.findById(result.getDefenderRoomId());</span>
+<span class="fc" id="L190">        Room room = playerLoses(loser, result.getMatchId(), result);</span>
+<span class="fc" id="L191">        winner.setRoom(defenderRoom);</span>
+<span class="fc" id="L192">        playerRepo.save(winner);</span>
+
+<span class="fc" id="L194">        PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(winner);</span>
+<span class="fc" id="L195">        matchWebsocketController.notifyPlayerLocationUpdate(result.getMatchId(), locationUpdate);</span>
+
+        // checkeamos por si puede ser que hubieran varios npcs en la misma sala (se hace cadena)
+<span class="fc" id="L198">        getPossibleFight(result.getMatchId(), winner.getUser().getId(), result.getDefenderRoomId(), false);</span>
+
+
+        // si el jugador activo (el que ataca en este caso, pierde entonces sus puntos de accion se quedan a cero)
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">        if (loser.getId().equals(result.getAttackerId())){</span>
+<span class="nc" id="L203">            loserLoseActionPoints(loser, result.getMatchId());</span>
+        }
+        // Actualizar estadísticas de batallas del jugador
+<span class="fc" id="L206">        updatePlayerStatistics(winner);</span>
+
+<span class="fc" id="L208">        FightResolvedDTO dto = new FightResolvedDTO(</span>
+<span class="fc" id="L209">            result.getMatchId(),</span>
+<span class="fc" id="L210">            winner.getUser().getId(),</span>
+<span class="fc" id="L211">            winner.getId(),</span>
+<span class="fc" id="L212">            loser.getId(),</span>
+<span class="fc" id="L213">            loser.getUser().getId(),</span>
+<span class="fc" id="L214">            room.getId(),</span>
+            FightResultType.PLAYER_BEATS_PLAYER
+        );
+        
+<span class="fc" id="L218">        return dto;</span>
+    }
+
+    
+    @Transactional
+    public Room playerLoses(Player loser, Integer matchId, FightResultRequestDTO request){
+<span class="fc" id="L224">        loser.setStrength(Math.min(6, loser.getStrength() + 1));</span>
+        // si el jugador activo pierde contra otro player, pierde sus puntos de acción
+<span class="pc bpc" id="L226" title="1 of 4 branches missed.">        if (!request.isNpcFight() &amp;&amp; request.getAttackerId().equals(loser.getId())){</span>
+<span class="nc" id="L227">            loser.setActionPoints(0);</span>
+<span class="nc" id="L228">            ActionPointsUpdateDTO actionPointsUpdate = matchService.consumeAllActionPointForUser(matchId, loser.getUser().getId());</span>
+<span class="nc" id="L229">            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+        }
+<span class="fc" id="L231">        Room randomRoom = roomService.getRandomRoom();</span>
+<span class="fc" id="L232">        loser.setRoom(randomRoom);</span>
+<span class="fc" id="L233">        playerRepo.save(loser);</span>
+
+        // vemos si se enlaza una pelea 
+<span class="fc" id="L236">        getPossibleFight(matchId, loser.getUser().getId(), randomRoom.getId(), false);</span>
+
+<span class="fc" id="L238">        PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(loser);</span>
+<span class="fc" id="L239">        matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);</span>
+
+<span class="fc" id="L241">        StrengthUpdateDTO strengthUpdate = new StrengthUpdateDTO(</span>
+<span class="fc" id="L242">                loser.getId(),</span>
+<span class="fc" id="L243">                loser.getUser().getId(),</span>
+<span class="fc" id="L244">                loser.getUser().getUsername(),</span>
+<span class="fc" id="L245">                loser.getStrength(),</span>
+<span class="fc" id="L246">                System.currentTimeMillis()</span>
+            );
+<span class="fc" id="L248">        matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);</span>
+
+<span class="fc" id="L250">        return randomRoom;</span>
+    }
+
+    @Transactional
+    public Room  npcLoses(Npc loser, Player winner, Integer matchId, Integer roomId){
+<span class="fc" id="L255">        loser.setStrength(Math.min(6, loser.getStrength() + 1));</span>
+<span class="fc" id="L256">        Room defenderRoom = roomService.findById(roomId);</span>
+<span class="fc" id="L257">        Room randomRoom  = roomService.getRandomRoom();</span>
+<span class="fc" id="L258">        loser.setRoom(randomRoom);</span>
+<span class="fc" id="L259">        npcRepository.save(loser);</span>
+        
+<span class="fc" id="L261">        winner.setRoom(defenderRoom);</span>
+<span class="fc" id="L262">        playerRepo.save(winner);</span>
+
+        // vemos si se enlaza una pelea 
+<span class="fc" id="L265">        getPossibleFight(matchId, loser.getId(), randomRoom.getId(), true);</span>
+
+<span class="fc" id="L267">        PlayerLocationUpdateDTO locationPlayerUpdate = new PlayerLocationUpdateDTO(winner);</span>
+<span class="fc" id="L268">        matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationPlayerUpdate);</span>
+
+<span class="fc" id="L270">        NpcLocationUpdateDTO locationNpcUpdate = new NpcLocationUpdateDTO(loser);</span>
+<span class="fc" id="L271">        matchWebsocketController.notifyNpcLocationUpdate(matchId, locationNpcUpdate);</span>
+
+<span class="fc" id="L273">        StrengthUpdateDTO strengthUpdate = new StrengthUpdateDTO(loser.getId(),loser.getStrength(),System.currentTimeMillis());</span>
+<span class="fc" id="L274">        matchWebsocketController.notifyStrengthUpdate(matchId, strengthUpdate);</span>
+
+<span class="fc" id="L276">        return randomRoom;</span>
+    }
+
+
+
+
+    @Transactional
+    public CardDTO playerStealFromPlayer(StealCardRequestDTO request, Integer matchId) {
+        // checkeamos que ambos jugadores existen en la partida
+<span class="fc" id="L285">        Integer loserId = playerService.findById(request.getLoserId()).getId(); </span>
+<span class="fc" id="L286">        Player winner = playerService.findById(request.getWinnerId());</span>
+
+        // quitamos la carta de la mano o bolsa del perdedor y se la añadimos a la mano del ganador
+<span class="fc bfc" id="L289" title="All 2 branches covered.">        Card card = request.getCard() == null ? null : request.getCard();</span>
+
+<span class="fc bfc" id="L291" title="All 2 branches covered.">        if (request.getFromWhere().equals(&quot;hand&quot;)){ </span>
+            // Selección aleatoria de carta de la mano del perdedor
+<span class="fc" id="L293">            HandInGame loserHand = handService.findPlayerHand(matchId, loserId);</span>
+<span class="fc" id="L294">            List&lt;Card&gt; loserHandCards = loserHand.getCards();</span>
+<span class="pc bpc" id="L295" title="2 of 4 branches missed.">            if (loserHandCards == null || loserHandCards.isEmpty()) {</span>
+<span class="nc" id="L296">                return new CardDTO();</span>
+            }
+<span class="fc" id="L298">            card = loserHandCards.get((int) Math.floor(Math.random() * loserHandCards.size()));</span>
+<span class="fc" id="L299">            handService.removeCardFromPlayerHand(card, matchId, loserId);</span>
+<span class="fc" id="L300">            handService.addCardToPlayerHand(card, matchId, winner.getId());</span>
+
+<span class="fc bfc" id="L302" title="All 2 branches covered.">        } else if (request.getFromWhere().equals(&quot;bag&quot;)){ </span>
+<span class="fc" id="L303">            bagService.removeCardFromPlayerBag(request.getCard(), matchId, loserId);</span>
+<span class="fc" id="L304">            handService.addCardToPlayerHand(request.getCard(), matchId, winner.getId()); </span>
+        
+        } else {
+<span class="fc" id="L307">            throw new IllegalArgumentException(&quot;fromWhere must be 'hand' or 'bag'&quot;);</span>
+        }
+        // Actualizar estadísticas de batallas
+<span class="fc" id="L310">        updatePlayerStatistics(winner);</span>
+
+<span class="fc" id="L312">        AllCardsStatusDTO winnerCards = matchService.getAllCards(matchId, winner.getId());</span>
+<span class="fc" id="L313">        AllCardsStatusDTO loserCards = matchService.getAllCards(matchId, loserId);</span>
+        
+<span class="fc" id="L315">        CardsUpdateDTO update = new CardsUpdateDTO(matchId, winnerCards, loserCards);</span>
+<span class="fc" id="L316">        matchWebsocketController.notifyCardsUpdate(matchId, update);</span>
+        
+<span class="fc" id="L318">        return new CardDTO(card);</span>
+
+    }
+
+     
+    @Transactional
+    public void playerLosesAgainstNpc(Integer matchId, Integer playerId, LoseAgainstNpcRequestDTO request){
+<span class="fc" id="L325">        String fromWhere = request.getFromWhere();</span>
+<span class="fc" id="L326">        Integer cardId = request.getCardId();</span>
+
+        // Validar parámetros
+<span class="pc bpc" id="L329" title="2 of 6 branches missed.">        if (fromWhere == null || (!&quot;hand&quot;.equals(fromWhere) &amp;&amp; !&quot;bag&quot;.equals(fromWhere))) {</span>
+<span class="nc" id="L330">            throw new IllegalArgumentException(&quot;fromWhere must be 'hand' or 'bag'&quot;);</span>
+        }
+<span class="pc bpc" id="L332" title="1 of 2 branches missed.">        if (cardId == null) {</span>
+<span class="nc" id="L333">            throw new IllegalArgumentException(&quot;cardId cannot be null&quot;);</span>
+        }
+
+        // Buscar la carta en mano o bolsa según corresponda
+<span class="fc" id="L337">        Card cardRef = null;</span>
+<span class="fc bfc" id="L338" title="All 2 branches covered.">        if (&quot;hand&quot;.equals(fromWhere)) {</span>
+<span class="fc" id="L339">            HandInGame hand = handService.findPlayerHand(matchId, playerId);</span>
+<span class="fc" id="L340">            cardRef = hand.getCards().stream()</span>
+<span class="pc bpc" id="L341" title="2 of 4 branches missed.">                .filter(c -&gt; c.getId() != null &amp;&amp; c.getId().equals(cardId))</span>
+<span class="fc" id="L342">                .findFirst()</span>
+<span class="fc" id="L343">                .orElse(null);</span>
+<span class="fc" id="L344">            handService.removeCardFromPlayerHand(cardRef, matchId, playerId);</span>
+<span class="fc" id="L345">        } else {</span>
+<span class="fc" id="L346">            BagInGame bag = bagService.findPlayerBag(matchId, playerId);</span>
+<span class="fc" id="L347">            cardRef = bag.getCards().stream()</span>
+<span class="pc bpc" id="L348" title="2 of 4 branches missed.">                .filter(c -&gt; c.getId() != null &amp;&amp; c.getId().equals(cardId))</span>
+<span class="fc" id="L349">                .findFirst()</span>
+<span class="fc" id="L350">                .orElse(null);</span>
+<span class="fc" id="L351">            bagService.removeCardFromPlayerBag(cardRef, matchId, playerId); </span>
+        }
+
+<span class="pc bpc" id="L354" title="1 of 2 branches missed.">        if (cardRef == null) {</span>
+<span class="nc" id="L355">            throw new IllegalArgumentException(&quot;Card not found in &quot; + fromWhere);</span>
+        }
+
+        // añadimos la carta seleccionada al mazo de descartes
+<span class="fc" id="L359">        deckService.addCardToDiscardedPile(matchId, cardRef);</span>
+
+        // Notificar cambios de cartas por WebSocket
+<span class="fc" id="L362">        AllCardsStatusDTO playerCards = matchService.getAllCards(matchId, playerId);</span>
+<span class="fc" id="L363">        CardsUpdateDTO update = new CardsUpdateDTO(matchId, playerCards, null);</span>
+<span class="fc" id="L364">        matchWebsocketController.notifyCardsUpdate(matchId, update);</span>
+
+<span class="fc" id="L366">    }</span>
+
+
+
+    @Transactional
+    public void loserLoseActionPoints(Player loser, Integer matchId){
+<span class="fc" id="L372">        ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(</span>
+<span class="fc" id="L373">                loser.getId(),</span>
+<span class="fc" id="L374">                loser.getUser().getId(),</span>
+<span class="fc" id="L375">                loser.getUser().getUsername(),</span>
+<span class="fc" id="L376">                loser.getActionPoints(),</span>
+<span class="fc" id="L377">                System.currentTimeMillis()</span>
+            );
+<span class="fc" id="L379">        matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);</span>
+<span class="fc" id="L380">    }</span>
+
+    
+    
+    @Transactional
+    public void updatePlayerStatistics(Player player){
+        // Actualizar estadísticas de batallas del jugador
+<span class="fc" id="L387">        int battlesWon = Optional.ofNullable(player.getBattlesWon()).orElse(0);</span>
+<span class="fc" id="L388">        int battlesPlayed = Optional.ofNullable(player.getBattlesPlayed()).orElse(0);</span>
+<span class="fc" id="L389">        player.setBattlesWon(battlesWon + 1);</span>
+<span class="fc" id="L390">        player.setBattlesPlayed(battlesPlayed + 1);</span>
+<span class="fc" id="L391">        playerRepo.save(player);</span>
+
+<span class="fc" id="L393">    }</span>
+
+    // movedId = id del user o npc que se mueve a esa habitacion
+    // isNpc si el que se mueve a la habitacion es un npc
+    @Transactional
+    public List&lt;PendingFight&gt; getPossibleFight(Integer matchId, Integer movedId, Integer roomId, boolean isNpc) {
+        // Safe Area
+<span class="fc bfc" id="L400" title="All 2 branches covered.">        if (roomId == 37) {</span>
+<span class="fc" id="L401">            return new ArrayList&lt;&gt;();</span>
+        }
+<span class="pc" id="L403">        Match match = matchRepo.findById(matchId).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Match not found&quot;));</span>
+<span class="fc" id="L404">        List&lt;Player&gt; players = playerRepo.findByMatchAndRoom(matchId, roomId);</span>
+<span class="fc" id="L405">        List&lt;Npc&gt; npcs = npcRepository.findByMatchAndRoom(matchId, roomId);</span>
+
+<span class="pc bpc" id="L407" title="1 of 4 branches missed.">        if (players.isEmpty() &amp;&amp; npcs.isEmpty()) {</span>
+<span class="fc" id="L408">            return match.getPendingFights();</span>
+        }
+
+<span class="pc bpc" id="L411" title="1 of 2 branches missed.">        if (isNpc) {</span>
+<span class="nc" id="L412">            npcRepository.findById(movedId).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Npc not found&quot;));</span>
+            // npc contra jugador 
+<span class="nc bnc" id="L414" title="All 4 branches missed.">            if (players.size() == 1 &amp;&amp; npcs.size() == 1) {</span>
+<span class="nc" id="L415">                addPendingFight(match, movedId, players.getFirst().getUser().getId(), roomId, true, true);</span>
+            }
+
+        } else {
+<span class="fc" id="L419">            Player player = playerService.findByMatchIdAndUserId(matchId, movedId);</span>
+            // jugador contra jugador 
+<span class="pc bpc" id="L421" title="1 of 2 branches missed.">            if (players.size() == 2) {</span>
+<span class="fc" id="L422">                Integer defenderId = players.stream()</span>
+<span class="fc bfc" id="L423" title="All 2 branches covered.">                    .filter(p -&gt; !p.getId().equals(player.getId()))</span>
+<span class="fc" id="L424">                    .findFirst()</span>
+<span class="fc" id="L425">                    .orElse(null).getUser().getId();</span>
+
+<span class="pc bpc" id="L427" title="1 of 2 branches missed.">                if (!movedId.equals(defenderId)) {</span>
+<span class="fc" id="L428">                    addPendingFight(match, movedId, defenderId, roomId, false, false);</span>
+                }
+            }
+            // jugador contra npc 
+<span class="pc bpc" id="L432" title="3 of 4 branches missed.">            if (players.size() == 1 &amp;&amp; npcs.size() &gt;= 1) {</span>
+<span class="nc" id="L433">                addPendingFight(match, movedId, npcs.getFirst().getId(), roomId, true, false);</span>
+            }
+        }
+<span class="fc" id="L436">        return match.getPendingFights();</span>
+    }
+
+    @Transactional
+    private void addPendingFight(Match match,Integer attackerId,Integer defenderId,Integer roomId,boolean isNpcFight, boolean isNpcAttacker) {
+<span class="fc" id="L441">        match.getPendingFights().add(new PendingFight(match.getId(),attackerId,defenderId,roomId,isNpcFight,isNpcAttacker));</span>
+<span class="fc" id="L442">        matchRepo.save(match);</span>
+<span class="fc" id="L443">    }</span>
+
+
+    @Transactional
+    public void checkPendingFights(Integer matchId) {
+<span class="fc" id="L448">        Match match = matchRepo.findById(matchId)</span>
+<span class="fc" id="L449">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Match not found&quot;));</span>
+<span class="fc bfc" id="L450" title="All 2 branches covered.">        if (match.getPendingFights().isEmpty()) {</span>
+<span class="fc" id="L451">            return;</span>
+        }
+<span class="fc" id="L453">        PendingFight fight = match.getPendingFights().removeFirst();</span>
+<span class="fc" id="L454">        matchRepo.save(match);</span>
+
+<span class="fc" id="L456">        FightUpdateDTO update = createFightUpdate(matchId, fight);</span>
+<span class="fc" id="L457">        matchWebsocketController.notifyFightUpdate(matchId, update);</span>
+<span class="fc" id="L458">    }</span>
+
+    @Transactional
+    private FightUpdateDTO createFightUpdate(Integer matchId, PendingFight fight) {
+        String attackerName;
+        String defenderName;
+<span class="pc bpc" id="L464" title="1 of 2 branches missed.">        if (fight.isNpcAttacker()) {</span>
+<span class="nc" id="L465">            Npc attacker = npcRepository.findById(fight.getAttackerUserId())</span>
+<span class="nc" id="L466">                    .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Npc not found&quot;));</span>
+<span class="nc" id="L467">            Player defender = playerService.findByMatchIdAndUserId(matchId, fight.getDefenserUserId());</span>
+
+<span class="nc bnc" id="L469" title="All 2 branches missed.">            attackerName = attacker.getIsNiallCampbell() ? &quot;Niall Campbell&quot; : &quot;NPC&quot;;</span>
+<span class="nc" id="L470">            defenderName = defender.getUser().getUsername();</span>
+
+<span class="pc bpc" id="L472" title="2 of 4 branches missed.">        } else if (fight.isNpcFight() &amp;&amp; !fight.isNpcAttacker()) {</span>
+<span class="fc" id="L473">            Player attacker = playerService.findByMatchIdAndUserId(matchId, fight.getAttackerUserId());</span>
+<span class="fc" id="L474">            Npc defender = npcRepository.findById(fight.getDefenserUserId())</span>
+<span class="pc" id="L475">                    .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Npc not found&quot;));</span>
+
+<span class="fc" id="L477">            attackerName = attacker.getUser().getUsername();</span>
+<span class="pc bpc" id="L478" title="1 of 2 branches missed.">            defenderName = defender.getIsNiallCampbell() ? &quot;Niall Campbell&quot; : &quot;NPC&quot;;</span>
+
+<span class="fc" id="L480">        } else {</span>
+<span class="nc" id="L481">            Player attacker = playerService.findByMatchIdAndUserId(matchId, fight.getAttackerUserId());</span>
+<span class="nc" id="L482">            Player defender = playerService.findByMatchIdAndUserId(matchId, fight.getDefenserUserId());</span>
+
+<span class="nc" id="L484">            attackerName = attacker.getUser().getUsername();</span>
+<span class="nc" id="L485">            defenderName = defender.getUser().getUsername();</span>
+        }
+
+<span class="fc" id="L488">        return new FightUpdateDTO(</span>
+                matchId,
+<span class="fc" id="L490">                fight.getAttackerUserId(),</span>
+                attackerName,
+<span class="fc" id="L492">                fight.getDefenserUserId(),</span>
+                defenderName,
+<span class="fc" id="L494">                fight.getRoomId(),</span>
+                &quot;START&quot;,
+<span class="fc" id="L496">                fight.isNpcFight()</span>
+        );
+    }
+
+    
+
+
+
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

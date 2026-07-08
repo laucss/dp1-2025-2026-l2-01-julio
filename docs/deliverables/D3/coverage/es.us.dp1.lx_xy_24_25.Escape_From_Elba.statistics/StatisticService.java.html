@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatisticService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics</a> &gt; <span class="el_source">StatisticService.java</span></div><h1>StatisticService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.statistics;
 
 
+import java.time.Duration;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 
 @Service
 public class StatisticService {
@@ -18,100 +21,226 @@ public class StatisticService {
     
     private PlayerRepository playerRepository;
     private MatchService matchService;
+    private UserService userService;
 
     @Autowired
-<span class="fc" id="L23">    public StatisticService( PlayerRepository playerRepository, MatchService matchService) {</span>
-<span class="fc" id="L24">        this.playerRepository = playerRepository;</span>
-<span class="fc" id="L25">        this.matchService = matchService;</span>
-<span class="fc" id="L26">    }</span>
+<span class="fc" id="L27">    public StatisticService( PlayerRepository playerRepository, MatchService matchService, UserService userService) {</span>
+<span class="fc" id="L28">        this.playerRepository = playerRepository;</span>
+<span class="fc" id="L29">        this.matchService = matchService;</span>
+<span class="fc" id="L30">        this.userService = userService;</span>
+<span class="fc" id="L31">    }</span>
 
     //puntos de accion totales de un usuario
     public Integer getTotalAccionPointsByUser(Integer currentUserId) {
-<span class="fc" id="L30">        return playerRepository.getTotalAccionPointsByUser(currentUserId);</span>
+<span class="fc" id="L35">        return playerRepository.getTotalAccionPointsByUser(currentUserId);</span>
     }
 
     //Todas las victorias de un usuario
     public Integer getTotalVictoriesByUser(Integer currentUserId) {
-<span class="fc" id="L35">        List&lt;Player&gt; players = playerRepository.findByUserId(currentUserId);</span>
-<span class="fc" id="L36">        int victories = 0;</span>
-<span class="fc bfc" id="L37" title="All 2 branches covered.">        for (Player player : players) {</span>
-<span class="pc bpc" id="L38" title="1 of 4 branches missed.">            if (player.getMatch() != null &amp;&amp; player.getMatch().getWinner() != null) {</span>
-<span class="pc bpc" id="L39" title="1 of 2 branches missed.">                if (player.getId().equals(player.getMatch().getWinner().getId())) {</span>
-<span class="fc" id="L40">                    victories++;</span>
-                }
-            }
-<span class="fc" id="L43">        }</span>
-<span class="fc" id="L44">        return victories;</span>
+<span class="fc" id="L40">        Integer victories = playerRepository.getTotalVictoriesByUser(currentUserId);</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        return victories != null ? victories : 0;</span>
     }
 
     //partidas jugadas por un usuario
     public Integer getMatchesPlayedByUser(Integer currentUserId) {
-<span class="fc" id="L49">        List&lt;Player&gt; players = playerRepository.findByUserId(currentUserId);</span>
-<span class="fc" id="L50">        return players.size();</span>
+<span class="fc" id="L46">        List&lt;Player&gt; players = playerRepository.findByUserId(currentUserId);</span>
+<span class="fc" id="L47">        return players.size();</span>
     }
 
     //total tiempo jugado por un usuario
     public Integer getTotalTimePlayedByUserFOR(Integer currentUserId) {
-<span class="fc" id="L55">        List&lt;Player&gt; players = playerRepository.findByUserId(currentUserId);</span>
-<span class="fc" id="L56">        int totalTime = 0;</span>
-<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (Player player : players) {</span>
-<span class="pc bpc" id="L58" title="5 of 6 branches missed.">            if (player.getMatch() != null &amp;&amp; player.getMatch().getStartTime() != null &amp;&amp; player.getMatch().getEndTime() != null) {</span>
-<span class="nc" id="L59">                totalTime += java.time.Duration.between(player.getMatch().getStartTime(), player.getMatch().getEndTime()).toMinutes();</span>
+<span class="fc" id="L52">        List&lt;Player&gt; players = playerRepository.findByUserId(currentUserId);</span>
+<span class="fc" id="L53">        int totalTime = 0;</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        for (Player player : players) {</span>
+<span class="pc bpc" id="L55" title="1 of 6 branches missed.">            if (player.getMatch() != null &amp;&amp; player.getMatch().getStartTime() != null &amp;&amp; player.getMatch().getEndTime() != null) {</span>
+<span class="fc" id="L56">                totalTime += java.time.Duration.between(player.getMatch().getStartTime(), player.getMatch().getEndTime()).toMinutes();</span>
             }
-<span class="fc" id="L61">        }</span>
-<span class="fc" id="L62">        return totalTime;</span>
+<span class="fc" id="L58">        }</span>
+<span class="fc" id="L59">        return totalTime;</span>
     }
 
     //media de jugadores por partida
     public Double getAveragePlayersPerMatch() {
-<span class="fc" id="L67">        List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (matches.isEmpty()) {</span>
-<span class="fc" id="L69">            return 0.0;</span>
+<span class="fc" id="L64">        List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (matches.isEmpty()) {</span>
+<span class="fc" id="L66">            return 0.0;</span>
         }
-<span class="fc" id="L71">        Double numPlayers = 0.0;</span>
-<span class="fc bfc" id="L72" title="All 2 branches covered.">        for (Match m : matches) {</span>
-<span class="fc" id="L73">            numPlayers += m.getMaxPlayers();</span>
-<span class="fc" id="L74">        }</span>
-<span class="fc" id="L75">        return numPlayers / matches.size();</span>
+<span class="fc" id="L68">        Double numPlayers = 0.0;</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        for (Match m : matches) {</span>
+<span class="fc" id="L70">            numPlayers += m.getMaxPlayers();</span>
+<span class="fc" id="L71">        }</span>
+<span class="fc" id="L72">        return numPlayers / matches.size();</span>
     }
 
     //total de partidas jugadas
     public Integer getTotalMatchesPlayed() {
-<span class="fc" id="L80">        List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
-<span class="fc" id="L81">        return matches.size();</span>
+<span class="fc" id="L77">        List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
+<span class="fc" id="L78">        return matches.size();</span>
     }
 
     // batallas ganadas por un usuario
     public Integer getBattlesWonByUser(Integer currentUserId) {
-<span class="fc" id="L86">        return playerRepository.getBattlesWonByUser(currentUserId);</span>
+<span class="fc" id="L83">        Integer battlesWon = playerRepository.getBattlesWonByUser(currentUserId);</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        return battlesWon != null ? battlesWon : 0;</span>
     }
 
     // total de batallas disputadas (suma de batallas jugadas por todos los jugadores)
     public Integer getTotalBattlesDisputed() {
-<span class="fc" id="L91">        return playerRepository.getTotalBattlesDisputed();</span>
+<span class="fc" id="L89">        Integer totalBattlesDisputed = playerRepository.getTotalBattlesDisputed();</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        return totalBattlesDisputed != null ? totalBattlesDisputed : 0;</span>
     }
 
     // habitaciones visitadas por un usuario
     public Integer getTotalRoomsVisitedByUser(Integer currentUserId) {
-<span class="fc" id="L96">        Integer total = playerRepository.getTotalRoomsVisitedByUser(currentUserId);</span>
-<span class="fc bfc" id="L97" title="All 2 branches covered.">        return total != null ? total : 0;</span>
+<span class="fc" id="L95">        Integer total = playerRepository.getTotalRoomsVisitedByUser(currentUserId);</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        return total != null ? total : 0;</span>
     }
 
     // media de habitaciones visitadas por partida
     public Double getAverageRoomsVisitedPerMatch() {
-<span class="fc" id="L102">        List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
-<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (matches.isEmpty()) {</span>
-<span class="nc" id="L104">            return 0.0;</span>
+<span class="fc" id="L101">        List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if (matches.isEmpty()) {</span>
+<span class="nc" id="L103">            return 0.0;</span>
         }
-<span class="fc" id="L106">        Double totalRoomsVisited = 0.0;</span>
-<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (Match m : matches) {</span>
-<span class="fc bfc" id="L108" title="All 2 branches covered.">            for (Player p : m.getPlayers()) {</span>
-<span class="pc bpc" id="L109" title="1 of 2 branches missed.">                if (p.getRoomsVisited() != null) {</span>
-<span class="fc" id="L110">                    totalRoomsVisited += p.getRoomsVisited();</span>
+<span class="fc" id="L105">        Double totalRoomsVisited = 0.0;</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        for (Match m : matches) {</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">            for (Player p : m.getPlayers()) {</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">                if (p.getRoomsVisited() != null) {</span>
+<span class="fc" id="L109">                    totalRoomsVisited += p.getRoomsVisited();</span>
                 }
-<span class="fc" id="L112">            }</span>
-<span class="fc" id="L113">        }</span>
-<span class="fc" id="L114">        return totalRoomsVisited / matches.size();</span>
+<span class="fc" id="L111">            }</span>
+<span class="fc" id="L112">        }</span>
+<span class="fc" id="L113">        return totalRoomsVisited / matches.size();</span>
     }
+
+    public Double getAverageMatchDuration() {
+<span class="fc" id="L117">    List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
+
+<span class="fc bfc" id="L119" title="All 2 branches covered.">    if(matches.isEmpty()) {</span>
+<span class="fc" id="L120">        return 0.0;</span>
+    }
+
+<span class="fc" id="L123">    double totalMinutes = 0;</span>
+
+<span class="fc bfc" id="L125" title="All 2 branches covered.">    for(Match m : matches) {</span>
+<span class="pc bpc" id="L126" title="2 of 4 branches missed.">        if(m.getStartTime() != null &amp;&amp; m.getEndTime() != null) {</span>
+<span class="fc" id="L127">            totalMinutes += Duration.between(</span>
+<span class="fc" id="L128">                m.getStartTime(),</span>
+<span class="fc" id="L129">                m.getEndTime()</span>
+<span class="fc" id="L130">            ).toMinutes();</span>
+        }
+<span class="fc" id="L132">    }</span>
+
+<span class="fc" id="L134">    return totalMinutes / matches.size();</span>
+    }
+
+    public Integer getBattlesPlayedByUser(Integer currentUserId) {
+<span class="fc" id="L138">    Integer battlesPlayed = playerRepository.getBattlesPlayedByUser(currentUserId);</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">    return battlesPlayed != null ? battlesPlayed : 0;</span>
+    }
+
+    public Integer getMaxRoomsVisitedInMatch(Integer currentUserId) {
+<span class="fc" id="L143">        List&lt;Player&gt; players = playerRepository.findByUserId(currentUserId);</span>
+
+<span class="fc" id="L145">        int maxRooms = 0;</span>
+
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        for (Player player : players) {</span>
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">            if (player.getRoomsVisited() != null &amp;&amp;</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">                player.getRoomsVisited() &gt; maxRooms) {</span>
+
+<span class="fc" id="L151">                maxRooms = player.getRoomsVisited();</span>
+            }
+<span class="fc" id="L153">        }</span>
+
+<span class="fc" id="L155">        return maxRooms;</span>
+    }
+
+    public Integer getLongestMatchDuration() {
+<span class="fc" id="L159">    List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
+
+<span class="fc" id="L161">    int longest = 0;</span>
+
+<span class="fc bfc" id="L163" title="All 2 branches covered.">    for (Match m : matches) {</span>
+<span class="pc bpc" id="L164" title="2 of 4 branches missed.">        if (m.getStartTime() != null &amp;&amp; m.getEndTime() != null) {</span>
+
+<span class="fc" id="L166">            int duration = (int) Duration.between(</span>
+<span class="fc" id="L167">                m.getStartTime(),</span>
+<span class="fc" id="L168">                m.getEndTime()</span>
+<span class="fc" id="L169">            ).toMinutes();</span>
+
+<span class="fc" id="L171">            longest = Math.max(longest, duration);</span>
+        }
+<span class="fc" id="L173">    }</span>
+
+<span class="fc" id="L175">    return longest;</span>
+    }
+
+    public Integer getShortestMatchDuration() {
+<span class="fc" id="L179">    List&lt;Match&gt; matches = matchService.getAllMatchs();</span>
+
+<span class="fc" id="L181">    Integer shortest = null;</span>
+
+<span class="fc bfc" id="L183" title="All 2 branches covered.">    for (Match m : matches) {</span>
+<span class="pc bpc" id="L184" title="2 of 4 branches missed.">        if (m.getStartTime() != null &amp;&amp; m.getEndTime() != null) {</span>
+
+<span class="fc" id="L186">            int duration = (int) Duration.between(</span>
+<span class="fc" id="L187">                m.getStartTime(),</span>
+<span class="fc" id="L188">                m.getEndTime()</span>
+<span class="fc" id="L189">            ).toMinutes();</span>
+
+<span class="pc bpc" id="L191" title="1 of 4 branches missed.">            if (shortest == null || duration &lt; shortest) {</span>
+<span class="fc" id="L192">                shortest = duration;</span>
+            }
+        }
+<span class="fc" id="L195">    }</span>
+
+<span class="fc bfc" id="L197" title="All 2 branches covered.">    return shortest != null ? shortest : 0;</span>
+    }
+
+    public String getPlayerType(Integer userId) {
+
+<span class="fc" id="L202">        Integer battlesWon = getBattlesWonByUser(userId);</span>
+<span class="fc" id="L203">        Integer roomsVisited = getTotalRoomsVisitedByUser(userId);</span>
+
+<span class="fc bfc" id="L205" title="All 2 branches covered.">        if (battlesWon &gt; roomsVisited) {</span>
+<span class="fc" id="L206">            return &quot;Aggressive&quot;;</span>
+        }
+
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        if (roomsVisited &gt; battlesWon * 2) {</span>
+<span class="fc" id="L210">            return &quot;Explorer&quot;;</span>
+        }
+
+<span class="fc" id="L213">        return &quot;Balanced&quot;;</span>
+    }
+
+    public Double getWinRateByUser(Integer userId){
+
+<span class="fc" id="L218">    Integer victories = getTotalVictoriesByUser(userId);</span>
+<span class="fc" id="L219">    Integer matches = getMatchesPlayedByUser(userId);</span>
+
+<span class="fc bfc" id="L221" title="All 2 branches covered.">    return matches &gt; 0</span>
+<span class="fc" id="L222">        ? (victories * 100.0) / matches</span>
+<span class="fc" id="L223">        : 0.0;</span>
+}
+
+
+
+// Devuelve el ranking de usuarios basado en victorias
+    public List&lt;RankingDTO&gt; getRanking() {
+
+<span class="nc" id="L231">        List&lt;User&gt; users = (List&lt;User&gt;) userService.findAll();</span>
+
+<span class="nc" id="L233">        return users.stream()</span>
+<span class="nc" id="L234">            .map(user -&gt; new RankingDTO(</span>
+<span class="nc" id="L235">                user.getId(),</span>
+<span class="nc" id="L236">                user.getUsername(),</span>
+<span class="nc" id="L237">                user.getAvatar(),</span>
+<span class="nc" id="L238">                getTotalVictoriesByUser(user.getId())</span>
+            ))
+<span class="nc" id="L240">            .sorted((a, b) -&gt;</span>
+<span class="nc" id="L241">                Integer.compare(b.getTotalVictories(), a.getTotalVictories()))</span>
+<span class="nc" id="L242">            .toList();</span>
+    }
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

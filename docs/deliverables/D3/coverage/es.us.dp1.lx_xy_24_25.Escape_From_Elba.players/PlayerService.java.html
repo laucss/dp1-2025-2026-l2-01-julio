@@ -3,7 +3,6 @@
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.maven.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,10 +20,10 @@ public class PlayerService {
     private final HandService handService; 
 
     @Autowired
-<span class="fc" id="L24">    public PlayerService(PlayerRepository playerRepository, HandService handService) {</span>
-<span class="fc" id="L25">        this.playerRepository = playerRepository;</span>
-<span class="fc" id="L26">        this.handService= handService; </span>
-<span class="fc" id="L27">    }</span>
+<span class="fc" id="L23">    public PlayerService(PlayerRepository playerRepository, HandService handService) {</span>
+<span class="fc" id="L24">        this.playerRepository = playerRepository;</span>
+<span class="fc" id="L25">        this.handService= handService; </span>
+<span class="fc" id="L26">    }</span>
 
     /* Encuentra un Player por su User asociado
     @Transactional(readOnly = true)
@@ -35,44 +34,51 @@ public class PlayerService {
 
     @Transactional(readOnly = true)
     public List&lt;Player&gt; findAll() {
-<span class="fc" id="L38">        return playerRepository.findAll();</span>
+<span class="fc" id="L37">        return playerRepository.findAll();</span>
     }
 
     @Transactional(readOnly = true)
     public Player findById(Integer id) {
-<span class="fc" id="L43">        Optional&lt;Player&gt; p = playerRepository.findById(id); </span>
-<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (p.isPresent()) {</span>
-<span class="fc" id="L45">            return p.get();</span>
+<span class="fc" id="L42">        Optional&lt;Player&gt; p = playerRepository.findById(id); </span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        if (p.isPresent()) {</span>
+<span class="fc" id="L44">            return p.get();</span>
         } else {
-<span class="fc" id="L47">            throw new ResourceNotFoundException(&quot;Player not found with id: &quot; + id);</span>
+<span class="fc" id="L46">            throw new ResourceNotFoundException(&quot;Player not found with id: &quot; + id);</span>
         }
     }
 
     @Transactional(readOnly = true)
     public List&lt;Player&gt; findByUserId(Integer id) {
-<span class="fc" id="L53">        return playerRepository.findByUserId(id);</span>
+<span class="fc" id="L52">        return playerRepository.findByUserId(id);</span>
     }
 
     @Transactional(readOnly = true)
-    public Optional&lt;Player&gt; findByMatchIdAndUserId(Integer matchId, Integer userId) {
-<span class="fc" id="L58">        return playerRepository.findByMatchAndUser(matchId, userId);</span>
+    public Player findByMatchIdAndUserId(Integer matchId, Integer userId) {
+<span class="nc" id="L57">        return playerRepository.findByMatchAndUser(matchId, userId)</span>
+<span class="nc" id="L58">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Player with  user id &quot; + userId + &quot;not found in the match with id&quot; + matchId));</span>
+    }
+
+    // funcion usada en el caht service
+    @Transactional(readOnly = true)
+    public Optional&lt;Player&gt; findOptionalPlayerByMatchIdAndUserId(Integer matchId, Integer userId) {
+<span class="nc" id="L64">        return playerRepository.findByMatchAndUser(matchId, userId);</span>
     }
 
 
     @Transactional
     public Player save(Player player) {
-<span class="fc" id="L64">        return playerRepository.save(player);</span>
+<span class="fc" id="L70">        return playerRepository.save(player);</span>
     }
 
 
     @Transactional
     public void deleteById(Integer id) {
-<span class="fc" id="L70">        playerRepository.deleteById(id);</span>
-<span class="fc" id="L71">    }</span>
+<span class="fc" id="L76">        playerRepository.deleteById(id);</span>
+<span class="fc" id="L77">    }</span>
 
     @Transactional
     public List&lt;Player&gt; getPlayersByMatchId(Integer matchId) {
-<span class="fc" id="L75">        return playerRepository.findByMatchId(matchId);</span>
+<span class="fc" id="L81">        return playerRepository.findByMatchId(matchId);</span>
     }
 
     /*
@@ -81,22 +87,22 @@ public class PlayerService {
     @Transactional
     public Integer getPlayerActionPoints(Integer matchId, Integer playerId){
         // checkeamos que el jugador exista 
-<span class="nc" id="L84">        Player player = findById(playerId); </span>
+<span class="nc" id="L90">        Player player = findById(playerId); </span>
          
         // vemos cuandas cartas tiene en su mano
-<span class="nc" id="L87">        HandInGame playerHand = handService.findPlayerHand(matchId, playerId); </span>
-<span class="nc" id="L88">        Integer totalCards = playerHand.getCards().size(); </span>
+<span class="nc" id="L93">        HandInGame playerHand = handService.findPlayerHand(matchId, playerId); </span>
+<span class="nc" id="L94">        Integer totalCards = playerHand.getCards().size(); </span>
 
         // si tiene más de 7 cartas, automáticamente no tiene puntos de acción, 
         // si tiene menos, los puntos de acción son 7 - número de cartas en mano
-<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (totalCards &gt; 7 ){</span>
-<span class="nc" id="L93">            player.setActionPoints(0); </span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (totalCards &gt; 7 ){</span>
+<span class="nc" id="L99">            player.setActionPoints(0); </span>
         } else {
-<span class="nc" id="L95">            Integer points=  7 - totalCards; </span>
-<span class="nc" id="L96">            player.setActionPoints(points);</span>
+<span class="nc" id="L101">            Integer points=  7 - totalCards; </span>
+<span class="nc" id="L102">            player.setActionPoints(points);</span>
         } 
-<span class="nc" id="L98">        playerRepository.save(player); </span>
-<span class="nc" id="L99">        return player.getActionPoints();</span>
+<span class="nc" id="L104">        playerRepository.save(player); </span>
+<span class="nc" id="L105">        return player.getActionPoints();</span>
     }
     
     /*
@@ -105,15 +111,16 @@ public class PlayerService {
 
     @Transactional
     public void removePlayerActionPoint(Integer matchId, Integer playerId){
-<span class="fc" id="L108">        Player player = playerRepository.findById(playerId).orElse(null); </span>
-<span class="pc bpc" id="L109" title="1 of 4 branches missed.">        if (player != null &amp;&amp; player.getMatch().getId().equals(matchId)){</span>
-<span class="fc" id="L110">            Integer current_action_points = player.getActionPoints(); </span>
-<span class="pc bpc" id="L111" title="1 of 2 branches missed.">            if (current_action_points &gt; 0){</span>
-<span class="fc" id="L112">                player.setActionPoints(current_action_points - 1); </span>
-<span class="fc" id="L113">                playerRepository.save(player); </span>
+<span class="fc" id="L114">        Player player = playerRepository.findById(playerId).orElse(null); </span>
+<span class="pc bpc" id="L115" title="1 of 4 branches missed.">        if (player != null &amp;&amp; player.getMatch().getId().equals(matchId)){</span>
+<span class="fc" id="L116">            Integer current_action_points = player.getActionPoints(); </span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">            if (current_action_points &gt; 0){</span>
+<span class="fc" id="L118">                player.setActionPoints(current_action_points - 1); </span>
+<span class="fc" id="L119">                playerRepository.save(player); </span>
             }
         }
-<span class="fc" id="L116">    }</span>
+<span class="fc" id="L122">    }</span>
+
 
 
 

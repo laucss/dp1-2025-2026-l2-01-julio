@@ -17,7 +17,7 @@ public class StealCardRequestDTOTest {
     void setUp() {
         dto = new StealCardRequestDTO();
     }
-    // TODO: CAMBIAR PORQUE CAMBIE EL CARDID POR CARD
+
     /* 
 
     @Test

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MatchHistorialDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs</a> &gt; <span class="el_source">MatchHistorialDTO.java</span></div><h1>MatchHistorialDTO.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerInGameDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,33 +24,36 @@ public class MatchHistorialDTO {
 
     private PlayerInGameDTO winner;
 
+    private Boolean abandoned;
 
-<span class="nc" id="L26">    public MatchHistorialDTO() {</span>
-<span class="nc" id="L27">    }</span>
 
-<span class="nc" id="L29">    public MatchHistorialDTO(Match match) {</span>
-<span class="nc" id="L30">        this.name = match.getName();</span>
-<span class="nc" id="L31">        this.players = match.getPlayers().stream().map(p-&gt; new PlayerInGameDTO(p)).toList();</span>
-<span class="nc" id="L32">        this.duration = match.getDuration();</span>
 
-        // Buscar creator en la lista de players usando creatorId
-<span class="nc bnc" id="L35" title="All 2 branches missed.">        if (match.getCreatorId() != null) {</span>
-<span class="nc" id="L36">            this.creator = match.getPlayers().stream()</span>
-<span class="nc" id="L37">                .filter(p -&gt; p.getUser().getId().equals(match.getCreatorId()))</span>
-<span class="nc" id="L38">                .findFirst()</span>
-<span class="nc" id="L39">                .map(PlayerInGameDTO::new)</span>
-<span class="nc" id="L40">                .orElse(null);</span>
-        }
+<span class="nc" id="L31">    public MatchHistorialDTO() {</span>
+<span class="nc" id="L32">    }</span>
+
+
+
+<span class="fc" id="L36">    public MatchHistorialDTO(Match match, User creator) {</span>
+<span class="fc" id="L37">        this.name = match.getName();</span>
+<span class="pc" id="L38">        this.players = match.getPlayers().stream().map(p-&gt; new PlayerInGameDTO(p)).toList();</span>
+<span class="fc" id="L39">        this.duration = match.getDuration();</span>
+<span class="fc" id="L40">        this.abandoned = false;</span>
+
+        
+
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (creator != null) {</span>
+<span class="fc" id="L45">        this.creator = new PlayerInGameDTO(creator);</span>
+         }
 
         // Buscar winner en la lista de players usando el winner
-<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (match.getWinner() != null) {</span>
-<span class="nc" id="L45">            this.winner = match.getPlayers().stream()</span>
-<span class="nc" id="L46">                .filter(p -&gt; p.getId().equals(match.getWinner().getId()))</span>
-<span class="nc" id="L47">                .findFirst()</span>
-<span class="nc" id="L48">                .map(PlayerInGameDTO::new)</span>
-<span class="nc" id="L49">                .orElse(null);</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if (match.getWinner() != null) {</span>
+<span class="nc" id="L50">            this.winner = match.getPlayers().stream()</span>
+<span class="nc" id="L51">                .filter(p -&gt; p.getId().equals(match.getWinner().getId()))</span>
+<span class="nc" id="L52">                .findFirst()</span>
+<span class="nc" id="L53">                .map(PlayerInGameDTO::new)</span>
+<span class="nc" id="L54">                .orElse(null);</span>
         }
-<span class="nc" id="L51">    }</span>
+<span class="fc" id="L56">    }</span>
     
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

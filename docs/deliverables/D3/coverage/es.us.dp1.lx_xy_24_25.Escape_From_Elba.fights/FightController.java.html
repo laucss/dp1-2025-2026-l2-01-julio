@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FightController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights</a> &gt; <span class="el_source">FightController.java</span></div><h1>FightController.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.CardDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.DiceTotalsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightDiceUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightResolvedDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightResultRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.LoseAgainstNpcRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.ReadyStateUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.StealCardRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.WeaponsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchWebsocketController;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.RequestBody;
+
+
+@RestController
+@RequestMapping(&quot;/api/v1/fights&quot;)
+public class FightController {
+
+    private final FightService fs;
+    private final MatchWebsocketController matchWebsocketController; 
+
+    @Autowired
+<span class="fc" id="L36">    public FightController(FightService fs, MatchWebsocketController matchWebsocketController) {</span>
+<span class="fc" id="L37">        this.fs = fs;</span>
+<span class="fc" id="L38">        this.matchWebsocketController = matchWebsocketController; </span>
+<span class="fc" id="L39">    }</span>
+
+    @PutMapping(&quot;/{matchId}/fight/resolve&quot;)
+    @Operation(summary = &quot;Resolve a fight&quot;, description = &quot;Give the result of a fight after receiving the total of the dices and the participates&quot;)
+    public ResponseEntity&lt;FightResolvedDTO&gt; resolveFight(@PathVariable Integer matchId, @RequestBody FightResultRequestDTO request) {
+<span class="fc" id="L44">        FightResolvedDTO result = fs.processFightResolution(request); </span>
+<span class="fc" id="L45">        return ResponseEntity.ok(result);</span>
+    }
+    
+    @PostMapping(&quot;/{matchId}/steal-card-from-player&quot;)
+     @Operation(summary = &quot;Player draw a card from a player&quot;, description = &quot;Player chooses a card to draw from the player loser after as a result o a fight&quot;)
+    public ResponseEntity&lt;CardDTO&gt; stealCardFromPlayer(@PathVariable Integer matchId, @RequestBody StealCardRequestDTO request) {
+<span class="fc" id="L51">        CardDTO result = fs.playerStealFromPlayer(request, matchId);</span>
+<span class="fc" id="L52">        return ResponseEntity.ok(result);</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/{playerId}/lose-against-npc&quot;)
+    @Operation(summary = &quot;Player loses against NPC&quot;, description = &quot;Player chooses a card to discard after losing to an NPC.&quot;)
+    public ResponseEntity&lt;?&gt; playerLosesAgainstNpc(@PathVariable Integer matchId, @PathVariable Integer playerId, @Valid @RequestBody LoseAgainstNpcRequestDTO request) {  
+<span class="fc" id="L58">        fs.playerLosesAgainstNpc(matchId, playerId, request);</span>
+<span class="fc" id="L59">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-fight&quot;)
+    @Operation(summary = &quot;Notify fight&quot;, description = &quot;Notifies all players when a fight is initiated.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyFight(@PathVariable Integer matchId, @RequestBody FightUpdateDTO fightUpdate) {
+<span class="fc" id="L65">        matchWebsocketController.notifyFightUpdate(matchId, fightUpdate);</span>
+<span class="fc" id="L66">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-fight-dice&quot;)
+    @Operation(summary = &quot;Notify fight dice&quot;, description = &quot;Notifies all players when a dice is rolled during a fight.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyFightDice(@PathVariable Integer matchId, @RequestBody FightDiceUpdateDTO diceUpdate) {
+<span class="fc" id="L72">        matchWebsocketController.notifyFightDiceUpdate(matchId, diceUpdate);</span>
+<span class="fc" id="L73">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-dice-totals&quot;)
+    @Operation(summary = &quot;Notify dice totals&quot;, description = &quot;Notifies all players when dice totals are updated during a fight.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyDiceTotals(@PathVariable Integer matchId, @RequestBody DiceTotalsUpdateDTO totalsUpdate) {
+<span class="fc" id="L79">        matchWebsocketController.notifyDiceTotalsUpdate(matchId, totalsUpdate);</span>
+<span class="fc" id="L80">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-ready-state&quot;)
+    @Operation(summary = &quot;Notify ready state&quot;, description = &quot;Notifies all players when a player changes their ready state during a fight.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyReadyState(@PathVariable Integer matchId, @RequestBody ReadyStateUpdateDTO readyStateUpdate) {
+<span class="fc" id="L86">        matchWebsocketController.notifyReadyStateUpdate(matchId, readyStateUpdate);</span>
+<span class="fc" id="L87">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/notify-fight-weapons&quot;)
+    @Operation(summary = &quot;Notify weapons update&quot;, description = &quot;Notifies all players when a player adds or removes weapons during a fight.&quot;)
+    public ResponseEntity&lt;Void&gt; notifyFightWeapons(@PathVariable Integer matchId, @RequestBody WeaponsUpdateDTO weaponsUpdate) {
+<span class="fc" id="L93">        matchWebsocketController.notifyWeaponsUpdate(matchId, weaponsUpdate);</span>
+<span class="fc" id="L94">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/check-pending-fights&quot;)
+    @Operation(summary = &quot;Check pending fights&quot;, description = &quot;Checks if there are players with npcs together as a result of a fight (so there are pending fights) and starts them&quot;)
+    public ResponseEntity&lt;?&gt; checkAndTriggerChainFights(@PathVariable Integer matchId) {
+<span class="fc" id="L100">        fs.checkPendingFights(matchId);</span>
+<span class="fc" id="L101">        return ResponseEntity.ok().build();</span>
+    }
+      
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

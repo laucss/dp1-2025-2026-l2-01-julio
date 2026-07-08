@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LobbyController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby</a> &gt; <span class="el_source">LobbyController.java</span></div><h1>LobbyController.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping(&quot;/api/v1/lobbies&quot;)
+public class LobbyController {
+
+    LobbyService ls;
+    MatchService ms;
+
+    @Autowired
+<span class="fc" id="L35">    public LobbyController(LobbyService ls, MatchService ms){</span>
+<span class="fc" id="L36">        this.ls = ls;</span>
+<span class="fc" id="L37">        this.ms = ms;</span>
+<span class="fc" id="L38">    }</span>
+
+    @GetMapping(&quot;/private&quot;)
+    public Optional&lt;Match&gt; getPrivateGame(@RequestParam  String code){
+<span class="nc" id="L42">        return ls.getPrivateLobby(code);</span>
+    }
+
+    @GetMapping(&quot;/{matchId}&quot;)
+    public Optional&lt;Match&gt; getLobbyById(@PathVariable(&quot;matchId&quot;) Integer matchId) {
+<span class="nc" id="L47">        return ls.getById(matchId);</span>
+    }
+
+    @GetMapping()
+    @Operation(summary = &quot;Get public matches&quot;, description = &quot;Get all public matches available to join.&quot;)
+    public Page&lt;Match&gt; getPublicGames(@RequestParam MatchStatus status,
+                                        @RequestParam(defaultValue = &quot;0&quot;) Integer page,
+                                        @RequestParam(defaultValue = &quot;10&quot;) Integer size) {
+<span class="nc" id="L55">        return ls.getAllPublicGamesByStatus(status,page,size);</span>
+    }
+
+    @GetMapping(&quot;/privates&quot;)
+    public List&lt;Match&gt; getPrivateLobbies(){
+<span class="nc" id="L60">        return ls.getAllPrivateLobbies();</span>
+    }
+
+    @PostMapping()
+    @Operation(summary = &quot;Create lobby&quot;, description = &quot;Create a new game.&quot;)
+    @ResponseStatus(HttpStatus.CREATED)
+    public  ResponseEntity&lt;Match&gt; createLobby(@Valid @RequestBody LobbyDTO lobbyDTO) {
+<span class="fc" id="L67">        Match saved= ls.createLobby(lobbyDTO.getIsPrivate(), lobbyDTO.getName(), lobbyDTO.getMaxPlayers(), lobbyDTO.getNumNpcs());</span>
+<span class="fc" id="L68">        return ResponseEntity.status(HttpStatus.CREATED).body(saved);</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/join&quot;)
+    @Operation(summary = &quot;Join public lobby&quot;, description = &quot;Join a public lobby from a list of available lobbies.&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity&lt;Match&gt; joinLobby(@Parameter(description = &quot;Id of the lobby to join&quot;) @PathVariable Integer matchId) {
+<span class="fc" id="L75">        Match joinedMatch = ls.joinLobby(matchId);</span>
+
+<span class="fc" id="L77">        return ResponseEntity.ok(joinedMatch);</span>
+    }
+    
+    @PostMapping(&quot;/join/private&quot;)
+    @Operation(summary = &quot;Join private lobby&quot;, description = &quot;Join a private lobby using its code.&quot;)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity&lt;Match&gt; joinPrivateLobby(@RequestParam String code) {
+<span class="fc" id="L84">        Match joinedMatch = ls.joinPrivateLobby(code);</span>
+<span class="fc" id="L85">        return ResponseEntity.ok(joinedMatch);</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/leave&quot;)
+    @Operation(summary = &quot;Leave a lobby&quot;, description = &quot;Leva a lobby before the game starts.&quot;)
+    public ResponseEntity&lt;Match&gt; leaveLobby(@Parameter(description = &quot;Id of the lobby to leave&quot;) @PathVariable Integer matchId) {
+<span class="fc" id="L91">        Match leftMatch = ls.leaveLobby(matchId);</span>
+<span class="fc" id="L92">        return ResponseEntity.ok(leftMatch);</span>
+    }
+
+    @PostMapping(&quot;/{matchId}/start&quot;)
+    @Operation(summary = &quot;Start match&quot;, description = &quot;Start a match from a lobby.&quot;)
+    public ResponseEntity&lt;MatchDTO&gt; startMatch(@Parameter(description = &quot;Id of the lobby to start the match&quot;) @PathVariable Integer matchId) {
+<span class="fc" id="L98">        Match startedMatch = ms.startMatch(matchId);</span>
+<span class="fc" id="L99">        return ResponseEntity.ok(new MatchDTO(startedMatch));</span>
+    }
+
+
+
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

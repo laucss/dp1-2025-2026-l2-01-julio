@@ -48,7 +48,6 @@ public class HandService {
 
     public void deleteMatchHands(Integer matchId){
         //playerService.findById(playerId); 
-        // TODO: revisar si tengo que checkear que match exista
 
         activesHands.remove(matchId);  
     }
@@ -164,7 +163,6 @@ public class HandService {
      */
 
     public void addFewCardsToPlayerHand (Integer matchId, Integer playerId, List<Card> cards ){
-       //TODO: REVISAR ESTA DOS LINEAS, NS SI SON REPETITIVAS
        Map<Integer, HandInGame> playerMap = activesHands.get(matchId); 
        HandInGame playerHand= findPlayerHand(matchId, playerId); 
 

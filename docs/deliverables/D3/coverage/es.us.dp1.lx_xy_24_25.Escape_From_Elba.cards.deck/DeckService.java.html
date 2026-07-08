@@ -121,7 +121,7 @@ public class DeckService {
 <span class="fc" id="L121">        DeckInGame deck = findDeckById(matchId); </span>
 <span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if (deck.getNotDiscardedCards().isEmpty()) {</span>
 <span class="nc" id="L123">            deck = shuffleAndDicardedToNotDiscarded(deck); </span>
-}
+        }
 
 <span class="fc" id="L126">        Card card = deck.getNotDiscardedCards().getLast();</span>
 <span class="fc" id="L127">        deck.getNotDiscardedCards().removeLast(); </span>

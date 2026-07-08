@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InvitationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Escape From Elba - L2-01</a> &gt; <a href="index.source.html" class="el_package">es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations</a> &gt; <span class="el_source">InvitationService.java</span></div><h1>InvitationService.java</h1><pre class="source lang-java linenums">package es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations;
+
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications.NotificationType;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications.NotificationWebController;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserRepository;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class InvitationService {
+
+    private InvitationRepository invitationRepository;
+    private UserRepository userRepository;
+    private MatchRepository matchRepository; 
+    private MatchService matchService; 
+    private LobbyService lobbyService;
+    private Checkers checkers; 
+    private NotificationWebController notificationWebController; 
+
+    @Autowired
+    public InvitationService ( InvitationRepository invitationRepository, UserRepository userRepository, MatchRepository matchRepository,
+<span class="fc" id="L35">            Checkers checkers, MatchService matchService, LobbyService lobbyService, NotificationWebController notificationWebController){</span>
+<span class="fc" id="L36">        this.invitationRepository = invitationRepository;</span>
+<span class="fc" id="L37">        this.matchRepository = matchRepository; </span>
+<span class="fc" id="L38">        this.userRepository = userRepository; </span>
+<span class="fc" id="L39">        this.checkers = checkers; </span>
+<span class="fc" id="L40">        this.matchService = matchService; </span>
+<span class="fc" id="L41">        this.lobbyService = lobbyService;</span>
+<span class="fc" id="L42">        this.notificationWebController = notificationWebController; </span>
+<span class="fc" id="L43">    }</span>
+
+    @Transactional
+    public InvitationMatch sendInvite( InviteRequest inviteRequest) throws IllegalArgumentException {
+
+<span class="fc" id="L48">        User sender = userRepository.findById(inviteRequest.getSenderId())</span>
+<span class="fc" id="L49">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Sender not found&quot;));</span>
+<span class="fc" id="L50">        User receiver = userRepository.findById(inviteRequest.getReceiverId())</span>
+<span class="fc" id="L51">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Receiver not found&quot;));</span>
+<span class="fc" id="L52">        Match match = matchRepository.findById(inviteRequest.getMatchId())</span>
+<span class="fc" id="L53">            .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Match not found&quot;));</span>
+
+        // Verificar si ya existe una invitación pendiente entre estos dos jugadores específicos
+<span class="fc" id="L56">        Optional&lt;InvitationMatch&gt; existingInvite = invitationRepository.findBySenderIdAndReceiverIdAndStatus(</span>
+<span class="fc" id="L57">            inviteRequest.getSenderId(), inviteRequest.getReceiverId(), InvitationStatus.PENDING</span>
+        );
+        
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (existingInvite.isPresent()) {</span>
+<span class="fc" id="L61">            throw new IllegalArgumentException(&quot;Ya existe una invitación pendiente entre estos jugadores&quot;);</span>
+        }
+        
+<span class="fc" id="L64">        InvitationMatch invitation = new InvitationMatch();</span>
+<span class="fc" id="L65">        invitation.setSender(sender);</span>
+<span class="fc" id="L66">        invitation.setReceiver(receiver);</span>
+<span class="fc" id="L67">        invitation.setMatch(match);</span>
+<span class="fc" id="L68">        invitation.setType(InvitationType.INVITE);</span>
+<span class="fc" id="L69">        invitation.setStatus(InvitationStatus.PENDING);</span>
+<span class="fc" id="L70">        invitation.setSpectator(inviteRequest.isSpectator());</span>
+<span class="fc" id="L71">        invitation.setCreatedAt(LocalDateTime.now());</span>
+        
+<span class="fc" id="L73">        notificationWebController.notifyNewNotification(receiver.getId(), </span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">            inviteRequest.isSpectator() ? NotificationType.MATCH_INVITATION_AS_SPECTATOR : NotificationType.MATCH_INVITATION_AS_PLAYER);</span>
+
+<span class="fc" id="L76">        return invitationRepository.save(invitation);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;InvitationMatch&gt; getPendingInvitations(Integer receiverId) {
+<span class="fc" id="L81">        return invitationRepository.findByReceiverIdAndStatus(receiverId, InvitationStatus.PENDING);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Optional&lt;InvitationMatch&gt; getInvitationBetweenUsers(Integer senderId, Integer receiverId, Integer matchId) {
+<span class="fc" id="L86">        return invitationRepository.findBySenderIdAndReceiverIdAndMatchIdAndStatus(senderId, receiverId, matchId, InvitationStatus.PENDING);</span>
+    }
+    
+    @Transactional(readOnly = true)
+    public InvitationMatch getInvitation(Integer id) {
+<span class="fc" id="L91">        return invitationRepository.findById(id).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Invitation not found&quot;));</span>
+    }
+
+    @Transactional
+    public InvitationMatch acceptInvite(Integer invitationId) {
+<span class="fc" id="L96">        InvitationMatch invitation = getInvitation(invitationId);</span>
+        
+<span class="fc" id="L98">        Match match = invitation.getMatch();</span>
+<span class="fc" id="L99">        User receiver = invitation.getReceiver();</span>
+        
+<span class="fc" id="L101">        checkers.checkGameIsNotPlaying(match); </span>
+<span class="fc" id="L102">        checkers.checkNumberOfPlayers(match);</span>
+
+        // Verificar si el usuario ya está en la partida
+<span class="fc" id="L105">        boolean alreadyInMatch = match.getPlayers().stream()</span>
+<span class="fc" id="L106">            .anyMatch(p -&gt; p.getUser().getId().equals(receiver.getId()));</span>
+
+<span class="fc bfc" id="L108" title="All 2 branches covered.">        if (alreadyInMatch) {</span>
+            // Ya estaba unido: marcar esta invitación como aceptada y limpiar el resto pero responder 200 con la notificación
+<span class="fc" id="L110">            invitation.setStatus(InvitationStatus.ACCEPTED);</span>
+<span class="fc" id="L111">            rejectOtherInvitesForMatch(receiver.getId(), match.getId(), invitation.getId());</span>
+        }
+
+        // en los demás casos aceptamos y rechazamos las demás invitaciones
+<span class="fc" id="L115">        rejectOtherInvitesForMatch(receiver.getId(), match.getId(), invitation.getId());</span>
+
+<span class="fc" id="L117">        invitation.setStatus(InvitationStatus.ACCEPTED);</span>
+
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if (invitation.isSpectator()) { // lo metemos como espectador</span>
+<span class="fc" id="L120">            matchService.spectateGame(match.getId()); </span>
+        } else { // lo metemos como player
+<span class="fc" id="L122">            lobbyService.joinLobby(match.getId()); </span>
+        }
+
+<span class="fc" id="L125">        notificationWebController.notifyNewNotification(invitation.getSender().getId(), NotificationType.ACCEPT_INVITATION);</span>
+
+<span class="fc" id="L127">        invitationRepository.save(invitation); </span>
+<span class="fc" id="L128">        return invitation;</span>
+    }
+
+    @Transactional
+    public InvitationMatch rejectInvite(InvitationMatch invitation) {
+<span class="fc" id="L133">        invitation.setStatus(InvitationStatus.REJECTED);</span>
+<span class="fc" id="L134">        notificationWebController.notifyNewNotification(invitation.getSender().getId(), NotificationType.REJECT_INVITATION);</span>
+<span class="fc" id="L135">        return invitationRepository.save(invitation);</span>
+    }
+
+    @Transactional
+    public void rejectOtherInvitesForMatch(Integer receiverId, Integer matchId, Integer acceptedInvitationId) {
+        // Obtener todas las invitaciones pendientes para este receiver en esta partida
+<span class="fc" id="L141">        List&lt;InvitationMatch&gt; pendingInvites = invitationRepository.findByReceiverIdAndMatchIdAndStatus(</span>
+            receiverId, matchId, InvitationStatus.PENDING
+        );
+        
+        // Rechazar todas excepto la que acabamos de aceptar
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        for (InvitationMatch invite : pendingInvites) {</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">            if (!invite.getId().equals(acceptedInvitationId)) {</span>
+<span class="nc" id="L148">                rejectInvite(invite);</span>
+            }
+<span class="nc" id="L150">        }</span>
+<span class="fc" id="L151">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

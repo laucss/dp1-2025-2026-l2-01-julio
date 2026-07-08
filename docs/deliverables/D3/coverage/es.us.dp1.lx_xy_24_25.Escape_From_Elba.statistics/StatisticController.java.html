@@ -3,6 +3,8 @@
 
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,33 +26,58 @@ public class StatisticController {
     private StatisticService statisticService;
     
     @Autowired
-<span class="fc" id="L27">    public StatisticController(StatisticService statisticService) {</span>
-<span class="fc" id="L28">        this.statisticService = statisticService;</span>
-<span class="fc" id="L29">    }    </span>
+<span class="fc" id="L29">    public StatisticController(StatisticService statisticService) {</span>
+<span class="fc" id="L30">        this.statisticService = statisticService;</span>
+<span class="fc" id="L31">    }    </span>
     
 
     @GetMapping(&quot;/{userId}&quot;)
     public ResponseEntity&lt;UserStatisticsDTO&gt; getUserStatistics(@PathVariable Integer userId) {
-<span class="fc" id="L34">    UserStatisticsDTO dto = new UserStatisticsDTO();</span>
-<span class="fc" id="L35">    dto.setTotalVictories(statisticService.getTotalVictoriesByUser(userId));</span>
-<span class="fc" id="L36">    dto.setMatchesPlayed(statisticService.getMatchesPlayedByUser(userId));</span>
-<span class="fc" id="L37">    dto.setTotalTimePlayed(statisticService.getTotalTimePlayedByUserFOR(userId));</span>
-<span class="fc" id="L38">    Integer actionPoints = statisticService.getTotalAccionPointsByUser(userId);</span>
-<span class="fc bfc" id="L39" title="All 2 branches covered.">    dto.setTotalActionPoints(actionPoints != null ? actionPoints : 0);</span>
-<span class="fc" id="L40">    dto.setBattlesWon(statisticService.getBattlesWonByUser(userId));</span>
-<span class="fc" id="L41">    dto.setRoomsVisited(statisticService.getTotalRoomsVisitedByUser(userId));</span>
-<span class="fc" id="L42">    return ResponseEntity.ok(dto);</span>
-}
+<span class="fc" id="L36">        UserStatisticsDTO dto = new UserStatisticsDTO();</span>
+<span class="fc" id="L37">        Integer victories = statisticService.getTotalVictoriesByUser(userId);</span>
+<span class="fc" id="L38">        Integer matches = statisticService.getMatchesPlayedByUser(userId);</span>
+<span class="fc" id="L39">        Integer totalTime = statisticService.getTotalTimePlayedByUserFOR(userId);</span>
+<span class="fc" id="L40">        Integer actionPoints = statisticService.getTotalAccionPointsByUser(userId);</span>
+<span class="fc" id="L41">        Integer battlesWon = statisticService.getBattlesWonByUser(userId);</span>
+<span class="fc" id="L42">        Integer rooms = statisticService.getTotalRoomsVisitedByUser(userId);</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        actionPoints = actionPoints != null ? actionPoints : 0;</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        rooms = rooms != null ? rooms : 0;</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        totalTime = totalTime != null ? totalTime : 0;</span>
+<span class="fc" id="L46">        dto.setTotalVictories(victories);</span>
+<span class="fc" id="L47">        dto.setMatchesPlayed(matches);</span>
+<span class="fc" id="L48">        dto.setTotalTimePlayed(totalTime);</span>
+<span class="fc" id="L49">        dto.setTotalActionPoints(actionPoints);</span>
+<span class="fc" id="L50">        dto.setBattlesWon(battlesWon);</span>
+<span class="fc" id="L51">        dto.setRoomsVisited(rooms);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        dto.setWinRate(matches &gt; 0 ? (victories * 100.0) / matches : 0.0);</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        dto.setAverageTimePerMatch(matches &gt; 0 ? totalTime.doubleValue() / matches : 0.0);</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        dto.setAverageActionPointsPerMatch(matches &gt; 0 ? actionPoints.doubleValue() / matches : 0.0);</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        dto.setAverageRoomsVisitedPerMatch(matches &gt; 0 ? rooms.doubleValue() / matches : 0.0);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        dto.setBattlesWonPerMatch(matches &gt; 0 ? dto.getBattlesWon().doubleValue() / matches : 0.0);</span>
+<span class="fc" id="L57">        Integer totalBattlesPlayed =statisticService.getBattlesPlayedByUser(userId);</span>
+<span class="fc" id="L58">        dto.setTotalBattlesPlayed(totalBattlesPlayed);</span>
+<span class="fc" id="L59">        dto.setMaxRoomsVisitedInMatch(statisticService.getMaxRoomsVisitedInMatch(userId));</span>
+<span class="fc" id="L60">        dto.setPlayerType(statisticService.getPlayerType(userId));</span>
+<span class="fc" id="L61">        return ResponseEntity.ok(dto);</span>
+    }
 
 
     @GetMapping(&quot;/general&quot;)
     public ResponseEntity&lt;GeneralStatisticsDTO&gt; getGeneralStatistics() {
-<span class="fc" id="L48">        GeneralStatisticsDTO Gdto = new GeneralStatisticsDTO();</span>
-<span class="fc" id="L49">        Gdto.setAveragePlayersPerMatch(statisticService.getAveragePlayersPerMatch());</span>
-<span class="fc" id="L50">        Gdto.setTotalMatchesPlayed(statisticService.getTotalMatchesPlayed());</span>
-<span class="fc" id="L51">        Gdto.setTotalBattlesDisputed(statisticService.getTotalBattlesDisputed());</span>
-<span class="fc" id="L52">        Gdto.setAverageRoomsVisitedPerMatch(statisticService.getAverageRoomsVisitedPerMatch());</span>
-<span class="fc" id="L53">        return ResponseEntity.ok(Gdto);</span>
+<span class="fc" id="L67">        GeneralStatisticsDTO Gdto = new GeneralStatisticsDTO();</span>
+<span class="fc" id="L68">        Gdto.setAveragePlayersPerMatch(statisticService.getAveragePlayersPerMatch());</span>
+<span class="fc" id="L69">        Gdto.setTotalMatchesPlayed(statisticService.getTotalMatchesPlayed());</span>
+<span class="fc" id="L70">        Gdto.setTotalBattlesDisputed(statisticService.getTotalBattlesDisputed());</span>
+<span class="fc" id="L71">        Gdto.setAverageRoomsVisitedPerMatch(statisticService.getAverageRoomsVisitedPerMatch());</span>
+<span class="fc" id="L72">        Gdto.setAverageMatchDuration(statisticService.getAverageMatchDuration());</span>
+<span class="fc" id="L73">        Gdto.setLongestMatchDuration(statisticService.getLongestMatchDuration());</span>
+<span class="fc" id="L74">        Gdto.setShortestMatchDuration(statisticService.getShortestMatchDuration());</span>
+<span class="fc" id="L75">        return ResponseEntity.ok(Gdto);</span>
+    }
+
+    @GetMapping(&quot;/ranking&quot;)
+    public ResponseEntity&lt;List&lt;RankingDTO&gt;&gt; getRanking() {
+<span class="fc" id="L80">        return ResponseEntity.ok(statisticService.getRanking());</span>
     }
     
 }
