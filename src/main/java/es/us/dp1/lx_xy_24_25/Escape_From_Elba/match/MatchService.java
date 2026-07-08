@@ -49,6 +49,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+import org.springframework.security.access.AccessDeniedException;
 
 
 @Service
@@ -129,7 +130,18 @@ public class MatchService {
     @Transactional(readOnly=true)
     public MatchDTO getMatchDTOById(Integer matchId){
         Match m = getMatchById(matchId); 
-        DeckInGame deck = deckService.findDeckById(m.getId());
+            User currentUser = userService.findCurrentUser();
+
+            boolean isPlayer = m.getPlayers().stream()
+                    .anyMatch(p -> p.getUser().getId().equals(currentUser.getId()));
+
+            boolean isSpectator = m.getSpectators().stream()
+                    .anyMatch(s -> s.getId().equals(currentUser.getId()));
+
+            if (!isPlayer && !isSpectator) {
+                throw new AccessDeniedException("You are not allowed to access this match");
+            }
+                DeckInGame deck = deckService.findDeckById(m.getId());
         List<PlayerInGameDTO> newPlayersList = new ArrayList<>(); 
         for (Player player : m.getPlayers()){
             HandInGame hand = handService.findPlayerHand(m.getId(), player.getId()); 
