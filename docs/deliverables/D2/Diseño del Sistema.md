@@ -16,6 +16,7 @@ Nerea Camacho Perez (QFL3393 / nercamper@alum.us.es)<br>
 Laura Cubero Sánchez (XNT3290 / laucubsan@alum.us.es)<br>
 Lucía Baltasar Muñoz (SBJ4592 / lucbalmun@alum.us.es)<br>
 
+<div align="justify">
 
 ## Introducción
 
@@ -281,7 +282,7 @@ Como consideramos que la división en capas es fundamental y no queremos renunci
 
 
 ### Decisión 2
-#### Descripción del problema:*
+#### Descripción del problema:
 
 Hemos decidido implementar en nuestra aplicación cuando te unes a una partida una sala de espera hasta que se de por empezado el propio juego. El crear una sala de espera trata los mismos datos que una partida pero maneja una logica diferente por lo que tuvimos que pensar como lo ibamos a organizar.
 
@@ -314,7 +315,7 @@ Consideramos que es más importante usar la opción que nos permita separar las 
 
 
 ### Decisión 3
-#### Descripción del problema:*
+#### Descripción del problema:
 
 A la hora de construir los services nos hemos visto con una gran cantidad de validaciones que comprobar por lo que hemos tenido que decidir cual sería la mejor manera de implementar estas validaciones.
 
@@ -344,7 +345,7 @@ Consideramos que al tener muchas restricciones que son reutilizables nos va a fa
 
 
 ### Decisión 4
-#### Descripción del problema:*
+#### Descripción del problema:
 
 A la hora de implementar la función para que un usuario pueda ser espectador de una partida, fue necesario estudiar distintas alternativas de diseño. El objetivo era permitir que un usuario pudiera visualizar el desarrollo de una partida sin formar parte de ella como jugador, procurando que la solución fuera sencilla de mantener y no afectara a la lógica ya existente.
 
@@ -379,8 +380,8 @@ A la hora de implementar la función para que un usuario pueda ser espectador de
 
 Finalmente se decantó por la segunda opción, tener un atributo `spectators` debido que a que solo implicaba la generación de nuevo código y no tanto la modificación de métodos que ya funcionaban correctamente. Dado el estado del sistema en ese momento de decisión lo más viable y práctica era esta opción. 
 
-### Decisión 4
-#### Descripción del problema:*
+### Decisión 5
+#### Descripción del problema:
 
 El módulo de peleas desarrollado hasta ese momento funcionaba correctamente para enfrentamientos individuales, pero no conseguía satisfacer la regla de negocio que establece que una pelea puede desencadenar una cadena de peleas consecutivas. Esto ocurría, por ejemplo, cuando el resultado de un combate provocaba el desplazamiento de un jugador a una sala en la que debía iniciarse un nuevo enfrentamiento.
 
@@ -388,30 +389,30 @@ Ante esta situación, fue necesario analizar el diseño existente y decidir entr
 
 #### Alternativas de solución evaluadas:
 
-*Alternativa 4.a* : Refactorizar todo el módulo de peleas y trasladar la responsabilidad de detectar e iniciar los combates del frontend al backend mediante WebSocket. <br>
+*Alternativa 5.a* : Refactorizar todo el módulo de peleas y trasladar la responsabilidad de detectar e iniciar los combates del frontend al backend mediante WebSocket. <br>
 
 *Ventajas:*<br>
-• Centraliza toda la lógica de negocio relacionada con las peleas en el backend, evitando duplicar reglas en el cliente.
-• Garantiza que las cadenas de peleas se ejecuten de forma automática y consistente para todos los jugadores.
-• Reduce la dependencia del frontend, que pasa a limitarse a representar el estado enviado por el servidor.
-• Facilita el mantenimiento y la evolución del sistema, ya que las reglas de las peleas se encuentran en un único punto.
+• Centraliza toda la lógica de negocio relacionada con las peleas en el backend, evitando duplicar reglas en el cliente.<br>
+• Garantiza que las cadenas de peleas se ejecuten de forma automática y consistente para todos los jugadores.<br>
+• Reduce la dependencia del frontend, que pasa a limitarse a representar el estado enviado por el servidor.<br>
+• Facilita el mantenimiento y la evolución del sistema, ya que las reglas de las peleas se encuentran en un único punto.<br>
 
 *Inconvenientes:*<br>
-• Requiere una refactorización importante del módulo de peleas y de la comunicación entre cliente y servidor.
-• Supone un mayor esfuerzo de desarrollo y de pruebas para asegurar que no se introducen regresiones en una funcionalidad crítica.
+• Requiere una refactorización importante del módulo de peleas y de la comunicación entre cliente y servidor.<br>
+• Supone un mayor esfuerzo de desarrollo y de pruebas para asegurar que no se introducen regresiones en una funcionalidad crítica.<br>
 
-*Alternativa 4.b* : Mantener la responsabilidad de detectar las peleas en el frontend e implementar allí la lógica necesaria para gestionar las cadenas de combates.<br>
+*Alternativa 5.b* : Mantener la responsabilidad de detectar las peleas en el frontend e implementar allí la lógica necesaria para gestionar las cadenas de combates.<br>
 
 *Ventajas:*<br>
-• Requiere menos cambios sobre la arquitectura existente.
-• Permite reutilizar gran parte del código ya implementado en el cliente.
-• Reduce el tiempo necesario para obtener una primera versión funcional.
+• Requiere menos cambios sobre la arquitectura existente.<br>
+• Permite reutilizar gran parte del código ya implementado en el cliente.<br>
+• Reduce el tiempo necesario para obtener una primera versión funcional.<br>
 
 *Inconvenientes:*<br>
-• La lógica de negocio permanece distribuida entre frontend y backend, dificultando su mantenimiento.
-• Aumenta el riesgo de inconsistencias entre clientes si alguno no procesa correctamente la cadena de peleas.
-• Hace más complejo el desarrollo de nuevas funcionalidades relacionadas con los combates.
-• El backend deja de ser la única fuente de verdad sobre el estado de la partida, lo que puede provocar comportamientos inesperados y dificultar las pruebas del sistema.
+• La lógica de negocio permanece distribuida entre frontend y backend, dificultando su mantenimiento.<br>
+• Aumenta el riesgo de inconsistencias entre clientes si alguno no procesa correctamente la cadena de peleas.<br>
+• Hace más complejo el desarrollo de nuevas funcionalidades relacionadas con los combates.<br>
+• El backend deja de ser la única fuente de verdad sobre el estado de la partida, lo que puede provocar comportamientos inesperados y dificultar las pruebas del sistema.<br>
 
 #### Justificación de la solución adoptada
 
@@ -422,24 +423,60 @@ _Ejemplos de uso de la plantilla con otras decisiones de diseño:_
 
 ## Refactorizaciones aplicadas
 
-Si ha hecho refactorizaciones en su código, puede documentarlas usando el siguiente formato:
+En esta entrega de julio se realizaron diversas refactorizaciones con el objetivo de mejorar la mantenibilidad del proyecto. Entre todas ellas destacan especialmente tres, debido al impacto que tuvieron sobre la arquitectura y organización del código. Dado que cada una de estas refactorizaciones afectó a un elevado número de archivos y líneas de código, en lugar de mostrar los cambios concretos se describe el objetivo de cada una, los problemas que resolvía y las mejoras obtenidas.
 
-### Refactorización X: 
-En esta refactorización añadimos un mapa de parámtros a la partida para ayudar a personalizar la información precalculada de la que partimos en cada fase del juego.
-#### Estado inicial del código
-```Java 
-class Animal
-{
-}
-``` 
-_Puedes añadir información sobre el lenguaje concreto en el que está escrito el código para habilitar el coloreado de sintaxis tal y como se especifica en [este tutorial](https://docs.github.com/es/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks)_
+### Refactorización 1: 
+La primera refactorización se realizó sobre el archivo `Match.js` (posteriormente renombrado y dividido tras la implementación del modo espectador, pasando parte de su funcionalidad a `PlayerMatch.js`). Este archivo contenía prácticamente toda la lógica y la vista de una partida, alcanzando una longitud superior a las 2.000 líneas de código.
 
-#### Estado del código refactorizado
+Mediante la extracción de componentes React se consiguió separar elementos como el mapa, el panel de información de jugadores o los botones de acciones en componentes independientes. Además, diversas funciones auxiliares fueron trasladadas a la carpeta `utils`, eliminando código repetido y mejorando la reutilización. Como resultado, el archivo pasó de superar las 2.000 líneas a unas 1.500. Posteriormente, gracias a la segunda refactorización, su tamaño se redujo hasta situarse por debajo de las 1.300 líneas.
 
-```
-código fuente en java, jsx o javascript
-```
+También se intentó refactorizar el bloque encargado de la comunicación mediante WebSocket, pero debido a la complejidad de dicha lógica y a los problemas de funcionamiento que aparecieron durante las pruebas, se decidió mantener esa parte del código sin modificaciones.
+
 #### Problema que nos hizo realizar la refactorización
-_Ej: Era difícil añadir información para implementar la lógica de negocio en cada una de las fases del juego (en nuestro caso varía bastante)_
+El componente concentraba una gran cantidad de responsabilidades (renderizado de la interfaz, gestión del estado, comunicación mediante WebSocket, lógica de acciones y múltiples componentes visuales), incumpliendo el principio de responsabilidad única. Esto dificultaba enormemente su comprensión, aumentaba la probabilidad de introducir errores al realizar cambios y complicaba la incorporación de nuevas funcionalidades.
+
 #### Ventajas que presenta la nueva versión del código respecto de la versión original
-_Ej: Ahora podemos añadir arbitrariamente los datos que nos hagan falta al contexto de la partida para que sea más sencillo llevar a cabo los turnos y jugadas_
+• Código más modular y organizado.<br>
+• Componentes reutilizables en otras vistas de la aplicación.<br>
+• Menor tamaño y complejidad del componente principal.<br>
+• Mayor facilidad para localizar errores y realizar futuras modificaciones.<br>
+• Mejor separación entre la lógica de negocio y la presentación.<br>
+
+
+### Refactorización 2: 
+La segunda refactorización fue la de mayor impacto sobre el proyecto y afectó por completo al módulo de peleas. Como consecuencia de la decisión de diseño adoptada para soportar cadenas de combates, fue necesario rediseñar prácticamente toda su arquitectura.
+
+Se reescribieron la mayoría de las funciones existentes, se crearon nuevos servicios, controladores, entidades y DTOs, y toda la responsabilidad de detectar y gestionar las peleas pasó del frontend al backend mediante WebSocket. Esta modificación también permitió eliminar una cantidad considerable de código del componente principal de la partida.
+
+La refactorización afectó además a las acciones del jugador, ya que muchas de ellas podían desencadenar combates, por lo que fue necesario revisar cuidadosamente toda la lógica para evitar romper funcionalidades previamente implementadas.
+
+#### Problema que nos hizo realizar la refactorización
+La implementación original distribuía la lógica de las peleas entre el frontend y el backend. Este diseño impedía implementar correctamente la regla de negocio que permitía encadenar combates de forma automática y hacía que el comportamiento dependiera parcialmente del cliente. Además, dificultaba el mantenimiento del código y aumentaba el riesgo de inconsistencias entre distintos jugadores conectados a una misma partida.
+
+#### Ventajas que presenta la nueva versión del código respecto de la versión original
+• Toda la lógica de las peleas queda centralizada en el backend.<br>
+• Las cadenas de combates se gestionan automáticamente sin depender del cliente.<br>
+• Se reduce considerablemente la lógica existente en el frontend.<br>
+• El backend se convierte en la única fuente de verdad del estado de la partida.<br>
+• Resulta más sencillo ampliar las reglas de combate y mantener el sistema.<br>
+
+### Refactorización 3: 
+La última refactorización fue, en parte, consecuencia directa de la anterior. Tras reorganizar el módulo de peleas, se detectó que `MatchService.java` había asumido demasiadas responsabilidades y que comenzaban a aparecer dependencias circulares con el nuevo `FightService`.
+
+Para resolver este problema se creó un nuevo servicio, `ActionsService.java`, al que se trasladó toda la lógica relacionada con las acciones que puede realizar un jugador durante la partida. Como consecuencia, también fue necesario reorganizar `MatchController.java`, eliminando lógica de negocio del controlador y delegándola en los servicios correspondientes.
+
+Gracias a esta reorganización, `MatchController.java` pasó de contener cerca de 700 líneas de código a menos de 300.
+
+
+#### Problema que nos hizo realizar la refactorización
+MatchService concentraba responsabilidades muy diversas, incluyendo la gestión de la partida y la ejecución de las acciones del jugador. La incorporación del nuevo módulo de peleas provocó la aparición de dependencias circulares entre servicios y aumentó el acoplamiento del sistema. Además, el controlador contenía demasiada lógica de negocio, dificultando su mantenimiento.
+
+#### Ventajas que presenta la nueva versión del código respecto de la versión original
+• Cada servicio posee una responsabilidad claramente definida.<br>
+• Se eliminan las dependencias circulares entre servicios.<br>
+• Los controladores pasan a limitarse a recibir peticiones y delegar la lógica de negocio.<br>
+• Se reduce significativamente el tamaño tanto de MatchService como de MatchController.<br>
+• La arquitectura resulta más limpia, modular y fácil de mantener.<br>
+• Facilita la escritura de pruebas unitarias al encontrarse las responsabilidades mejor separadas.<br>
+
+</div>
