@@ -1,6 +1,9 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -28,12 +31,14 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightResolvedDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightResultRequestDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.FightUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.LoseAgainstNpcRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.fights.DTOs.StealCardRequestDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchWebsocketController;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.NpcRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
@@ -356,5 +361,73 @@ class FightServiceTest {
 
         assertNotNull(result);
         verify(matchRepo, times(1)).save(any(Match.class));
+    }
+
+    @Test
+    void testLoserLoseActionPoints() {
+        fightService.loserLoseActionPoints(attackerPlayer, testMatch.getId());
+        verify(matchWebsocketController).notifyActionPointsUpdate(eq(testMatch.getId()), any(ActionPointsUpdateDTO.class));
+    }
+
+    @Test
+    void testUpdatePlayerStatistics(){
+        fightService.updatePlayerStatistics(attackerPlayer);
+
+        assertEquals(1, attackerPlayer.getBattlesWon());
+        assertEquals(1, attackerPlayer.getBattlesPlayed());
+
+        verify(playerRepo).save(attackerPlayer);
+
+    }
+
+
+    @Test
+    void shouldNotifyWhenPendingFights() {
+        when(matchRepo.findById(testMatch.getId()))
+            .thenReturn(Optional.of(testMatch));
+
+        when(playerService.findByMatchIdAndUserId(testMatch.getId(), attackerUser.getId()))
+            .thenReturn(attackerPlayer);
+
+        when(npcRepository.findById(testNpc.getId()))
+            .thenReturn(Optional.of(testNpc));
+
+        PendingFight testPendingFight = new PendingFight();
+        testPendingFight.setAttackerUserId(attackerUser.getId());
+        testPendingFight.setDefenserUserId(testNpc.getId());
+        testPendingFight.setNpcAttacker(false);
+        testPendingFight.setNpcFight(true);
+        testPendingFight.setRoomId(testRoom.getId());
+
+        List<PendingFight> fights = new ArrayList<>();
+        fights.add(testPendingFight);
+        testMatch.setPendingFights(fights);
+
+        fightService.checkPendingFights(testMatch.getId());
+
+        verify(matchWebsocketController)
+            .notifyFightUpdate(eq(testMatch.getId()), any(FightUpdateDTO.class));
+    }
+
+    @Test
+    void shouldNotNotifyWhenNoPendingFights() {
+        when(matchRepo.findById(testMatch.getId()))
+            .thenReturn(Optional.of(testMatch));
+
+        testMatch.setPendingFights(new ArrayList<>());
+
+        fightService.checkPendingFights(testMatch.getId());
+
+        verify(matchWebsocketController, never())
+            .notifyFightUpdate(anyInt(), any(FightUpdateDTO.class));
+    }
+
+    @Test
+    void shouldThrowIfMatchDoesNotExistWhenChecKPendingFights(){
+        when(matchRepo.findById(99)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class,
+            () -> fightService.checkPendingFights(99));
+        verify(matchWebsocketController, never())
+            .notifyFightUpdate(anyInt(), any());            
     }
 }
