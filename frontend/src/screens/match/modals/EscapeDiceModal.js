@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../../static/css/match/modals/startDiceModal.css';
 import tokenService from '../../../services/token.service';
 import getIdFromUrl from '../../../util/getIdFromUrl';
 import { toast } from 'react-toastify';
+
 
 export default function EscapeDiceModal({ isOpen, onClose, onResult, canAttemptEscape = true, escapeAttemptReason = '' }) {
   const jwt = tokenService.getLocalAccessToken();
@@ -13,6 +14,14 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult, canAttemptE
   const [diceRolled, setDiceRolled] = useState(false);
   const [isRolling, setIsRolling] = useState(false);
   const [totalRoll, setTotalRoll] = useState(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setDiceRolled(false);
+      setIsRolling(false);
+      setTotalRoll(null);
+    }
+  }, [isOpen]);
 
   const rollDice = () => {
     return Math.floor(Math.random() * 6) + 1;
@@ -38,7 +47,13 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult, canAttemptE
     } catch (err) {
       console.error('Error attempting escape:', err);
     } finally {
-      onClose();
+        setDiceRolled(false);
+        setIsRolling(false);
+        setTotalRoll(null);
+        onClose();
+
+        
+
     }
   };
 

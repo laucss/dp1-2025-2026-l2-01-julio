@@ -322,8 +322,18 @@ public class ActionsService {
         } else {
             //El intento de escape falla y ocurre lo mismo que si un jugador pierde contra un npc en una pelea
             matchService.consumeAllActionPointForUser(matchId, userId);
+            ActionPointsUpdateDTO actionPointsUpdate = new ActionPointsUpdateDTO(
+                p.getId(),
+                userId,
+                p.getUser().getUsername(),
+                p.getActionPoints(),
+                System.currentTimeMillis()
+            );
+            matchWebsocketController.notifyActionPointsUpdate(matchId, actionPointsUpdate);
             Room randomRoom = matchService.getAvailableRoomsForPlayer(matchId).get(new Random().nextInt(matchService.getAvailableRoomsForPlayer(matchId).size()));
             matchService.moveLoserPlayer(matchId, userId, randomRoom.getId());
+            PlayerLocationUpdateDTO locationUpdate = new PlayerLocationUpdateDTO(p);
+            matchWebsocketController.notifyPlayerLocationUpdate(matchId, locationUpdate);
 
 
             resultado.setSuccess(false);

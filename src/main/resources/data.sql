@@ -29,6 +29,7 @@ INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (22
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (23,'player16','player16@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar1.jpg');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (24,'player17','player17@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar2.jpg');
 INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (25,'player18','player18@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
+INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (26,'player19','player19@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar1.jpg');
 
 -- Match
 
@@ -44,7 +45,7 @@ VALUES (4,'nerea!','DEF345', 'WAITING',NULL,NULL,5,3,4,true,null);
 
 -- Partida en progreso 
 INSERT INTO match(id,name,code,creator_id,status,start_time,end_time,max_players,min_players,num_npcs,is_private)
-VALUES (2,'Partida en curso','ABC123',7,'PLAYING','2025-10-26 20:00:00',NULL,5,3,3,false);
+VALUES (2,'Partida en curso','ABC123',26,'PLAYING','2025-10-26 20:00:00',NULL,5,3,3,false);
 
 -- Más partidas en progreso
 
@@ -152,7 +153,7 @@ INSERT INTO player (id, action_points, match_id, strength, user_id)
         VALUES (7,null,1,null,4), 
                (8,null,1,null,5), 
                (9,null,1,null,6),
-               (10,null,2,null,7),
+               (10,null,2,null,26),
                (11,12,3,null,9),
                (12,5,6,null,9),
                (13,7,7,null,9),
@@ -364,44 +365,7 @@ INSERT INTO room_adjacency_list (room_id, adjacency_list_id)
                (37,22),
                (37,27);
 
-/*
--- Friend request test data
--- User IDs: 101-110 for friend request tests
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (101,'test_user_101','test101@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (102,'test_user_102','test102@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (103,'test_user_103','test103@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (104,'test_user_104','test104@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (105,'test_user_105','test105@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (106,'test_user_106','test106@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (107,'test_user_107','test107@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
-INSERT INTO appusers(id,username,email,password,authority,age,avatar) VALUES (110,'test_user_110','test110@example.com','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,25,'/Avatar_default.png');
 
--- Friend requests for testing
--- Request IDs: 201 (pending), 202 (accepted)
--- USER_ID_ONE_SENT_REQUEST = 101 (1 sent)
--- USER_ID_TWO_SENT_REQUESTS = 102 (2 sent)
--- USER_ID_ONE_RECEIVED_REQUEST = 102 (1 received)
--- USER_ID_TWO_RECEIVED_REQUESTS = 103 (2 received)
--- USER_ID_ONE_ACCEPTED_REQUEST = 102 (1 accepted friend)
--- USER_ID_TWO_ACCEPTED_REQUESTS = 103 (2 accepted friends)
--- USER_ID_ONE_PENDING_REQUEST = 101, USER_ID_THREE_PENDING_REQUESTS = 104
-INSERT INTO requests(id, request_status, sender, receiver) VALUES (201, 'PENDING', 101, 104);
-INSERT INTO requests(id, request_status, sender, receiver) VALUES (202, 'ACCEPTED', 105, 103);
-INSERT INTO requests(id, request_status, sender, receiver) VALUES (203, 'ACCEPTED', 106, 103);
-INSERT INTO requests(id, request_status, sender, receiver) VALUES (204, 'ACCEPTED', 105, 102);
-INSERT INTO requests(id, request_status, sender, receiver) VALUES (205, 'PENDING', 102, 103);
-INSERT INTO requests(id, request_status, sender, receiver) VALUES (206, 'PENDING', 102, 104);
-INSERT INTO requests(id, request_status, sender, receiver) VALUES (207, 'PENDING', 107, 103);
-
--- Ensure match 1 has a winner set to player.id=9
- Por facilitar el testeo lo comento
-UPDATE match
-   SET status = 'FINISHED',
-           start_time = '2025-12-01 18:00:00',
-           end_time   = '2025-12-01 19:00:00',
-           winner_id  = 9
- WHERE id = 1;
- */
 
 
 -- ACHIEVEMENTS ------------
