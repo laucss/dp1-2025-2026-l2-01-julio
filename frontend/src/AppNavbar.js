@@ -10,8 +10,7 @@ import { Client } from '@stomp/stompjs';
 import '../src/static/css/appnavbar/navbar.css';
 import NotificationsModal from './NotificationsModal';
 
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 function AppNavbar() {
     const [roles, setRoles] = useState([]);
@@ -112,6 +111,7 @@ function AppNavbar() {
                             theme: "colored",
                         });
 
+                        // 2. Refrescar el contador del navbar de forma silenciosa
                         fetchNotifications();
                     }
                 });
@@ -182,8 +182,6 @@ function AppNavbar() {
 
     return (
         <div>
-            {/* Contenedor global de Toastify indispensable para renderizar las alertas flotantes */}
-            <ToastContainer />
 
             <Navbar expand="md" dark style={{ backgroundColor: '#d58a5b', borderBottom: '4px solid #a7661b' }}>
                 <NavbarBrand href="/" style={{ color: '#ffffff', fontWeight: 700 }}>
