@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-
+import static org.mockito.ArgumentMatchers.anyInt;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckInGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandInGame;
@@ -31,13 +32,17 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.bag.BagService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.deck.DeckService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.hand.HandService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.InvalidMovementException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.MoreThan7CardsDrawnException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.NoActionPointsException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.Card;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.cards.DrawCardResultDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.ActionPointsUpdateDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.CardsUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.EscapeAttemptResultDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.MatchHistorialDTO;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.DTOs.TurnUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyUpdateDTO;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyWebsocketController;
@@ -51,6 +56,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.Room;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
+import org.springframework.security.access.AccessDeniedException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.npcs.Npc;
 
 @ExtendWith(MockitoExtension.class)
@@ -152,23 +158,6 @@ public class MatchServiceTests {
         assertEquals(1, result.getId());
     }
 
-    /* 
-    @Test
-    void getMatchByIdNotFoundThrows() {
-        when(matchRepo.findById(any(Integer.class))).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class, () -> matchService.getMatchById(99));
-    }
-        */
-
-    // tests de operaciones básicas
-/*
-    @Test
-    public void getMatchByIdThrowsExceptionWhenNotFound() {
-        when(matchRepo.findById(1)).thenReturn(Optional.empty());
-        assertThrows(IllegalArgumentException.class, () -> matchService.getMatchById(1));
-    }
-    */
 
     @Test
     public void getMatchsByNameReturnsList() {
@@ -197,20 +186,6 @@ public class MatchServiceTests {
         //assertEquals(3, result.getContent().size());
     }
 
-    /*
-    @Test
-    void getMatchesPlayedByUserCallsRepo() {
-        int userId = 7;
-        List<Match> list = List.of(new Match());
-        Page<Match> page = new PageImpl<>(list);
-        when(matchRepo.findMatchesPlayedByUser(eq(userId), any(PageRequest.class))).thenReturn(page);
-
-        //Page<Match> result = matchService.getMatchesPlayedByUser(userId, 0, 3);
-
-        //assertEquals(1, result.getContent().size());
-        verify(matchRepo).findMatchesPlayedByUser(eq(userId), any(PageRequest.class));
-    }
-        */
 
     @Test
     void getMatchesWonByUserCallsRepo() {
@@ -225,196 +200,6 @@ public class MatchServiceTests {
         //verify(matchRepo).findMatchesWonByUser(eq(userId), any(PageRequest.class));
     }
 
-    // test de startMatch
-
-
-        // CORREGIR 
-    /*
-
-
-    // partida not found
-    @Test
-    void startMatchThrowsWhenMatchNotFound() {
-        when(matchRepo.findById(1)).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class,
-            () -> matchService.startMatch(1));
-    }
-
-    // caso positivo todo bien
-    @Test
-    void startMatchSetsStatusStartTimeAndSavesMatch() {
-        int matchId = 1;
-
-        Match m = new Match();
-        m.setId(matchId);
-        m.setStatus(MatchStatus.WAITING);
-        m.setNumNpcs(0);
-        m.setPlayers(new ArrayList<>());
-        m.setNpcs(new ArrayList<>());
-
-        when(matchRepo.findById(matchId)).thenReturn(Optional.of(m));
-        when(matchRepo.save(any(Match.class))).thenAnswer(i -> i.getArgument(0));
-
-        when(roomService.initializeRoomsForMatch(m)).thenReturn(new ArrayList<>());
-        doNothing().when(lobbyWebsocketController)
-            .notifyGameStarted(eq(matchId), any());
-
-        Match result = matchService.startMatch(matchId);
-
-        assertEquals(MatchStatus.PLAYING, result.getStatus());
-        assertNotNull(result.getStartTime());
-        assertEquals(0, result.getTurnNumber());
-        assertNull(result.getCurrentTurnUserId());
-
-        verify(matchRepo).save(m);
-    }
-
-    // check npc bien
-    @Test
-    void startMatchCreatesNpcsAndMarksLastAsNiallCampbell() {
-        int matchId = 2;
-
-        Match m = new Match();
-        m.setId(matchId);
-        m.setNumNpcs(3);
-        m.setPlayers(new ArrayList<>());
-        m.setNpcs(new ArrayList<>());
-
-        when(matchRepo.findById(matchId)).thenReturn(Optional.of(m));
-        when(matchRepo.save(any(Match.class))).thenReturn(m);
-        when(roomService.initializeRoomsForMatch(m)).thenReturn(new ArrayList<>());
-        doNothing().when(lobbyWebsocketController)
-            .notifyGameStarted(eq(matchId), any());
-
-        when(npcRepository.save(any(Npc.class)))
-            .thenAnswer(i -> i.getArgument(0));
-
-        matchService.startMatch(matchId);
-
-        assertEquals(3, m.getNpcs().size());
-
-        Npc lastNpc = m.getNpcs().get(2);
-        assertTrue(lastNpc.getIsNiallCampbell());
-
-        for (Npc npc : m.getNpcs()) {
-            assertEquals(1, npc.getStrength());
-            assertEquals(m, npc.getMatch());
-        }
-
-        verify(npcRepository, times(3)).save(any(Npc.class));
-    }
-
-    // incia bien los players
-    @Test
-    void startMatchInitializesPlayersState() {
-        int matchId = 3;
-
-        Player p1 = new Player();
-        Player p2 = new Player();
-
-        Match m = new Match();
-        m.setId(matchId);
-        m.setNumNpcs(0);
-        m.setPlayers(new ArrayList<>(List.of(p1, p2)));
-        m.setNpcs(new ArrayList<>());
-
-        when(matchRepo.findById(matchId)).thenReturn(Optional.of(m));
-        when(matchRepo.save(any(Match.class))).thenReturn(m);
-        when(roomService.initializeRoomsForMatch(m)).thenReturn(new ArrayList<>());
-        doNothing().when(lobbyWebsocketController)
-            .notifyGameStarted(eq(matchId), any());
-
-        matchService.startMatch(matchId);
-
-        for (Player p : m.getPlayers()) {
-            assertNull(p.getDiceOrder());
-            assertNull(p.getOrderInMatch());
-            assertEquals(0, p.getActionPoints());
-            assertEquals(1, p.getStrength());
-            assertEquals(0, p.getCardsDrawnInTurn());
-        }
-    }
-
-
-    @Test
-    void startMatchInitializesDeckAndRoomsState() {
-        int matchId = 4;
-
-        Match m = new Match();
-        m.setId(matchId);
-        m.setNumNpcs(0);
-        m.setPlayers(new ArrayList<>());
-        m.setNpcs(new ArrayList<>());
-
-        DeckInGame deck = new DeckInGame();
-
-        when(matchRepo.findById(matchId)).thenReturn(Optional.of(m));
-        when(matchRepo.save(any(Match.class))).thenReturn(m);
-        when(roomService.initializeRoomsForMatch(m)).thenReturn(new ArrayList<>());
-        doNothing().when(lobbyWebsocketController)
-            .notifyGameStarted(eq(matchId), any());
-
-        // método interno del servicio
-        doReturn(deck)
-            .when(matchService)
-            .initializePlayerHandCards(matchId, m.getPlayers());
-
-        Match result = matchService.startMatch(matchId);
-
-        assertEquals(deck, result.getDeck());
-        assertNotNull(result.getRoomsState());
-    }
-
-    @Test
-    void startMatchNotifiesLobbyWebsocket() {
-        int matchId = 5;
-
-        Match m = new Match();
-        m.setId(matchId);
-        m.setNumNpcs(0);
-        m.setPlayers(new ArrayList<>());
-        m.setNpcs(new ArrayList<>());
-
-        when(matchRepo.findById(matchId)).thenReturn(Optional.of(m));
-        when(matchRepo.save(any(Match.class))).thenReturn(m);
-        when(roomService.initializeRoomsForMatch(m)).thenReturn(new ArrayList<>());
-        doNothing().when(lobbyWebsocketController)
-            .notifyGameStarted(eq(matchId), any());
-
-        doReturn(new DeckInGame())
-            .when(matchService)
-            .initializePlayerHandCards(anyInt(), anyList());
-
-        matchService.startMatch(matchId);
-
-        verify(lobbyWebsocketController)
-            .notifyGameStarted(eq(matchId), any(LobbyUpdateDTO.class));
-    }
-
-    */
-
-    /*
-    @Test
-    void endMatchSetsStatusAndWinner() {
-        Match m = new Match();
-        m.setId(55);
-        m.setStatus(MatchStatus.PLAYING);
-        m.setStartTime(LocalDateTime.now().minusMinutes(5));
-
-        Player winner = new Player();
-        winner.setId(99);
-
-        when(matchRepo.findById(Integer.valueOf(55))).thenReturn(Optional.of(m));
-        when(matchRepo.save(any(Match.class))).thenAnswer(i -> i.getArgument(0));
-
-        matchService.endMatch(55, winner);
-
-        assertEquals(MatchStatus.FINISHED, m.getStatus());
-        assertEquals(winner, m.getWinner());
-        assertNotNull(m.getEndTime());
-    }
-        */
 
     @Test
     void deleteMatchCardsCallsDeleteMethods() {
@@ -516,15 +301,7 @@ public class MatchServiceTests {
         verify(matchRepo).deleteById(id);
     }
 
-    /* 
-    @Test
-    void getInProgressMatchesCallsRepo() {
-        List<Match> list = List.of(new Match());
-        when(matchRepo.findInProgress()).thenReturn(list);
-        List<Match> result = matchService.getInProgressMatches();
-        assertEquals(1, result.size());
-        verify(matchRepo).findInProgress();
-    } */
+
 
     @Test
     void consumeActionPointForUserDecrementsAndReturnsDTO() {
@@ -586,41 +363,6 @@ public class MatchServiceTests {
         verify(playerRepo).save(p);
     }
 
-    /*
-    @Test
-    void playerBeatsNonPlayerDrawsCardAndAddsToHand() {
-        int matchId = 11;
-        int playerId = 12;
-        Card card = new Card();
-        card.setId(999);
-        card.setLetter("X");
-        card.setFrontImage("f");
-        card.setBackImage("b");
-        when(deckService.drawCard(matchId)).thenReturn(card);
-        when(handService.addCardToPlayerHand(card, matchId, playerId)).thenReturn(new HandInGame());
-
-        // ensure NPC and player exist for the interaction
-        Player player = new Player(); player.setId(playerId);
-        when(playerService.findById(playerId)).thenReturn(player);
-        Npc npc = new Npc(); npc.setId(99); npc.setStrength(0);
-        when(npcRepository.findById(Integer.valueOf(99))).thenReturn(Optional.of(npc));
-        // ensure card/hand/deck/bag objects exist for getAllCards
-        DeckInGame deck = new DeckInGame();
-        deck.setNotDiscardedCards(new java.util.ArrayList<>());
-        when(deckService.findDeckById(matchId)).thenReturn(deck);
-        HandInGame hand = new HandInGame();
-        hand.setCards(new java.util.ArrayList<>());
-        when(handService.findPlayerHand(matchId, playerId)).thenReturn(hand);
-        BagInGame bag = new BagInGame(new java.util.ArrayList<>());
-        when(bagService.findPlayerBag(matchId, playerId)).thenReturn(bag);
-
-        Card result = matchService.playerBeatsNonPlayer(matchId, playerId, 99);
-
-        assertEquals(card, result);
-        verify(deckService).drawCard(matchId);
-        verify(handService).addCardToPlayerHand(card, matchId, playerId);
-    }
-    */
 
     @Test
     void playerDrawsRewardCardNotifiesAndReturnsResult() {
@@ -643,378 +385,7 @@ public class MatchServiceTests {
         verify(matchWebsocketController).notifyCardsUpdate(eq(matchId), any());
     }
 
-    /* 
-    @Test
-    void playerWinsNiallCampbellReturnsCardWhenPresentOrNull() {
-        int matchId = 31;
-        int playerId = 32;
-        Card card = new Card();
-        HandInGame hand = new HandInGame();
 
-        when(deckService.getAndRemoveLastDiscardedCard(matchId)).thenReturn(card);
-        when(handService.addCardToPlayerHand(card, matchId, playerId)).thenReturn(hand);
-
-        Card r1 = matchService.playerWinsNiallCampbell(matchId, playerId);
-        assertEquals(card, r1);
-
-        when(deckService.getAndRemoveLastDiscardedCard(matchId)).thenReturn(null);
-        Card r2 = matchService.playerWinsNiallCampbell(matchId, playerId);
-        assertNull(r2);
-    }
-        */
-
-    /*
-    @Test
-    void playerLosesAgaintsNonPlayerZeroesActionPointsAndMovesCardToDiscard() {
-        int matchId = 41;
-        int playerId = 42;
-        Card card = new Card();
-        Player p = new Player();
-        p.setId(playerId);
-        p.setActionPoints(5);
-
-        when(playerService.findById(playerId)).thenReturn(p);
-        when(handService.removeCardFromPlayerHand(card, matchId, playerId)).thenReturn(card);
-        when(deckService.findDeckById(matchId)).thenReturn(new DeckInGame());
-        when(handService.findPlayerHand(matchId, playerId)).thenReturn(new HandInGame());
-        when(bagService.findPlayerBag(matchId, playerId)).thenReturn(new BagInGame());
-        doNothing().when(deckService).addCardToDiscardedPile(matchId, card);
-        when(playerService.save(any(Player.class))).thenAnswer(i -> i.getArgument(0));
-
-        matchService.playerLosesAgaintsNonPlayer(card, matchId, playerId, 99, "hand");
-
-        assertEquals(0, p.getActionPoints());
-        verify(handService).removeCardFromPlayerHand(card, matchId, playerId);
-        verify(deckService).addCardToDiscardedPile(matchId, card);
-        verify(playerService).save(p);
-    }
-    
-
-    @Test
-    void moveLoserPlayerUpdatesRoomAndStrength() {
-        int matchId = 51;
-        int userId = 52;
-        int roomId = 60;
-
-        Match m = new Match(); m.setId(matchId);
-        when(matchRepo.findById(Integer.valueOf(matchId))).thenReturn(Optional.of(m));
-
-        Player p = new Player(); p.setId(70); p.setStrength(0);
-        when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.of(p));
-
-        Room target = new Room(); target.setId(roomId);
-        when(roomRepo.findById(Integer.valueOf(roomId))).thenReturn(Optional.of(target));
-        when(playerRepo.save(any(Player.class))).thenAnswer(i -> i.getArgument(0));
-
-        Player res = matchService.moveLoserPlayer(matchId, userId, roomId);
-
-        assertEquals(target, res.getRoom());
-        assertEquals(Integer.valueOf(1), res.getStrength());
-    }
-
-    @Test
-    void movePlayerToAdyacentRoomMovesAndConsumesActionPoint() {
-        int matchId = 61; int userId = 62; int targetRoomId = 70;
-
-        Match m = new Match(); m.setId(matchId);
-        when(matchRepo.findById(Integer.valueOf(matchId))).thenReturn(Optional.of(m));
-
-        Room current = new Room(); current.setId(1);
-        Room target = new Room(); target.setId(targetRoomId);
-        current.setAdjacencyList(List.of(target));
-
-        Player p = new Player(); p.setId(100);
-        p.setRoom(current);
-        p.setActionPoints(2);
-        User u = new User(); u.setId(userId); p.setUser(u);
-
-        when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.of(p));
-        when(roomRepo.findById(Integer.valueOf(targetRoomId))).thenReturn(Optional.of(target));
-        when(playerRepo.save(any(Player.class))).thenAnswer(i -> i.getArgument(0));
-
-        Player res = matchService.movePlayerToAdyacentRoom(matchId, userId, targetRoomId);
-
-        assertEquals(target, res.getRoom());
-        assertEquals(1, res.getActionPoints());
-    }
-
-    // la partida no existe 
-    @Test
-    void movePlayerToAdyacentRoomThrowsWhenMatchNotFound() {
-        when(matchRepo.findById(anyInt())).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-            () -> matchService.movePlayerToAdyacentRoom(1, 2, 3));
-    }
-
-    // jugador no existe 
-    @Test
-    void movePlayerToAdyacentRoomThrowsWhenPlayerNotFound() {
-        Match match = new Match();
-        match.setId(1);
-        when(matchRepo.findById(1)).thenReturn(Optional.of(match));
-
-        when(playerRepo.findByMatchAndUser(1, 2)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-            () -> matchService.movePlayerToAdyacentRoom(1, 2, 3));
-    }
-
-    // juagdor no tiene sala asignada
-    @Test
-    void movePlayerToAdyacentRoomThrowsWhenPlayerHasNoRoom() {
-        Match match = new Match();
-        match.setId(1);
-        when(matchRepo.findById(1)).thenReturn(Optional.of(match));
-
-        Player player = new Player();
-        player.setRoom(null);
-
-        when(playerRepo.findByMatchAndUser(1, 2)).thenReturn(Optional.of(player));
-
-        assertThrows(RuntimeException.class,
-            () -> matchService.movePlayerToAdyacentRoom(1, 2, 3));
-    }
-    
-
-        // CORREGIR 
-    /*
-    // jugador no tiene puntos de accion
-    @Test
-    void movePlayerToAdyacentRoomThrowsWhenNoActionPoints() {
-        int matchId = 1;
-        int userId = 2;
-        int targetRoomId = 3;
-
-        Match match = new Match();
-        match.setId(matchId);
-        match.setCurrentTurnPhase(TurnPhase.ACTIONS);
-
-        when(matchRepo.findById(matchId)).thenReturn(Optional.of(match));
-        when(matchRepo.save(any(Match.class))).thenReturn(match);
-
-        Room room = new Room();
-        room.setId(10);
-        room.setAdjacencyList(List.of());
-
-        Player player = new Player();
-        player.setRoom(room);
-        player.setActionPoints(0);
-
-        when(playerRepo.findByMatchAndUser(matchId, userId))
-            .thenReturn(Optional.of(player));
-
-        assertThrows(NoActionPointsException.class,
-            () -> matchService.movePlayerToAdyacentRoom(matchId, userId, targetRoomId));
-    }
-
-    
-
-    
-    
-    // sala destiono no existe 
-    @Test
-    void movePlayerToAdyacentRoomThrowsWhenTargetRoomNotFound() {
-        Match match = new Match();
-        match.setId(1);
-        when(matchRepo.findById(1)).thenReturn(Optional.of(match));
-
-        Room currentRoom = new Room();
-        currentRoom.setId(10);
-
-        Player player = new Player();
-        player.setRoom(currentRoom);
-        player.setActionPoints(1);
-
-        when(playerRepo.findByMatchAndUser(1, 2)).thenReturn(Optional.of(player));
-        when(roomRepo.findById(3)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-            () -> matchService.movePlayerToAdyacentRoom(1, 2, 3));
-    }
-
-
-        // CORREGIR 
-    /*
-
-
-    // player intenta moverse a una habitacion que no es adyacente 
-    @Test
-    void movePlayerToAdyacentRoomThrowsIfRoomNotAdjacent() {
-        int matchId = 1;
-        int userId = 2;
-        int targetRoomId = 7;
-
-        Match match = new Match();
-        match.setId(matchId);
-        when(matchRepo.findById(matchId)).thenReturn(Optional.of(match));
-
-        Room currentRoom = new Room();
-        currentRoom.setId(1);
-
-        Room targetRoom = new Room();
-        targetRoom.setId(targetRoomId);
-
-        // NO es adyacente
-        currentRoom.setAdjacencyList(List.of());
-
-        Player player = new Player();
-        player.setRoom(currentRoom);
-        player.setActionPoints(1);
-
-        when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.of(player));
-        when(roomRepo.findById(targetRoomId)).thenReturn(Optional.of(targetRoom));
-
-        assertThrows(InvalidMovementException.class,
-            () -> matchService.movePlayerToAdyacentRoom(matchId, userId, targetRoomId));
-    }
-
-    // si el turno no esta en actions
-    @Test
-    void movePlayerToAdyacentRoomSetsTurnPhaseToActionsIfNotActions() {
-        Match match = new Match();
-        match.setId(1);
-        match.setCurrentTurnPhase(TurnPhase.DRAW);
-        when(matchRepo.findById(1)).thenReturn(Optional.of(match));
-        when(matchRepo.save(any(Match.class))).thenReturn(match);
-
-        Room currentRoom = new Room();
-        Room targetRoom = new Room();
-        targetRoom.setId(3);
-        currentRoom.setAdjacencyList(List.of(targetRoom));
-
-        Player player = new Player();
-        player.setRoom(currentRoom);
-        player.setActionPoints(1);
-
-        when(playerRepo.findByMatchAndUser(1, 2)).thenReturn(Optional.of(player));
-        when(roomRepo.findById(3)).thenReturn(Optional.of(targetRoom));
-        when(playerRepo.save(any(Player.class))).thenAnswer(i -> i.getArgument(0));
-
-        matchService.movePlayerToAdyacentRoom(1, 2, 3);
-
-        assertEquals(TurnPhase.ACTIONS, match.getCurrentTurnPhase());
-        verify(matchRepo).save(match);
-    }
-
-    */
-
-
-    /* 
-    @Test
-    void moveNpcToAdyacentRoomMovesNpcAndConsumesPlayerActionPoint() {
-        int matchId = 71; int npcId = 81; int userId = 82; int targetRoomId = 90;
-
-        Match m = new Match(); m.setId(matchId);
-        when(matchRepo.findById(Integer.valueOf(matchId))).thenReturn(Optional.of(m));
-
-        Room current = new Room(); current.setId(2);
-        Room target = new Room(); target.setId(targetRoomId);
-        current.setAdjacencyList(List.of(target));
-
-        Npc npc = new Npc(); npc.setId(npcId); npc.setRoom(current);
-        when(npcRepository.findById(npcId)).thenReturn(Optional.of(npc));
-
-        Player p = new Player(); p.setId(200); p.setActionPoints(3);
-        when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.of(p));
-        when(roomRepo.findById(Integer.valueOf(targetRoomId))).thenReturn(Optional.of(target));
-        when(playerRepo.save(any(Player.class))).thenAnswer(i -> i.getArgument(0));
-        when(npcRepository.save(any(Npc.class))).thenAnswer(i -> i.getArgument(0));
-
-        Npc res = matchService.moveNpcToAdyacentRoom(matchId, npcId, targetRoomId, userId);
-
-        assertEquals(target, res.getRoom());
-        assertEquals(2, playerRepo.findByMatchAndUser(matchId, userId).get().getActionPoints());
-    }
-        */
-
-        // CORREGIR 
-    /*
-
-    @Test
-    void moveNpcToAdyacentRoomThrowsWhenNpcNotFound() {
-        when(npcRepository.findById(1)).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class,
-            () -> matchService.moveNpcToAdyacentRoom(1, 1, 2, 3));
-    }
-
-    
-
-    @Test
-    void movePlayerByFormingRoomNameSucceedsWhenBagHasLetters() {
-        int matchId = 101; int userId = 102; int targetRoomId = 110;
-
-        Match m = new Match(); m.setId(matchId);
-        when(matchRepo.findById(Integer.valueOf(matchId))).thenReturn(Optional.of(m));
-
-        Room target = new Room(); target.setId(targetRoomId); target.setName("ABC");
-        when(roomRepo.findById(Integer.valueOf(targetRoomId))).thenReturn(Optional.of(target));
-
-        // bag with letters A,B,C
-        Card c1 = new Card(); c1.setLetter("A");
-        Card c2 = new Card(); c2.setLetter("B");
-        Card c3 = new Card(); c3.setLetter("C");
-        BagInGame bag = new BagInGame(List.of(c1,c2,c3));
-
-        Player p = new Player(); p.setId(300); p.setActionPoints(2);
-        when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.of(p));
-        when(bagService.findPlayerBag(matchId, p.getId())).thenReturn(bag);
-        when(playerRepo.save(any(Player.class))).thenAnswer(i -> i.getArgument(0));
-
-        Player res = matchService.movePlayerByFormingRoomName(matchId, userId, targetRoomId);
-
-        assertEquals(target, res.getRoom());
-        assertEquals(1, res.getActionPoints());
-    }
-
-    @Test
-    void escapeAttemptSuccessAndFailurePaths() {
-        int matchId = 121; int userId = 122;
-
-        Match m = new Match(); m.setId(matchId);
-        when(matchRepo.findById(Integer.valueOf(matchId))).thenReturn(Optional.of(m));
-
-        Room tower = new Room(); tower.setId(500);
-        when(roomService.getAllTowers()).thenReturn(List.of(tower));
-
-        Player p = new Player(); p.setId(400); User u = new User(); u.setId(userId); u.setUsername("ux"); p.setUser(u);
-        p.setActionPoints(1);
-        p.setRoom(tower);
-        p.setStrength(5);
-        when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.of(p));
-
-        // bag and word match
-        BagInGame bag = new BagInGame(List.of(new Card()));
-        when(bagService.findPlayerBag(matchId, p.getId())).thenReturn(bag);
-        when(bagService.wordFromCards(any())).thenReturn("emperor");
-        when(roomService.getWordOfEscapeFromTower(tower.getId())).thenReturn("emperor");
-
-        doNothing().when(deckService).deleteDeckInGame(matchId);
-        doNothing().when(handService).deleteMatchHands(matchId);
-        doNothing().when(bagService).deleteMatchBags(matchId);
-        when(matchRepo.save(any(Match.class))).thenAnswer(i -> i.getArgument(0));
-
-        // success: rolldiceResult < strength
-        EscapeAttemptResultDTO r1 = matchService.escapeAttempt(matchId, userId, 3);
-        assertTrue(r1.isSuccess());
-
-        // failure: rolldiceResult >= strength
-        Room randomRoom = new Room(); randomRoom.setId(600);
-        // make repository return both the tower and the random room; the service will remove towers and occupied rooms
-        when(roomRepo.findAll()).thenReturn(new java.util.ArrayList<>(List.of(tower, randomRoom)));
-        when(roomRepo.findById(Integer.valueOf(randomRoom.getId()))).thenReturn(Optional.of(randomRoom));
-        p.setActionPoints(2);
-        when(playerRepo.findByMatchAndUser(matchId, userId)).thenReturn(Optional.of(p));
-        when(playerRepo.save(any(Player.class))).thenAnswer(i -> i.getArgument(0));
-
-        EscapeAttemptResultDTO r2 = matchService.escapeAttempt(matchId, userId, 10);
-        assertFalse(r2.isSuccess());
-        assertTrue(r2.isDiscardRequired());
-        verify(roomRepo).findAll();
-        verify(playerRepo, times(2)).save(p);
-    }
-    */
 
     @Test
     void submitDiceAndAssignOrderThrowsWhenPlayerNotFound() {
@@ -1044,4 +415,1785 @@ public class MatchServiceTests {
 
         assertThrows(IllegalStateException.class, () -> matchService.getMatchWinner(matchId));
     }
+
+    @Test
+    void shouldGetAllMatches() {
+        Match m1 = new Match();
+        Match m2 = new Match();
+
+        when(matchRepo.findAll()).thenReturn(List.of(m1, m2));
+
+        List<Match> result = matchService.getAllMatchs();
+
+        assertEquals(2, result.size());
+        verify(matchRepo).findAll();
+    }
+
+    @Test
+    void shouldReturnMatchesByName() {
+        Match match = new Match();
+
+        when(matchRepo.findByName("Test")).thenReturn(List.of(match));
+
+        List<Match> result = matchService.getMatchsByName("Test");
+
+        assertEquals(1, result.size());
+        verify(matchRepo).findByName("Test");
+    }
+
+    @Test
+    void shouldReturnRunningMatches() {
+
+        Match m1 = new Match();
+        Match m2 = new Match();
+
+        when(matchRepo.findAll()).thenReturn(List.of(m1, m2));
+
+        List<Match> result = matchService.getRunningMatches();
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void shouldSaveMatch() {
+
+        Match match = new Match();
+
+        when(matchRepo.save(match)).thenReturn(match);
+
+        Match result = matchService.save(match);
+
+        assertEquals(match, result);
+
+        verify(matchRepo).save(match);
+    }
+
+    @Test
+    void shouldThrowWhenMatchDoesNotExist() {
+
+        when(matchRepo.findById(100))
+                .thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> matchService.getMatchById(100));
+    }
+
+    @Test
+    void shouldDeleteMatch() {
+
+        matchService.delete(4);
+
+        verify(matchRepo).deleteById(4);
+    }
+
+    @Test
+    void shouldReturnUserInMatch() {
+
+        when(matchRepo.userInMatch(5))
+                .thenReturn(8);
+
+        Integer result = matchService.userInMatch(5);
+
+        assertEquals(8, result);
+
+        verify(matchRepo).userInMatch(5);
+    }
+
+    @Test
+    void shouldReturnMatchDTOWhenUserIsPlayer() {
+
+        User user = new User();
+        user.setId(1);
+
+        Player player = new Player();
+        player.setId(10);
+        player.setUser(user);
+
+        Match match = new Match();
+        match.setId(1);
+        match.setPlayers(new ArrayList<>(List.of(player)));
+        match.setSpectators(new ArrayList<>());
+
+        when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+        when(userService.findCurrentUser())
+                .thenReturn(user);
+
+        when(deckService.findDeckById(1))
+                .thenReturn(new DeckInGame());
+
+        when(handService.findPlayerHand(1, 10))
+                .thenReturn(new HandInGame());
+
+        when(bagService.findPlayerBag(1, 10))
+                .thenReturn(new BagInGame());
+
+        MatchDTO dto = matchService.getMatchDTOById(1);
+
+        assertNotNull(dto);
+
+        verify(matchRepo).findById(Integer.valueOf(1));;
+        verify(userService).findCurrentUser();
+        verify(deckService).findDeckById(1);
+    }
+    @Test
+    void shouldReturnMatchDTOWhenUserIsSpectator() {
+
+        User spectator = new User();
+        spectator.setId(2);
+
+        Match match = new Match();
+        match.setId(1);
+        match.setPlayers(new ArrayList<>());
+        match.setSpectators(new ArrayList<>(List.of(spectator)));
+
+        when(matchRepo.findById(Integer.valueOf(1)))
+                .thenReturn(Optional.of(match));
+
+        when(userService.findCurrentUser())
+                .thenReturn(spectator);
+
+        when(deckService.findDeckById(1))
+                .thenReturn(new DeckInGame());
+
+        MatchDTO dto = matchService.getMatchDTOById(1);
+
+        assertNotNull(dto);
+
+        verify(matchRepo).findById(Integer.valueOf(1));
+        verify(userService).findCurrentUser();
+    }
+    @Test
+    void shouldThrowWhenMatchNotFound() {
+
+        when(matchRepo.findById(1))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> matchService.getMatchDTOById(1)
+        );
+    }
+    @Test
+    void shouldCreatePlayerDTOForEveryPlayer() {
+
+        User u1 = new User();
+        u1.setId(1);
+
+        User u2 = new User();
+        u2.setId(2);
+
+        Player p1 = new Player();
+        p1.setId(11);
+        p1.setUser(u1);
+
+        Player p2 = new Player();
+        p2.setId(22);
+        p2.setUser(u2);
+
+        Match match = new Match();
+        match.setId(1);
+        match.setPlayers(List.of(p1, p2));
+        match.setSpectators(new ArrayList<>());
+
+        when(matchRepo.findById(Integer.valueOf(1)))
+                .thenReturn(Optional.of(match));
+
+        when(userService.findCurrentUser())
+                .thenReturn(u1);
+
+        when(deckService.findDeckById(Integer.valueOf(1)))
+                .thenReturn(new DeckInGame());
+
+        when(handService.findPlayerHand(anyInt(), anyInt()))
+                .thenReturn(new HandInGame());
+
+        when(bagService.findPlayerBag(anyInt(), anyInt()))
+                .thenReturn(new BagInGame());
+
+        MatchDTO dto = matchService.getMatchDTOById(1);
+
+        assertNotNull(dto);
+
+        verify(handService, times(2)).findPlayerHand(anyInt(), anyInt());
+        verify(bagService, times(2)).findPlayerBag(anyInt(), anyInt());
+    }
+
+
+    @Test
+    void shouldReturnFinishedAndInProgressMatches() {
+
+        User creator = new User();
+        creator.setId(1);
+
+        Match match = new Match();
+        match.setId(1);
+        match.setCreatorId(1);
+
+        Page<Match> page = new PageImpl<>(List.of(match));
+
+        when(matchRepo.findFinishedAndInProgress(any(Pageable.class)))
+                .thenReturn(page);
+
+        when(userService.findUser(1)).thenReturn(creator);
+
+        Page<MatchHistorialDTO> result =
+                matchService.getFinishedAndInProgressMatches(0, 10);
+
+        assertEquals(1, result.getTotalElements());
+
+        verify(matchRepo).findFinishedAndInProgress(any(Pageable.class));
+        verify(userService).findUser(1);
+    }
+    @Test
+    void shouldReturnInProgressMatches() {
+
+        User creator = new User();
+        creator.setId(5);
+
+        Match match = new Match();
+        match.setCreatorId(5);
+
+        Page<Match> page = new PageImpl<>(List.of(match));
+
+        when(matchRepo.findInProgress(any(Pageable.class)))
+                .thenReturn(page);
+
+        when(userService.findUser(5)).thenReturn(creator);
+
+        Page<MatchHistorialDTO> result =
+                matchService.getInProgressMatches(0, 5);
+
+        assertEquals(1, result.getContent().size());
+
+        verify(matchRepo).findInProgress(any(Pageable.class));
+    }
+    @Test
+    void shouldReturnFinishedMatches() {
+
+        User creator = new User();
+        creator.setId(7);
+
+        Match match = new Match();
+        match.setCreatorId(7);
+
+        Page<Match> page = new PageImpl<>(List.of(match));
+
+        when(matchRepo.findFinished(any(Pageable.class)))
+                .thenReturn(page);
+
+        when(userService.findUser(7)).thenReturn(creator);
+
+        Page<MatchHistorialDTO> result =
+                matchService.getFinishedMatches(0, 10);
+
+        assertEquals(1, result.getTotalElements());
+
+        verify(matchRepo).findFinished(any(Pageable.class));
+    }
+    @Test
+    void shouldReturnPlayedOrAbandonedMatches() {
+
+        User creator = new User();
+        creator.setId(1);
+
+        Match match = new Match();
+        match.setId(8);
+        match.setCreatorId(1);
+
+        Page<Match> page = new PageImpl<>(List.of(match));
+
+        when(matchRepo.findMatchesPlayedOrAbandonedByUser(eq(2), any(Pageable.class)))
+                .thenReturn(page);
+
+        when(userService.findUser(1)).thenReturn(creator);
+
+        when(abandonedMatchRepository.existsByMatchIdAndUserId(8, 2))
+                .thenReturn(true);
+
+        Page<MatchHistorialDTO> result =
+                matchService.getAllMatchesByUser(2, 0, 10);
+
+        assertEquals(1, result.getContent().size());
+        assertTrue(result.getContent().get(0).getAbandoned());
+
+        verify(abandonedMatchRepository)
+                .existsByMatchIdAndUserId(8, 2);
+    }
+    @Test
+    void shouldReturnPlayedAndCreatedMatches() {
+
+        User creator = new User();
+        creator.setId(1);
+
+        Match match = new Match();
+        match.setCreatorId(1);
+
+        when(userService.findUser(1)).thenReturn(creator);
+
+        when(matchRepo.findMatchesPlayedAndCreatedByUser(eq(1), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(match)));
+
+        Page<MatchHistorialDTO> result =
+                matchService.getMatchesPlayedAndCreatedByUser(1, 0, 5);
+
+        assertEquals(1, result.getTotalElements());
+    }
+    @Test
+    void shouldReturnWonMatches() {
+
+        User creator = new User();
+        creator.setId(1);
+
+        Match match = new Match();
+        match.setCreatorId(1);
+
+        when(userService.findUser(1)).thenReturn(creator);
+
+        when(matchRepo.findMatchesWonByUser(eq(1), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(match)));
+
+        Page<MatchHistorialDTO> result =
+                matchService.getMatchesWonByUser(1, 0, 5);
+
+        assertEquals(1, result.getContent().size());
+    }
+    @Test
+    void shouldReturnAbandonedMatches() {
+
+        User creator = new User();
+        creator.setId(1);
+
+        Match match = new Match();
+        match.setCreatorId(1);
+
+        when(userService.findUser(1)).thenReturn(creator);
+
+        when(abandonedMatchRepository.findMatchesAbandonedByUser(eq(1), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(match)));
+
+        Page<MatchHistorialDTO> result =
+                matchService.getMatchesAbandonedByUser(1, 0, 5);
+
+        assertEquals(1, result.getContent().size());
+
+        verify(abandonedMatchRepository)
+                .findMatchesAbandonedByUser(eq(1), any(Pageable.class));
+    }
+
+    @Test
+    void shouldThrowWhenStartingUnknownMatch() {
+
+        when(matchRepo.findById(Integer.valueOf(99))).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> matchService.startMatch(99));
+
+        verify(matchRepo).findById(Integer.valueOf(99));
+    }
+
+    @Test
+    void shouldSetStatusToPlaying() {
+
+        Match match = new Match();
+        match.setId(1);
+        match.setPlayers(new ArrayList<>());
+        match.setNpcs(new ArrayList<>());
+        match.setNumNpcs(0);
+
+        DeckInGame deck = new DeckInGame();
+        deck.setNotDiscardedCards(new ArrayList<>());
+
+        when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+        when(deckService.initializeDeck(Integer.valueOf(1))).thenReturn(deck);
+        when(roomService.initializeRoomsForMatch(match)).thenReturn(new ArrayList<>());
+
+        when(matchRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        when(lobbyService.createLobbyUpdate(any(), eq("START"), eq("")))
+                .thenReturn(mock(LobbyUpdateDTO.class));
+
+        matchService.startMatch(Integer.valueOf(1));
+
+        assertEquals(MatchStatus.PLAYING, match.getStatus());
+        assertNotNull(match.getStartTime());
+    }
+
+    @Test
+    void shouldResetPlayers() {
+
+        Player player = new Player();
+
+        player.setId(1);
+        player.setActionPoints(4);
+        player.setStrength(8);
+        player.setCardsDrawnInTurn(9);
+        player.setDiceOrder(3);
+        player.setOrderInMatch(2);
+
+        Match match = new Match();
+        match.setId(1);
+        match.setPlayers(List.of(player));
+        match.setNpcs(new ArrayList<>());
+        match.setNumNpcs(0);
+
+        DeckInGame deck = new DeckInGame();
+
+        List<Card> cards = new ArrayList<>();
+
+        for(int i=0;i<3;i++)
+            cards.add(new Card());
+
+        deck.setNotDiscardedCards(cards);
+
+        when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+        when(deckService.initializeDeck(Integer.valueOf(1))).thenReturn(deck);
+        when(roomService.initializeRoomsForMatch(any())).thenReturn(new ArrayList<>());
+
+        when(matchRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        when(lobbyService.createLobbyUpdate(any(), any(), any()))
+                .thenReturn(mock(LobbyUpdateDTO.class));
+
+        matchService.startMatch(Integer.valueOf(1));
+
+        assertNull(player.getDiceOrder());
+        assertNull(player.getOrderInMatch());
+
+        assertEquals(0, player.getActionPoints());
+        assertEquals(1, player.getStrength());
+        assertEquals(0, player.getCardsDrawnInTurn());
+    }
+
+    @Test
+    void shouldCreateNpcs() {
+
+        Match match = new Match();
+        match.setId(1);
+        match.setPlayers(new ArrayList<>());
+        match.setNpcs(new ArrayList<>());
+        match.setNumNpcs(4);
+
+        DeckInGame deck = new DeckInGame();
+        deck.setNotDiscardedCards(new ArrayList<>());
+
+        when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+        when(deckService.initializeDeck(Integer.valueOf(1))).thenReturn(deck);
+
+        when(roomService.initializeRoomsForMatch(any()))
+                .thenReturn(new ArrayList<>());
+
+        when(matchRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        when(lobbyService.createLobbyUpdate(any(), any(), any()))
+                .thenReturn(mock(LobbyUpdateDTO.class));
+
+        matchService.startMatch(Integer.valueOf(1));
+
+        assertEquals(4, match.getNpcs().size());
+
+        verify(npcRepository, times(4))
+                .save(any(Npc.class));
+}
+    @Test
+    void shouldNotifyGameStarted() {
+
+        Match match = new Match();
+
+        match.setId(1);
+        match.setPlayers(new ArrayList<>());
+        match.setNpcs(new ArrayList<>());
+        match.setNumNpcs(0);
+
+        DeckInGame deck = new DeckInGame();
+        deck.setNotDiscardedCards(new ArrayList<>());
+
+        LobbyUpdateDTO dto = mock(LobbyUpdateDTO.class);
+
+        when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+        when(deckService.initializeDeck(Integer.valueOf(1))).thenReturn(deck);
+
+        when(roomService.initializeRoomsForMatch(any()))
+                .thenReturn(new ArrayList<>());
+
+        when(matchRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        when(lobbyService.createLobbyUpdate(any(), eq("START"), eq("")))
+                .thenReturn(dto);
+
+        matchService.startMatch(Integer.valueOf(1));
+
+        verify(lobbyWebsocketController)
+                .notifyGameStarted(1, dto);
+    }
+
+    @Test
+    void shouldThrowWhenPlayerNotFound() {
+
+        Match match = new Match();
+        match.setId(1);
+
+        when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+        when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(7)))
+                .thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+            () -> matchService.submitDiceAndAssignOrder(Integer.valueOf(1), Integer.valueOf(7), Integer.valueOf(4)));
+    }
+
+    @Test
+    void shouldThrowWhenPlayerAlreadyRolled() {
+
+        Match match = new Match();
+        match.setId(1);
+
+        Player player = new Player();
+        player.setDiceOrder(5);
+
+        when(matchRepo.findById(1)).thenReturn(Optional.of(match));
+
+        when(playerRepo.findByMatchAndUser(1, 1))
+                .thenReturn(Optional.of(player));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> matchService.submitDiceAndAssignOrder(1, 1, 3));
+    }
+
+    @Test
+    void shouldSaveDiceRoll() {
+
+        User user = new User();
+        user.setId(1);
+
+        Player player = new Player();
+        player.setUser(user);
+
+        Match match = new Match();
+        match.setId(1);
+        match.setPlayers(List.of(player));
+
+        when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+        when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1)))
+                .thenReturn(Optional.of(player));
+
+        matchService.submitDiceAndAssignOrder(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(6));
+
+        assertEquals(6, player.getDiceOrder());
+
+        verify(playerRepo).save(player);
+    }
+
+    @Test
+void shouldNotAssignOrderUntilEveryoneRolls() {
+
+    User u1 = new User();
+    u1.setId(1);
+
+    User u2 = new User();
+    u2.setId(2);
+
+    Player p1 = new Player();
+    p1.setUser(u1);
+
+    Player p2 = new Player();
+    p2.setUser(u2);
+    p2.setDiceOrder(null);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setPlayers(List.of(p1, p2));
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1)))
+            .thenReturn(Optional.of(p1));
+
+    matchService.submitDiceAndAssignOrder(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(5));
+
+    assertNull(match.getCurrentTurnUserId());
+
+    verify(matchRepo, never()).save(match);
+}
+
+@Test
+void shouldBreakTieUsingPlayerId() {
+
+    User u1 = new User();
+    u1.setId(1);
+
+    User u2 = new User();
+    u2.setId(2);
+
+    Player p1 = new Player();
+    p1.setId(1);
+    p1.setUser(u1);
+
+    Player p2 = new Player();
+    p2.setId(2);
+    p2.setUser(u2);
+    p2.setDiceOrder(5);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setPlayers(List.of(p1, p2));
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(playerRepo.findByMatchAndUser(1, 1))
+            .thenReturn(Optional.of(p1));
+
+    matchService.submitDiceAndAssignOrder(1, 1, 5);
+
+    assertEquals(0, p1.getOrderInMatch());
+    assertEquals(1, p2.getOrderInMatch());
+}
+@Test
+void shouldNotifyTurnUpdate() {
+
+    User user = new User();
+    user.setId(1);
+    user.setUsername("Julian");
+
+    Player p = new Player();
+    p.setId(1);
+    p.setUser(user);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setPlayers(List.of(p));
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1)))
+            .thenReturn(Optional.of(p));
+
+    matchService.submitDiceAndAssignOrder(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(6));
+
+    verify(matchWebsocketController)
+            .notifyTurnUpdate(eq(Integer.valueOf(1)), any(TurnUpdateDTO.class));
+}
+@Test
+void shouldThrowWhenMatchDoesNotExistInNextTurn() {
+
+    when(matchRepo.findById(1)).thenReturn(Optional.empty());
+
+    assertThrows(IllegalArgumentException.class,
+            () -> matchService.nextTurn(1));
+}
+
+@Test
+void shouldThrowWhenCurrentPlayerDoesNotExist() {
+
+    Match match = new Match();
+    match.setCurrentTurnUserId(1);
+    match.setPlayers(new ArrayList<>());
+
+    when(matchRepo.findById(1)).thenReturn(Optional.of(match));
+
+    assertThrows(IllegalArgumentException.class,
+            () -> matchService.nextTurn(1));
+}
+@Test
+void shouldResetCardsDrawn() {
+
+    User u1 = new User();
+    u1.setId(1);
+
+    Player p1 = new Player();
+    p1.setId(10);
+    p1.setUser(u1);
+    p1.setOrderInMatch(0);
+    p1.setCardsDrawnInTurn(2);
+
+    User u2 = new User();
+    u2.setId(2);
+
+    Player p2 = new Player();
+    p2.setId(20);
+    p2.setUser(u2);
+    p2.setOrderInMatch(1);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setCurrentTurnUserId(1);
+    match.setPlayers(List.of(p1, p2));
+    match.setTurnNumber(3);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(handService.findPlayerHand(Integer.valueOf(1), Integer.valueOf(10)))
+            .thenReturn(new HandInGame());
+
+    matchService.nextTurn(Integer.valueOf(1));
+
+    assertEquals(0, p1.getCardsDrawnInTurn());
+
+    verify(playerRepo).save(p1);
+}
+@Test
+void shouldAdvanceToNextPlayer() {
+
+    User u1 = new User();
+    u1.setId(1);
+
+    Player p1 = new Player();
+    p1.setId(10);
+    p1.setUser(u1);
+    p1.setOrderInMatch(0);
+
+    User u2 = new User();
+    u2.setId(2);
+
+    Player p2 = new Player();
+    p2.setId(20);
+    p2.setUser(u2);
+    p2.setOrderInMatch(1);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setCurrentTurnUserId(1);
+    match.setPlayers(List.of(p1, p2));
+    match.setTurnNumber(1);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(handService.findPlayerHand(1, 10))
+            .thenReturn(new HandInGame());
+
+    matchService.nextTurn(1);
+
+    assertEquals(2, match.getCurrentTurnUserId());
+    assertEquals(TurnPhase.DRAW, match.getCurrentTurnPhase());
+
+    verify(matchRepo).save(match);
+}
+@Test
+void shouldReturnToFirstPlayer() {
+
+    User u1 = new User();
+    u1.setId(1);
+
+    Player p1 = new Player();
+    p1.setId(10);
+    p1.setUser(u1);
+    p1.setOrderInMatch(0);
+
+    User u2 = new User();
+    u2.setId(2);
+
+    Player p2 = new Player();
+    p2.setId(20);
+    p2.setUser(u2);
+    p2.setOrderInMatch(1);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setCurrentTurnUserId(2);
+    match.setPlayers(List.of(p1, p2));
+    match.setTurnNumber(4);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(handService.findPlayerHand(Integer.valueOf(1), Integer.valueOf(20)))
+            .thenReturn(new HandInGame());
+
+    matchService.nextTurn(Integer.valueOf(1));
+
+    assertEquals(1, match.getCurrentTurnUserId());
+}
+@Test
+void shouldThrowWhenEndingUnknownMatch() {
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.empty());
+
+    assertThrows(IllegalArgumentException.class,
+            () -> matchService.endMatch(Integer.valueOf(1), null));
+}
+@Test
+void shouldReturnWithoutModifyingFinishedMatch() {
+
+    Match match = new Match();
+    match.setId(1);
+    match.setStatus(MatchStatus.FINISHED);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    MatchDTO result = matchService.endMatch(Integer.valueOf(1), null);
+
+    assertEquals(MatchStatus.FINISHED, result.getStatus());
+
+    verify(matchRepo, never()).save(any());
+    verify(matchWebsocketController, never()).notifyEndMatch(anyInt(), any());
+}
+@Test
+void shouldFinishMatchWithoutWinner() {
+
+    Match match = new Match();
+    match.setId(1);
+    match.setStatus(MatchStatus.PLAYING);
+    match.setPlayers(new ArrayList<>());
+    match.setStartTime(LocalDateTime.now().minusMinutes(10));
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(matchRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+    MatchDTO result = matchService.endMatch(Integer.valueOf(1), null);
+
+    assertEquals(MatchStatus.FINISHED, match.getStatus());
+    assertNull(match.getWinner());
+    assertNotNull(match.getEndTime());
+
+    verify(matchRepo).save(match);
+    verify(matchWebsocketController).notifyEndMatch(eq(Integer.valueOf(1)), any(MatchDTO.class));
+}
+@Test
+void shouldFinishMatchWithWinner() {
+
+    User user = new User();
+    user.setId(1);
+
+    Player winner = new Player();
+    winner.setId(10);
+    winner.setUser(user);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setStatus(MatchStatus.PLAYING);
+    match.setPlayers(List.of(winner));
+    match.setStartTime(LocalDateTime.now().minusMinutes(5));
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(matchRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+    MatchDTO result = matchService.endMatch(Integer.valueOf(1), winner);
+
+    assertEquals(winner, match.getWinner());
+    assertEquals(MatchStatus.FINISHED, result.getStatus());
+
+    verify(matchRepo).save(match);
+}
+@Test
+void shouldThrowWhenWinnerIsNotInMatch() {
+
+    Player winner = new Player();
+    winner.setId(50);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setStatus(MatchStatus.PLAYING);
+    match.setPlayers(new ArrayList<>());
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    assertThrows(IllegalArgumentException.class,
+            () -> matchService.endMatch(Integer.valueOf(1), winner));
+
+    verify(matchRepo, never()).save(any());
+}
+@Test
+void shouldSetEndTime() {
+
+    Match match = new Match();
+    match.setId(1);
+    match.setStatus(MatchStatus.PLAYING);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(matchRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+    matchService.endMatch(Integer.valueOf(1), null);
+
+    assertNotNull(match.getEndTime());
+}
+@Test
+void shouldNotifyEndMatch() {
+
+    Match match = new Match();
+    match.setId(1);
+    match.setStatus(MatchStatus.PLAYING);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(matchRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+    matchService.endMatch(Integer.valueOf(1), null);
+
+    verify(matchWebsocketController)
+            .notifyEndMatch(eq(Integer.valueOf(1)), any(MatchDTO.class));
+}
+@Test
+void shouldThrowWhenLeavingUnknownMatch() {
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.empty());
+
+    assertThrows(IllegalArgumentException.class,
+            () -> matchService.leaveMatch(Integer.valueOf(1), Integer.valueOf(1)));
+}
+@Test
+void shouldThrowWhenPlayerIsNotInMatch() {
+
+    Match match = new Match();
+    match.setId(1);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1)))
+            .thenReturn(Optional.empty());
+
+    assertThrows(IllegalArgumentException.class,
+            () -> matchService.leaveMatch(Integer.valueOf(1), Integer.valueOf(1)));
+}
+@Test
+void shouldSaveAbandonedMatch() {
+
+    User user = new User();
+    user.setId(1);
+
+    Player player = new Player();
+    player.setId(10);
+    player.setUser(user);
+    player.setOrderInMatch(0);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setPlayers(new ArrayList<>(List.of(player)));
+    match.setCurrentTurnUserId(2);
+    match.setMinPlayers(1);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(userService.findUser(Integer.valueOf(1))).thenReturn(user);
+
+    matchService.leaveMatch(Integer.valueOf(1), Integer.valueOf(1));
+
+    verify(abandonedMatchService).saveAbandonedMatch(user, match);
+}
+@Test
+void shouldRemovePlayerFromMatch() {
+
+    User user = new User();
+    user.setId(1);
+
+    Player player = new Player();
+    player.setId(10);
+    player.setUser(user);
+    player.setOrderInMatch(0);
+
+    Match match = new Match();
+    match.setPlayers(new ArrayList<>(List.of(player)));
+    match.setCurrentTurnUserId(2);
+    match.setMinPlayers(1);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(userService.findUser(Integer.valueOf(1))).thenReturn(user);
+
+    matchService.leaveMatch(Integer.valueOf(1), Integer.valueOf(1));
+
+    assertTrue(match.getPlayers().isEmpty());
+}
+@Test
+void shouldPassTurnToNextPlayer() {
+
+    User u1 = new User();
+    u1.setId(1);
+
+    User u2 = new User();
+    u2.setId(2);
+
+    Player p1 = new Player();
+    p1.setId(10);
+    p1.setUser(u1);
+    p1.setOrderInMatch(0);
+
+    Player p2 = new Player();
+    p2.setId(20);
+    p2.setUser(u2);
+    p2.setOrderInMatch(1);
+
+    Match match = new Match();
+    match.setPlayers(new ArrayList<>(List.of(p1, p2)));
+    match.setCurrentTurnUserId(1);
+    match.setMinPlayers(1);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(p1));
+    when(userService.findUser(Integer.valueOf(1))).thenReturn(u1);
+
+    matchService.leaveMatch(Integer.valueOf(1), Integer.valueOf(1));
+
+    assertEquals(2, match.getCurrentTurnUserId());
+    assertEquals(TurnPhase.DRAW, match.getCurrentTurnPhase());
+}
+@Test
+void shouldUpdatePlayersOrder() {
+
+    User u1 = new User();
+    u1.setId(1);
+
+    User u2 = new User();
+    u2.setId(2);
+
+    User u3 = new User();
+    u3.setId(3);
+
+    Player p1 = new Player();
+    p1.setUser(u1);
+    p1.setOrderInMatch(0);
+
+    Player p2 = new Player();
+    p2.setUser(u2);
+    p2.setOrderInMatch(1);
+
+    Player p3 = new Player();
+    p3.setUser(u3);
+    p3.setOrderInMatch(2);
+
+    Match match = new Match();
+    match.setPlayers(new ArrayList<>(List.of(p1, p2, p3)));
+    match.setCurrentTurnUserId(3);
+    match.setMinPlayers(2);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(2))).thenReturn(Optional.of(p2));
+    when(userService.findUser(Integer.valueOf(2))).thenReturn(u2);
+
+    matchService.leaveMatch(Integer.valueOf(1), Integer.valueOf(2));
+
+    assertEquals(1, p3.getOrderInMatch());
+
+    verify(playerRepo).save(p3);
+}
+@Test
+void shouldEndMatchIfPlayersAreLessThanMinimum() {
+
+    User user = new User();
+    user.setId(1);
+
+    Player player = new Player();
+    player.setUser(user);
+    player.setOrderInMatch(0);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setPlayers(new ArrayList<>(List.of(player)));
+    match.setCurrentTurnUserId(2);
+    match.setMinPlayers(2);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(userService.findUser(Integer.valueOf(1))).thenReturn(user);
+
+    matchService.leaveMatch(Integer.valueOf(1), Integer.valueOf(1));
+
+    verify(matchRepo, atLeastOnce()).save(any());
+}
+@Test
+void shouldNotifyPlayerLeft() {
+
+    User user = new User();
+    user.setId(1);
+
+    Player player = new Player();
+    player.setUser(user);
+    player.setOrderInMatch(0);
+
+    Match match = new Match();
+    match.setPlayers(new ArrayList<>(List.of(player)));
+    match.setCurrentTurnUserId(2);
+    match.setMinPlayers(1);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(userService.findUser(Integer.valueOf(1))).thenReturn(user);
+
+    matchService.leaveMatch(Integer.valueOf(1), Integer.valueOf(1));
+
+    verify(matchWebsocketController)
+            .notifyPlayerLeft(eq(Integer.valueOf(1)), any(MatchDTO.class));
+}
+@Test
+void shouldDrawCardFromDeck() {
+
+    Player player = new Player();
+    player.setId(1);
+    player.setCardsDrawnInTurn(0);
+    player.setActionPoints(3);
+
+    Card card = new Card();
+
+    DeckInGame deck = new DeckInGame();
+
+    HandInGame hand = new HandInGame();
+
+    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(card);
+    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(deck);
+    when(handService.addCardToPlayerHand(card, Integer.valueOf(1), Integer.valueOf(1))).thenReturn(hand);
+
+    DrawCardResultDTO result = matchService.playerDrawsCardFromDeck(Integer.valueOf(1), Integer.valueOf(1));
+
+    assertEquals(card,result.getCard());
+    assertEquals(deck,result.getDeck());
+    assertEquals(hand,result.getHand());
+
+    verify(deckService).drawCard(1);
+}
+@Test
+void shouldIncreaseCardsDrawn() {
+
+    Player player = new Player();
+    player.setId(1);
+    player.setCardsDrawnInTurn(2);
+    player.setActionPoints(5);
+
+    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(new Card());
+    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(new DeckInGame());
+    when(handService.addCardToPlayerHand(any(),eq(Integer.valueOf(1)),eq(Integer.valueOf(1))))
+            .thenReturn(new HandInGame());
+
+    matchService.playerDrawsCardFromDeck(Integer.valueOf(1), Integer.valueOf(1));
+
+    assertEquals(3,player.getCardsDrawnInTurn());
+}
+@Test
+void shouldConsumeOneActionPoint() {
+
+    Player player = new Player();
+    player.setId(1);
+    player.setCardsDrawnInTurn(0);
+    player.setActionPoints(4);
+
+    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(new Card());
+    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(new DeckInGame());
+    when(handService.addCardToPlayerHand(any(),eq(Integer.valueOf(1)),eq(Integer.valueOf(1))))
+            .thenReturn(new HandInGame());
+
+    matchService.playerDrawsCardFromDeck(Integer.valueOf(1), Integer.valueOf(1));
+
+    assertEquals(3,player.getActionPoints());
+}
+@Test
+void shouldSavePlayerAfterDrawing() {
+
+    Player player = new Player();
+    player.setId(1);
+
+    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(new Card());
+    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(new DeckInGame());
+    when(handService.addCardToPlayerHand(any(),eq(Integer.valueOf(1)),eq(Integer.valueOf(1))))
+            .thenReturn(new HandInGame());
+
+    matchService.playerDrawsCardFromDeck(1,1);
+
+    verify(playerRepo).save(player);
+}
+@Test
+void shouldCheckCardsDrawnBeforeDrawing() {
+
+    Player player = new Player();
+    player.setId(1);
+
+    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(new Card());
+    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(new DeckInGame());
+    when(handService.addCardToPlayerHand(any(),eq(Integer.valueOf(1)),eq(Integer.valueOf(1))))
+            .thenReturn(new HandInGame());
+
+    matchService.playerDrawsCardFromDeck(1,1);
+
+    verify(checkers).checkCardsDrawnInTurn(player);
+}
+@Test
+void shouldThrowWhenPlayerHasDrawnTooManyCards() {
+
+    Player player = new Player();
+    player.setId(1);
+
+    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
+
+    doThrow(new MoreThan7CardsDrawnException("Too many cards"))
+            .when(checkers)
+            .checkCardsDrawnInTurn(player);
+
+    assertThrows(MoreThan7CardsDrawnException.class,
+            () -> matchService.playerDrawsCardFromDeck(Integer.valueOf(1), Integer.valueOf(1)));
+
+    verify(deckService,never()).drawCard(anyInt());
+}
+@Test
+void shouldNotifyCardsUpdate() {
+
+    Player player = new Player();
+    player.setId(1);
+
+    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(new Card());
+    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(new DeckInGame());
+    when(handService.addCardToPlayerHand(any(),eq(Integer.valueOf(1)),eq(Integer.valueOf(1))))
+            .thenReturn(new HandInGame());
+
+    matchService.playerDrawsCardFromDeck(1,1);
+
+    verify(matchWebsocketController)
+            .notifyCardsUpdate(eq(1), any(CardsUpdateDTO.class));
+}
+
+@Test
+void shouldThrowWhenMatchDoesNotExistInMoveLoserPlayer() {
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.empty());
+
+    assertThrows(RuntimeException.class,
+            () -> matchService.moveLoserPlayer(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(1)));
+}
+@Test
+void shouldThrowWhenPlayerDoesNotExistInMoveLoserPlayer() {
+
+    Match match = new Match();
+    match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.empty());
+
+    assertThrows(RuntimeException.class,
+            () -> matchService.moveLoserPlayer(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(1)));
+}
+@Test
+void shouldThrowWhenTargetRoomDoesNotExist() {
+
+    Match match = new Match();
+    match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+
+    Player player = new Player();
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(roomRepo.findById(Integer.valueOf(1))).thenReturn(Optional.empty());
+
+    assertThrows(RuntimeException.class,
+            () -> matchService.moveLoserPlayer(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(1)));
+}
+@Test
+void shouldMovePlayerToTargetRoom() {
+
+    Match match = new Match();
+    match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+
+    Room currentRoom = new Room();
+    currentRoom.setId(1);
+
+    Room targetRoom = new Room();
+    targetRoom.setId(2);
+
+    Player player = new Player();
+    player.setRoom(currentRoom);
+    player.setStrength(3);
+    player.setRoomsVisited(4);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(roomRepo.findById(Integer.valueOf(2))).thenReturn(Optional.of(targetRoom));
+    when(playerRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+    Player result = matchService.moveLoserPlayer(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(2));
+
+    assertEquals(targetRoom, result.getRoom());
+    assertEquals(4, result.getStrength());
+    assertEquals(5, result.getRoomsVisited());
+}
+@Test
+void shouldNotIncreaseVisitedRoomsWhenRoomIsTheSame() {
+
+    Match match = new Match();
+    match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+
+    Room room = new Room();
+    room.setId(5);
+
+    Player player = new Player();
+    player.setRoom(room);
+    player.setRoomsVisited(7);
+    player.setStrength(2);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(roomRepo.findById(Integer.valueOf(5))).thenReturn(Optional.of(room));
+    when(playerRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+    Player result = matchService.moveLoserPlayer(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(5));
+
+    assertEquals(7, result.getRoomsVisited());
+    assertEquals(3, result.getStrength());
+}
+@Test
+void shouldSetTurnPhaseToActions() {
+
+    Match match = new Match();
+    match.setCurrentTurnPhase(TurnPhase.DRAW);
+
+    Room room = new Room();
+    room.setId(2);
+
+    Player player = new Player();
+    player.setStrength(1);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(roomRepo.findById(Integer.valueOf(2))).thenReturn(Optional.of(room));
+    when(playerRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+    matchService.moveLoserPlayer(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(2));
+
+    assertEquals(TurnPhase.ACTIONS, match.getCurrentTurnPhase());
+}
+
+@Test
+void shouldSaveMovedPlayer() {
+
+    Match match = new Match();
+    match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+
+    Room room = new Room();
+    room.setId(2);
+
+    Player player = new Player();
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(player));
+    when(roomRepo.findById(Integer.valueOf(2))).thenReturn(Optional.of(room));
+    when(playerRepo.save(any())).thenAnswer(i -> i.getArgument(0));
+
+    matchService.moveLoserPlayer(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(2));
+
+    verify(playerRepo).save(player);
+}
+@Test
+void shouldReturnAvailableRooms() {
+
+    Room occupied = new Room();
+    occupied.setId(1);
+
+    Room free = new Room();
+    free.setId(2);
+
+    Match match = new Match();
+
+    Player player = new Player();
+    player.setRoom(occupied);
+
+    match.setPlayers(List.of(player));
+    match.setNpcs(new ArrayList<>());
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(roomRepo.findAll()).thenReturn(new ArrayList<>(List.of(occupied, free)));
+
+    when(roomService.getAllTowers()).thenReturn(new ArrayList<>());
+
+    List<Room> result = matchService.getAvailableRoomsForPlayer(Integer.valueOf(1));
+
+    assertEquals(1, result.size());
+    assertTrue(result.contains(free));
+}
+@Test
+void shouldRemoveNpcRooms() {
+
+    Room npcRoom = new Room();
+    npcRoom.setId(5);
+
+    Room free = new Room();
+    free.setId(8);
+
+    Npc npc = new Npc();
+    npc.setRoom(npcRoom);
+
+    Match match = new Match();
+    match.setPlayers(new ArrayList<>());
+    match.setNpcs(List.of(npc));
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(roomRepo.findAll()).thenReturn(new ArrayList<>(List.of(npcRoom, free)));
+
+    when(roomService.getAllTowers()).thenReturn(new ArrayList<>());
+
+    List<Room> result = matchService.getAvailableRoomsForPlayer(Integer.valueOf(1));
+
+    assertEquals(1, result.size());
+    assertFalse(result.contains(npcRoom));
+}
+@Test
+void shouldRemoveTowerRooms() {
+
+    Room tower = new Room();
+    tower.setId(31);
+
+    Room normal = new Room();
+    normal.setId(15);
+
+    Match match = new Match();
+    match.setPlayers(new ArrayList<>());
+    match.setNpcs(new ArrayList<>());
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(roomRepo.findAll()).thenReturn(new ArrayList<>(List.of(tower, normal)));
+
+    when(roomService.getAllTowers()).thenReturn(List.of(tower));
+
+    List<Room> result = matchService.getAvailableRoomsForPlayer(Integer.valueOf(1));
+
+    assertEquals(1, result.size());
+    assertTrue(result.contains(normal));
+}
+@Test
+void shouldNotDuplicateOccupiedRooms() {
+
+    Room room = new Room();
+    room.setId(3);
+
+    Player p1 = new Player();
+    p1.setRoom(room);
+
+    Player p2 = new Player();
+    p2.setRoom(room);
+
+    Match match = new Match();
+    match.setPlayers(List.of(p1, p2));
+    match.setNpcs(new ArrayList<>());
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(roomRepo.findAll()).thenReturn(new ArrayList<>(List.of(room)));
+
+    when(roomService.getAllTowers()).thenReturn(new ArrayList<>());
+
+    List<Room> result = matchService.getAvailableRoomsForPlayer(Integer.valueOf(1));
+
+    assertTrue(result.isEmpty());
+}
+@Test
+void shouldReturnEmptyWhenNoRoomsAvailable() {
+
+    Room room = new Room();
+    room.setId(1);
+
+    Player player = new Player();
+    player.setRoom(room);
+
+    Match match = new Match();
+    match.setPlayers(List.of(player));
+    match.setNpcs(new ArrayList<>());
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(roomRepo.findAll()).thenReturn(new ArrayList<>(List.of(room)));
+
+    when(roomService.getAllTowers()).thenReturn(new ArrayList<>());
+
+    List<Room> result = matchService.getAvailableRoomsForPlayer(Integer.valueOf(1));
+
+    assertTrue(result.isEmpty());
+}
+@Test
+void shouldCallGetAllTowers() {
+
+    Match match = new Match();
+    match.setPlayers(new ArrayList<>());
+    match.setNpcs(new ArrayList<>());
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+
+    when(roomRepo.findAll()).thenReturn(new ArrayList<>());
+
+    when(roomService.getAllTowers()).thenReturn(new ArrayList<>());
+
+    matchService.getAvailableRoomsForPlayer(Integer.valueOf(1));
+
+    verify(roomService).getAllTowers();
+}
+@Test
+void shouldReturnMatchIfUserIsAlreadyPlayer() {
+
+    User user = new User();
+    user.setId(1);
+
+    Player player = new Player();
+    player.setUser(user);
+
+    Match match = new Match();
+    match.setPlayers(new ArrayList<>(List.of(player)));
+    match.setSpectators(new ArrayList<>());
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(user);
+
+    MatchDTO dto = matchService.spectateGame(Integer.valueOf(1));
+
+    assertNotNull(dto);
+
+    verify(matchRepo, never()).save(any());
+    verify(checkers, never()).checkCanSpectateGame(any(), any());
+}
+@Test
+void shouldReturnMatchIfUserIsAlreadySpectator() {
+
+    User user = new User();
+    user.setId(1);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setPlayers(new ArrayList<>());
+    match.setSpectators(new ArrayList<>(List.of(user)));
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(user);
+
+    MatchDTO dto = matchService.spectateGame(Integer.valueOf(1));
+
+    assertNotNull(dto);
+
+    verify(matchRepo, never()).save(any());
+}
+
+@Test
+void shouldAddSpectator() {
+
+    User user = new User();
+    user.setId(5);
+    user.setUsername("Julian");
+
+    Match match = new Match();
+    match.setId(1);
+    match.setPlayers(new ArrayList<>());
+    match.setSpectators(new ArrayList<>());
+
+    LobbyUpdateDTO update = mock(LobbyUpdateDTO.class);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(user);
+
+    when(lobbyService.createLobbyUpdate(match, "SPECTATOR_JOIN", "Julian"))
+            .thenReturn(update);
+
+    MatchDTO dto = matchService.spectateGame(Integer.valueOf(1));
+
+    assertEquals(1, match.getSpectators().size());
+    assertTrue(match.getSpectators().contains(user));
+
+    verify(matchRepo).save(match);
+}
+@Test
+void shouldCheckPermissionsBeforeJoiningAsSpectator() {
+
+    User user = new User();
+    user.setId(3);
+
+    Match match = new Match();
+    match.setPlayers(new ArrayList<>());
+    match.setSpectators(new ArrayList<>());
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(user);
+
+    when(lobbyService.createLobbyUpdate(any(), any(), any()))
+            .thenReturn(mock(LobbyUpdateDTO.class));
+
+    matchService.spectateGame(Integer.valueOf(1));
+
+    verify(checkers).checkCanSpectateGame(match, 3);
+}
+@Test
+void shouldSaveMatchWhenSpectatorJoins() {
+
+    User user = new User();
+    user.setId(2);
+    user.setUsername("Player");
+
+    Match match = new Match();
+    match.setId(1);
+    match.setPlayers(new ArrayList<>());
+    match.setSpectators(new ArrayList<>());
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(user);
+
+    when(lobbyService.createLobbyUpdate(any(), any(), any()))
+            .thenReturn(mock(LobbyUpdateDTO.class));
+
+    matchService.spectateGame(Integer.valueOf(1));
+
+    verify(matchRepo).save(match);
+}
+@Test
+void shouldNotifySpectatorJoined() {
+
+    User user = new User();
+    user.setId(2);
+    user.setUsername("Julian");
+
+    Match match = new Match();
+    match.setId(10);
+    match.setPlayers(new ArrayList<>());
+    match.setSpectators(new ArrayList<>());
+
+    LobbyUpdateDTO update = mock(LobbyUpdateDTO.class);
+
+    when(matchRepo.findById(Integer.valueOf(10))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(user);
+
+    when(lobbyService.createLobbyUpdate(match, "SPECTATOR_JOIN", "Julian"))
+            .thenReturn(update);
+
+    matchService.spectateGame(Integer.valueOf(10));
+
+    verify(lobbyWebsocketController)
+            .notifyPlayerJoined(10, update);
+}
+@Test
+void shouldThrowWhenUserCannotSpectate() {
+
+    User user = new User();
+    user.setId(4);
+
+    Match match = new Match();
+    match.setPlayers(new ArrayList<>());
+    match.setSpectators(new ArrayList<>());
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(user);
+
+    doThrow(new IllegalArgumentException("Cannot spectate"))
+            .when(checkers)
+            .checkCanSpectateGame(match, 4);
+
+    assertThrows(IllegalArgumentException.class,
+            () -> matchService.spectateGame(Integer.valueOf(1)));
+
+    verify(matchRepo, never()).save(any());
+}
+@Test
+void shouldRemoveSpectatorFromMatch() {
+
+    User user = new User();
+    user.setId(1);
+    user.setUsername("Julian");
+
+    Match match = new Match();
+    match.setId(1);
+    match.setSpectators(new ArrayList<>(List.of(user)));
+
+    LobbyUpdateDTO update = mock(LobbyUpdateDTO.class);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(user);
+    when(lobbyService.createLobbyUpdate(match, "SPECTATOR_LEAVE", "Julian"))
+            .thenReturn(update);
+
+    matchService.stopSpectating(Integer.valueOf(1));
+
+    assertTrue(match.getSpectators().isEmpty());
+
+    verify(matchRepo).save(match);
+}
+@Test
+void shouldSaveMatchWhenSpectatorLeaves() {
+
+    User user = new User();
+    user.setId(1);
+    user.setUsername("Julian");
+
+    Match match = new Match();
+    match.setId(1);
+    match.setSpectators(new ArrayList<>(List.of(user)));
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(user);
+    when(lobbyService.createLobbyUpdate(any(), any(), any()))
+            .thenReturn(mock(LobbyUpdateDTO.class));
+
+    matchService.stopSpectating(Integer.valueOf(1));
+
+    verify(matchRepo).save(match);
+}
+@Test
+void shouldCreateLobbyUpdateWhenSpectatorLeaves() {
+
+    User user = new User();
+    user.setId(1);
+    user.setUsername("Julian");
+
+    Match match = new Match();
+    match.setId(1);
+    match.setSpectators(new ArrayList<>(List.of(user)));
+
+    LobbyUpdateDTO update = mock(LobbyUpdateDTO.class);
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(user);
+    when(lobbyService.createLobbyUpdate(match, "SPECTATOR_LEAVE", "Julian"))
+            .thenReturn(update);
+
+    matchService.stopSpectating(Integer.valueOf(1));
+
+    verify(lobbyService)
+            .createLobbyUpdate(match, "SPECTATOR_LEAVE", "Julian");
+}
+@Test
+void shouldNotifySpectatorLeave() {
+
+    User user = new User();
+    user.setId(1);
+    user.setUsername("Julian");
+
+    Match match = new Match();
+    match.setId(15);
+    match.setSpectators(new ArrayList<>(List.of(user)));
+
+    LobbyUpdateDTO update = mock(LobbyUpdateDTO.class);
+
+    when(matchRepo.findById(Integer.valueOf(15))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(user);
+    when(lobbyService.createLobbyUpdate(match, "SPECTATOR_LEAVE", "Julian"))
+            .thenReturn(update);
+
+    matchService.stopSpectating(Integer.valueOf(15));
+
+    verify(lobbyWebsocketController)
+            .notifyPlayerJoined(15, update);
+}
+@Test
+void shouldDoNothingIfUserWasNotSpectator() {
+
+    User currentUser = new User();
+    currentUser.setId(2);
+    currentUser.setUsername("Julian");
+
+    User otherUser = new User();
+    otherUser.setId(5);
+
+    Match match = new Match();
+    match.setId(1);
+    match.setSpectators(new ArrayList<>(List.of(otherUser)));
+
+    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
+    when(userService.findCurrentUser()).thenReturn(currentUser);
+    when(lobbyService.createLobbyUpdate(any(), any(), any()))
+            .thenReturn(mock(LobbyUpdateDTO.class));
+
+    matchService.stopSpectating(Integer.valueOf(1));
+
+    assertEquals(1, match.getSpectators().size());
+    assertTrue(match.getSpectators().contains(otherUser));
+
+    verify(matchRepo).save(match);
+}
 }
