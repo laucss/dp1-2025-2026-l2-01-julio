@@ -168,11 +168,43 @@ La aplicación para evitar exponer datos internos de algunas clases relacionados
 
 *Clases o paquetes creados*
 
--LobbyDTO
--ChatDTO
--MiniUserDTO
+-CardDTO
+-HandInGameDTO
+-BagInGameDTO
+-DeckInGameDTO
+-AllCardsStatusDTO
+-DrawCardResultDTO
+-DiceTotalsUpdateDTO
+-FightDiceUpdateDTO
+-FightResolvedDTO
+-FightResultRequestDTO
+-FightUpdateDTO
+-LoseAgainstNpcRequestDTO
+-ReadyStateUpdateDTO
+-StealCardRequestDTO
+-WeaponsUpdateDTO
+-FriendsInvitationDTO
 -MiniRequestDTO
-
+-InviteRequest
+-PlayerPositionDTO
+-NpcPositionDTO
+-LobbyDTO
+-LobbyUpdateDTO
+-PlayerLobbyDTO (clase interna)
+-UserLobbyDTO (clase interna)
+-MatchDTO
+-MatchHistorialDTO
+-ActionPointsUpdateDTO
+-CardsUpdateDTO
+-EndedMatchDTO
+-EscapeAttemptResultDTO
+-HandUpdateDTO
+-MoveNpcToRoomDTO
+-MoveToRoomDTO
+-NpcLocationUpdateDTO
+-PlayerLocationUpdateDTO
+-StrengthUpdateDTO
+-TurnUpdateDTO
 
 *Ventajas alcanzadas al aplicar el patrón*
 
@@ -212,6 +244,12 @@ Al diseñar el backend, lo planteamos como un sistema compuesto por diversas ent
       -hand
       -handInGame
    -card
+.Fights
+   -pendingFight
+.Invitations
+   -invitationMatch
+.Notification
+   -notification
 ·Chat
    -chatMessage
 ·FriendRequest
@@ -233,28 +271,27 @@ Al diseñar el backend, lo planteamos como un sistema compuesto por diversas ent
    -user
 ·Util
    -checkers
+.Voting
+   -vote
 
 *Ventajas alcanzadas al aplicar el patrón*
 Aunque el tamaño de nuestro proyecto ha dado lugar a un modelo relativamente complejo, el uso de este patrón nos ha facilitado comprender de forma más clara cómo los cambios de estado en unas entidades influyen sobre otras.
+
+### Patrón: Pagination
+*Tipo*: de Diseño 
+
+*Contexto de Aplicación*
+A la hora de listar diversos recursos en nuestra aplicación, este listado se ha organizado de manera que se vayan cargando un número pequeño de datos y el usuario vaya pasando para ver los demás.
+
+ 
+*Ventajas alcanzadas al aplicar el patrón*
+Conseguimos optimizar las consultas sobre colecciones potencialmente grandes, reduciendo el tiempo de respuesta del servidor, el consumo de memoria y el volumen de datos enviados al cliente. Además, esta solución mejora la escalabilidad de la aplicación y facilita la navegación del usuario por grandes conjuntos de información.
+
 
 
 ## Decisiones de diseño
 
 
-### Decisión X
-#### Descripción del problema:*
-
-Describir el problema de diseño que se detectó, o el porqué era necesario plantearse las posibilidades de diseño disponibles para implementar la funcionalidad asociada a esta decisión de diseño.
-
-#### Alternativas de solución evaluadas:
-Especificar las distintas alternativas que se evaluaron antes de seleccionar el diseño concreto implementado finalmente en el sistema. Si se considera oportuno se pude incluir las ventajas e inconvenientes de cada alternativa
-
-#### Justificación de la solución adoptada
-
-Describir porqué se escogió la solución adoptada. Si se considera oportuno puede hacerse en función de qué  ventajas/inconvenientes de cada una de las soluciones consideramos más importantes.
-Os recordamos que la decisión sobre cómo implementar las distintas reglas de negocio, cómo informar de los errores en el frontend, y qué datos devolver u obtener a través de las APIs y cómo personalizar su representación en caso de que sea necesario son decisiones de diseño relevantes.
-
-_Ejemplos de uso de la plantilla con otras decisiones de diseño:_
 
 ### Decisión 1: Importación de datos reales para demostración
 #### Descripción del problema:
@@ -350,33 +387,25 @@ A la hora de construir los services nos hemos visto con una gran cantidad de val
 • Los servicios (como MatchService) deben interactuar con la clase Checkers correctamente, lo que añade un nivel de abstracción.
 
 
-
 #### Justificación de la solución adoptada
 
 Consideramos que al tener muchas restricciones que son reutilizables nos va a facilitar mucho el tener una clase Checkers, también nos va a facilitar la lectura del código.
 
-_Ejemplos de uso de la plantilla con otras decisiones de diseño:_
+
 
 ## Refactorizaciones aplicadas
 
-Si ha hecho refactorizaciones en su código, puede documentarlas usando el siguiente formato:
+A lo largo de la realización del trabajo se han hecho varias refactorizaciones.
 
-### Refactorización X: 
-En esta refactorización añadimos un mapa de parámtros a la partida para ayudar a personalizar la información precalculada de la que partimos en cada fase del juego.
-#### Estado inicial del código
-```Java 
-class Animal
-{
-}
-``` 
-_Puedes añadir información sobre el lenguaje concreto en el que está escrito el código para habilitar el coloreado de sintaxis tal y como se especifica en [este tutorial](https://docs.github.com/es/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks)_
+### Refactorización 1: 
+Esta refactorización ha sido de las más grandes, el objetivo de esta refactorización fue reducir el número de líneas del archivo playerMatch.js, el cual contaba con más de 2400 líneas de código. Debido al gran tamaño de código esta refactorización se hizo por partes.
+- Lo primero que se hizo para mejorar fue borrar todo el código comentado del archivo.
+- Lo siguiente realizado fue aprovechar el código duplicado y hacer una función con ese código para poder reutilizarlo sin tener que copiar 100 líneas en cada caso.
+- Lo que más ayudó a reducir código fue ir descompiendo el archivo en más componentes, haciendo así un componente para el mapa, otro para los botones, otro para la información del jugador, etc. Esto redujo muchas líneas.
 
-#### Estado del código refactorizado
+Trás realizar lo mencionado anteriormente el archivo quedó en 1200 líneas, logramos reducirlo a la mitad del tamaño original.
 
-```
-código fuente en java, jsx o javascript
-```
 #### Problema que nos hizo realizar la refactorización
-_Ej: Era difícil añadir información para implementar la lógica de negocio en cada una de las fases del juego (en nuestro caso varía bastante)_
+Era muy díficil comprender que se hacía en el archivo y también era muy laborioso encontrar alguna función en concreto.
 #### Ventajas que presenta la nueva versión del código respecto de la versión original
-_Ej: Ahora podemos añadir arbitrariamente los datos que nos hagan falta al contexto de la partida para que sea más sencillo llevar a cabo los turnos y jugadas_
+Ahora tenemos varios componentes dejando todo más organizado.
