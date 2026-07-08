@@ -6,10 +6,11 @@
     height: 100px;
     object-fit: cover;
     transition: all 0.2s;
+    background-color: #f0f0f0;
 }
 
 .selectAvatar:hover {
-    border-color: #007bff;
+    border-color: #694b75;
     transform: scale(1.1);
 }
 

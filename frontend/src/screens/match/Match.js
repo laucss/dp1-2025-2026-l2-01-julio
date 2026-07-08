@@ -4,6 +4,7 @@ import tokenService from "../../services/token.service";
 import getIdFromUrl from '../../util/getIdFromUrl';
 import PlayerMatch from "./PlayerMatch";
 import SpectatorMatch from "./SpectatorMatch";
+import { toast } from "react-toastify";
 
 const jwt = tokenService.getLocalAccessToken();
 const currentUser = tokenService.getUser();
@@ -17,17 +18,29 @@ export default function Match() {
     const fetchMatchInitial = async () => {
         try {
             const response = await fetch(`/api/v1/matches/${matchId}`, {
-                headers: { Authorization: `Bearer ${jwt}`, 'Content-Type': 'application/json' }
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    "Content-Type": "application/json"
+                }
             });
-            if (response.ok) {
-                const data = await response.json();
-                setMatch(data);
-            } else {
-                navigate('/');
+
+            if (response.status === 403) {
+                toast.error("You are not allowed to access this match.");
+                navigate("/");
+                return;
             }
+
+            if (!response.ok) {
+                navigate("/");
+                return;
+            }
+
+            const data = await response.json();
+            setMatch(data);
+
         } catch (error) {
-            console.error("Error cargando la partida:", error);
-            navigate('/');
+            console.error("Error loading the match:", error);
+            navigate("/");
         } finally {
             setLoading(false);
         }

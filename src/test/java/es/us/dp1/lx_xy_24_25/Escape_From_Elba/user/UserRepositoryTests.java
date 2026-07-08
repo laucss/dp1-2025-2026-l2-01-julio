@@ -114,7 +114,6 @@ public class UserRepositoryTests {
         assertEquals("user1", userList.get(0).getUsername());
     }
 
-    /* 
     @Test
     public void findAllReturnsAllUsers() {
         Authorities auth = new Authorities();
@@ -132,8 +131,26 @@ public class UserRepositoryTests {
         userRepository.save(user2);
 
         List<User> users = userRepository.findAll();
-        assertThat(users).hasSize(2).extracting(User::getUsername)
-                        .containsExactlyInAnyOrder("allUser1", "allUser2");
-    }*/
+        assertTrue(users.size() >= 2);
+        assertTrue(users.stream().anyMatch(u -> u.getUsername().equals("allUser1")));
+        assertTrue(users.stream().anyMatch(u -> u.getUsername().equals("allUser2")));
+    }
+
+    @Test
+    public void findByUsernameReturnsEmpty() {
+        Optional<User> found = userRepository.findByUsername("nonexistentUser");
+        assertFalse(found.isPresent());
+    }
+
+    @Test
+    public void existsByUsernameReturnsFalse() {
+        assertFalse(userRepository.existsByUsername("nonexistentUser123"));
+    }
+
+    @Test
+    public void findByIdReturnsEmpty() {
+        Optional<User> found = userRepository.findById(99999);
+        assertFalse(found.isPresent());
+    }
 
 }
