@@ -78,6 +78,7 @@ class ActionsServiceTest {
     private User testUser;
     private Room currentRoom;
     private Room targetRoom;
+    private Npc testNpc; 
 
     @BeforeEach
     void setUp() {
@@ -105,6 +106,9 @@ class ActionsServiceTest {
         testPlayer.setActionPoints(3);
         testPlayer.setStrength(5);
         testPlayer.setRoomsVisited(0);
+
+        testNpc = new Npc();
+        testNpc.setId(100);
     }
 
     @Test
@@ -127,6 +131,45 @@ class ActionsServiceTest {
     }
 
     @Test
+    @DisplayName("Cambia el estado de la partida a ACTIONS con éxito al mover a una habiacion adyacente")
+    void testMovePlayerToAdyacentRoomChangeMatchStatus() {
+        testMatch.setCurrentTurnPhase(TurnPhase.DRAW);
+        when(matchService.getMatchById(any())).thenReturn(testMatch);
+        when(playerService.findByMatchIdAndUserId(1, 1)).thenReturn(testPlayer);
+        when(roomRepository.findById(any())).thenReturn(Optional.of(targetRoom));
+        when(fightService.getPossibleFight(anyInt(), anyInt(), anyInt(), anyBoolean())).thenReturn(new ArrayList<>());
+
+        MatchDTO result = actionsService.movePlayerToAdyacentRoom(1, 1, 2);
+
+        assertNotNull(result);
+        assertEquals(TurnPhase.ACTIONS, testMatch.getCurrentTurnPhase());
+        assertEquals(targetRoom, testPlayer.getRoom());
+        assertEquals(1, testPlayer.getRoomsVisited());
+        
+        verify(matchRepo).save(testMatch);
+        verify(playerRepo, times(2)).save(testPlayer);
+        verify(matchWebsocketController, times(1)).notifyActionPointsUpdate(eq(1), any(ActionPointsUpdateDTO.class));
+    }
+
+    @Test
+    @DisplayName("Error al no tener habitacion asignada e intentar moverte")
+    void shouldThrowWhenPlayerNoCurrentRoomWhenMoveAdyacentRoom() {
+        testPlayer.setRoom(null);
+        when(matchService.getMatchById(any())).thenReturn(testMatch);
+        when(playerService.findByMatchIdAndUserId(1, 1)).thenReturn(testPlayer);
+        when(roomRepository.findById(any())).thenReturn(Optional.of(targetRoom));
+        when(fightService.getPossibleFight(anyInt(), anyInt(), anyInt(), anyBoolean())).thenReturn(new ArrayList<>());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            actionsService.movePlayerToAdyacentRoom(1, 1, 1);
+        });
+
+        assertEquals("Player not assigned to a room", exception.getMessage());
+   
+    }
+
+
+    @Test
     @DisplayName("Error al mover jugador si la sala de destino es la misma que la actual")
     void testMovePlayerToSameRoomThrowsException() {
         when(matchService.getMatchById(1)).thenReturn(testMatch);
@@ -142,24 +185,77 @@ class ActionsServiceTest {
     @Test
     @DisplayName("Mover un NPC a otra sala con éxito")
     void testMoveNpcToRoomSuccess() {
-        Npc npc = new Npc();
-        npc.setId(10);
-        npc.setRoom(currentRoom);
+        testNpc.setRoom(currentRoom);
 
         when(matchService.getMatchById(1)).thenReturn(testMatch);
-        when(npcRepository.findById(10)).thenReturn(Optional.of(npc));
+        when(npcRepository.findById(100)).thenReturn(Optional.of(testNpc));
         when(roomService.findById(2)).thenReturn(targetRoom);
         when(playerService.findByMatchIdAndUserId(1, 1)).thenReturn(testPlayer);
         when(fightService.getPossibleFight(anyInt(), anyInt(), anyInt(), anyBoolean())).thenReturn(new ArrayList<>());
 
-        MatchDTO result = actionsService.moveNpcToRoom(1, 10, 2, 1);
+        MatchDTO result = actionsService.moveNpcToRoom(1, 100, 2, 1);
 
         assertNotNull(result);
         assertEquals(2, testPlayer.getActionPoints());
-        assertEquals(targetRoom, npc.getRoom());
+        assertEquals(targetRoom, testNpc.getRoom());
         
         verify(playerRepo, times(1)).save(testPlayer);
-        verify(npcRepository, times(1)).save(npc);
+        verify(npcRepository, times(1)).save(testNpc);
+    }
+
+    @Test
+    @DisplayName("Cambia el estado de la partida a ACTIONS con éxito al mover a un npc")
+    void testMoveNpcToRoomChangeMatchPhaseSuccess() {
+        testMatch.setCurrentTurnPhase(TurnPhase.DRAW);
+        testNpc.setRoom(currentRoom);
+        when(matchService.getMatchById(1)).thenReturn(testMatch);
+        when(npcRepository.findById(100)).thenReturn(Optional.of(testNpc));
+        when(roomService.findById(2)).thenReturn(targetRoom);
+        when(playerService.findByMatchIdAndUserId(1, 1)).thenReturn(testPlayer);
+        when(fightService.getPossibleFight(anyInt(), anyInt(), anyInt(), anyBoolean())).thenReturn(new ArrayList<>());
+
+        MatchDTO result = actionsService.moveNpcToRoom(1, 100, 2, 1);
+
+        assertNotNull(result);
+        assertEquals(TurnPhase.ACTIONS, testMatch.getCurrentTurnPhase());
+        assertEquals(2, testPlayer.getActionPoints());
+        assertEquals(targetRoom, testNpc.getRoom());
+        
+        verify(playerRepo, times(1)).save(testPlayer);
+        verify(npcRepository, times(1)).save(testNpc);
+    }
+
+    @Test
+    @DisplayName("Error al intentar mover un NPC sin habitación asignada")
+    void shouldThrowWhenNpcNoCurrentRoomWhenMoveNPC() {
+        testNpc.setRoom(null);
+
+        when(matchService.getMatchById(any())).thenReturn(testMatch);
+        when(npcRepository.findById(100)).thenReturn(Optional.of(testNpc));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            actionsService.moveNpcToRoom(1, 100, 1, 1);
+        });
+
+        assertEquals("NPC not assigned to a room", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Error al mover un npc si la sala de destino es la misma que la actual")
+    void testMoveNpcToSameRoomThrowsException() {
+        Room sameRoom = new Room();
+        sameRoom.setId(1);
+        testNpc.setRoom(currentRoom);
+        when(matchService.getMatchById(1)).thenReturn(testMatch);
+        when(playerService.findByMatchIdAndUserId(1, 1)).thenReturn(testPlayer);
+        when(npcRepository.findById(100)).thenReturn(Optional.of(testNpc));
+        when(roomService.findById(1)).thenReturn(sameRoom);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            actionsService.moveNpcToRoom(1, 100, 1, 1);
+        });
+
+        assertEquals("The destination room is the same as the current room of the NPC", exception.getMessage());
     }
 
     @Test
@@ -192,6 +288,58 @@ class ActionsServiceTest {
     }
 
     @Test
+    @DisplayName("Cambia el estado de la partida a ACTIONS con éxito al moverte con una palabra")
+    void testMoveByFormingWordChangeMatchPhaseSuccess() {
+        testMatch.setCurrentTurnPhase(TurnPhase.DRAW);
+        targetRoom.setName("ARMORY");
+        
+        BagInGame bag = new BagInGame();
+        List<Card> cards = new ArrayList<>();
+        // Añadimos suficientes letras para formar la palabra "armory"
+        String[] letters = {"A", "R", "M", "O", "R", "Y"};
+        for (String l : letters) {
+            Card c = new Card();
+            c.setLetter(l);
+            cards.add(c);
+        }
+        bag.setCards(cards);
+
+        when(matchService.getMatchById(1)).thenReturn(testMatch);
+        when(playerService.findByMatchIdAndUserId(1, 1)).thenReturn(testPlayer);
+        when(roomService.findById(2)).thenReturn(targetRoom);
+        when(bagService.findPlayerBag(1, testPlayer.getId())).thenReturn(bag);
+        when(fightService.getPossibleFight(anyInt(), anyInt(), anyInt(), anyBoolean())).thenReturn(new ArrayList<>());
+
+        MatchDTO result = actionsService.movePlayerByFormingRoomName(1, 1, 2);
+
+        assertNotNull(result);
+        assertEquals(targetRoom, testPlayer.getRoom());
+        assertEquals(2, testPlayer.getActionPoints());
+        assertEquals(TurnPhase.ACTIONS, testMatch.getCurrentTurnPhase());
+    }
+
+
+    @Test
+    @DisplayName("Error al no tener cartas en la bolsa al intentar moverte con una palabra")
+    void shouldThrowWhenNoBagCardsMoveByFormingWord() {
+        targetRoom.setName("ARMORY");
+        
+        BagInGame bag = new BagInGame();
+
+        when(matchService.getMatchById(1)).thenReturn(testMatch);
+        when(playerService.findByMatchIdAndUserId(1, 1)).thenReturn(testPlayer);
+        when(roomService.findById(2)).thenReturn(targetRoom);
+        when(bagService.findPlayerBag(1, testPlayer.getId())).thenReturn(bag);
+        when(fightService.getPossibleFight(anyInt(), anyInt(), anyInt(), anyBoolean())).thenReturn(new ArrayList<>());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            actionsService.movePlayerByFormingRoomName(1, 1, 2);
+        });
+
+        assertTrue(exception.getMessage().contains("The player does not have any cards in their bag"));
+    }
+
+    @Test
     @DisplayName("Error al mover jugador por nombre de sala si no tiene las letras requeridas")
     void testMovePlayerByFormingRoomNameInsuficientLetters() {
         targetRoom.setName("ARMORY");
@@ -214,7 +362,7 @@ class ActionsServiceTest {
     }
 
     @Test
-    @DisplayName("Intento de escape exitoso (Dado < Fuerza)")
+    @DisplayName("Intento de escape exitoso")
     void testEscapeAttemptSuccess() {
         when(matchRepo.findById(any())).thenReturn(Optional.of(testMatch));
         when(playerService.findByMatchIdAndUserId(1, 1)).thenReturn(testPlayer);
@@ -237,7 +385,7 @@ class ActionsServiceTest {
     }
 
     @Test
-    @DisplayName("Intento de escape fallido (Dado >= Fuerza)")
+    @DisplayName("Intento de escape fallido (dado >= fuerza)")
     void testEscapeAttemptFailure() {
         when(matchRepo.findById(any())).thenReturn(Optional.of(testMatch));
         when(playerService.findByMatchIdAndUserId(1, 1)).thenReturn(testPlayer);
@@ -250,7 +398,7 @@ class ActionsServiceTest {
         when(roomService.getWordOfEscapeFromTower(currentRoom.getId())).thenReturn("TOWERWORD");
         when(matchService.getAvailableRoomsForPlayer(1)).thenReturn(List.of(targetRoom));
 
-        // RolldiceResult (6) >= Fuerza (5) -> Fallo
+        // rolldiceResult (6) >= fuerza (5) -> fallo
         EscapeAttemptResultDTO result = actionsService.escapeAttempt(1, 1, 6);
 
         assertFalse(result.isSuccess());
@@ -264,7 +412,6 @@ class ActionsServiceTest {
     @DisplayName("Error en intento de escape si el jugador no tiene puntos de acción")
     void testEscapeAttemptNoActionPoints() {
         testPlayer.setActionPoints(0);
-        // Cambiado anyInt() por any() para evitar conflictos de tipo int / Integer
         when(matchRepo.findById(any())).thenReturn(Optional.of(testMatch));
         when(playerService.findByMatchIdAndUserId(anyInt(), anyInt())).thenReturn(testPlayer);
 
@@ -276,7 +423,6 @@ class ActionsServiceTest {
     @Test
     @DisplayName("Error en intento de escape si el jugador no está en una torre")
     void testEscapeAttemptNotInTower() {
-        // Cambiado anyInt() por any() para evitar conflictos de tipo int / Integer
         when(matchRepo.findById(any())).thenReturn(Optional.of(testMatch));
         when(playerService.findByMatchIdAndUserId(anyInt(), anyInt())).thenReturn(testPlayer);
         when(roomService.getAllTowers()).thenReturn(List.of(targetRoom)); // La sala actual no está en la lista
@@ -286,5 +432,33 @@ class ActionsServiceTest {
         });
 
         assertEquals("Player is not in a tower room", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Throws exception when player does not have the required escape word")
+    void shouldThrowWhenPlayerDoesNotHaveRequiredWord() {
+
+        testPlayer.setActionPoints(3);
+        testPlayer.setRoom(currentRoom);
+
+        BagInGame bag = new BagInGame();
+        bag.setCards(new ArrayList<>());
+
+        when(matchRepo.findById(any())).thenReturn(Optional.of(testMatch));
+        when(playerService.findByMatchIdAndUserId(1, 1)).thenReturn(testPlayer);
+
+        when(roomService.getAllTowers()).thenReturn(List.of(currentRoom));
+
+        when(bagService.findPlayerBag(1, testPlayer.getId())).thenReturn(bag);
+
+        when(bagService.wordFromCards(any())).thenReturn("house");
+
+        when(roomService.getWordOfEscapeFromTower(currentRoom.getId()))
+                .thenReturn("castle");
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> actionsService.escapeAttempt(1, 1, 3));
+
+        assertEquals("Player does not have the required word in their bag to attempt escape", exception.getMessage());
     }
 }
