@@ -326,8 +326,10 @@ A continuación se definen  todas las historias de usuario a implementar:
 
 
 ## Diagrama conceptual del sistema
-![alt text](<images/WhatsApp Image 2025-10-29 at 09.32.01.png>)
-![alt text](<images/imagee.png>)
+
+![alt text](images/diagrama1.png)  
+![alt text](images/diagrama2.png)
+
 
 ## Reglas de Negocio
 ### R1 - Número de jugadores
