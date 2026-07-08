@@ -37,10 +37,6 @@ public class FightResolvedDTO {
     private FightResultType fightResultType; // en verdad sobra un poco pero bueno, extra confirmación
 
 
-    public boolean hasChainFight() {
-        return chainRoomId != null;
-    }
-
     // player beats npc
     public FightResolvedDTO(Integer matchId, Integer winnerUserId, Integer winnerId, Integer loserId, Integer chainRoomId, Card card, FightResultType fightResultType){
         this.card = new CardDTO(card);
