@@ -139,7 +139,7 @@ public class Checkers {
         boolean canMove = adjacent.stream()
                 .anyMatch(r -> r.getId().equals(targetRoom.getId()));
         if (!canMove) {
-            throw new InvalidMovementException("Movimiento no permitido: la sala destino no es adyacente");
+            throw new InvalidMovementException("Move not allowed: the destination room is not adjacent");
         }
     }
 
