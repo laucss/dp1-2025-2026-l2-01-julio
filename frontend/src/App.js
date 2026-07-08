@@ -94,6 +94,7 @@ function App() {
     if (role === "ADMIN") {
       adminRoutes = (
         <>
+          <Route path="/users/new" exact={true} element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
           <Route path="/users" exact={true} element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
           <Route path="/users/:username" exact={true} element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
           <Route path="/achievements/" exact={true} element={<PrivateRoute><AchievementList/></PrivateRoute>} /> 
