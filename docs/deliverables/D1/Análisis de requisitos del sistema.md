@@ -75,6 +75,13 @@ A continuación se definen  todas las historias de usuario a implementar:
 
 ## Juego
 
+
+   >[!NOTA]
+   >
+   >En la historias de usuario relacionadas con la ejecución de la partida, se podrá apreciar que son fieles al resultado final entregado. Esto se debe a que esta sección se dejó incompleta en la entrega de enero y se ha decidido no hacer mockups manuales, sino capturas de pantalla, ante el ahorro de tiempo que supone. 
+   
+
+
 ### HU-001
 |Como jugador quiero crear una partida pudiendo configurarla como yo desee para poder jugar.| 
 |:-----:|
