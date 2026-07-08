@@ -17,7 +17,6 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult, canAttemptE
 
   useEffect(() => {
     if (isOpen) {
-      setWhiteDice('1');
       setDiceRolled(false);
       setIsRolling(false);
       setTotalRoll(null);
@@ -48,7 +47,6 @@ export default function EscapeDiceModal({ isOpen, onClose, onResult, canAttemptE
     } catch (err) {
       console.error('Error attempting escape:', err);
     } finally {
-        setWhiteDice('1');
         setDiceRolled(false);
         setIsRolling(false);
         setTotalRoll(null);
