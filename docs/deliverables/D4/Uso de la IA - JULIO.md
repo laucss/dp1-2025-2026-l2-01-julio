@@ -73,6 +73,9 @@ Checklist de cumplimiento de uso ético de la IA del sprint de julio:
 
 
 
+| 1.4 | 08/07/2026 | 1 | Lucía Baltasar Muñoz | ChatGPT 5.5 | Web | Conversación de ChatGPT | Diagnóstico de un error `Failed to load ApplicationContext` en un test de Spring Boot (Depuración / Diagnóstico) | `FriendRequestRepositoryTest.java` y posibles clases relacionadas (`FriendRequest`, repositorios, entidades y configuración de Spring) | Se proporcionó el stacktrace del error y se verificó que el mensaje mostrado correspondía únicamente al síntoma, identificando la necesidad de revisar la excepción raíz (`Caused by`) para localizar el origen real del fallo. | Existía el riesgo de diagnosticar incorrectamente el problema al tratarse de un error genérico. Se mitigó indicando cómo localizar la excepción raíz y las causas más habituales (creación de beans, configuración JPA, conexión con la base de datos o mapeo de entidades). | Aceptado como guía de diagnóstico para continuar la depuración del problema. |
+
+
 
 ## Conclusiones finales sobre el uso de la IA en el proyecto
 Se ha utilizado la IA, para valorar qué opciones habían dadas las circunstancias concretas dadas y cuáles se consideraban más prácticas. Ha ayudado a detectar y solventar muchos fallos y errores, sobre todo en la interpretación de los mensajes de errror. En general resulta muy útil para conocer diferentes formas de abordar un problema, con sus inconvenientes y beneficios. Sin embargo también da respuestas muy erroneas que a veces puede provocar la pérdida considerable de tiempo al no ir con el enfoque correcto, ya que es normal pues no se les puede proporcionar el contexto global.

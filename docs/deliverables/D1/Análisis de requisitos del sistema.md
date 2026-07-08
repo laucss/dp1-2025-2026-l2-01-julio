@@ -7,7 +7,7 @@
 
 **Nombre del proyecto:** Escape from Elba 
 
-**Repositorio:** https://github.com/gii-is-DP1/dp1-2025-2026-l2-01  
+**Repositorio:** https://github.com/laucss/dp1-2025-2026-l2-01-julio  
 
 **Integrantes:** 
 

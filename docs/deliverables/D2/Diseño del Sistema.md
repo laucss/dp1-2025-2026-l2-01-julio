@@ -85,10 +85,17 @@ Debido al gran tamaño del trabajo realizado se han realizado varios diagramas d
 ### Diagrama de Capas (incluyendo Controladores, Servicios y Repositorios)
 
 
+Con objeto de facilitar la comprensión se han dividido y diseccionado en varios diagramas. 
+
+![alt text](images/GameControllers.png)
+
+![alt text](images/game%20services%20-%20repos.png)
+
+![Diagrama de Capas Actualizado](images/repos.png)
+
 ![Diagrama de capas de logros](images/DiagramaCapasEstadísticas.png)
 
 ![Diagrama de capas social](images/DiagramaCapasSocial.png)
-
 
 ## Descomposición del mockups del tablero de juego en componentes
 

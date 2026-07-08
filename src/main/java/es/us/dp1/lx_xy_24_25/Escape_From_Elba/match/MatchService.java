@@ -54,26 +54,25 @@ import org.springframework.security.access.AccessDeniedException;
 
 @Service
 public class MatchService {
-
     private static final Integer initialCardsPerPlayer = 3; 
 
-    DeckService deckService; 
-    HandService handService; 
-    BagService bagService;
-    PlayerService playerService; 
-    UserService userService;
-    LobbyWebsocketController lobbyWebsocketController;
-    MatchWebsocketController matchWebsocketController;
-    Checkers checkers; 
-    LobbyService lobbyService;
-    AbandonedMatchService abandonedMatchService;
+    private final DeckService deckService; 
+    private final HandService handService; 
+    private final BagService bagService;
+    private final PlayerService playerService; 
+    private final UserService userService;
+    private final LobbyWebsocketController lobbyWebsocketController;
+    private final MatchWebsocketController matchWebsocketController;
+    private final Checkers checkers; 
+    private final LobbyService lobbyService;
+    private final AbandonedMatchService abandonedMatchService;
 
-    MatchRepository matchRepo;
-    PlayerRepository playerRepo;
-    RoomRepository roomRepository;
-    NpcRepository npcRepository;
-    RoomService roomService;
-    AbandonedMatchRepository abandonedMatchRepository;
+    private final MatchRepository matchRepo;
+    private final PlayerRepository playerRepo;
+    private final RoomRepository roomRepository;
+    private final NpcRepository npcRepository;
+    private final RoomService roomService;
+    private final AbandonedMatchRepository abandonedMatchRepository;
 
     @Autowired
     public MatchService(MatchRepository mrepo, PlayerRepository playerRepo, RoomRepository roomRepository, AbandonedMatchRepository abandonedMatchRepository, 
