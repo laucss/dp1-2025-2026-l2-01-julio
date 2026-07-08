@@ -44,51 +44,30 @@ public class InvitationControllerTest {
         match.setPlayers(new ArrayList<>());
     }
 
-    // ========================
-    // Tests for Repository
-    // ========================
+@Test
+void shouldReturnEmptyPendingInvitations() {
 
-    @Test
-    public void shouldReturnInvitationsWhenRepositoryHasData() {
-        List<InvitationMatch> Invitations = InvitationRepository.findByReceiverIdAndStatus(
-            receiver.getId(), InvitationStatus.PENDING
-        );
-        assertNotNull(Invitations);
-        assertTrue(Invitations.size() >= 0);
-    }
+    List<InvitationMatch> invitations =
+            InvitationRepository.findByReceiverIdAndStatus(
+                    receiver.getId(),
+                    InvitationStatus.PENDING);
 
-    @Test
-    public void shouldReturnEmptyListWhenNoInvitationsExist() {
-        List<InvitationMatch> Invitations = InvitationRepository.findByReceiverIdAndStatus(
-            999999, InvitationStatus.PENDING
-        );
-        assertNotNull(Invitations);
-        assertEquals(0, Invitations.size());
-    }
+    assertTrue(invitations.isEmpty());
+}
 
-    @Test
-    public void shouldFindInvitationById() {
-        // This test just verifies the repository method works
-        Optional<InvitationMatch> Invitation = InvitationRepository.findBySenderIdAndReceiverIdAndStatus(
-            sender.getId(), receiver.getId(), InvitationStatus.PENDING
-        );
-        assertNotNull(Invitation);
-    }
 
-    @Test
-    public void shouldReturnEmptyWhenSearchingNonExistentInvitation() {
-        Optional<InvitationMatch> Invitation = InvitationRepository.findBySenderIdAndReceiverIdAndStatus(
-            999999, 999998, InvitationStatus.PENDING
-        );
-        assertTrue(Invitation.isEmpty());
-    }
+@Test
+void shouldReturnEmptyWhenInvitationBetweenUsersDoesNotExist() {
 
-    @Test
-    public void shouldFindInvitationsByMatchId() {
-        List<InvitationMatch> Invitations = InvitationRepository.findByReceiverIdAndMatchIdAndStatus(
-            receiver.getId(), match.getId(), InvitationStatus.PENDING
-        );
-        assertNotNull(Invitations);
-        assertTrue(Invitations.size() >= 0);
-    }
+    Optional<InvitationMatch> result =
+            InvitationRepository.findBySenderIdAndReceiverIdAndMatchIdAndStatus(
+                    sender.getId(),
+                    receiver.getId(),
+                    match.getId(),
+                    InvitationStatus.PENDING);
+
+    assertTrue(result.isEmpty());
+}
+
+
 }
