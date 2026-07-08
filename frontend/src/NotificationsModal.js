@@ -20,9 +20,10 @@ export default function NotificationsModal({ isOpen, onClose, notifications, ref
 
       if (res.ok) {
         const invitation = await res.json();
-        const matchId = invitation.match?.id;
+        const matchId = invitation.match;
         setError(null);
 
+        console.log('invitation', invitation)
         // Refrescar estado global
         await refreshNotifications();
 
