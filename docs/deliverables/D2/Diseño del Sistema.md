@@ -16,19 +16,21 @@ Nerea Camacho Perez (QFL3393 / nercamper@alum.us.es)<br>
 Laura Cubero Sánchez (XNT3290 / laucubsan@alum.us.es)<br>
 Lucía Baltasar Muñoz (SBJ4592 / lucbalmun@alum.us.es)<br>
 
+<div align="justify">
 
 ## Introducción
 
-Este proyecto se dedica a la implementación del juego de mesa llamado "Escape From Elba" de 1999, el cual por cada partida puede ser disfrutado desde 3 a 6 jugadores, con una duración media de 60 minutos.<br>
+Este proyecto se dedica a la implementación del juego de mesa llamado "Escape From Elba" de 1999, el cual por cada partida puede ser disfrutado desde 3 a 6 jugadores, con una duración media de 60 minutos.</div>
 
 ![Portada](<images/Portada.jpg>)
+
 ### Materiales
 Los materiales para jugar son muy simples, ya que se componen principalmente de dos:
 
-- El tablero, el cual está formado por un distinto número de habitaciones, en cada una aparece su nombre (lo cual será importante para una de las mecánicas principales del juego) y dos dados, uno negro y otro blanco (los cuales servirán para colocar a los jugadores en habitaciones aleatorias).
+- El tablero, el cual está formado por un distinto número de habitaciones, en cada una aparece su nombre (lo cual será importante para una de las mecánicas principales del juego) y dos dados, uno negro y otro blanco (los cuales servirán para colocar a los jugadores en habitaciones aleatorias).<br>
 ![Tablero](<images/Mapa.jpg>)
 
-- Las cartas, en las cuales destacan dos partes esenciales. La primera letra del nombre de la carta, situada en la esquina superior izquierda y el conjunto de palabras de escape que se puede formar con esta letra.
+- Las cartas, en las cuales destacan dos partes esenciales. La primera letra del nombre de la carta, situada en la esquina superior izquierda y el conjunto de palabras de escape que se puede formar con esta letra.<br>
 ![Carta](<images/Carta.jpg>)
  
 ### Objetivo
@@ -290,7 +292,6 @@ Conseguimos optimizar las consultas sobre colecciones potencialmente grandes, re
 ## Decisiones de diseño
 
 
-
 ### Decisión 1: Importación de datos reales para demostración
 #### Descripción del problema:
 
@@ -329,30 +330,30 @@ Como consideramos que la división en capas es fundamental y no queremos renunci
 
 
 ### Decisión 2
-#### Descripción del problema:*
+#### Descripción del problema:
 
 Hemos decidido implementar en nuestra aplicación cuando te unes a una partida una sala de espera hasta que se de por empezado el propio juego. El crear una sala de espera trata los mismos datos que una partida pero maneja una logica diferente por lo que tuvimos que pensar como lo ibamos a organizar.
 
 #### Alternativas de solución evaluadas:
 
-*Alternativa 2.a* : Añadir la lógica de negocio del lobby en el propio MatchService
-*Ventajas:*
-•	Una clase que gestiona todo, lobbies y partidas, hace que sea más simple.
-•	Hay menos servicios que implementar.
-•	No se necesita coordinación entre distintos servicios.
-*Inconvenientes:*
-• La lógica de lobby y de partida se mezcla, lo que hace que la clase sea más grande y difícil de mantener.
-• Añadir nuevas funcionalidades de lobby afecta directamente a la lógica de la partida.
-• Difícil de testear de forma aislada.
+*Alternativa 2.a* : Añadir la lógica de negocio del lobby en el propio MatchService<br>
+*Ventajas:* <br>
+•	Una clase que gestiona todo, lobbies y partidas, hace que sea más simple. <br>
+•	Hay menos servicios que implementar.<br>
+•	No se necesita coordinación entre distintos servicios.<br>
+*Inconvenientes:* <br>
+• La lógica de lobby y de partida se mezcla, lo que hace que la clase sea más grande y difícil de mantener.<br>
+• Añadir nuevas funcionalidades de lobby afecta directamente a la lógica de la partida.<br>
+• Difícil de testear de forma aislada.<br>
 
-*Alternativa 2.b* : Crear un servicio LobbyService para gestionar la lógica.
-*Ventajas:*
-•	Hace el código más fácil de entender, mantener y testear.
-•	Se separan las responsabilidades.
-•	Permite añadir funcionalidades específicas del lobby sin tocar la lógica de partidas.
-*Inconvenientes:*
-• Más código y más estructura que mantener.
-• Hay que pasar datos de LobbyService a MatchService cuando se inicia la partida.
+*Alternativa 2.b* : Crear un servicio LobbyService para gestionar la lógica.<br>
+*Ventajas:*<br>
+•	Hace el código más fácil de entender, mantener y testear.<br>
+•	Se separan las responsabilidades.<br>
+•	Permite añadir funcionalidades específicas del lobby sin tocar la lógica de partidas.<br>
+*Inconvenientes:*<br>
+• Más código y más estructura que mantener.<br>
+• Hay que pasar datos de LobbyService a MatchService cuando se inicia la partida.<br>
 
 
 
@@ -362,27 +363,27 @@ Consideramos que es más importante usar la opción que nos permita separar las 
 
 
 ### Decisión 3
-#### Descripción del problema:*
+#### Descripción del problema:
 
 A la hora de construir los services nos hemos visto con una gran cantidad de validaciones que comprobar por lo que hemos tenido que decidir cual sería la mejor manera de implementar estas validaciones.
 
 #### Alternativas de solución evaluadas:
 
-*Alternativa 3.a* : Añadir directamente cada validación en la función que la necesite.
-*Ventajas:*
-• No hay que crear nuevas clases ni abstraer la lógica, todo está “donde se usa”, por lo que es más simple.
-*Inconvenientes:*
-• La misma restricción puede necesitarse en varias funciones, y si se modifica, hay que actualizar todas.
-• Cambiar una regla implica revisar múltiples funciones, aumentando riesgo de errores.
-• La lógica de juego queda mezclada con servicios o controladores, dificultando extensiones o reutilización.
+*Alternativa 3.a* : Añadir directamente cada validación en la función que la necesite.<br>
+*Ventajas:*<br>
+• No hay que crear nuevas clases ni abstraer la lógica, todo está “donde se usa”, por lo que es más simple.<br>
+*Inconvenientes:*<br>
+• La misma restricción puede necesitarse en varias funciones, y si se modifica, hay que actualizar todas.<br>
+• Cambiar una regla implica revisar múltiples funciones, aumentando riesgo de errores.<br>
+• La lógica de juego queda mezclada con servicios o controladores, dificultando extensiones o reutilización.<br>
 
-*Alternativa 3.b* : Crear una clase checkers con todas las restricciones.
-*Ventajas:*
-• Todas las reglas del juego están en un solo lugar, fácil de localizar y modificar.
-•	Otras partes del sistema (MatchService, frontend, tests) pueden reutilizar la misma lógica sin duplicarla.
-•	Si cambia una regla del juego, solo se modifica en la clase Checkers.
+*Alternativa 3.b* : Crear una clase checkers con todas las restricciones.<br>
+*Ventajas:*<br>
+• Todas las reglas del juego están en un solo lugar, fácil de localizar y modificar.<br>
+•	Otras partes del sistema (MatchService, frontend, tests) pueden reutilizar la misma lógica sin duplicarla.<br>
+•	Si cambia una regla del juego, solo se modifica en la clase Checkers.<br>
 *Inconvenientes:*
-• Los servicios (como MatchService) deben interactuar con la clase Checkers correctamente, lo que añade un nivel de abstracción.
+• Los servicios (como MatchService) deben interactuar con la clase Checkers correctamente, lo que añade un nivel de abstracción.<br>
 
 
 #### Justificación de la solución adoptada
@@ -390,20 +391,138 @@ A la hora de construir los services nos hemos visto con una gran cantidad de val
 Consideramos que al tener muchas restricciones que son reutilizables nos va a facilitar mucho el tener una clase Checkers, también nos va a facilitar la lectura del código.
 
 
+### Decisión 4
+#### Descripción del problema:
+
+A la hora de implementar la función para que un usuario pueda ser espectador de una partida, fue necesario estudiar distintas alternativas de diseño. El objetivo era permitir que un usuario pudiera visualizar el desarrollo de una partida sin formar parte de ella como jugador, procurando que la solución fuera sencilla de mantener y no afectara a la lógica ya existente.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 4.a* : Añadir un enumerado de `PlayerType` <br>
+
+*Ventajas:*<br>
+• Permite distinguir de forma explícita entre jugadores y espectadores mediante un único modelo de entidad.<br>
+• Facilita futuras ampliaciones en caso de querer añadir nuevos tipos de participantes.<br>
+
+*Inconvenientes:*<br>
+• Obliga a modificar gran parte de la lógica de negocio para comprobar continuamente el tipo de participante antes de ejecutar determinadas acciones.<br>
+• Los espectadores no necesitan la mayoría de atributos de Player (mano, bolsa, habitación, fuerza, etc.), por lo que existirían objetos con numerosos campos sin utilidad.<br>
+• Incrementa el riesgo de errores al tener que impedir que un espectador pueda realizar acciones reservadas exclusivamente a los jugadores.<br>
+
+*Alternativa 4.b* : Añadir una lista de usuarios como atributo `spectators` en `Match.java`<br>
+
+*Ventajas:*<br>
+• Separa claramente los conceptos de jugador y espectador, evitando mezclar responsabilidades dentro de la entidad `Player`.<br>
+• Requiere menos modificaciones sobre la lógica existente, ya que los espectadores no participan en las mecánicas del juego.<br>
+• Simplifica las comprobaciones de permisos, al mantenerse independientes las listas de jugadores y espectadores.<br>
+• Reduce el impacto sobre el resto del sistema, ya que la incorporación de espectadores afecta principalmente a la entidad Match y a los servicios relacionados con ella.<br>
+
+*Inconvenientes:*<br>
+• Es necesario mantener una nueva relación entre `Match` y `User`, incrementando ligeramente la complejidad del modelo de datos.<br>
+• Si en el futuro los espectadores adquirieran funcionalidades más avanzadas, podría ser necesario crear una entidad específica para representar su participación en la partida.<br>
+
+
+
+#### Justificación de la solución adoptada
+
+Finalmente se decantó por la segunda opción, tener un atributo `spectators` debido que a que solo implicaba la generación de nuevo código y no tanto la modificación de métodos que ya funcionaban correctamente. Dado el estado del sistema en ese momento de decisión lo más viable y práctica era esta opción. 
+
+### Decisión 5
+#### Descripción del problema:
+
+El módulo de peleas desarrollado hasta ese momento funcionaba correctamente para enfrentamientos individuales, pero no conseguía satisfacer la regla de negocio que establece que una pelea puede desencadenar una cadena de peleas consecutivas. Esto ocurría, por ejemplo, cuando el resultado de un combate provocaba el desplazamiento de un jugador a una sala en la que debía iniciarse un nuevo enfrentamiento.
+
+Ante esta situación, fue necesario analizar el diseño existente y decidir entre adaptar la implementación actual para soportar este comportamiento o replantear por completo el funcionamiento del módulo de peleas, trasladando la responsabilidad de detectar y gestionar los enfrentamientos al backend.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 5.a* : Refactorizar todo el módulo de peleas y trasladar la responsabilidad de detectar e iniciar los combates del frontend al backend mediante WebSocket. <br>
+
+*Ventajas:*<br>
+• Centraliza toda la lógica de negocio relacionada con las peleas en el backend, evitando duplicar reglas en el cliente.<br>
+• Garantiza que las cadenas de peleas se ejecuten de forma automática y consistente para todos los jugadores.<br>
+• Reduce la dependencia del frontend, que pasa a limitarse a representar el estado enviado por el servidor.<br>
+• Facilita el mantenimiento y la evolución del sistema, ya que las reglas de las peleas se encuentran en un único punto.<br>
+
+*Inconvenientes:*<br>
+• Requiere una refactorización importante del módulo de peleas y de la comunicación entre cliente y servidor.<br>
+• Supone un mayor esfuerzo de desarrollo y de pruebas para asegurar que no se introducen regresiones en una funcionalidad crítica.<br>
+
+*Alternativa 5.b* : Mantener la responsabilidad de detectar las peleas en el frontend e implementar allí la lógica necesaria para gestionar las cadenas de combates.<br>
+
+*Ventajas:*<br>
+• Requiere menos cambios sobre la arquitectura existente.<br>
+• Permite reutilizar gran parte del código ya implementado en el cliente.<br>
+• Reduce el tiempo necesario para obtener una primera versión funcional.<br>
+
+*Inconvenientes:*<br>
+• La lógica de negocio permanece distribuida entre frontend y backend, dificultando su mantenimiento.<br>
+• Aumenta el riesgo de inconsistencias entre clientes si alguno no procesa correctamente la cadena de peleas.<br>
+• Hace más complejo el desarrollo de nuevas funcionalidades relacionadas con los combates.<br>
+• El backend deja de ser la única fuente de verdad sobre el estado de la partida, lo que puede provocar comportamientos inesperados y dificultar las pruebas del sistema.<br>
+
+#### Justificación de la solución adoptada
+
+En un principio se intentó hacer una pequeña modificación en el backend, pero seguir manteniendo la estructura tal y como estaba y que fuera el frontend el encargado de lanzar las peleas. El estado de la partida era tan complejo que no resultó dicha solución. Así que se decidió asumir el riesgo y tiempo de replantear todo el sistema y delegar la responsabilidad al backend, como se debió hacer en su momento. Se optó por esta solución porque al final era la más fiables y que a nuestro criterio, debió ser el enfoque dado inicialmente por nuestro compañero. 
+
+
 
 ## Refactorizaciones aplicadas
 
-A lo largo de la realización del trabajo se han hecho varias refactorizaciones.
+En esta entrega de julio se realizaron diversas refactorizaciones con el objetivo de mejorar la mantenibilidad del proyecto. Entre todas ellas destacan especialmente tres, debido al impacto que tuvieron sobre la arquitectura y organización del código. Dado que cada una de estas refactorizaciones afectó a un elevado número de archivos y líneas de código, en lugar de mostrar los cambios concretos se describe el objetivo de cada una, los problemas que resolvía y las mejoras obtenidas.
 
 ### Refactorización 1: 
-Esta refactorización ha sido de las más grandes, el objetivo de esta refactorización fue reducir el número de líneas del archivo playerMatch.js, el cual contaba con más de 2400 líneas de código. Debido al gran tamaño de código esta refactorización se hizo por partes.
-- Lo primero que se hizo para mejorar fue borrar todo el código comentado del archivo.
-- Lo siguiente realizado fue aprovechar el código duplicado y hacer una función con ese código para poder reutilizarlo sin tener que copiar 100 líneas en cada caso.
-- Lo que más ayudó a reducir código fue ir descompiendo el archivo en más componentes, haciendo así un componente para el mapa, otro para los botones, otro para la información del jugador, etc. Esto redujo muchas líneas.
+La primera refactorización se realizó sobre el archivo `Match.js` (posteriormente renombrado y dividido tras la implementación del modo espectador, pasando parte de su funcionalidad a `PlayerMatch.js`). Este archivo contenía prácticamente toda la lógica y la vista de una partida, alcanzando una longitud superior a las 2.000 líneas de código.
 
-Trás realizar lo mencionado anteriormente el archivo quedó en 1200 líneas, logramos reducirlo a la mitad del tamaño original.
+Mediante la extracción de componentes React se consiguió separar elementos como el mapa, el panel de información de jugadores o los botones de acciones en componentes independientes. Además, diversas funciones auxiliares fueron trasladadas a la carpeta `utils`, eliminando código repetido y mejorando la reutilización. Como resultado, el archivo pasó de superar las 2.000 líneas a unas 1.500. Posteriormente, gracias a la segunda refactorización, su tamaño se redujo hasta situarse por debajo de las 1.300 líneas.
+
+También se intentó refactorizar el bloque encargado de la comunicación mediante WebSocket, pero debido a la complejidad de dicha lógica y a los problemas de funcionamiento que aparecieron durante las pruebas, se decidió mantener esa parte del código sin modificaciones.
 
 #### Problema que nos hizo realizar la refactorización
-Era muy díficil comprender que se hacía en el archivo y también era muy laborioso encontrar alguna función en concreto.
+El componente concentraba una gran cantidad de responsabilidades (renderizado de la interfaz, gestión del estado, comunicación mediante WebSocket, lógica de acciones y múltiples componentes visuales), incumpliendo el principio de responsabilidad única. Esto dificultaba enormemente su comprensión, aumentaba la probabilidad de introducir errores al realizar cambios y complicaba la incorporación de nuevas funcionalidades.
+
 #### Ventajas que presenta la nueva versión del código respecto de la versión original
-Ahora tenemos varios componentes dejando todo más organizado.
+• Código más modular y organizado.<br>
+• Componentes reutilizables en otras vistas de la aplicación.<br>
+• Menor tamaño y complejidad del componente principal.<br>
+• Mayor facilidad para localizar errores y realizar futuras modificaciones.<br>
+• Mejor separación entre la lógica de negocio y la presentación.<br>
+
+
+### Refactorización 2: 
+La segunda refactorización fue la de mayor impacto sobre el proyecto y afectó por completo al módulo de peleas. Como consecuencia de la decisión de diseño adoptada para soportar cadenas de combates, fue necesario rediseñar prácticamente toda su arquitectura.
+
+Se reescribieron la mayoría de las funciones existentes, se crearon nuevos servicios, controladores, entidades y DTOs, y toda la responsabilidad de detectar y gestionar las peleas pasó del frontend al backend mediante WebSocket. Esta modificación también permitió eliminar una cantidad considerable de código del componente principal de la partida.
+
+La refactorización afectó además a las acciones del jugador, ya que muchas de ellas podían desencadenar combates, por lo que fue necesario revisar cuidadosamente toda la lógica para evitar romper funcionalidades previamente implementadas.
+
+#### Problema que nos hizo realizar la refactorización
+La implementación original distribuía la lógica de las peleas entre el frontend y el backend. Este diseño impedía implementar correctamente la regla de negocio que permitía encadenar combates de forma automática y hacía que el comportamiento dependiera parcialmente del cliente. Además, dificultaba el mantenimiento del código y aumentaba el riesgo de inconsistencias entre distintos jugadores conectados a una misma partida.
+
+#### Ventajas que presenta la nueva versión del código respecto de la versión original
+• Toda la lógica de las peleas queda centralizada en el backend.<br>
+• Las cadenas de combates se gestionan automáticamente sin depender del cliente.<br>
+• Se reduce considerablemente la lógica existente en el frontend.<br>
+• El backend se convierte en la única fuente de verdad del estado de la partida.<br>
+• Resulta más sencillo ampliar las reglas de combate y mantener el sistema.<br>
+
+### Refactorización 3: 
+La última refactorización fue, en parte, consecuencia directa de la anterior. Tras reorganizar el módulo de peleas, se detectó que `MatchService.java` había asumido demasiadas responsabilidades y que comenzaban a aparecer dependencias circulares con el nuevo `FightService`.
+
+Para resolver este problema se creó un nuevo servicio, `ActionsService.java`, al que se trasladó toda la lógica relacionada con las acciones que puede realizar un jugador durante la partida. Como consecuencia, también fue necesario reorganizar `MatchController.java`, eliminando lógica de negocio del controlador y delegándola en los servicios correspondientes.
+
+Gracias a esta reorganización, `MatchController.java` pasó de contener cerca de 700 líneas de código a menos de 300.
+
+
+#### Problema que nos hizo realizar la refactorización
+MatchService concentraba responsabilidades muy diversas, incluyendo la gestión de la partida y la ejecución de las acciones del jugador. La incorporación del nuevo módulo de peleas provocó la aparición de dependencias circulares entre servicios y aumentó el acoplamiento del sistema. Además, el controlador contenía demasiada lógica de negocio, dificultando su mantenimiento.
+
+#### Ventajas que presenta la nueva versión del código respecto de la versión original
+• Cada servicio posee una responsabilidad claramente definida.<br>
+• Se eliminan las dependencias circulares entre servicios.<br>
+• Los controladores pasan a limitarse a recibir peticiones y delegar la lógica de negocio.<br>
+• Se reduce significativamente el tamaño tanto de MatchService como de MatchController.<br>
+• La arquitectura resulta más limpia, modular y fácil de mantener.<br>
+• Facilita la escritura de pruebas unitarias al encontrarse las responsabilidades mejor separadas.<br>
+
+</div>
