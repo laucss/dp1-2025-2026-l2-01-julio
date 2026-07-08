@@ -49,6 +49,7 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.room.RoomService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
+import org.springframework.security.access.AccessDeniedException;
 
 
 @Service
@@ -129,7 +130,18 @@ public class MatchService {
     @Transactional(readOnly=true)
     public MatchDTO getMatchDTOById(Integer matchId){
         Match m = getMatchById(matchId); 
-        DeckInGame deck = deckService.findDeckById(m.getId());
+            User currentUser = userService.findCurrentUser();
+
+            boolean isPlayer = m.getPlayers().stream()
+                    .anyMatch(p -> p.getUser().getId().equals(currentUser.getId()));
+
+            boolean isSpectator = m.getSpectators().stream()
+                    .anyMatch(s -> s.getId().equals(currentUser.getId()));
+
+            if (!isPlayer && !isSpectator) {
+                throw new AccessDeniedException("You are not allowed to access this match");
+            }
+                DeckInGame deck = deckService.findDeckById(m.getId());
         List<PlayerInGameDTO> newPlayersList = new ArrayList<>(); 
         for (Player player : m.getPlayers()){
             HandInGame hand = handService.findPlayerHand(m.getId(), player.getId()); 
@@ -398,6 +410,8 @@ public class MatchService {
         return m;
  
     }
+
+
 
 
     @Transactional
@@ -676,6 +690,33 @@ public class MatchService {
             updated,
             System.currentTimeMillis()
         );
+    }
+
+    //Función que se va a usar cuando un jugador falla el intento de escapar
+     @Transactional
+    public Player moveLoserPlayer(Integer matchId, Integer userId, Integer targetRoomId) {
+        Match match = matchRepo.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Partida no encontrada"));
+        if(match.getCurrentTurnPhase() != TurnPhase.ACTIONS){
+            match.setCurrentTurnPhase(TurnPhase.ACTIONS);
+        }
+        //Recuperar el jugador dentro del match
+        Player player = playerRepo.findByMatchAndUser(matchId, userId)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado en la partida"));
+        //Recuperar la sala destino
+        Room targetRoom = roomRepository.findById(targetRoomId)
+            .orElseThrow(() -> new RuntimeException("Sala destino no encontrada"));
+        //Actualizar la sala y fuerza del jugador
+        Room currentRoom = player.getRoom();
+        if (currentRoom == null || !targetRoom.getId().equals(currentRoom.getId())) {
+            int visited = Optional.ofNullable(player.getRoomsVisited()).orElse(0);
+            player.setRoomsVisited(visited + 1);
+        }
+        player.setRoom(targetRoom);
+        player.setStrength(player.getStrength() + 1);
+        
+        //Guardar cambios
+        return playerRepo.save(player);
     }
     
 

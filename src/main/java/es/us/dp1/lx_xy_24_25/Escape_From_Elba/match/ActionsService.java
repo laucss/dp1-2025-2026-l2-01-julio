@@ -2,6 +2,7 @@ package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -321,9 +322,9 @@ public class ActionsService {
         } else {
             //El intento de escape falla y ocurre lo mismo que si un jugador pierde contra un npc en una pelea
             matchService.consumeAllActionPointForUser(matchId, userId);
-            // lo ponemos así para intentar reutilizar el método (tal y como se dice en las reglas)
-            FightResultRequestDTO fight = new FightResultRequestDTO();
-            fightService.playerLoses(p, matchId, fight ) ;
+            Room randomRoom = matchService.getAvailableRoomsForPlayer(matchId).get(new Random().nextInt(matchService.getAvailableRoomsForPlayer(matchId).size()));
+            matchService.moveLoserPlayer(matchId, userId, randomRoom.getId());
+
 
             resultado.setSuccess(false);
             resultado.setDiscardRequired(true);
