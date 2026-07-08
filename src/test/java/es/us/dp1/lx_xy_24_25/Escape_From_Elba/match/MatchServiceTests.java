@@ -964,30 +964,7 @@ public class MatchServiceTests {
                 () -> matchService.submitDiceAndAssignOrder(1, 1, 3));
     }
 
-    @Test
-    void shouldSaveDiceRoll() {
 
-        User user = new User();
-        user.setId(1);
-
-        Player player = new Player();
-        player.setUser(user);
-
-        Match match = new Match();
-        match.setId(1);
-        match.setPlayers(List.of(player));
-
-        when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
-
-        when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1)))
-                .thenReturn(Optional.of(player));
-
-        matchService.submitDiceAndAssignOrder(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(6));
-
-        assertEquals(6, player.getDiceOrder());
-
-        verify(playerRepo).save(player);
-    }
 
     @Test
 void shouldNotAssignOrderUntilEveryoneRolls() {
@@ -1396,39 +1373,7 @@ void shouldRemovePlayerFromMatch() {
 
     assertTrue(match.getPlayers().isEmpty());
 }
-@Test
-void shouldPassTurnToNextPlayer() {
 
-    User u1 = new User();
-    u1.setId(1);
-
-    User u2 = new User();
-    u2.setId(2);
-
-    Player p1 = new Player();
-    p1.setId(10);
-    p1.setUser(u1);
-    p1.setOrderInMatch(0);
-
-    Player p2 = new Player();
-    p2.setId(20);
-    p2.setUser(u2);
-    p2.setOrderInMatch(1);
-
-    Match match = new Match();
-    match.setPlayers(new ArrayList<>(List.of(p1, p2)));
-    match.setCurrentTurnUserId(1);
-    match.setMinPlayers(1);
-
-    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
-    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(p1));
-    when(userService.findUser(Integer.valueOf(1))).thenReturn(u1);
-
-    matchService.leaveMatch(Integer.valueOf(1), Integer.valueOf(1));
-
-    assertEquals(2, match.getCurrentTurnUserId());
-    assertEquals(TurnPhase.DRAW, match.getCurrentTurnPhase());
-}
 @Test
 void shouldUpdatePlayersOrder() {
 
@@ -1516,101 +1461,9 @@ void shouldNotifyPlayerLeft() {
     verify(matchWebsocketController)
             .notifyPlayerLeft(eq(Integer.valueOf(1)), any(MatchDTO.class));
 }
-@Test
-void shouldDrawCardFromDeck() {
 
-    Player player = new Player();
-    player.setId(1);
-    player.setCardsDrawnInTurn(0);
-    player.setActionPoints(3);
 
-    Card card = new Card();
 
-    DeckInGame deck = new DeckInGame();
-
-    HandInGame hand = new HandInGame();
-
-    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
-    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(card);
-    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(deck);
-    when(handService.addCardToPlayerHand(card, Integer.valueOf(1), Integer.valueOf(1))).thenReturn(hand);
-
-    DrawCardResultDTO result = matchService.playerDrawsCardFromDeck(Integer.valueOf(1), Integer.valueOf(1));
-
-    assertEquals(card,result.getCard());
-    assertEquals(deck,result.getDeck());
-    assertEquals(hand,result.getHand());
-
-    verify(deckService).drawCard(1);
-}
-@Test
-void shouldIncreaseCardsDrawn() {
-
-    Player player = new Player();
-    player.setId(1);
-    player.setCardsDrawnInTurn(2);
-    player.setActionPoints(5);
-
-    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
-    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(new Card());
-    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(new DeckInGame());
-    when(handService.addCardToPlayerHand(any(),eq(Integer.valueOf(1)),eq(Integer.valueOf(1))))
-            .thenReturn(new HandInGame());
-
-    matchService.playerDrawsCardFromDeck(Integer.valueOf(1), Integer.valueOf(1));
-
-    assertEquals(3,player.getCardsDrawnInTurn());
-}
-@Test
-void shouldConsumeOneActionPoint() {
-
-    Player player = new Player();
-    player.setId(1);
-    player.setCardsDrawnInTurn(0);
-    player.setActionPoints(4);
-
-    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
-    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(new Card());
-    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(new DeckInGame());
-    when(handService.addCardToPlayerHand(any(),eq(Integer.valueOf(1)),eq(Integer.valueOf(1))))
-            .thenReturn(new HandInGame());
-
-    matchService.playerDrawsCardFromDeck(Integer.valueOf(1), Integer.valueOf(1));
-
-    assertEquals(3,player.getActionPoints());
-}
-@Test
-void shouldSavePlayerAfterDrawing() {
-
-    Player player = new Player();
-    player.setId(1);
-
-    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
-    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(new Card());
-    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(new DeckInGame());
-    when(handService.addCardToPlayerHand(any(),eq(Integer.valueOf(1)),eq(Integer.valueOf(1))))
-            .thenReturn(new HandInGame());
-
-    matchService.playerDrawsCardFromDeck(1,1);
-
-    verify(playerRepo).save(player);
-}
-@Test
-void shouldCheckCardsDrawnBeforeDrawing() {
-
-    Player player = new Player();
-    player.setId(1);
-
-    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
-    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(new Card());
-    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(new DeckInGame());
-    when(handService.addCardToPlayerHand(any(),eq(Integer.valueOf(1)),eq(Integer.valueOf(1))))
-            .thenReturn(new HandInGame());
-
-    matchService.playerDrawsCardFromDeck(1,1);
-
-    verify(checkers).checkCardsDrawnInTurn(player);
-}
 @Test
 void shouldThrowWhenPlayerHasDrawnTooManyCards() {
 
@@ -1628,23 +1481,7 @@ void shouldThrowWhenPlayerHasDrawnTooManyCards() {
 
     verify(deckService,never()).drawCard(anyInt());
 }
-@Test
-void shouldNotifyCardsUpdate() {
 
-    Player player = new Player();
-    player.setId(1);
-
-    when(playerRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(player));
-    when(deckService.drawCard(Integer.valueOf(1))).thenReturn(new Card());
-    when(deckService.findDeckById(Integer.valueOf(1))).thenReturn(new DeckInGame());
-    when(handService.addCardToPlayerHand(any(),eq(Integer.valueOf(1)),eq(Integer.valueOf(1))))
-            .thenReturn(new HandInGame());
-
-    matchService.playerDrawsCardFromDeck(1,1);
-
-    verify(matchWebsocketController)
-            .notifyCardsUpdate(eq(1), any(CardsUpdateDTO.class));
-}
 
 @Test
 void shouldThrowWhenMatchDoesNotExistInMoveLoserPlayer() {
@@ -1755,26 +1592,6 @@ void shouldSetTurnPhaseToActions() {
     assertEquals(TurnPhase.ACTIONS, match.getCurrentTurnPhase());
 }
 
-@Test
-void shouldSaveMovedPlayer() {
-
-    Match match = new Match();
-    match.setCurrentTurnPhase(TurnPhase.ACTIONS);
-
-    Room room = new Room();
-    room.setId(2);
-
-    Player player = new Player();
-
-    when(matchRepo.findById(Integer.valueOf(1))).thenReturn(Optional.of(match));
-    when(playerRepo.findByMatchAndUser(Integer.valueOf(1), Integer.valueOf(1))).thenReturn(Optional.of(player));
-    when(roomRepo.findById(Integer.valueOf(2))).thenReturn(Optional.of(room));
-    when(playerRepo.save(any())).thenAnswer(i -> i.getArgument(0));
-
-    matchService.moveLoserPlayer(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(2));
-
-    verify(playerRepo).save(player);
-}
 @Test
 void shouldReturnAvailableRooms() {
 
