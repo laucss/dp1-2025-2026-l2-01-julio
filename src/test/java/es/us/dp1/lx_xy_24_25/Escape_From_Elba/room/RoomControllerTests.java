@@ -1,6 +1,10 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.room;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -105,6 +109,91 @@ public class RoomControllerTests {
         assertEquals(1, dto.getAdjacencyList().size());
         assertEquals("AdjB", dto.getAdjacencyList().get(0).getName());
     }
+
+    @Test
+public void getAllRoomsReturnsDtos() {
+
+    List<RoomDTO> rooms = roomController.getAllRooms();
+
+    assertFalse(rooms.isEmpty());
+
+    for (RoomDTO room : rooms) {
+        assertNotNull(room.getId());
+        assertNotNull(room.getName());
+    }
+}
+
+@Test
+public void getRoomByIdNonExistingReturnsException() {
+
+    assertThrows(NullPointerException.class,
+            () -> roomController.getRoomById(999999));
+}
+
+@Test
+public void getRoomByDiceNotFound() {
+
+    assertThrows(NullPointerException.class,
+            () -> roomController.getRoomByDices(99, 99));
+}
+
+
+
+@Test
+public void updateRoomNotExistingThrowsException() {
+
+    Room room = new Room();
+    room.setName("Fake");
+
+    RoomDTO dto = new RoomDTO(room);
+
+    assertThrows(NullPointerException.class,
+            () -> roomController.updateRoom(9999, dto));
+}
+
+@Test
+public void roomDtoStartsEmpty() {
+
+    Room room = new Room();
+    room.setName("Room");
+    room.setBlackDice(1);
+    room.setWhiteDice(2);
+    room.setAdjacencyList(new ArrayList<>());
+
+    RoomDTO dto = new RoomDTO(room);
+
+    assertEquals(0, dto.getTimesVisited());
+    assertTrue(dto.getNpcsInside().isEmpty());
+    assertNull(dto.getPlayerInside());
+}
+
+@Test
+public void getAllRoomsContainsAllIds() {
+
+    List<Room> rooms = roomRepository.findAll();
+
+    List<RoomDTO> dtos = roomController.getAllRooms();
+
+    assertEquals(rooms.size(), dtos.size());
+
+    for(Room room : rooms){
+
+        assertTrue(
+            dtos.stream()
+                .anyMatch(dto -> dto.getId().equals(room.getId()))
+        );
+    }
+}
+
+@Test
+public void roomDtoContainsAdjacencyList() {
+
+    Room room = roomRepository.findById(2).get();
+
+    RoomDTO dto = roomController.getRoomById(room.getId());
+
+    assertNotNull(dto.getAdjacencyList());
+}
 
 
 }
