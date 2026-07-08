@@ -265,7 +265,7 @@ public class ActionsService {
 
     @Transactional
     public EscapeAttemptResultDTO escapeAttempt( Integer matchId, Integer userId, Integer rolldiceResult) {
-        matchRepo.findById(matchId).orElseThrow(() -> new IllegalArgumentException("Match not found"));
+        matchRepo.findById(matchId).orElseThrow(() -> new ResourceNotFoundException("Match not found"));
         Player p = playerService.findByMatchIdAndUserId(matchId, userId);
 
         //Comprobamos que el jugador tenga puntos de acción para poder realizar la acción
