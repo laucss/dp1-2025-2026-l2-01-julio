@@ -11,17 +11,20 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.AlreadyCreatedException;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.ResourceNotFoundException;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications.NotificationType;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications.NotificationWebController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserRepository;
 
+@DisplayName("FriendRequestService Unit Tests")
 public class FriendRequestServiceTest {
 
     @InjectMocks
@@ -33,8 +36,12 @@ public class FriendRequestServiceTest {
     @Mock
     private UserRepository userRepository;
 
-        @Mock
-        private FriendWebsocketController friendWebsocketController;
+    @Mock
+    private FriendWebsocketController friendWebsocketController;
+
+    // FALTABA ESTE MOCK EXPLICITAMENTE PARA EL CONSTRUCTOR DEL SERVICIO
+    @Mock
+    private NotificationWebController notificationWebController;
 
     private static final Integer CURRENT_USER_ID = 4;
     private static final Integer ANOTHER_USER_ID = 5;
@@ -48,8 +55,7 @@ public class FriendRequestServiceTest {
     }
 
     @Test
-    // Type: Backend unit test
-    // Description: Tests that the service finds a friend request by ID.
+    @DisplayName("Debe encontrar una solicitud de amistad por su ID")
     void shouldFindById() {
         FriendRequest request = new FriendRequest();
         request.setId(REQUEST_EXIST_ACCEPTED_ID);
@@ -64,8 +70,7 @@ public class FriendRequestServiceTest {
     }
 
     @Test
-    // Type: Backend unit test
-    // Description: Tests that the service does not find a friend request with an incorrect ID.
+    @DisplayName("Debe lanzar ResourceNotFoundException si la solicitud no existe por ID")
     void shouldNotFindByIncorrectId() {
         when(friendRequestRepository.findById(REQUEST_NOT_EXIST_ID))
                 .thenReturn(Optional.empty());
@@ -76,8 +81,7 @@ public class FriendRequestServiceTest {
     }
 
     @Test
-    // Type: Backend unit test
-    // Description: Tests that the service finds the pending friend request corresponding to the requested ID.
+    @DisplayName("Debe encontrar una solicitud pendiente mediante su ID")
     void shouldFindFriendRequestById() {
         FriendRequest request = new FriendRequest();
         request.setId(REQUEST_EXIST_ACCEPTED_ID);
@@ -93,8 +97,7 @@ public class FriendRequestServiceTest {
     }
 
     @Test
-    // Type: Backend unit test
-    // Description: Tests that the service throws when pending request with ID does not exist.
+    @DisplayName("Debe lanzar ResourceNotFoundException si no hay solicitud pendiente con ese ID")
     void shouldNotFindFriendRequestByIncorrectId() {
         when(friendRequestRepository.findRequestPendingById(REQUEST_NOT_EXIST_ID))
                 .thenReturn(Optional.empty());
@@ -105,8 +108,7 @@ public class FriendRequestServiceTest {
     }
 
     @Test
-    // Type: Backend unit test
-    // Description: Tests that the service finds all friend requests sent by the requested user.
+    @DisplayName("Debe encontrar todas las solicitudes enviadas (PENDING) por un usuario emisor")
     void shouldFindAllSentRequests() {
         List<FriendRequest> requests = List.of(new FriendRequest(), new FriendRequest());
         when(friendRequestRepository.findAllRequestsByUserId(CURRENT_USER_ID))
@@ -120,8 +122,7 @@ public class FriendRequestServiceTest {
     }
 
     @Test
-    // Type: Backend unit test
-    // Description: Tests that the service finds all friend requests received by the requested user.
+    @DisplayName("Debe encontrar todas las solicitudes recibidas (PENDING) para un usuario receptor")
     void shouldFindAllReceivedRequests() {
         List<FriendRequest> requests = List.of(new FriendRequest(), new FriendRequest());
         when(friendRequestRepository.findAllRequestsForUserId(CURRENT_USER_ID))
@@ -134,26 +135,23 @@ public class FriendRequestServiceTest {
         verify(friendRequestRepository).findAllRequestsForUserId(CURRENT_USER_ID);
     }
 
-    /* 
     @Test
-    // Type: Backend unit test
-    // Description: Tests that the service finds all the friend requests (friends) of the requested user.
+    @DisplayName("Debe encontrar todas las solicitudes aceptadas asociadas a un ID de usuario")
     void shouldFindAllFriendRequests() {
         List<FriendRequest> requests = List.of(new FriendRequest(), new FriendRequest());
         when(friendRequestRepository.findAllFriendsByUserId(CURRENT_USER_ID))
                 .thenReturn(requests);
 
+        // CORREGIDO: El método correcto del servicio que mapea a findAllFriendsByUserId es el siguiente
         List<FriendRequest> foundRequests =
-                this.friendRequestService.findFriendRequestsByUserId(CURRENT_USER_ID);
+                this.friendRequestService.findAcceptedFriendRequestsByUserId(CURRENT_USER_ID);
 
         assertEquals(requests, foundRequests);
         verify(friendRequestRepository).findAllFriendsByUserId(CURRENT_USER_ID);
     }
-        */
 
     @Test
-    // Type: Backend unit test
-    // Description: Tests that the service resolves friends (Users) correctly from friend requests.
+    @DisplayName("Debe resolver correctamente la lista de amigos mutuos (como objetos User)")
     void shouldFindAllFriendsAsUsers() {
         User currentUser = new User();
         currentUser.setId(CURRENT_USER_ID);
@@ -184,24 +182,7 @@ public class FriendRequestServiceTest {
     }
 
     @Test
-    // Type: Backend unit test
-    // Description: Tests that the service finds accepted friend requests for a user.
-    void shouldFindAcceptedFriendRequestsByUserId() {
-        List<FriendRequest> requests = List.of(new FriendRequest(), new FriendRequest());
-        when(friendRequestRepository.findAllFriendsByUserId(CURRENT_USER_ID))
-                .thenReturn(requests);
-
-        List<FriendRequest> foundRequests =
-                this.friendRequestService.findAcceptedFriendRequestsByUserId(CURRENT_USER_ID);
-
-        assertEquals(requests, foundRequests);
-        verify(friendRequestRepository).findAllFriendsByUserId(CURRENT_USER_ID);
-    }
-
-    @Test
-    @Transactional
-    // Type: Backend unit test
-    // Description: Tests that the method returns true when the users are friends or have a pending friend request.
+    @DisplayName("Debe retornar verdadero si existe una relación previa o pendiente entre los dos usuarios")
     void shouldReturnTrueWhenUsersAreFriendsOrHavePendingRequest() {
         when(friendRequestRepository.findPendingOrFriendsUsers(CURRENT_USER_ID, ANOTHER_USER_ID))
                 .thenReturn(Optional.of(new FriendRequest()));
@@ -211,9 +192,7 @@ public class FriendRequestServiceTest {
     }
 
     @Test
-    @Transactional
-    // Type: Backend unit test
-    // Description: Tests that the method returns false when the users are not friends or do not have a pending friend request.
+    @DisplayName("Debe retornar falso si no existe ninguna relación activa o pendiente entre ambos usuarios")
     void shouldReturnFalseWhenUsersAreNotFriendsOrDoNotHavePendingRequest() {
         when(friendRequestRepository.findPendingOrFriendsUsers(CURRENT_USER_ID, ANOTHER_USER_ID))
                 .thenReturn(Optional.empty());
@@ -223,9 +202,6 @@ public class FriendRequestServiceTest {
     }
 
     @Test
-    @Transactional
-    // Type: Backend unit test
-    // Description: Tests that the method returns a user with the requested ID.
     void shouldFindUserById() {
         User user = new User();
         user.setId(CURRENT_USER_ID);
@@ -239,9 +215,6 @@ public class FriendRequestServiceTest {
     }
 
     @Test
-    @Transactional
-    // Type: Backend unit test
-    // Description: Tests that the method throws an exception when the user with the requested ID does not exist.
     void shouldNotFindUserById() {
         when(userRepository.findById(USER_ID_NOT_EXIST)).thenReturn(Optional.empty());
 
@@ -251,9 +224,7 @@ public class FriendRequestServiceTest {
     }
 
     @Test
-    @Transactional
-    // Type: Backend unit test
-    // Description: Tests that the service creates a friend request.
+    @DisplayName("Debe enviar correctamente una solicitud de amistad y lanzar notificaciones WebSocket")
     void shouldCreateRequest() {
         User sender = new User();
         sender.setId(CURRENT_USER_ID);
@@ -263,6 +234,9 @@ public class FriendRequestServiceTest {
         receiver.setId(ANOTHER_USER_ID);
         when(userRepository.findById(ANOTHER_USER_ID)).thenReturn(Optional.of(receiver));
 
+        when(friendRequestRepository.findPendingOrFriendsUsers(CURRENT_USER_ID, ANOTHER_USER_ID))
+                .thenReturn(Optional.empty());
+
         when(friendRequestRepository.save(any(FriendRequest.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -271,30 +245,28 @@ public class FriendRequestServiceTest {
 
         assertEquals(sender, newRequest.getSender());
         assertEquals(receiver, newRequest.getReceiver());
-        assertTrue(newRequest.getStatus() == StatusType.PENDING);
-        verify(friendRequestRepository).save(newRequest);
-        verify(userRepository).findById(CURRENT_USER_ID);
-        verify(userRepository).findById(ANOTHER_USER_ID);
+        assertEquals(StatusType.PENDING, newRequest.getStatus());
+        
+        verify(friendRequestRepository).save(any(FriendRequest.class));
+        verify(friendWebsocketController).notifyNewFriendRequest(ANOTHER_USER_ID, newRequest);
+        verify(notificationWebController).notifyNewNotification(ANOTHER_USER_ID, NotificationType.FRIEND_REQUEST);
     }
 
     @Test
-    @Transactional
-    // Type: Backend unit test
-    // Description: Tests that the service throws an exception when the users are already friends and a new friend request is requested.
+    @DisplayName("Debe impedir el envío de solicitud si ya existe un vínculo pendiente o aceptado")
     void shouldNotCreateRequestWhenUsersAreAlreadyFriends() {
         when(friendRequestRepository.findPendingOrFriendsUsers(CURRENT_USER_ID, ANOTHER_USER_ID))
                 .thenReturn(Optional.of(new FriendRequest()));
 
         AlreadyCreatedException exception = assertThrows(AlreadyCreatedException.class,
                 () -> this.friendRequestService.sendRequest(CURRENT_USER_ID, ANOTHER_USER_ID));
+        
         verify(friendRequestRepository).findPendingOrFriendsUsers(CURRENT_USER_ID, ANOTHER_USER_ID);
         assertTrue(exception.getMessage().contains("Friend request"));
     }
 
     @Test
-    @Transactional
-    // Type: Backend unit test
-    // Description: Tests that the service accepts a friend request.
+    @DisplayName("Debe cambiar el estado a ACCEPTED y notificar vía WebSockets")
     void shouldAcceptRequest() {
         when(friendRequestRepository.save(any(FriendRequest.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -308,13 +280,14 @@ public class FriendRequestServiceTest {
         FriendRequest updatedRequest = this.friendRequestService.acceptRequest(toUpdate);
 
         verify(friendRequestRepository).save(updatedRequest);
-        assertTrue(updatedRequest.getStatus() == StatusType.ACCEPTED);
+        assertEquals(StatusType.ACCEPTED, updatedRequest.getStatus());
+        verify(friendWebsocketController).notifyRequestAccepted(CURRENT_USER_ID, updatedRequest);
+        verify(friendWebsocketController).notifyFriendRequestUpdate(ANOTHER_USER_ID, updatedRequest);
+        verify(notificationWebController).notifyNewNotification(CURRENT_USER_ID, NotificationType.ACCEPT_FRIEND_REQUEST);
     }
 
     @Test
-    @Transactional
-    // Type: Backend unit test
-    // Description: Tests that the service rejects a friend request.
+    @DisplayName("Debe cambiar el estado a REJECTED y emitir la notificación correspondiente")
     void shouldRejectRequest() {
         when(friendRequestRepository.save(any(FriendRequest.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -328,24 +301,26 @@ public class FriendRequestServiceTest {
         FriendRequest updatedRequest = this.friendRequestService.rejectRequest(toUpdate);
 
         verify(friendRequestRepository).save(updatedRequest);
-        assertTrue(updatedRequest.getStatus() == StatusType.REJECTED);
+        assertEquals(StatusType.REJECTED, updatedRequest.getStatus());
+        verify(friendWebsocketController).notifyRequestRejected(CURRENT_USER_ID, updatedRequest);
+        verify(friendWebsocketController).notifyFriendRequestUpdate(ANOTHER_USER_ID, updatedRequest);
+        verify(notificationWebController).notifyNewNotification(CURRENT_USER_ID, NotificationType.REJECT_FRIEND_REQUEST);
     }
 
     @Test
-    @Transactional
-    // Type: Backend unit test
-    // Description: Tests that the service deletes a friend.
+    @DisplayName("Debe eliminar el registro de amistad y propagar la baja del canal WebSocket")
     void shouldDeleteFriend() {
         FriendRequest friendRequest = new FriendRequest();
         friendRequest.setId(REQUEST_EXIST_ACCEPTED_ID);
 
-                User sender = new User(); sender.setId(CURRENT_USER_ID);
-                User receiver = new User(); receiver.setId(ANOTHER_USER_ID);
-                friendRequest.setSender(sender);
-                friendRequest.setReceiver(receiver);
+        User sender = new User(); sender.setId(CURRENT_USER_ID);
+        User receiver = new User(); receiver.setId(ANOTHER_USER_ID);
+        friendRequest.setSender(sender);
+        friendRequest.setReceiver(receiver);
 
-                this.friendRequestService.deleteFriend(friendRequest);
+        this.friendRequestService.deleteFriend(friendRequest);
 
-                verify(friendRequestRepository).deleteById(REQUEST_EXIST_ACCEPTED_ID);
+        verify(friendRequestRepository).deleteById(REQUEST_EXIST_ACCEPTED_ID);
+        verify(friendWebsocketController).notifyFriendRequestDeleted(CURRENT_USER_ID, ANOTHER_USER_ID, REQUEST_EXIST_ACCEPTED_ID);
     }
 }

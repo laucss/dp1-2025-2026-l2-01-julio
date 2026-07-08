@@ -9,9 +9,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -20,12 +22,14 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.PlayerService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.Authorities;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserService;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc(addFilters = false) // Esto quita la necesidad de pasar el token de seguridad real
+@DisplayName("FriendRequestRestController Unit Tests")
 public class FriendRequestRestControllerTest {
 
     private static final String BASE_URL = "/api/v1/friendRequests";
@@ -39,10 +43,12 @@ public class FriendRequestRestControllerTest {
     @MockBean
     private UserService userService;
 
+    // SE HA AÑADIDO ESTE MOCKBEAN ESENCIAL QUE USA EL MINIREQUESTDTO DENTRO DEL CONTROLADOR
+    @MockBean
+    private PlayerService playerService;
+
     @Autowired
     private ObjectMapper objectMapper;
-
-    // ==== Datos de ejemplo ====
 
     private User user1;
     private User user2;
@@ -88,8 +94,8 @@ public class FriendRequestRestControllerTest {
 
     @Test
     @WithMockUser(username = "admin", authorities = "ADMIN")
+    @DisplayName("Debe listar los amigos aceptados de un usuario")
     void shouldGetFriendsByUserId() throws Exception {
-
         when(friendRequestService.findAcceptedFriendRequestsByUserId(1))
                 .thenReturn(List.of(fr1));
 
@@ -104,8 +110,8 @@ public class FriendRequestRestControllerTest {
 
     @Test
     @WithMockUser(username = "admin", authorities = "ADMIN")
+    @DisplayName("Debe listar las solicitudes pendientes de un usuario")
     void shouldGetPendingRequestsByUserId() throws Exception {
-
         when(friendRequestService.findFriendRequestsByUserId(1))
                 .thenReturn(List.of(fr2, fr3));
 
@@ -120,8 +126,8 @@ public class FriendRequestRestControllerTest {
 
     @Test
     @WithMockUser(username = "admin", authorities = "ADMIN")
+    @DisplayName("Debe listar las solicitudes recibidas de un usuario")
     void shouldGetReceivedRequestsByUserId() throws Exception {
-
         when(friendRequestService.findFriendRequestsForUserId(1))
                 .thenReturn(List.of(fr3));
 
@@ -136,8 +142,8 @@ public class FriendRequestRestControllerTest {
 
     @Test
     @WithMockUser(username = "user1", authorities = "USER")
+    @DisplayName("Debe crear una nueva solicitud de amistad correctamente")
     void shouldCreateFriendRequest() throws Exception {
-
         when(userService.findUser("user2")).thenReturn(user2);
         when(friendRequestService.sendRequest(1, 2)).thenReturn(fr2);
 
@@ -154,8 +160,8 @@ public class FriendRequestRestControllerTest {
 
     @Test
     @WithMockUser(username = "user1", authorities = "USER")
+    @DisplayName("No debe permitir enviarse una solicitud a sí mismo")
     void shouldNotCreateFriendRequestToSelf() throws Exception {
-
         when(userService.findUser("user1")).thenReturn(user1);
 
         String body = objectMapper.writeValueAsString(1);
@@ -175,8 +181,8 @@ public class FriendRequestRestControllerTest {
 
     @Test
     @WithMockUser(username = "user1", authorities = "USER")
+    @DisplayName("Debe aceptar una solicitud de amistad pendiente propia")
     void shouldAcceptMyFriendRequest() throws Exception {
-
         fr3.setReceiver(user1);
 
         when(friendRequestService.findFriendRequestPendingById(3)).thenReturn(fr3);
@@ -195,9 +201,9 @@ public class FriendRequestRestControllerTest {
 
     @Test
     @WithMockUser(username = "user1", authorities = "USER")
+    @DisplayName("Debe retornar prohibido (403) si se intenta aceptar una solicitud ajena")
     void shouldNotAcceptOtherUsersRequest() throws Exception {
-
-        fr3.setReceiver(user2); // receiver ≠ current user
+        fr3.setReceiver(user2); // Destinatario diferente al usuario autenticado
 
         when(friendRequestService.findFriendRequestPendingById(3)).thenReturn(fr3);
         when(userService.findCurrentUser()).thenReturn(user1);
@@ -219,8 +225,8 @@ public class FriendRequestRestControllerTest {
 
     @Test
     @WithMockUser(username = "user1", authorities = "USER")
+    @DisplayName("Debe rechazar una solicitud de amistad pendiente propia")
     void shouldRejectMyFriendRequest() throws Exception {
-
         fr3.setReceiver(user1);
         FriendRequest rejected = sampleRequest(3, user2, user1, StatusType.REJECTED);
 
@@ -240,8 +246,8 @@ public class FriendRequestRestControllerTest {
 
     @Test
     @WithMockUser(username = "user1", authorities = "USER")
+    @DisplayName("Debe retornar prohibido (403) si se intenta rechazar una solicitud ajena")
     void shouldNotRejectOtherUsersRequest() throws Exception {
-
         fr3.setReceiver(user2);
 
         when(friendRequestService.findFriendRequestPendingById(3)).thenReturn(fr3);
@@ -264,9 +270,10 @@ public class FriendRequestRestControllerTest {
 
     @Test
     @WithMockUser(username = "user1", authorities = "USER")
+    @DisplayName("Debe eliminar un amigo si eres el remitente original de la solicitud")
     void shouldDeleteFriendAsSender() throws Exception {
-
         fr1.setSender(user1);
+        fr1.setReceiver(user2);
 
         when(friendRequestService.findById(1)).thenReturn(fr1);
         when(userService.findCurrentUser()).thenReturn(user1);
@@ -285,9 +292,10 @@ public class FriendRequestRestControllerTest {
 
     @Test
     @WithMockUser(username = "user1", authorities = "USER")
+    @DisplayName("Debe eliminar un amigo si eres el destinatario original de la solicitud")
     void shouldDeleteFriendAsReceiver() throws Exception {
-
-        fr1.setReceiver(user1);
+        fr1.setSender(user2);
+        fr1.setReceiver(user1); // Cambiado para que coincida por referencia con el current user
 
         when(friendRequestService.findById(1)).thenReturn(fr1);
         when(userService.findCurrentUser()).thenReturn(user1);
@@ -300,12 +308,14 @@ public class FriendRequestRestControllerTest {
                 .content(body)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+            
+        verify(friendRequestService).deleteFriend(fr1);
     }
 
     @Test
     @WithMockUser(username = "user1", authorities = "USER")
+    @DisplayName("Debe retornar prohibido (403) al intentar romper una amistad ajena")
     void shouldNotDeleteFriendNotMine() throws Exception {
-
         fr1.setSender(user2);
         fr1.setReceiver(user3);
 
