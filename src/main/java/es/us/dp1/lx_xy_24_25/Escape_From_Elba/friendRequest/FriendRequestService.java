@@ -13,6 +13,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations.InvitationRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchStatus;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications.NotificationType;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications.NotificationWebController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.players.Player;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserRepository;
@@ -28,16 +30,18 @@ public class FriendRequestService {
     UserRepository userRepository;
     FriendWebsocketController friendWebsocketController;
     MatchRepository matchRepository;
-    InvitationRepository invitationRepository;  
+    InvitationRepository invitationRepository; 
+    private NotificationWebController notificationWebController;  
 
     @Autowired
-    public FriendRequestService(FriendRequestRepository friendRequestRepository, UserRepository userRepository, 
+    public FriendRequestService(FriendRequestRepository friendRequestRepository, UserRepository userRepository,  NotificationWebController notificationWebController,
         FriendWebsocketController friendWebsocketController,  MatchRepository matchRepository, InvitationRepository invitationRepository) {
         this.friendRequestRepository = friendRequestRepository;
         this.userRepository = userRepository;
         this.friendWebsocketController = friendWebsocketController;
         this.matchRepository = matchRepository; 
-        this.invitationRepository = invitationRepository; 
+        this.invitationRepository = invitationRepository;
+        this.notificationWebController = notificationWebController;  
     }
 
     @Transactional(readOnly = true)
@@ -112,6 +116,7 @@ public class FriendRequestService {
         
         // Notificar al receptor sobre la nueva solicitud de amistad
         friendWebsocketController.notifyNewFriendRequest(receiverId, savedFriendRequest);
+        notificationWebController.notifyNewNotification(receiver.getId(), NotificationType.FRIEND_REQUEST);
         
         return newFriendRequest;
     }
@@ -127,6 +132,7 @@ public class FriendRequestService {
         friendWebsocketController.notifyRequestAccepted(toUpdate.getSender().getId(), toUpdate);
         // Notificar al receptor de la actualización
         friendWebsocketController.notifyFriendRequestUpdate(toUpdate.getReceiver().getId(), toUpdate);
+        notificationWebController.notifyNewNotification(toUpdate.getSender().getId(), NotificationType.ACCEPT_FRIEND_REQUEST);
         
         return toUpdate;
     }
@@ -142,6 +148,7 @@ public class FriendRequestService {
         friendWebsocketController.notifyRequestRejected(toUpdate.getSender().getId(), toUpdate);
         // Notificar al receptor de la actualización
         friendWebsocketController.notifyFriendRequestUpdate(toUpdate.getReceiver().getId(), toUpdate);
+        notificationWebController.notifyNewNotification(toUpdate.getSender().getId(), NotificationType.REJECT_FRIEND_REQUEST);
         
         return toUpdate;
     }

@@ -5,6 +5,8 @@ import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.MatchService;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby.LobbyService;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications.NotificationType;
+import es.us.dp1.lx_xy_24_25.Escape_From_Elba.notifications.NotificationWebController;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.User;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.user.UserRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.util.Checkers;
@@ -25,19 +27,22 @@ public class InvitationService {
     private MatchRepository matchRepository; 
     private MatchService matchService; 
     private LobbyService lobbyService;
-    public Checkers checkers; 
+    private Checkers checkers; 
+    private NotificationWebController notificationWebController; 
 
     @Autowired
     public InvitationService ( InvitationRepository invitationRepository, UserRepository userRepository, MatchRepository matchRepository,
-            Checkers checkers, MatchService matchService, LobbyService lobbyService){
+            Checkers checkers, MatchService matchService, LobbyService lobbyService, NotificationWebController notificationWebController){
         this.invitationRepository = invitationRepository;
         this.matchRepository = matchRepository; 
         this.userRepository = userRepository; 
         this.checkers = checkers; 
         this.matchService = matchService; 
         this.lobbyService = lobbyService;
+        this.notificationWebController = notificationWebController; 
     }
 
+    @Transactional
     public InvitationMatch sendInvite( InviteRequest inviteRequest) throws IllegalArgumentException {
 
         User sender = userRepository.findById(inviteRequest.getSenderId())
@@ -64,17 +69,24 @@ public class InvitationService {
         invitation.setStatus(InvitationStatus.PENDING);
         invitation.setSpectator(inviteRequest.isSpectator());
         invitation.setCreatedAt(LocalDateTime.now());
+        
+        notificationWebController.notifyNewNotification(receiver.getId(), 
+            inviteRequest.isSpectator() ? NotificationType.MATCH_INVITATION_AS_SPECTATOR : NotificationType.MATCH_INVITATION_AS_PLAYER);
+
         return invitationRepository.save(invitation);
     }
 
+    @Transactional(readOnly = true)
     public List<InvitationMatch> getPendingInvitations(Integer receiverId) {
         return invitationRepository.findByReceiverIdAndStatus(receiverId, InvitationStatus.PENDING);
     }
 
+    @Transactional(readOnly = true)
     public Optional<InvitationMatch> getInvitationBetweenUsers(Integer senderId, Integer receiverId, Integer matchId) {
         return invitationRepository.findBySenderIdAndReceiverIdAndMatchIdAndStatus(senderId, receiverId, matchId, InvitationStatus.PENDING);
     }
-
+    
+    @Transactional(readOnly = true)
     public InvitationMatch getInvitation(Integer id) {
         return invitationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Invitation not found"));
     }
@@ -110,17 +122,20 @@ public class InvitationService {
             lobbyService.joinLobby(match.getId()); 
         }
 
-
+        notificationWebController.notifyNewNotification(invitation.getSender().getId(), NotificationType.ACCEPT_INVITATION);
 
         invitationRepository.save(invitation); 
         return invitation;
     }
 
-    public InvitationMatch rejectInvite(InvitationMatch Invitation) {
-        Invitation.setStatus(InvitationStatus.REJECTED);
-        return invitationRepository.save(Invitation);
+    @Transactional
+    public InvitationMatch rejectInvite(InvitationMatch invitation) {
+        invitation.setStatus(InvitationStatus.REJECTED);
+        notificationWebController.notifyNewNotification(invitation.getSender().getId(), NotificationType.REJECT_INVITATION);
+        return invitationRepository.save(invitation);
     }
 
+    @Transactional
     public void rejectOtherInvitesForMatch(Integer receiverId, Integer matchId, Integer acceptedInvitationId) {
         // Obtener todas las invitaciones pendientes para este receiver en esta partida
         List<InvitationMatch> pendingInvites = invitationRepository.findByReceiverIdAndMatchIdAndStatus(

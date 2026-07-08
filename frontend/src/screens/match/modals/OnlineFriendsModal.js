@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import tokenService from "../../../services/token.service";
 import "../../../static/css/home/waitingRoom.css";
+import { Client } from '@stomp/stompjs';
 
 export default function OnlineFriendsModal({ onClose, lobby }) {
-  // el lobby es el match vaya 
   const jwt = tokenService.getLocalAccessToken();
   const currentUser = tokenService.getUser();
   const matchId = window.location.pathname.split("/").pop();
@@ -46,9 +46,42 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
     }
   };
 
+  // 1. Carga inicial al abrir el modal
   useEffect(() => {
     fetchFriends();
   }, []);
+
+  useEffect(() => {
+    if (!jwt || !currentUser?.id) return;
+
+    const client = new Client({
+      brokerURL: 'ws://localhost:8080/ws',
+      connectHeaders: { 'Authorization': `Bearer ${jwt}` },
+      onConnect: () => {
+        console.log('OnlineFriendsModal connected to real-time updates');
+        
+        client.subscribe(`/topic/user.${currentUser.id}.notifications`, (message) => {
+          if (message.body) {
+            const notificationType = message.body.replace(/(^"|"$)/g, '').trim(); 
+            
+            console.log("WebSocket event in Modal:", notificationType);
+
+            if (notificationType === "ACCEPT_INVITATION" || notificationType === "REJECT_INVITATION") {
+              fetchFriends();
+            }
+          }
+        });
+      },
+    });
+
+    client.activate();
+
+    return () => {
+      if (client.active) {
+        client.deactivate();
+      }
+    };
+  }, [jwt, currentUser?.id]);
 
 
   const isFriendInLobby = (friend) => {
@@ -57,7 +90,7 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
 
   const handleInvite = async (friend, spectator) => {
     setInviteStatus(s => ({ ...s, [friend.id]: "loading" }));
-    console.log('friendid',friend.id,)
+    console.log('friendid', friend.id)
     try {
       const res = await fetch("/api/v1/invitations/invite", {
         method: "POST",
@@ -65,7 +98,6 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${jwt}`,
         },
-        
         body: JSON.stringify({
           senderId: currentUser.id,
           receiverId: friend.id,
@@ -73,19 +105,17 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
           spectator
         }),
       });
-      
 
       if (res.ok) {
         setInviteStatus(s => ({ ...s, [friend.id]: "success" }));
+        fetchFriends(); 
       } else {
         setInviteStatus(s => ({ ...s, [friend.id]: "error" }));
       }
     } catch {
       setInviteStatus(s => ({ ...s, [friend.id]: "error" }));
     }
-  }
-
-
+  };
 
   console.log('friends', friends)
   return (
@@ -185,5 +215,5 @@ export default function OnlineFriendsModal({ onClose, lobby }) {
         </button>
       </div>
     </div>
-  )
+  );
 }

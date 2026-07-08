@@ -79,13 +79,19 @@ export default function WaitingRoom() {
 
       // Control de alertas visuales (Toasts y navegación)
       if (update.action === 'JOIN') {
-        toast.info(`${update.username} joined the lobby`);
+        if (update.username !== currentUser?.username) {
+          toast.info(`${update.username} has joined the lobby!`);
+        }
       } else if (update.action === 'LEAVE') {
-        toast.info(`${update.username} left the lobby`);
+        if (update.username !== currentUser?.username) {
+          toast.info(`${update.username} left the lobby`);
+        }
       } else if (update.action === 'START') {
         navigate(`/match/${matchId}`);
       } else if (update.action === 'DELETED') {
-        toast.info(`The lobby was closed by the creator`);
+        if (update.username !== currentUser?.username) {
+          toast.info(`The lobby was closed by the creator`);
+        }
         setTimeout(() => navigate('/lobbies'), 2000);
       } 
       // Notificaciones reactivas opcionales cuando entra o sale un espectador

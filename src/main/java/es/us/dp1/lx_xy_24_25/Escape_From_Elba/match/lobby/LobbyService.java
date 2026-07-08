@@ -1,7 +1,6 @@
 package es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.lobby;
 
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.LobbyNotFound;
-import es.us.dp1.lx_xy_24_25.Escape_From_Elba.exceptions.PlayerNotInTheGame;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.invitations.InvitationRepository;
 import es.us.dp1.lx_xy_24_25.Escape_From_Elba.match.Match;
 
