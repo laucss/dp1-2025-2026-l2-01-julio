@@ -794,6 +794,63 @@ https://gii-is-dp1.github.io/group-project-seed/deliverables/D3/coverage/).
 | Servicio de votaciones | submitVoteAlreadyVotedThrows | Verifica que se lanza una excepción cuando un jugador intenta votar más de una vez en la misma votación. | Implementada | Unitaria backend – Servicio |
 | Servicio de votaciones | submitVoteMoreVotesThanPlayersThrows | Verifica que se lanza una excepción cuando el número de votos supera el número de jugadores participantes. | Implementada | Unitaria backend – Servicio |
 | Servicio de votaciones | submitVoteFinishesVoting | Verifica que una votación finaliza correctamente cuando se reciben todos los votos, actualizando el resultado y devolviendo la partida al estado PLAYING. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldReturnEmptyPendingInvitations | Verifica que la consulta de invitaciones pendientes devuelve una lista vacía cuando el usuario no tiene ninguna invitación pendiente. | Implementada | Integración backend – Repositorio |
+| Gestión de invitaciones | shouldReturnEmptyWhenInvitationBetweenUsersDoesNotExist | Verifica que la búsqueda de una invitación entre remitente, destinatario y partida devuelve un resultado vacío cuando dicha invitación no existe. | Implementada | Integración backend – Repositorio |
+| Gestión de invitaciones | shouldSendPlayerInvitationSuccessfully | Verifica el envío correcto de una invitación de jugador, comprobando la creación de la invitación, su persistencia y el envío de la notificación correspondiente. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldSendSpectatorInvitationSuccessfully | Verifica el envío correcto de una invitación como espectador y la notificación asociada. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldThrowWhenSenderDoesNotExist | Verifica que se lanza una excepción cuando el remitente de la invitación no existe. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldThrowWhenReceiverDoesNotExist | Verifica que se lanza una excepción cuando el destinatario de la invitación no existe. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldThrowWhenMatchDoesNotExist | Verifica que se lanza una excepción cuando la partida asociada a la invitación no existe. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldThrowWhenPendingInvitationAlreadyExists | Verifica que no se permite crear una nueva invitación si ya existe una invitación pendiente entre los mismos usuarios. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldSaveInvitationExactlyOnce | Verifica que la invitación se persiste una única vez durante el proceso de envío. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldReturnPendingInvitations | Verifica la recuperación de las invitaciones pendientes de un usuario. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldReturnEmptyPendingInvitations | Verifica que la recuperación de invitaciones pendientes devuelve una lista vacía cuando no existen invitaciones. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldReturnInvitationBetweenUsers | Verifica la recuperación de una invitación pendiente existente entre dos usuarios para una partida determinada. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldReturnEmptyWhenInvitationBetweenUsersDoesNotExist | Verifica que la búsqueda de una invitación entre usuarios devuelve vacío cuando no existe. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldThrowWhenInvitationDoesNotExist | Verifica que se lanza una excepción al solicitar una invitación inexistente por identificador. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldAcceptPlayerInvitation | Verifica la aceptación correcta de una invitación de jugador, incluyendo la incorporación al lobby y la actualización del estado de la invitación. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldAcceptSpectatorInvitation | Verifica la aceptación correcta de una invitación como espectador y la incorporación a la partida en modo observador. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldAcceptInvitationWhenPlayerAlreadyInMatch | Verifica el comportamiento cuando el usuario ya pertenece a la partida al aceptar una invitación. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldNotifySenderWhenInvitationAccepted | Verifica que se notifica al remitente cuando una invitación es aceptada. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldRejectInvitation | Verifica el rechazo correcto de una invitación pendiente y el envío de la notificación correspondiente. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldReturnSavedRejectedInvitation | Verifica que el rechazo de una invitación devuelve la entidad persistida correctamente actualizada. | Implementada | Unitaria backend – Servicio |
+| Gestión de invitaciones | shouldDoNothingWhenNoPendingInvitationsExist | Verifica que no se realizan modificaciones cuando no existen otras invitaciones pendientes que rechazar. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | getAllRoomsWhenNoRoomsReturnsEmptyList | Verifica que la consulta de todas las salas devuelve una lista vacía cuando no existen salas registradas. | Implementada | Integración backend – Controlador |
+| Gestión de salas | findByNameNoRoomsReturnsEmpty | Verifica que la búsqueda de una sala por nombre devuelve un resultado vacío cuando no existe ninguna sala con dicho nombre. | Implementada | Integración backend – Repositorio |
+| Gestión de salas | createRoomAndRetrieveById | Verifica la creación de una sala y su posterior recuperación mediante identificador. | Implementada | Integración backend – Controlador |
+| Gestión de salas | createRoomAndRetrieveAllRooms | Verifica que las salas creadas aparecen correctamente en la consulta global de salas. | Implementada | Integración backend – Controlador |
+| Gestión de salas | findRoomByDicesReturnsCorrectRoom | Verifica la recuperación de una sala a partir de la combinación de valores de dados asociada. | Implementada | Integración backend – Controlador |
+| Gestión de salas | adjacencyIsReflectedInDto | Verifica que las salas adyacentes se representan correctamente en el DTO de una sala. | Implementada | Integración backend – Controlador |
+| Gestión de salas | getAllRoomsReturnsDtos | Verifica que la consulta de todas las salas devuelve DTOs con los campos básicos correctamente informados. | Implementada | Integración backend – Controlador |
+| Gestión de salas | getRoomByIdNonExistingReturnsException | Verifica que se produce una excepción al solicitar una sala inexistente mediante identificador. | Implementada | Integración backend – Controlador |
+| Gestión de salas | getRoomByDiceNotFound | Verifica que se produce una excepción cuando no existe una sala asociada a la combinación de dados indicada. | Implementada | Integración backend – Controlador |
+| Gestión de salas | updateRoomNotExistingThrowsException | Verifica que se produce una excepción al intentar actualizar una sala inexistente. | Implementada | Integración backend – Controlador |
+| Gestión de salas | roomDtoStartsEmpty | Verifica que un RoomDTO recién construido inicializa correctamente los campos de ocupación y visitas. | Implementada | Unitaria backend – DTO |
+| Gestión de salas | getAllRoomsContainsAllIds | Verifica que todos los identificadores de las salas almacenadas aparecen en la colección de DTOs recuperada. | Implementada | Integración backend – Controlador |
+| Gestión de salas | roomDtoContainsAdjacencyList | Verifica que el DTO de sala contiene correctamente la lista de salas adyacentes asociada. | Implementada | Integración backend – Controlador |
+| Gestión de salas | findAllRoomsReturnsEmptyListInitially | Verifica que la consulta de salas devuelve una lista vacía cuando no existen salas registradas. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | findByNameNoRoomReturnsEmptyOptional | Verifica que la búsqueda de una sala por nombre devuelve un resultado vacío cuando no existe. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | saveRoomAndRetrieveById | Verifica la recuperación correcta de una sala almacenada mediante su identificador. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | saveRoomAndRetrieveByDices | Verifica la recuperación de una sala utilizando los valores de dados asociados. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | findAllRoomsMultipleRoomsReturnsAll | Verifica que la consulta de salas devuelve todas las salas almacenadas. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | findByIdReturnsNullWhenNotExists | Verifica que la búsqueda por identificador devuelve null cuando la sala no existe. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | areAdjacentReturnsTrue | Verifica que dos salas conectadas son reconocidas como adyacentes. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | areAdjacentReturnsFalse | Verifica que dos salas no conectadas no son consideradas adyacentes. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | getWordEscapeTower1 | Verifica que la torre con identificador 1 devuelve correctamente la palabra ESCAPE. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | getWordEscapeTower6 | Verifica que la torre con identificador 6 devuelve correctamente la palabra FROM. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | getWordEscapeTower31 | Verifica que la torre con identificador 31 devuelve correctamente la palabra ELBA. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | getWordEscapeTower36 | Verifica que la torre con identificador 36 devuelve correctamente la palabra PEACE. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | getWordEscapeInvalidTower | Verifica que se devuelve null cuando se consulta una torre sin palabra de escape asociada. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | getAllTowersReturnsFourRooms | Verifica que el servicio recupera correctamente las cuatro torres del juego. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | getRandomRoomNeverReturnsTower | Verifica que la selección aleatoria de salas nunca devuelve una torre. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | randomFightRoomIsNeverSafeZone | Verifica que la selección aleatoria de una sala para combate nunca devuelve la zona segura. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | getRandomUnoccupiedRoomWorks | Verifica que la búsqueda de una sala libre evita las salas ocupadas por jugadores. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | randomUnoccupiedRoomWithNullMatch | Verifica que se obtiene una sala válida cuando no se proporciona ninguna partida. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | initializeRoomsAssignsRoomsToPlayers | Verifica que la inicialización de una partida asigna una sala a todos los jugadores. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | initializeRoomsAssignsRoomsToNpcs | Verifica que la inicialización de una partida asigna una sala a todos los NPCs. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | niallStartsInSafeArea | Verifica que el NPC Niall Campbell comienza la partida en la zona segura. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | playersNeverStartInTower | Verifica que los jugadores nunca comienzan la partida en una de las torres de escape. | Implementada | Unitaria backend – Servicio |
+| Gestión de salas | initializeRoomsCreatesDtoForEveryRoom | Verifica que la inicialización genera un DTO para cada sala existente en el tablero. | Implementada | Unitaria backend – Servicio |
 
 ## 6. Criterios de Aceptación
 
