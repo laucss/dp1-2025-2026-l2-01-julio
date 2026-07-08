@@ -22,22 +22,15 @@ Lucía Baltasar Muñoz (SBJ4592 / lucbalmun@alum.us.es)<br>
 
 Este proyecto se dedica a la implementación del juego de mesa llamado "Escape From Elba" de 1999, el cual por cada partida puede ser disfrutado desde 3 a 6 jugadores, con una duración media de 60 minutos.<br>
 
-<div align="center">
-<img width="900" height="574" alt="image" src="https://github.com/user-attachments/assets/256499a6-cae0-4a68-8d5b-f38fbac10b79" />
-</div>
-
+![Portada](<images/Portada.jpg>)
 ### Materiales
 Los materiales para jugar son muy simples, ya que se componen principalmente de dos:
 
 - El tablero, el cual está formado por un distinto número de habitaciones, en cada una aparece su nombre (lo cual será importante para una de las mecánicas principales del juego) y dos dados, uno negro y otro blanco (los cuales servirán para colocar a los jugadores en habitaciones aleatorias).
-<div align="center">
-<img width="420" height="330" alt="image" src="https://github.com/user-attachments/assets/9d838893-ecd0-4001-bdc6-ee6ed80b52e9" />
-</div>
+![Tablero](<images/Mapa.jpg>)
 
 - Las cartas, en las cuales destacan dos partes esenciales. La primera letra del nombre de la carta, situada en la esquina superior izquierda y el conjunto de palabras de escape que se puede formar con esta letra.
-<div align="center">
-<img width="243" height="330" alt="image" src="https://github.com/user-attachments/assets/e4169910-5865-47f5-8c40-b7e79c0b9289" />
- </div>
+![Carta](<images/Carta.jpg>)
  
 ### Objetivo
 La partida comienza colocando a los visitantes, para esto cada uno lanza dos dados, uno negro y otro blanco, colocando a su personaje en la habitación que estos indiquen. Posteriormente se reparten 3 cartas a cada jugador (si deseas jugar con más de 6 jugadores, se recomienda repartir solo 2 cartas iniciales) y se elige a un jugador de manera aleatoria para que este comience, siendo el siguiente el de su izquierda.
@@ -92,6 +85,7 @@ Debido al gran tamaño del trabajo realizado se han realizado varios diagramas d
 
 ### Diagrama de Capas (incluyendo Controladores, Servicios y Repositorios)
 
+
 Con objeto de facilitar la comprensión se han dividido y diseccionado en varios diagramas. 
 
 ![alt text](images/GameControllers.png)
@@ -100,13 +94,15 @@ Con objeto de facilitar la comprensión se han dividido y diseccionado en varios
 
 ![Diagrama de Capas Actualizado](images/repos.png)
 
+![Diagrama de capas de logros](images/DiagramaCapasEstadísticas.png)
+
+![Diagrama de capas social](images/DiagramaCapasSocial.png)
 
 ## Descomposición del mockups del tablero de juego en componentes
 
 Componentes de la pantalla de juego principal:
 
-![Descomposición en componentes de la interfaz de estadísticas](![componentes](https://github.com/user-attachments/assets/f86606a6-f837-48f6-a669-fa1ff02937e0)
-
+![Componentes](images/Componentes.jpeg)
 
   - App – Componente principal de la aplicación
     - $\color{pink}{\textsf{PlayersAvatar – Muestra los avatares de los N jugadores de la actual partida.}}$
@@ -114,7 +110,7 @@ Componentes de la pantalla de juego principal:
        - $\color{blue}{\textsf{Rooms – Conjunto de habitaciones que hay en el mapa.}}$
     - $\color{yellow}{\textsf{DiscardPile – Muestra el mazo de cartas de descarte.}}$
     - $\color{red}{\textsf{Deck – Muestra el mazo de cartas de robo.}}$
-       - $\color{yellow}{\textsf{DeckButton – Permite al jugador robar una carta del mazo de robo.}}$
+   
     - $\color{purple}{\textsf{PlayerInformation – Muestra toda la información relevante sobre tu partida personal, como las cartas en tu poseson (mano o bolsa), tus puntos de fuerza y de acción, un boton para elegir tu acción y el botón del chat.}}$
        - $\color{orange}{\textsf{ChatButton – Boton para abrir el chat}}$
        - $\color{gray}{\textsf{ActionsButton – Boton para abrir el menu de acciones disponibles en tu ronda.}}$
@@ -171,11 +167,43 @@ La aplicación para evitar exponer datos internos de algunas clases relacionados
 
 *Clases o paquetes creados*
 
--LobbyDTO
--ChatDTO
--MiniUserDTO
+-CardDTO
+-HandInGameDTO
+-BagInGameDTO
+-DeckInGameDTO
+-AllCardsStatusDTO
+-DrawCardResultDTO
+-DiceTotalsUpdateDTO
+-FightDiceUpdateDTO
+-FightResolvedDTO
+-FightResultRequestDTO
+-FightUpdateDTO
+-LoseAgainstNpcRequestDTO
+-ReadyStateUpdateDTO
+-StealCardRequestDTO
+-WeaponsUpdateDTO
+-FriendsInvitationDTO
 -MiniRequestDTO
-
+-InviteRequest
+-PlayerPositionDTO
+-NpcPositionDTO
+-LobbyDTO
+-LobbyUpdateDTO
+-PlayerLobbyDTO (clase interna)
+-UserLobbyDTO (clase interna)
+-MatchDTO
+-MatchHistorialDTO
+-ActionPointsUpdateDTO
+-CardsUpdateDTO
+-EndedMatchDTO
+-EscapeAttemptResultDTO
+-HandUpdateDTO
+-MoveNpcToRoomDTO
+-MoveToRoomDTO
+-NpcLocationUpdateDTO
+-PlayerLocationUpdateDTO
+-StrengthUpdateDTO
+-TurnUpdateDTO
 
 *Ventajas alcanzadas al aplicar el patrón*
 
@@ -215,6 +243,12 @@ Al diseñar el backend, lo planteamos como un sistema compuesto por diversas ent
       -hand
       -handInGame
    -card
+.Fights
+   -pendingFight
+.Invitations
+   -invitationMatch
+.Notification
+   -notification
 ·Chat
    -chatMessage
 ·FriendRequest
@@ -236,9 +270,22 @@ Al diseñar el backend, lo planteamos como un sistema compuesto por diversas ent
    -user
 ·Util
    -checkers
+.Voting
+   -vote
 
 *Ventajas alcanzadas al aplicar el patrón*
 Aunque el tamaño de nuestro proyecto ha dado lugar a un modelo relativamente complejo, el uso de este patrón nos ha facilitado comprender de forma más clara cómo los cambios de estado en unas entidades influyen sobre otras.
+
+### Patrón: Pagination
+*Tipo*: de Diseño 
+
+*Contexto de Aplicación*
+A la hora de listar diversos recursos en nuestra aplicación, este listado se ha organizado de manera que se vayan cargando un número pequeño de datos y el usuario vaya pasando para ver los demás.
+
+ 
+*Ventajas alcanzadas al aplicar el patrón*
+Conseguimos optimizar las consultas sobre colecciones potencialmente grandes, reduciendo el tiempo de respuesta del servidor, el consumo de memoria y el volumen de datos enviados al cliente. Además, esta solución mejora la escalabilidad de la aplicación y facilita la navegación del usuario por grandes conjuntos de información.
+
 
 
 ## Decisiones de diseño
@@ -338,7 +385,6 @@ A la hora de construir los services nos hemos visto con una gran cantidad de val
 • Los servicios (como MatchService) deben interactuar con la clase Checkers correctamente, lo que añade un nivel de abstracción.<br>
 
 
-
 #### Justificación de la solución adoptada
 
 Consideramos que al tener muchas restricciones que son reutilizables nos va a facilitar mucho el tener una clase Checkers, también nos va a facilitar la lectura del código.
@@ -419,7 +465,6 @@ Ante esta situación, fue necesario analizar el diseño existente y decidir entr
 En un principio se intentó hacer una pequeña modificación en el backend, pero seguir manteniendo la estructura tal y como estaba y que fuera el frontend el encargado de lanzar las peleas. El estado de la partida era tan complejo que no resultó dicha solución. Así que se decidió asumir el riesgo y tiempo de replantear todo el sistema y delegar la responsabilidad al backend, como se debió hacer en su momento. Se optó por esta solución porque al final era la más fiables y que a nuestro criterio, debió ser el enfoque dado inicialmente por nuestro compañero. 
 
 
-_Ejemplos de uso de la plantilla con otras decisiones de diseño:_
 
 ## Refactorizaciones aplicadas
 
