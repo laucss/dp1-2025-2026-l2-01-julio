@@ -349,7 +349,7 @@
 }
 
 .leave-cancel {
-    background: #a0deff;
+    background: #67afd6;
     color: white;
     border: 2px solid #4a90e2;
 }
@@ -359,7 +359,7 @@
 }
 
 .leave-confirm {
-    background: #b22222;
+    background: #d53d3d;
     color: white;
 }
 
