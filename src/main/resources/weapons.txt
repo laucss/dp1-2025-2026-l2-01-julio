@@ -1,5 +1,4 @@
 ammo 
-arm 
 armor 
 bar
 barb 
@@ -9,7 +8,6 @@ broom
 bola 
 bomb 
 crabs 
-clap 
 clamp 
 corbel 
 ebola 
